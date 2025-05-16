@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Rich Text Editor</title>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,700|Open+Sans:400,700|Lato:400,700|Montserrat:400,700|Oswald:400,700|Raleway:400,700|Merriweather:400,700|Nunito:400,700|Poppins:400,700|Source+Sans+Pro:400,700|Playfair+Display:400,700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+        <div class="toolbar">
+      <span class="table-dropdown">
+        <button id="table-btn" title="Insert Table"><i class="fa-solid fa-table"></i> <i class="fa-solid fa-chevron-down"></i></button>
+        <div id="table-popup" class="table-popup" style="display:none;">
+          <div id="table-grid" class="table-grid"></div>
+          <div id="table-size-label" class="table-size-label">0x0</div>
+            </div>
+      </span>
+      <select id="font-select" title="Font" class="font-select">
+        <option value="default">Font</option>
+        <option value="Roboto" style="font-family: 'Roboto', sans-serif;">Roboto</option>
+        <option value="Open Sans" style="font-family: 'Open Sans', sans-serif;">Open Sans</option>
+        <option value="Lato" style="font-family: 'Lato', sans-serif;">Lato</option>
+        <option value="Montserrat" style="font-family: 'Montserrat', sans-serif;">Montserrat</option>
+        <option value="Oswald" style="font-family: 'Oswald', sans-serif;">Oswald</option>
+        <option value="Raleway" style="font-family: 'Raleway', sans-serif;">Raleway</option>
+        <option value="Merriweather" style="font-family: 'Merriweather', serif;">Merriweather</option>
+        <option value="Nunito" style="font-family: 'Nunito', sans-serif;">Nunito</option>
+        <option value="Poppins" style="font-family: 'Poppins', sans-serif;">Poppins</option>
+        <option value="Source Sans Pro" style="font-family: 'Source Sans Pro', sans-serif;">Source Sans Pro</option>
+        <option value="Playfair Display" style="font-family: 'Playfair Display', serif;">Playfair Display</option>
+      </select>
+      <select id="block-format-select" class="block-format-select" title="Block Format">
+        <option value="P">Paragraph</option>
+        <option value="H1">Heading 1</option>
+        <option value="H2">Heading 2</option>
+        <option value="H3">Heading 3</option>
+        <option value="H4">Heading 4</option>
+        <option value="H5">Heading 5</option>
+        <option value="H6">Heading 6</option>
+        <option value="PRE">Preformatted</option>
+      </select>
+      <button id="bold-btn" title="Bold"><i class="fa-solid fa-bold"></i></button>
+      <button id="italic-btn" title="Italic"><i class="fa-solid fa-italic"></i></button>
+      <button id="underline-btn" title="Underline"><i class="fa-solid fa-underline"></i></button>
+      <button id="strike-btn" title="Strikethrough"><i class="fa-solid fa-strikethrough"></i></button>
+      <button id="sup-btn" title="Superscript"><i class="fa-solid fa-superscript"></i></button>
+      <button id="sub-btn" title="Subscript"><i class="fa-solid fa-subscript"></i></button>
+      <button id="h1-btn" title="Heading 1"><i class="fa-solid fa-heading"></i>1</button>
+      <button id="h2-btn" title="Heading 2"><i class="fa-solid fa-heading"></i>2</button>
+      <button id="quote-btn" title="Blockquote"><i class="fa-solid fa-quote-left"></i></button>
+      <button id="code-btn" title="Code"><i class="fa-solid fa-code"></i></button>
+      <button id="left-btn" title="Align Left"><i class="fa-solid fa-align-left"></i></button>
+      <button id="center-btn" title="Align Center"><i class="fa-solid fa-align-center"></i></button>
+      <button id="right-btn" title="Align Right"><i class="fa-solid fa-align-right"></i></button>
+      <button id="ul-btn" title="Bullet List"><i class="fa-solid fa-list-ul"></i></button>
+      <button id="ol-btn" title="Numbered List"><i class="fa-solid fa-list-ol"></i></button>
+      <button id="link-btn" title="Insert Link"><i class="fa-solid fa-link"></i></button>
+      <button id="img-btn" title="Insert Image"><i class="fa-solid fa-image"></i></button>
+      <span class="color-dropdown">
+        <button id="color-btn" title="Text Color"><i class="fa-solid fa-palette"></i> <i class="fa-solid fa-chevron-down"></i></button>
+        <div id="color-palette" class="color-palette" style="display:none;">
+          <div class="color-swatch" data-color="#000000" style="background:#000000"></div>
+          <div class="color-swatch" data-color="#434343" style="background:#434343"></div>
+          <div class="color-swatch" data-color="#666666" style="background:#666666"></div>
+          <div class="color-swatch" data-color="#999999" style="background:#999999"></div>
+          <div class="color-swatch" data-color="#cccccc" style="background:#cccccc"></div>
+          <div class="color-swatch" data-color="#ffffff" style="background:#ffffff; border:1px solid #ccc"></div>
+          <div class="color-swatch" data-color="#f94144" style="background:#f94144"></div>
+          <div class="color-swatch" data-color="#f3722c" style="background:#f3722c"></div>
+          <div class="color-swatch" data-color="#f9c74f" style="background:#f9c74f"></div>
+          <div class="color-swatch" data-color="#43aa8b" style="background:#43aa8b"></div>
+          <div class="color-swatch" data-color="#577590" style="background:#577590"></div>
+          <div class="color-swatch" data-color="#277da1" style="background:#277da1"></div>
+        </div>
+      </span>
+      <span class="highlight-dropdown">
+        <button id="highlight-btn" title="Highlight"><i class="fa-solid fa-highlighter"></i> <i class="fa-solid fa-chevron-down"></i></button>
+        <div id="highlight-palette" class="color-palette" style="display:none;">
+          <div class="color-swatch" data-color="#fffbe6" style="background:#fffbe6"></div>
+          <div class="color-swatch" data-color="#ffe066" style="background:#ffe066"></div>
+          <div class="color-swatch" data-color="#ffd166" style="background:#ffd166"></div>
+          <div class="color-swatch" data-color="#f9c74f" style="background:#f9c74f"></div>
+          <div class="color-swatch" data-color="#f9844a" style="background:#f9844a"></div>
+          <div class="color-swatch" data-color="#f94144" style="background:#f94144"></div>
+          <div class="color-swatch" data-color="#43aa8b" style="background:#43aa8b"></div>
+          <div class="color-swatch" data-color="#577590" style="background:#577590"></div>
+          <div class="color-swatch" data-color="#000000" style="background:#000000"></div>
+          <div class="color-swatch" data-color="#ffffff" style="background:#ffffff; border:1px solid #ccc"></div>
+        </div>
+      </span>
+      <button id="undo-btn" title="Undo"><i class="fa-solid fa-rotate-left"></i></button>
+      <button id="redo-btn" title="Redo"><i class="fa-solid fa-rotate-right"></i></button>
+      <button id="remove-format-btn" title="Remove Format"><i class="fa-solid fa-eraser"></i></button>
+      <button id="save-btn" title="Save"><i class="fa-solid fa-floppy-disk"></i></button>
+      <button id="view-html-btn" title="View HTML"><i class="fa-solid fa-code"></i></button>
+    </div>
+    <div id="editor" contenteditable="true" class="editor-area">Type here...</div>
+    <pre id="html-content" class="html-view"></pre>
+  </div>
+  <div id="table-toolbar" class="table-toolbar" style="display:none;">
+    <button id="delete-table-btn" title="Delete Table"><i class="fa-solid fa-trash"></i></button>
+    <button id="add-row-above-btn" title="Add Row Above"><i class="fa-solid fa-plus"></i>↑</button>
+    <button id="add-row-below-btn" title="Add Row Below"><i class="fa-solid fa-plus"></i>↓</button>
+    <button id="delete-row-btn" title="Delete Row"><i class="fa-solid fa-minus"></i>↔</button>
+    <button id="add-col-left-btn" title="Add Column Left"><i class="fa-solid fa-plus"></i>←</button>
+    <button id="add-col-right-btn" title="Add Column Right"><i class="fa-solid fa-plus"></i>→</button>
+    <button id="delete-col-btn" title="Delete Column"><i class="fa-solid fa-minus"></i>↕</button>
+  </div>
+  <script type="module" src="./js/editor.js"></script>
+</body>
+</html> 
