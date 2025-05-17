@@ -237,4 +237,34 @@ body {
 .block-format-select option[value="H4"] { font-size: 1.1em; font-weight: bold; }
 .block-format-select option[value="H5"] { font-size: 1em; font-weight: bold; }
 .block-format-select option[value="H6"] { font-size: 0.95em; font-weight: bold; }
-.block-format-select option[value="PRE"] { font-family: monospace; } 
+.block-format-select option[value="PRE"] { font-family: monospace; }
+
+.editor-toolbar button.active, .toolbar button.active {
+  background: #007bff !important;
+  color: #fff !important;
+  border-color: #007bff !important;
+  box-shadow: 0 0 0 2px #0056b3;
+}
+
+.editor-statusbar {
+  background: #f8f8f8;
+  border: 1px solid #e0e0e0;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  font-size: 14px;
+  color: #555;
+  padding: 6px 16px 6px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 28px;
+  box-sizing: border-box;
+}
+#breadcrumb {
+  color: #888;
+  font-size: 13px;
+}
+#wordcount {
+  color: #888;
+  font-size: 13px;
+} 

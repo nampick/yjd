@@ -180,12 +180,31 @@ document.addEventListener('DOMContentLoaded', function() {
     exec('fontName', font);
   });
 
-  document.getElementById('bold-btn').addEventListener('mousedown', e => { e.preventDefault(); exec('bold'); });
-  document.getElementById('italic-btn').addEventListener('mousedown', e => { e.preventDefault(); exec('italic'); });
-  document.getElementById('underline-btn').addEventListener('mousedown', e => { e.preventDefault(); exec('underline'); });
-  document.getElementById('strike-btn').addEventListener('mousedown', e => { e.preventDefault(); exec('strikeThrough'); });
-  document.getElementById('sup-btn').addEventListener('mousedown', e => { e.preventDefault(); exec('superscript'); });
-  document.getElementById('sub-btn').addEventListener('mousedown', e => { e.preventDefault(); exec('subscript'); });
+  // Định dạng văn bản
+  function addFormatBtnListener(id, cmd) {
+    const btn = document.getElementById(id);
+    if (btn) {
+      btn.addEventListener('mousedown', e => {
+        e.preventDefault();
+        exec(cmd);
+        updateToolbarActiveState();
+      });
+    }
+  }
+  addFormatBtnListener('bold-btn', 'bold');
+  addFormatBtnListener('italic-btn', 'italic');
+  addFormatBtnListener('underline-btn', 'underline');
+  addFormatBtnListener('strike-btn', 'strikeThrough');
+  addFormatBtnListener('sup-btn', 'superscript');
+  addFormatBtnListener('sub-btn', 'subscript');
+
+  // Đảm bảo cập nhật trạng thái khi editor được focus hoặc click
+  editor.addEventListener('focus', updateToolbarActiveState);
+  editor.addEventListener('mouseup', updateToolbarActiveState);
+  editor.addEventListener('keyup', updateToolbarActiveState);
+
+  document.addEventListener('selectionchange', updateToolbarActiveState);
+
   document.getElementById('h1-btn').addEventListener('mousedown', e => { e.preventDefault(); exec('formatBlock', 'H1'); });
   document.getElementById('h2-btn').addEventListener('mousedown', e => { e.preventDefault(); exec('formatBlock', 'H2'); });
   document.getElementById('quote-btn').addEventListener('mousedown', e => { e.preventDefault(); exec('formatBlock', 'BLOCKQUOTE'); });
@@ -197,72 +216,449 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('ol-btn').addEventListener('mousedown', e => { e.preventDefault(); exec('insertOrderedList'); });
   document.getElementById('link-btn').addEventListener('mousedown', e => {
     e.preventDefault();
-    const url = prompt('Enter URL:', 'https://');
-    if (url) exec('createLink', url);
+    showTooltip({
+      title: 'Chèn liên kết',
+      placeholder: 'Nhập URL (https://...)',
+      confirmText: 'Chèn',
+      onSubmit: url => exec('createLink', url)
+    });
   });
+  let savedSelection = null;
+
   document.getElementById('img-btn').addEventListener('mousedown', e => {
     e.preventDefault();
-    const url = prompt('Enter image URL:', 'https://');
-    if (url) exec('insertImage', url);
-  });
-
-  // Text color palette
-  const colorBtn = document.getElementById('color-btn');
-  const colorPalette = document.getElementById('color-palette');
-  colorBtn.addEventListener('click', e => {
-    e.preventDefault();
-    colorPalette.style.display = colorPalette.style.display === 'flex' ? 'none' : 'flex';
-  });
-  colorPalette.querySelectorAll('.color-swatch').forEach(swatch => {
-    swatch.addEventListener('mousedown', e => {
-      e.preventDefault();
-      exec('foreColor', swatch.dataset.color);
-      colorPalette.style.display = 'none';
+    savedSelection = saveSelection();
+    showTooltip({
+      title: 'Chèn ảnh',
+      placeholder: 'Dán URL ảnh hoặc chọn file...',
+      confirmText: 'Chèn',
+      file: true,
+      onSubmit: url => insertImageWithStyle(url)
     });
   });
-  document.addEventListener('mousedown', e => {
-    if (!colorPalette.contains(e.target) && e.target !== colorBtn) {
-      colorPalette.style.display = 'none';
+
+  function saveSelection() {
+    const sel = window.getSelection();
+    if (sel.rangeCount > 0) {
+      return sel.getRangeAt(0).cloneRange();
+    }
+    return null;
+  }
+  function restoreSelection(range) {
+    if (range) {
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  }
+
+  // Chèn ảnh với style hợp lý
+  function insertImageWithStyle(url) {
+    const img = document.createElement('img');
+    img.src = url;
+    img.style.maxWidth = '100%';
+    img.style.height = 'auto';
+    img.style.display = 'block';
+    img.setAttribute('data-resizable', 'true');
+    img.width = 300;
+    img.height = 200;
+
+    // Khôi phục selection trước khi chèn
+    restoreSelection(savedSelection);
+    editor.focus();
+    const sel = window.getSelection();
+    if (sel.rangeCount && editor.contains(sel.anchorNode)) {
+      sel.getRangeAt(0).insertNode(img);
+    } else {
+      editor.appendChild(img);
+    }
+    setTimeout(() => {
+      img.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      showImgResizeHandles(img);
+    }, 10);
+  }
+
+  // Resize ảnh trong editor với 4 điểm như table
+  let currentImg = null, imgHandles = [], imgResizing = false, imgStartX = 0, imgStartY = 0, imgStartW = 0, imgStartH = 0, imgWhich = 0, imgAspect = 1;
+
+  function showImgResizeHandles(img) {
+    removeImgResizeHandles();
+    currentImg = img;
+    imgAspect = img.naturalWidth / img.naturalHeight;
+    // Tính vị trí ảnh trên trang
+    const rect = img.getBoundingClientRect();
+    const scrollY = window.scrollY, scrollX = window.scrollX;
+    imgHandles = ['tl', 'tr', 'bl', 'br'].map(pos => {
+      const div = document.createElement('div');
+      div.className = 'img-resize-handle ' + pos;
+      div.style.position = 'absolute';
+      div.style.width = '14px';
+      div.style.height = '14px';
+      div.style.background = '#007bff';
+      div.style.border = '2px solid #fff';
+      div.style.borderRadius = '50%';
+      div.style.zIndex = 20;
+      div.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+      div.style.cursor =
+        pos === 'tl' ? 'nwse-resize' :
+        pos === 'tr' ? 'nesw-resize' :
+        pos === 'bl' ? 'nesw-resize' :
+        'nwse-resize';
+      document.body.appendChild(div);
+      return div;
+    });
+    positionImgHandles();
+    img.style.outline = '2px solid #007bff';
+    window.addEventListener('scroll', positionImgHandles);
+    window.addEventListener('resize', positionImgHandles);
+    imgHandles.forEach((handle, idx) => {
+      handle.addEventListener('mousedown', e => {
+    e.preventDefault();
+        e.stopPropagation();
+        startResizeImgHandle(e, idx);
+      });
+    });
+  }
+
+  function positionImgHandles() {
+    if (!currentImg || imgHandles.length !== 4) return;
+    const rect = currentImg.getBoundingClientRect();
+    const scrollY = window.scrollY, scrollX = window.scrollX;
+    // tl
+    imgHandles[0].style.top = (rect.top + scrollY - 7) + 'px';
+    imgHandles[0].style.left = (rect.left + scrollX - 7) + 'px';
+    // tr
+    imgHandles[1].style.top = (rect.top + scrollY - 7) + 'px';
+    imgHandles[1].style.left = (rect.right + scrollX - 7) + 'px';
+    // bl
+    imgHandles[2].style.top = (rect.bottom + scrollY - 7) + 'px';
+    imgHandles[2].style.left = (rect.left + scrollX - 7) + 'px';
+    // br
+    imgHandles[3].style.top = (rect.bottom + scrollY - 7) + 'px';
+    imgHandles[3].style.left = (rect.right + scrollX - 7) + 'px';
+    // Debug vị trí handle
+    console.log('Handle TL:', imgHandles[0].style.top, imgHandles[0].style.left);
+    console.log('Handle TR:', imgHandles[1].style.top, imgHandles[1].style.left);
+    console.log('Handle BL:', imgHandles[2].style.top, imgHandles[2].style.left);
+    console.log('Handle BR:', imgHandles[3].style.top, imgHandles[3].style.left);
+  }
+
+  function removeImgResizeHandles() {
+    if (currentImg) currentImg.style.outline = '';
+    imgHandles.forEach(h => h.remove());
+    imgHandles = [];
+    window.removeEventListener('scroll', positionImgHandles);
+    window.removeEventListener('resize', positionImgHandles);
+    currentImg = null;
+  }
+
+  function startResizeImgHandle(e, which) {
+    e.preventDefault();
+    imgResizing = true;
+    imgWhich = which;
+    imgStartX = e.clientX;
+    imgStartY = e.clientY;
+    imgStartW = currentImg.width;
+    imgStartH = currentImg.height || (currentImg.width / imgAspect);
+    document.body.style.userSelect = 'none';
+    document.addEventListener('mousemove', resizingImgHandle);
+    document.addEventListener('mouseup', stopResizeImgHandle);
+  }
+
+  function resizingImgHandle(e) {
+    if (!imgResizing || !currentImg) return;
+    let dx = e.clientX - imgStartX;
+    let dy = e.clientY - imgStartY;
+    let newW = imgStartW, newH = imgStartH;
+    if (imgWhich === 3) { // br
+      newW = imgStartW + dx;
+      newH = imgStartH + dy;
+    } else if (imgWhich === 2) { // bl
+      newW = imgStartW - dx;
+      newH = imgStartH + dy;
+    } else if (imgWhich === 1) { // tr
+      newW = imgStartW + dx;
+      newH = imgStartH - dy;
+    } else if (imgWhich === 0) { // tl
+      newW = imgStartW - dx;
+      newH = imgStartH - dy;
+    }
+    // Giữ tỷ lệ gốc khi kéo chéo
+    if (e.shiftKey) {
+      const ratio = imgAspect;
+      if (Math.abs(dx) > Math.abs(dy)) {
+        newH = newW / ratio;
+      } else {
+        newW = newH * ratio;
+      }
+    }
+    if (newW > 40) currentImg.width = newW;
+    if (newH > 40) currentImg.height = newH;
+    positionImgHandles();
+  }
+
+  function stopResizeImgHandle() {
+    imgResizing = false;
+    document.body.style.userSelect = '';
+    document.removeEventListener('mousemove', resizingImgHandle);
+    document.removeEventListener('mouseup', stopResizeImgHandle);
+  }
+
+  // Lắng nghe click vào ảnh trong editor
+  editor.addEventListener('mousedown', function(e) {
+    if (e.target.tagName === 'IMG' && e.target.getAttribute('data-resizable') === 'true') {
+      showImgResizeHandles(e.target);
+    } else {
+      removeImgResizeHandles();
     }
   });
 
-  // Highlight palette
-  const highlightBtn = document.getElementById('highlight-btn');
-  const highlightPalette = document.getElementById('highlight-palette');
-  highlightBtn.addEventListener('click', e => {
-    e.preventDefault();
-    highlightPalette.style.display = highlightPalette.style.display === 'flex' ? 'none' : 'flex';
-  });
-  highlightPalette.querySelectorAll('.color-swatch').forEach(swatch => {
-    swatch.addEventListener('mousedown', e => {
-      e.preventDefault();
-      exec('hiliteColor', swatch.dataset.color);
-      highlightPalette.style.display = 'none';
-    });
-  });
-  document.addEventListener('mousedown', e => {
-    if (!highlightPalette.contains(e.target) && e.target !== highlightBtn) {
-      highlightPalette.style.display = 'none';
+  // Khi click ra ngoài editor và ngoài handle, ẩn handle
+  document.addEventListener('mousedown', function(e) {
+    if (!editor.contains(e.target) && !e.target.classList.contains('img-resize-handle')) {
+      removeImgResizeHandles();
     }
   });
 
-  document.getElementById('undo-btn').addEventListener('mousedown', e => { e.preventDefault(); exec('undo'); });
-  document.getElementById('redo-btn').addEventListener('mousedown', e => { e.preventDefault(); exec('redo'); });
-  document.getElementById('remove-format-btn').addEventListener('mousedown', e => { e.preventDefault(); exec('removeFormat'); });
-  document.getElementById('save-btn').addEventListener('mousedown', e => {
-    e.preventDefault();
-    alert('HTML content saved!\n' + editor.innerHTML);
-  });
-  document.getElementById('view-html-btn').addEventListener('click', function() {
-    document.getElementById('html-content').textContent = editor.innerHTML;
-  });
+  // Cập nhật trạng thái active cho các nút định dạng
+  function updateToolbarActiveState() {
+    const selection = document.getSelection();
+    console.log('updateToolbarActiveState', selection && selection.toString(), selection);
+    const formatMap = [
+      { cmd: 'bold', btn: 'bold-btn' },
+      { cmd: 'italic', btn: 'italic-btn' },
+      { cmd: 'underline', btn: 'underline-btn' },
+      { cmd: 'strikeThrough', btn: 'strike-btn' },
+      { cmd: 'superscript', btn: 'sup-btn' },
+      { cmd: 'subscript', btn: 'sub-btn' }
+    ];
+    formatMap.forEach(item => {
+      const btn = document.getElementById(item.btn);
+      if (!btn) return;
+      const state = document.queryCommandState(item.cmd);
+      console.log(`Button ${item.btn} (${item.cmd}):`, state);
+      if (state) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+  }
+
+  // Tooltip tổng quát, tái sử dụng cho nhiều mục đích
+  function showTooltip({ 
+    title = '', 
+    placeholder = '', 
+    confirmText = 'OK', 
+    file = false,
+    emojis = false,
+    onSubmit, 
+    onClose 
+  }) {
+    // Xóa tooltip cũ nếu có
+    const old = document.getElementById('custom-tooltip');
+    if (old) old.remove();
+    const oldOverlay = document.getElementById('custom-tooltip-overlay');
+    if (oldOverlay) oldOverlay.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'custom-tooltip-overlay';
+    overlay.style.position = 'fixed';
+    overlay.style.top = 0;
+    overlay.style.left = 0;
+    overlay.style.width = '100vw';
+    overlay.style.height = '100vh';
+    overlay.style.background = 'rgba(0,0,0,0.08)';
+    overlay.style.zIndex = 9998;
+    overlay.onclick = () => { close(); };
+
+    const tooltip = document.createElement('div');
+    tooltip.id = 'custom-tooltip';
+    tooltip.style.position = 'fixed';
+    tooltip.style.top = '120px';
+    tooltip.style.left = '50%';
+    tooltip.style.transform = 'translateX(-50%)';
+    tooltip.style.background = '#fff';
+    tooltip.style.border = '1px solid #ccc';
+    tooltip.style.borderRadius = '10px';
+    tooltip.style.boxShadow = '0 4px 24px rgba(0,0,0,0.18)';
+    tooltip.style.padding = '20px 24px 16px 24px';
+    tooltip.style.zIndex = 9999;
+    tooltip.style.display = 'flex';
+    tooltip.style.flexDirection = 'column';
+    tooltip.style.gap = '12px';
+    tooltip.style.minWidth = '320px';
+    tooltip.style.maxWidth = '90vw';
+
+    if (title) {
+      const h = document.createElement('div');
+      h.textContent = title;
+      h.style.fontWeight = 'bold';
+      h.style.fontSize = '18px';
+      h.style.marginBottom = '4px';
+      tooltip.appendChild(h);
+    }
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = placeholder;
+    input.style.padding = '10px';
+    input.style.fontSize = '16px';
+    input.style.border = '1px solid #ccc';
+    input.style.borderRadius = '5px';
+    input.style.outline = 'none';
+    tooltip.appendChild(input);
+
+    let fileInput, fileLabel, filePreview;
+    if (file) {
+      fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/*';
+      fileInput.style.marginTop = '8px';
+      fileLabel = document.createElement('label');
+      fileLabel.textContent = 'Chọn file ảnh...';
+      fileLabel.style.fontSize = '14px';
+      fileLabel.style.marginTop = '4px';
+      fileLabel.style.cursor = 'pointer';
+      fileLabel.appendChild(fileInput);
+      tooltip.appendChild(fileLabel);
+      filePreview = document.createElement('img');
+      filePreview.style.maxWidth = '100%';
+      filePreview.style.maxHeight = '120px';
+      filePreview.style.marginTop = '8px';
+      filePreview.style.display = 'none';
+      tooltip.appendChild(filePreview);
+      fileInput.addEventListener('change', async () => {
+        if (fileInput.files && fileInput.files[0]) {
+          // Hiển thị preview
+          const reader = new FileReader();
+          reader.onload = e => {
+            filePreview.src = e.target.result;
+            filePreview.style.display = 'block';
+          };
+          reader.readAsDataURL(fileInput.files[0]);
+          // Upload demo lên imgbb
+          const formData = new FormData();
+          formData.append('image', fileInput.files[0]);
+          // Gợi ý: Nên dùng API key riêng của bạn ở đây
+          const imgbbKey = 'YOUR_IMGBB_API_KEY'; // Đăng ký miễn phí tại https://api.imgbb.com/
+          input.value = 'Đang upload...';
+          input.disabled = true;
+          try {
+            const res = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbKey}`, {
+              method: 'POST',
+              body: formData
+            });
+            const data = await res.json();
+            if (data && data.data && data.data.url) {
+              input.value = data.data.url;
+            } else {
+              input.value = '';
+              alert('Upload ảnh thất bại!');
+            }
+          } catch (err) {
+            input.value = '';
+            alert('Upload ảnh thất bại!');
+          }
+          input.disabled = false;
+        }
+      });
+    }
+
+    if (emojis) {
+      const emojiList = '😀 😃 😄 😁 😆 😅 😂 😊 😇 😉 😍 😘 😜 🤗 🤔 🤩 🤨 🥳 🥰 😎 😏 😤 😱 😭 😡 🤬 🥶 🥵 🤯 🥳 🥺 🙏 👍 👎 👏 🙌 💪 🤝 🧠 🦾 🦿 🦵 🦶 👀 👋'.split(' ');
+      const emojiBox = document.createElement('div');
+      emojiBox.style.display = 'flex';
+      emojiBox.style.flexWrap = 'wrap';
+      emojiBox.style.gap = '6px';
+      emojiBox.style.margin = '8px 0';
+      emojiList.forEach(emo => {
+        const btn = document.createElement('button');
+        btn.textContent = emo;
+        btn.style.fontSize = '22px';
+        btn.style.padding = '4px 8px';
+        btn.style.border = 'none';
+        btn.style.background = 'none';
+        btn.style.cursor = 'pointer';
+        btn.onclick = () => {
+          // Khôi phục selection emoji và chèn emoji ngay lập tức
+          restoreSelection(savedEmojiSelection);
+          editor.focus();
+          const sel = window.getSelection();
+          if (sel.rangeCount && editor.contains(sel.anchorNode)) {
+            sel.getRangeAt(0).insertNode(document.createTextNode(emo));
+          } else {
+            editor.appendChild(document.createTextNode(emo));
+          }
+          // Đóng tooltip
+          overlay.remove();
+          tooltip.remove();
+        };
+        emojiBox.appendChild(btn);
+      });
+      tooltip.insertBefore(emojiBox, input);
+    }
+
+    const btnRow = document.createElement('div');
+    btnRow.style.display = 'flex';
+    btnRow.style.gap = '8px';
+    btnRow.style.justifyContent = 'flex-end';
+
+    const confirmBtn = document.createElement('button');
+    confirmBtn.textContent = confirmText;
+    confirmBtn.style.padding = '8px 18px';
+    confirmBtn.style.background = '#007bff';
+    confirmBtn.style.color = '#fff';
+    confirmBtn.style.border = 'none';
+    confirmBtn.style.borderRadius = '4px';
+    confirmBtn.style.cursor = 'pointer';
+    confirmBtn.style.fontWeight = 'bold';
+
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = 'Đóng';
+    closeBtn.style.padding = '8px 18px';
+    closeBtn.style.background = '#eee';
+    closeBtn.style.color = '#333';
+    closeBtn.style.border = 'none';
+    closeBtn.style.borderRadius = '4px';
+    closeBtn.style.cursor = 'pointer';
+
+    btnRow.appendChild(confirmBtn);
+    btnRow.appendChild(closeBtn);
+    tooltip.appendChild(btnRow);
+
+    function close() {
+      overlay.remove();
+      tooltip.remove();
+      if (onClose) onClose();
+    }
+
+    confirmBtn.onclick = () => {
+      if (input.value.trim() && input.value !== 'Đang upload...') {
+        onSubmit(input.value.trim());
+        close();
+      } else {
+        input.focus();
+      }
+    };
+    closeBtn.onclick = close;
+
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') confirmBtn.click();
+      if (e.key === 'Escape') close();
+    });
+
+    setTimeout(() => input.focus(), 10);
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(tooltip);
+  }
 
   // Block format select (heading, paragraph, pre)
   const blockFormatSelect = document.getElementById('block-format-select');
   blockFormatSelect.addEventListener('change', function() {
     const value = blockFormatSelect.value;
     exec('formatBlock', value);
-  });
 });
 
 // Table resize handle logic
@@ -348,3 +744,54 @@ function removeTableResizeHandles() {
   document.querySelectorAll('.table-resize-handle').forEach(h => h.remove());
   console.log('removeTableResizeHandles: removed all handles');
 }
+
+  // Nút emoji
+  let savedEmojiSelection = null;
+  document.getElementById('emoji-btn').addEventListener('mousedown', e => {
+    e.preventDefault();
+    savedEmojiSelection = saveSelection();
+    showTooltip({
+      title: 'Chèn Emoji',
+      placeholder: 'Tìm hoặc chọn emoji...',
+      confirmText: 'Chèn',
+      emojis: true,
+      onSubmit: emoji => {
+        // Trường hợp bấm nút Chèn (ít dùng)
+        restoreSelection(savedEmojiSelection);
+        editor.focus();
+        const sel = window.getSelection();
+        if (sel.rangeCount && editor.contains(sel.anchorNode)) {
+          sel.getRangeAt(0).insertNode(document.createTextNode(emoji));
+        } else {
+          editor.appendChild(document.createTextNode(emoji));
+        }
+      }
+    });
+  });
+
+  // Cập nhật statusbar: breadcrumb và wordcount
+  function updateStatusbar() {
+    // Breadcrumb
+    const breadcrumbEl = document.getElementById('breadcrumb');
+    const sel = window.getSelection();
+    let node = sel.anchorNode;
+    if (node && node.nodeType === 3) node = node.parentNode;
+    let path = [];
+    while (node && node !== editor && node.nodeType === 1) {
+      path.unshift(node.tagName.toLowerCase());
+      node = node.parentNode;
+    }
+    breadcrumbEl.textContent = path.join(' › ');
+    // Wordcount
+    const wordcountEl = document.getElementById('wordcount');
+    const text = editor.innerText || '';
+    const words = text.trim().split(/\s+/).filter(Boolean);
+    wordcountEl.textContent = words.length + ' words  |  ' + text.length + ' chars';
+  }
+  editor.addEventListener('keyup', updateStatusbar);
+  editor.addEventListener('mouseup', updateStatusbar);
+  editor.addEventListener('input', updateStatusbar);
+  document.addEventListener('selectionchange', updateStatusbar);
+  // Gọi lần đầu
+  updateStatusbar();
+});

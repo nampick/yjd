@@ -58,6 +58,7 @@
       <button id="ol-btn" title="Numbered List"><i class="fa-solid fa-list-ol"></i></button>
       <button id="link-btn" title="Insert Link"><i class="fa-solid fa-link"></i></button>
       <button id="img-btn" title="Insert Image"><i class="fa-solid fa-image"></i></button>
+      <button id="emoji-btn" title="Chèn Emoji"><i class="fa-regular fa-face-smile"></i></button>
       <span class="color-dropdown">
         <button id="color-btn" title="Text Color"><i class="fa-solid fa-palette"></i> <i class="fa-solid fa-chevron-down"></i></button>
         <div id="color-palette" class="color-palette" style="display:none;">
@@ -96,7 +97,35 @@
       <button id="save-btn" title="Save"><i class="fa-solid fa-floppy-disk"></i></button>
       <button id="view-html-btn" title="View HTML"><i class="fa-solid fa-code"></i></button>
     </div>
-    <div id="editor" contenteditable="true" class="editor-area">Type here...</div>
+    <div id="editor" contenteditable="true" class="editor-area">
+      <div style="max-width:600px;margin:40px auto;padding:32px;background:#fff;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.07);font-family:'Segoe UI',Roboto,Arial,sans-serif;">
+        <div style="text-align:center;">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Pleiades_large.jpg" width="80" style="border-radius:50%;margin-bottom:16px;" alt="Logo" />
+          <h2 style="color:#2d3748;margin:0 0 12px 0;">Chào mừng bạn đến với RichEditor!</h2>
+        </div>
+        <div style="color:#444;font-size:16px;line-height:1.7;">
+          <p>Xin chào <b>Người dùng</b>,</p>
+          <p>Cảm ơn bạn đã đăng ký sử dụng <b>RichEditor</b>. Dưới đây là một số tính năng nổi bật:</p>
+          <ul style="margin:12px 0 18px 20px;">
+            <li>Soạn thảo văn bản <b>in đậm</b>, <i>in nghiêng</i>, <u>gạch chân</u></li>
+            <li>Chèn liên kết, hình ảnh, bảng biểu</li>
+            <li>Hoàn tác, làm lại, căn lề, danh sách</li>
+          </ul>
+          <p>Để bắt đầu, hãy nhấn vào nút <b>ChatGPT</b> để tạo nội dung tự động!</p>
+          <p style="margin:24px 0 0 0;">Chúc bạn một ngày tốt lành,<br><b>Đội ngũ RichEditor</b></p>
+        </div>
+        <div style="text-align:center;margin-top:32px;">
+          <a href="https://your-app-link.com" style="background:#007bff;color:#fff;text-decoration:none;padding:12px 32px;border-radius:4px;font-size:16px;display:inline-block;">Truy cập RichEditor</a>
+        </div>
+        <div style="text-align:center;color:#aaa;font-size:12px;margin-top:24px;">
+          © 2024 RichEditor. All rights reserved.
+        </div>
+      </div>
+    </div>
+    <div id="editor-statusbar" class="editor-statusbar">
+      <span id="breadcrumb"></span>
+      <span id="wordcount" style="float:right"></span>
+    </div>
     <pre id="html-content" class="html-view"></pre>
   </div>
   <div id="table-toolbar" class="table-toolbar" style="display:none;">
