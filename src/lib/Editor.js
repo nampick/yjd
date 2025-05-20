@@ -1027,6 +1027,24 @@ export class Editor {
         }
       }, 10);
     });
+
+    // Hiển thị toolbar khi select text
+    this.editor.addEventListener('mouseup', e => {
+      const sel = window.getSelection();
+      if (sel.rangeCount > 0) {
+        const range = sel.getRangeAt(0);
+        if (!range.collapsed) { // Nếu có text được chọn
+          const rect = range.getBoundingClientRect();
+          // Hiển thị toolbar phía trên vùng chọn
+          this.showBlockToolbar({
+            left: rect.left + (rect.width / 2),
+            top: rect.top - 10
+          });
+        } else {
+          this.hideBlockToolbar();
+        }
+      }
+    });
   }
 
   updateStatusbar() {
