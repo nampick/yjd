@@ -21,7 +21,7 @@ export class Editor {
         breadcrumb: true
       },
       blockToolbarFeatures: [
-        'image', 'table', 'heading', 'list', 'quote', 'code'
+        'image', 'table', 'heading', 'list', 'quote', 'code','video','import'
       ]
     }, options);
 
@@ -369,7 +369,9 @@ export class Editor {
       { icon: '<i class="far fa-smile"></i>', title: 'Emoji', cmd: 'emoji' },
       { icon: '<i class="far fa-image"></i>', title: 'Image', cmd: 'image' },
       { icon: '<i class="fas fa-link"></i>', title: 'Link', cmd: 'link' },
-      { icon: '<i class="fas fa-table"></i>', title: 'Table', cmd: 'table' }
+      { icon: '<i class="fas fa-table"></i>', title: 'Table', cmd: 'table' },
+      { icon: '<i class="fas fa-video"></i>', title: 'Video', cmd: 'video' },
+      { icon: '<i class="fas fa-file-import"></i>', title: 'Import', cmd: 'import' }
     ];
 
     insertBtns.forEach(btn => {
@@ -518,6 +520,27 @@ export class Editor {
           confirmText: 'Insert',
           file: true,
           onSubmit: url => this.insertImageWithStyle(url)
+        });
+        return;
+      }
+      if (cmd === 'video') {
+        this.savedSelection = this.saveSelection();
+        this.showTooltip({
+          title: 'Insert Video',
+          placeholder: 'Paste video URL (YouTube, Vimeo, etc.)...',
+          confirmText: 'Insert',
+          onSubmit: url => this.insertVideo(url)
+        });
+        return;
+      }
+      if (cmd === 'import') {
+        this.savedSelection = this.saveSelection();
+        this.showTooltip({
+          title: 'Import Content',
+          placeholder: 'Paste HTML content to import...',
+          confirmText: 'Import',
+          showImportOptions: true, // Thêm tùy chọn cho các loại file
+          onSubmit: (content, fileType) => this.importContent(content, fileType)
         });
         return;
       }
@@ -854,7 +877,399 @@ export class Editor {
   }
 
   bindEvents() {
-    this.editor.addEventListener('input', () => this.updateStatusbar());
+    this.editor.addEventListener('input', () => {
+      this.updateStatusbar();
+      // Kiểm tra nếu editor trống thì tạo thẻ div và p
+      if (this.editor.innerHTML === '' || this.editor.innerHTML === '<br>') {
+        const div = document.createElement('div');
+        div.style.fontFamily = 'Arial, sans-serif';
+        div.style.maxWidth = '600px';
+        div.style.margin = '0 auto';
+        div.style.padding = '20px';
+
+        const p = document.createElement('p');
+        p.innerHTML = '<br>';
+        div.appendChild(p);
+        this.editor.appendChild(div);
+
+        // Đặt con trỏ vào thẻ p
+        const range = document.createRange();
+        const sel = window.getSelection();
+        range.setStart(p, 0);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    });
+
+    this.editor.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const sel = window.getSelection();
+        if (sel.rangeCount > 0) {
+          const range = sel.getRangeAt(0);
+          const node = range.startContainer;
+          let block = node.nodeType === 3 ? node.parentNode : node;
+          
+          // Tìm thẻ block cha gần nhất (h1-h6, p, pre)
+          while (block && block !== this.editor && !['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'P', 'PRE'].includes(block.nodeName)) {
+            block = block.parentNode;
+          }
+
+          // Nếu đang ở trong text node
+          if (node.nodeType === 3) {
+            const text = node.textContent;
+            const offset = range.startOffset;
+            const tagName = block.nodeName;
+            
+            // Nếu là thẻ h1-h6, p, pre
+            if (['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'P', 'PRE'].includes(tagName)) {
+              // Nếu con trỏ ở cuối text
+              if (offset === text.length) {
+                // Tạo thẻ p mới
+                const newP = document.createElement('p');
+                newP.innerHTML = '<br>';
+                block.parentNode.insertBefore(newP, block.nextSibling);
+                
+                // Đặt con trỏ vào thẻ p mới
+                const newRange = document.createRange();
+                newRange.setStart(newP, 0);
+                newRange.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(newRange);
+              } else {
+                // Tách text thành 2 phần
+                const beforeText = text.substring(0, offset);
+                const afterText = text.substring(offset);
+                console.log("beforeText", beforeText);
+                console.log("afterText", afterText);
+                // Tạo bản sao của thẻ hiện tại để giữ nguyên style và cấu trúc HTML
+                function isStopTag(el) {
+                  if (!el) return false;
+                  const tag = el.tagName.toLowerCase();
+                  return tag === 'p' || /^h[1-6]$/.test(tag) || tag === 'pre';
+                }
+
+                function getSiblings(element) {
+                  let anhemtruoc = [];
+                  let anhemsau = [];
+
+                  // Lấy parent của element
+                  const parent = element.parentElement;
+                  if (!parent) return { anhemtruoc, anhemsau };
+                  
+                  // Lấy tất cả các node con của parent (bao gồm cả text node và element node)
+                  const allSiblings = Array.from(parent.childNodes);
+                  
+                  // Tìm vị trí của element trong danh sách
+                  const elementIndex = allSiblings.indexOf(element);
+                  
+                  if (elementIndex === -1) return { anhemtruoc, anhemsau };
+                  
+                  // Tất cả node trước element
+                  for (let i = 0; i < elementIndex; i++) {
+                    const sibling = allSiblings[i];
+                    // Chỉ thêm vào nếu là element node hoặc là text node có nội dung
+                    if (sibling.nodeType === 1 || (sibling.nodeType === 3 && sibling.textContent.trim() !== '')) {
+                      anhemtruoc.push(sibling);
+                    }
+                  }
+                  
+                  // Tất cả node sau element
+                  for (let i = elementIndex + 1; i < allSiblings.length; i++) {
+                    const sibling = allSiblings[i];
+                    // Chỉ thêm vào nếu là element node hoặc là text node có nội dung
+                    if (sibling.nodeType === 1 || (sibling.nodeType === 3 && sibling.textContent.trim() !== '')) {
+                      anhemsau.push(sibling);
+                    }
+                  }
+
+                  return { anhemtruoc, anhemsau };
+                }
+                /**
+                 * Trả về mảng các object theo thứ tự cấp cha:
+                 * [
+                 *   { cha: HTMLElement, anhemtruoc: [HTMLElements], anhemsau: [HTMLElements] },
+                 *   { cha: HTMLElement, anhemtruoc: [...], anhemsau: [...] },
+                 *   ...
+                 * ]
+                 */
+                function getParentAndSiblingData(element) {
+                  let current = element;
+                  const result = [];
+
+                  while (current && !isStopTag(current)) {
+                    const parent = current.parentElement;
+                    if (!parent) break;
+
+                    const { anhemtruoc, anhemsau } = getSiblings(current);
+
+                    result.push({
+                      cha: parent,
+                      anhemtruoc,
+                      anhemsau,
+                    });
+
+                    current = parent;
+                  }
+
+                  return result;
+                }
+                function cloneWithSiblings(beforeText, afterText, data, offsetElement) {
+                  if (!data.length) return { ele1: null, ele2: null };
+                  
+                  // Bắt đầu từ cấp thấp nhất (gần offsetElement nhất)
+                  let ele1 = null;
+                  let ele2 = null;
+
+                  for (let i = data.length - 1; i >= 0; i--) {
+                    const { cha, anhemtruoc, anhemsau } = data[i];
+
+                    const chax = cha.cloneNode(false); // clone cha (không clone con)
+
+                    const newEle1 = chax.cloneNode(false);
+                    const newEle2 = chax.cloneNode(false);
+
+                    // Thêm anh em trước vào ele1
+                    anhemtruoc.forEach(el => {
+                      newEle1.appendChild(el.cloneNode(true));
+                    });
+
+                    // ele1 xử lý trước, luôn thêm ele1 ở cuối (sau anh em trước)
+                    if (ele1) {
+                      newEle1.appendChild(ele1);
+                    } else {
+                      // Đây là cấp gần offsetElement nhất — xử lý trước/afterText
+                      // Clone offsetElement giữ nguyên thuộc tính và style
+                      const left = offsetElement.cloneNode(false);
+                      
+                      // Xóa tất cả nội dung hiện tại và đặt text mới
+                      left.innerHTML = '';
+                      left.textContent = beforeText;
+                      
+                      newEle1.appendChild(left);
+                    }
+
+                    // ele2 xử lý đúng thứ tự: phần tử chính trước, anh em sau đứng sau
+                    if (ele2) {
+                      // Nếu có ele2 từ trước, thêm vào đầu tiên
+                      newEle2.appendChild(ele2);
+                    } else {
+                      // Trường hợp đầu tiên: thêm phần tử chứa afterText
+                      // Clone offsetElement giữ nguyên thuộc tính và style
+                      const right = offsetElement.cloneNode(false);
+                      
+                      // Xóa tất cả nội dung hiện tại và đặt text mới
+                      right.innerHTML = '';
+                      right.textContent = afterText;
+                      
+                      newEle2.appendChild(right);
+                    }
+                    
+                    // Thêm anh em sau vào ele2 (sau phần tử chính)
+                    anhemsau.forEach(el => {
+                      newEle2.appendChild(el.cloneNode(true));
+                    });
+
+                    ele1 = newEle1;
+                    ele2 = newEle2;
+                  }
+                  
+                  return { ele1, ele2 };
+                }
+                function replaceChaxWith(ele1, ele2, data) {
+                  if (!data.length || !ele1 || !ele2) return;
+
+                  const chax = data[0].cha;
+                  const parent = chax.parentElement;
+                  if (!parent) return;
+
+                  parent.insertBefore(ele1, chax);
+                  parent.insertBefore(ele2, chax.nextSibling); // Sau ele1
+                  parent.removeChild(chax);
+                  }
+                // --------- Sử dụng trong code của bạn ---------
+                const sel = window.getSelection();
+                if (!sel.rangeCount) return;
+
+                const range = sel.getRangeAt(0);
+                const containerNode = range.startContainer;
+
+                const offsetElement = containerNode.nodeType === 3
+                  ? containerNode.parentElement
+                  : containerNode;
+                
+                // Kiểm tra nếu offsetElement chính là thẻ block
+                const isBlockElement = ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'P', 'PRE'].includes(offsetElement.nodeName);
+                
+                if (isBlockElement) {
+                  // Trường hợp đơn giản khi offsetElement là thẻ block
+                  const newBlock1 = document.createElement(offsetElement.nodeName);
+                  const newBlock2 = document.createElement(offsetElement.nodeName);
+                  
+                  // Sao chép style và các thuộc tính khác
+                  if (offsetElement.hasAttributes()) {
+                    const attrs = offsetElement.attributes;
+                    for (let i = 0; i < attrs.length; i++) {
+                      newBlock1.setAttribute(attrs[i].name, attrs[i].value);
+                      newBlock2.setAttribute(attrs[i].name, attrs[i].value);
+                    }
+                  }
+                  
+                  // Chia nội dung
+                  const tempDiv1 = document.createElement('div');
+                  const tempDiv2 = document.createElement('div');
+                  tempDiv1.innerHTML = offsetElement.innerHTML;
+                  tempDiv2.innerHTML = offsetElement.innerHTML;
+                  
+                  // Tìm node text cần cắt
+                  const textNodes1 = [];
+                  const textNodes2 = [];
+                  
+                  function findTextNodes(node, arr) {
+                    if (node.nodeType === 3) arr.push(node);
+                    else node.childNodes.forEach(child => findTextNodes(child, arr));
+                  }
+                  
+                  findTextNodes(tempDiv1, textNodes1);
+                  findTextNodes(tempDiv2, textNodes2);
+                  
+                  if (textNodes1.length > 0 && textNodes2.length > 0) {
+                    textNodes1[0].textContent = beforeText;
+                    textNodes2[0].textContent = afterText;
+                    
+                    newBlock1.innerHTML = tempDiv1.innerHTML;
+                    newBlock2.innerHTML = tempDiv2.innerHTML;
+                    
+                    // Thay thế block gốc
+                    offsetElement.parentNode.insertBefore(newBlock1, offsetElement);
+                    offsetElement.parentNode.insertBefore(newBlock2, offsetElement.nextSibling);
+                    offsetElement.remove();
+                    
+                    // Đặt con trỏ vào đầu block thứ hai
+                    const newRange = document.createRange();
+                    const firstNode = newBlock2.firstChild;
+                    newRange.setStart(firstNode.nodeType === 3 ? firstNode : firstNode.firstChild, 0);
+                    newRange.collapse(true);
+                    sel.removeAllRanges();
+                    sel.addRange(newRange);
+                    return;
+                  }
+                }
+                
+                const data = getParentAndSiblingData(offsetElement);
+                
+                console.log(data); // Log ra kết quả trả về
+                // Tạo 2 cây mới từ beforeText và afterText
+                const { ele1, ele2 } = cloneWithSiblings(beforeText, afterText, data, offsetElement);
+                // Bước 3: thay thế chax trong DOM
+                replaceChaxWith(ele1, ele2, data);
+                // Đặt con trỏ vào đầu thẻ mới
+                const newRange = document.createRange();
+                const newBlock = ele2;
+                newRange.setStart(newBlock, 0);
+                newRange.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(newRange);
+              }
+            } else {
+              // Nếu không phải thẻ h1-h6, p, pre, tạo p mới
+              const newP = document.createElement('p');
+              newP.innerHTML = '<br>';
+              block.parentNode.insertBefore(newP, block.nextSibling);
+              
+              // Đặt con trỏ vào thẻ p mới
+              const newRange = document.createRange();
+              newRange.setStart(newP, 0);
+              newRange.collapse(true);
+              sel.removeAllRanges();
+              sel.addRange(newRange);
+            }
+          } else {
+            // Nếu không phải text node, tạo p mới
+            const newP = document.createElement('p');
+            newP.innerHTML = '<br>';
+            block.parentNode.insertBefore(newP, block.nextSibling);
+            
+            // Đặt con trỏ vào thẻ p mới
+            const newRange = document.createRange();
+            newRange.setStart(newP, 0);
+            newRange.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+          }
+        }
+      } else if (e.key === 'Backspace') {
+        const sel = window.getSelection();
+        if (sel.rangeCount > 0) {
+          const range = sel.getRangeAt(0);
+          const node = range.startContainer;
+          
+          // Nếu đang ở đầu một thẻ và có thẻ trước đó
+          if (range.collapsed && range.startOffset === 0) {
+            let block = node.nodeType === 3 ? node.parentNode : node;
+            
+            // Tìm thẻ block cha gần nhất
+            while (block && block !== this.editor && !['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'DIV'].includes(block.nodeName)) {
+              block = block.parentNode;
+            }
+            
+            // Nếu tìm thấy thẻ block và có thẻ trước đó
+            if (block && block.previousElementSibling) {
+              const prevBlock = block.previousElementSibling;
+              
+              // Nếu cả hai thẻ đều là heading
+              if (['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(block.nodeName) && 
+                  ['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(prevBlock.nodeName)) {
+                e.preventDefault();
+                
+                // Sao chép style từ thẻ hiện tại sang thẻ trước đó nếu thẻ trước đó không có style
+                if (block.hasAttribute('style') && !prevBlock.hasAttribute('style')) {
+                  prevBlock.setAttribute('style', block.getAttribute('style'));
+                }
+                
+                // Lấy text từ cả hai thẻ
+                const prevText = prevBlock.textContent;
+                const currentText = block.textContent;
+                
+                // Xóa nội dung cũ
+                prevBlock.textContent = '';
+                block.textContent = '';
+                
+                // Tạo text node mới với nội dung đã hợp nhất
+                const mergedText = document.createTextNode(prevText + currentText);
+                prevBlock.appendChild(mergedText);
+                
+                // Xóa thẻ hiện tại
+                block.remove();
+                
+                // Đặt con trỏ vào cuối thẻ trước đó
+                const newRange = document.createRange();
+                newRange.setStart(prevBlock.firstChild, prevBlock.firstChild.length);
+                newRange.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(newRange);
+              }
+            }
+          } else if (range.collapsed && node.nodeType === 3) {
+            // Xử lý khi xóa text trong thẻ heading
+            let block = node.parentNode;
+            while (block && block !== this.editor && !['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(block.nodeName)) {
+              block = block.parentNode;
+            }
+            
+            if (block && ['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(block.nodeName)) {
+              // Nếu đang xóa text trong thẻ heading, giữ nguyên thẻ và style
+              const text = node.textContent;
+              if (text.length > 0) {
+                node.textContent = text.substring(0, range.startOffset - 1) + text.substring(range.startOffset);
+              }
+            }
+          }
+        }
+      }
+    });
+
     this.editor.addEventListener('keyup', () => this.updateStatusbar());
     this.editor.addEventListener('mouseup', () => this.updateStatusbar());
     document.addEventListener('selectionchange', () => this.updateStatusbar());
@@ -921,43 +1336,43 @@ export class Editor {
 
     // Thêm sự kiện cho block toolbar
     this.editor.addEventListener('keyup', e => {
-      if (e.key === 'Enter') {
-        setTimeout(() => {
-          const sel = window.getSelection();
-          if (sel.rangeCount > 0) {
-            const range = sel.getRangeAt(0);
-            const node = range.startContainer;
-            let block = node.nodeType === 3 ? node.parentNode : node;
-            // Kiểm tra block là dòng trống: chỉ chứa <br> hoặc text rỗng
-            let isEmptyBlock = false;
-            if (block && (block.nodeName === 'DIV' || block.nodeName === 'P')) {
-              if (
-                block.textContent.trim() === '' ||
-                (block.childNodes.length === 1 && block.childNodes[0].nodeName === 'BR')
-              ) {
-                isEmptyBlock = true;
-              }
-            }
-            // Nếu block là editor-area và chỉ có 1 child là <br> hoặc text rỗng
-            if (!isEmptyBlock && block === this.editor) {
-              if (
-                this.editor.childNodes.length === 1 &&
-                (this.editor.firstChild.nodeName === 'BR' || this.editor.textContent.trim() === '')
-              ) {
-                isEmptyBlock = true;
-              }
-            }
-            if (isEmptyBlock && block.offsetHeight > 0) {
-              const rect = block.getBoundingClientRect();
-              this.showBlockToolbar(rect);
-            } else {
-              this.hideBlockToolbar();
-            }
-          }
-        }, 10);
-      } else {
-        this.hideBlockToolbar();
-      }
+      // if (e.key === 'Enter') {
+      //   setTimeout(() => {
+      //     const sel = window.getSelection();
+      //     if (sel.rangeCount > 0) {
+      //       const range = sel.getRangeAt(0);
+      //       const node = range.startContainer;
+      //       let block = node.nodeType === 3 ? node.parentNode : node;
+      //       // Kiểm tra block là dòng trống: chỉ chứa <br> hoặc text rỗng
+      //       let isEmptyBlock = false;
+      //       if (block && (block.nodeName === 'DIV' || block.nodeName === 'P')) {
+      //         if (
+      //           block.textContent.trim() === '' ||
+      //           (block.childNodes.length === 1 && block.childNodes[0].nodeName === 'BR')
+      //         ) {
+      //           isEmptyBlock = true;
+      //         }
+      //       }
+      //       // Nếu block là editor-area và chỉ có 1 child là <br> hoặc text rỗng
+      //       if (!isEmptyBlock && block === this.editor) {
+      //         if (
+      //           this.editor.childNodes.length === 1 &&
+      //           (this.editor.firstChild.nodeName === 'BR' || this.editor.textContent.trim() === '')
+      //         ) {
+      //           isEmptyBlock = true;
+      //         }
+      //       }
+      //       if (isEmptyBlock && block.offsetHeight > 0) {
+      //         const rect = block.getBoundingClientRect();
+      //         this.showBlockToolbar(rect);
+      //       } else {
+      //         this.hideBlockToolbar();
+      //       }
+      //     }
+      //   }, 10);
+      // } else {
+      //   this.hideBlockToolbar();
+      // }
     });
     // Ẩn toolbar khi click ra ngoài hoặc nhập nội dung
     this.editor.addEventListener('input', () => {
@@ -1179,6 +1594,7 @@ export class Editor {
     confirmText = 'OK', 
     file = false,
     emojis = false,
+    showImportOptions = false,
     onSubmit, 
     onClose 
   }) {
@@ -1226,6 +1642,60 @@ export class Editor {
       tooltip.appendChild(h);
     }
 
+    // Nếu là chức năng import với nhiều lựa chọn
+    let selectedFileType = 'html';
+    if (showImportOptions) {
+      const optionsDiv = document.createElement('div');
+      optionsDiv.style.display = 'flex';
+      optionsDiv.style.gap = '10px';
+      optionsDiv.style.marginBottom = '12px';
+      optionsDiv.style.flexWrap = 'wrap';
+      
+      const options = [
+        { id: 'excel', label: 'Excel', icon: '<i class="fas fa-file-excel"></i>' },
+        { id: 'pdf', label: 'PDF', icon: '<i class="fas fa-file-pdf"></i>' },
+        { id: 'doc', label: 'Word', icon: '<i class="fas fa-file-word"></i>' }
+      ];
+      
+      options.forEach(option => {
+        const btn = document.createElement('button');
+        btn.innerHTML = `${option.icon} ${option.label}`;
+        btn.dataset.type = option.id;
+        btn.style.padding = '8px 12px';
+        btn.style.border = '1px solid #eee';
+        btn.style.borderRadius = '6px';
+        btn.style.background = option.id === 'excel' ? '#e0f0ff' : '#fff';
+        btn.style.color = option.id === 'excel' ? '#1976d2' : '#333';
+        btn.style.cursor = 'pointer';
+        btn.style.fontSize = '14px';
+        btn.style.display = 'flex';
+        btn.style.alignItems = 'center';
+        btn.style.gap = '6px';
+        
+        btn.onclick = () => {
+          // Cập nhật UI và placeholder cho loại file được chọn
+          options.forEach(opt => {
+            const el = optionsDiv.querySelector(`[data-type="${opt.id}"]`);
+            if (el) {
+              el.style.background = opt.id === option.id ? '#e0f0ff' : '#fff';
+              el.style.color = opt.id === option.id ? '#1976d2' : '#333';
+            }
+          });
+          
+          selectedFileType = option.id;
+          
+          // Cập nhật placeholder và hiển thị file input
+          input.placeholder = `Select ${option.label} file to import...`;
+          input.style.display = 'block';
+          if (fileInputWrapper) fileInputWrapper.style.display = 'block';
+        };
+        
+        optionsDiv.appendChild(btn);
+      });
+      
+      tooltip.appendChild(optionsDiv);
+    }
+
     const input = document.createElement('input');
     input.type = 'text';
     input.placeholder = placeholder;
@@ -1236,58 +1706,73 @@ export class Editor {
     input.style.outline = 'none';
     tooltip.appendChild(input);
 
-    let fileInput, fileLabel, filePreview;
-    if (file) {
+    let fileInput, fileInputWrapper, fileLabel, filePreview;
+    if (file || showImportOptions) {
+      fileInputWrapper = document.createElement('div');
+      fileInputWrapper.style.marginTop = '8px';
+      
       fileInput = document.createElement('input');
       fileInput.type = 'file';
-      fileInput.accept = 'image/*';
-      fileInput.style.marginTop = '8px';
-      fileLabel = document.createElement('label');
-      fileLabel.textContent = 'Chọn file ảnh...';
-      fileLabel.style.fontSize = '14px';
-      fileLabel.style.marginTop = '4px';
-      fileLabel.style.cursor = 'pointer';
-      fileLabel.appendChild(fileInput);
-      tooltip.appendChild(fileLabel);
-      filePreview = document.createElement('img');
-      filePreview.style.maxWidth = '100%';
-      filePreview.style.maxHeight = '120px';
-      filePreview.style.marginTop = '8px';
-      filePreview.style.display = 'none';
-      tooltip.appendChild(filePreview);
+      fileInput.style.width = '100%';
+      
+      // Nếu là import options, thiết lập chấp nhận các loại file tương ứng
+      if (showImportOptions) {
+        fileInput.accept = '.html,.htm,.xlsx,.xls,.pdf,.doc,.docx';
+        fileInputWrapper.style.display = 'none'; // Ẩn ban đầu nếu chọn HTML
+      } else if (file) {
+        fileInput.accept = 'image/*';
+      }
+      
+      fileInputWrapper.appendChild(fileInput);
+      tooltip.appendChild(fileInputWrapper);
+      
+      if (file) {
+        filePreview = document.createElement('img');
+        filePreview.style.maxWidth = '100%';
+        filePreview.style.maxHeight = '120px';
+        filePreview.style.marginTop = '8px';
+        filePreview.style.display = 'none';
+        tooltip.appendChild(filePreview);
+      }
+      
       fileInput.addEventListener('change', async () => {
         if (fileInput.files && fileInput.files[0]) {
-          // Hiển thị preview
-          const reader = new FileReader();
-          reader.onload = e => {
-            filePreview.src = e.target.result;
-            filePreview.style.display = 'block';
-          };
-          reader.readAsDataURL(fileInput.files[0]);
-          // Upload demo lên imgbb
-          const formData = new FormData();
-          formData.append('image', fileInput.files[0]);
-          // Gợi ý: Nên dùng API key riêng của bạn ở đây
-          const imgbbKey = 'YOUR_IMGBB_API_KEY'; // Đăng ký miễn phí tại https://api.imgbb.com/
-          input.value = 'Đang upload...';
-          input.disabled = true;
-          try {
-            const res = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbKey}`, {
-              method: 'POST',
-              body: formData
-            });
-            const data = await res.json();
-            if (data && data.data && data.data.url) {
-              input.value = data.data.url;
-            } else {
+          const fileName = fileInput.files[0].name;
+          input.value = fileName;
+          
+          if (file) {
+            // Hiển thị preview nếu là ảnh
+            const reader = new FileReader();
+            reader.onload = e => {
+              filePreview.src = e.target.result;
+              filePreview.style.display = 'block';
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+            // Upload demo lên imgbb
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
+            // Gợi ý: Nên dùng API key riêng của bạn ở đây
+            const imgbbKey = 'YOUR_IMGBB_API_KEY'; // Đăng ký miễn phí tại https://api.imgbb.com/
+            input.value = 'Đang upload...';
+            input.disabled = true;
+            try {
+              const res = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbKey}`, {
+                method: 'POST',
+                body: formData
+              });
+              const data = await res.json();
+              if (data && data.data && data.data.url) {
+                input.value = data.data.url;
+              } else {
+                input.value = '';
+                alert('Upload ảnh thất bại!');
+              }
+            } catch (err) {
               input.value = '';
-              alert('Upload ảnh thất bại!');
+              alert('Upload ảnh thất bại!', err);
             }
-          } catch (err) {
-            input.value = '';
-            alert('Upload ảnh thất bại!');
+            input.disabled = false;
           }
-          input.disabled = false;
         }
       });
     }
@@ -1361,8 +1846,17 @@ export class Editor {
     }
 
     confirmBtn.onclick = () => {
-      if (input.value.trim() && input.value !== 'Đang upload...') {
-        onSubmit(input.value.trim());
+      if (showImportOptions && fileInput && fileInput.files && fileInput.files[0] && selectedFileType !== 'html') {
+        // Xử lý file import
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        reader.onload = e => {
+          onSubmit(e.target.result, selectedFileType);
+          close();
+        };
+        reader.readAsDataURL(file);
+      } else if (input.value.trim() && input.value !== 'Đang upload...') {
+        onSubmit(input.value.trim(), selectedFileType);
         close();
       } else {
         input.focus();
@@ -1420,6 +1914,684 @@ export class Editor {
       img.scrollIntoView({ behavior: 'smooth', block: 'center' });
       this.showImgResizeHandles(img);
     }, 10);
+  }
+
+  insertVideo(url) {
+  let embedUrl = url;
+  if (url.includes('youtube.com/watch') || url.includes('youtu.be/')) {
+    const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)?.[1];
+    if (videoId) {
+      embedUrl = `https://www.youtube.com/embed/${videoId}`;
+    }
+  } else if (url.includes('vimeo.com/')) {
+    const videoId = url.match(/vimeo\.com\/([0-9]+)/)?.[1];
+    if (videoId) {
+      embedUrl = `https://player.vimeo.com/video/${videoId}`;
+    }
+  }
+
+  // Tạo iframe video
+  const iframe = document.createElement('iframe');
+    iframe.src = embedUrl;
+    iframe.width = '560';
+    iframe.height = '315';
+    iframe.frameBorder = '0';
+    iframe.allowFullscreen = true;
+    iframe.style.maxWidth = '100%';
+    iframe.style.borderRadius = '8px';
+    iframe.setAttribute('data-resizable', 'true');
+
+    // Bao khung resize
+    const wrapper = document.createElement('div');
+    wrapper.style.display = 'inline-block';
+    wrapper.style.position = 'relative';
+    wrapper.style.resize = 'both';
+    wrapper.style.overflow = 'hidden';
+    wrapper.style.border = '1px dashed #ccc';
+    wrapper.appendChild(iframe);
+
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+    wrapper.style.width = 300;
+    wrapper.style.height = 200;
+    // Khôi phục selection trước khi chèn
+    this.restoreSelection(this.savedSelection);
+    this.editor.focus();
+    const sel = window.getSelection();
+    if (sel.rangeCount && this.editor.contains(sel.anchorNode)) {
+      sel.getRangeAt(0).insertNode(wrapper);
+    } else {
+      this.editor.appendChild(wrapper);
+    }
+    setTimeout(() => {
+      wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      this.showImgResizeHandles(wrapper);
+    }, 10);
+  }
+
+
+  importContent(content, fileType = 'html') {
+    try {
+      // Khôi phục selection
+      this.restoreSelection(this.savedSelection);
+      this.editor.focus();
+      const sel = window.getSelection();
+      
+      // Xử lý nội dung dựa trên loại file
+      if (fileType === 'html') {
+        // Xử lý HTML như trước
+        const temp = document.createElement('div');
+        temp.innerHTML = content;
+        
+        // Chèn nội dung
+        if (sel.rangeCount && this.editor.contains(sel.anchorNode)) {
+          sel.getRangeAt(0).insertNode(temp);
+        } else {
+          this.editor.appendChild(temp);
+        }
+        
+        // Xóa div tạm nhưng giữ lại nội dung
+        while (temp.firstChild) {
+          temp.parentNode.insertBefore(temp.firstChild, temp);
+        }
+        temp.remove();
+      } 
+      else if (fileType === 'excel') {
+        this.importExcelFile(content);
+      }
+      else if (fileType === 'pdf') {
+        this.importPdfFile(content);
+      }
+      else if (fileType === 'doc') {
+        this.importDocFile(content);
+      }
+    } catch (error) {
+      console.error('Error importing content:', error);
+      alert(`Failed to import ${fileType} content. Please check if the file is valid.`);
+    }
+  }
+  
+  importExcelFile(content) {
+    try {
+      // Trích xuất dữ liệu từ file Excel
+      // Lưu ý: Hàm này giả định file được đọc thành base64 data URL
+      this.parseExcelToTable(content, (tableHTML) => {
+        // Chèn HTML table vào editor
+        const sel = window.getSelection();
+        if (sel.rangeCount && this.editor.contains(sel.anchorNode)) {
+          // Tạo wrapper để bọc table
+          const wrapper = document.createElement('div');
+          wrapper.className = 'excel-table-wrapper';
+          wrapper.style.margin = '10px 0';
+          wrapper.style.maxWidth = '100%';
+          wrapper.style.overflowX = 'auto';
+          
+          // Header với icon Excel
+          const header = document.createElement('div');
+          header.innerHTML = '<i class="fas fa-file-excel" style="color: #1D6F42; margin-right: 8px;"></i> Excel Data';
+          header.style.fontWeight = 'bold';
+          header.style.marginBottom = '8px';
+          header.style.display = 'flex';
+          header.style.alignItems = 'center';
+          wrapper.appendChild(header);
+          
+          // Thêm table vào wrapper
+          wrapper.innerHTML += tableHTML;
+          
+          // Làm đẹp table
+          const tables = wrapper.querySelectorAll('table');
+          tables.forEach(table => {
+            table.style.borderCollapse = 'collapse';
+            table.style.width = '100%';
+            table.style.maxWidth = '100%';
+            table.style.border = '1px solid #ddd';
+            
+            const cells = table.querySelectorAll('th, td');
+            cells.forEach(cell => {
+              cell.style.border = '1px solid #ddd';
+              cell.style.padding = '8px';
+              cell.style.textAlign = 'left';
+            });
+            
+            const headerCells = table.querySelectorAll('thead th');
+            headerCells.forEach(th => {
+              th.style.backgroundColor = '#f2f2f2';
+              th.style.position = 'sticky';
+              th.style.top = '0';
+            });
+            
+            // Thêm style cho dòng chẵn/lẻ
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach((row, index) => {
+              if (index % 2 === 0) {
+                row.style.backgroundColor = '#f9f9f9';
+              }
+            });
+          });
+          
+          // Chèn vào editor
+          sel.getRangeAt(0).insertNode(wrapper);
+        } else {
+          this.editor.appendChild(document.createTextNode(tableHTML));
+        }
+      });
+    } catch (error) {
+      console.error('Error importing Excel:', error);
+      
+      // Fallback nếu không thể xử lý file Excel
+      const excelContainer = document.createElement('div');
+      excelContainer.className = 'excel-import-container';
+      excelContainer.style.border = '1px solid #ccc';
+      excelContainer.style.borderRadius = '4px';
+      excelContainer.style.padding = '10px';
+      excelContainer.style.margin = '10px 0';
+      excelContainer.style.background = '#f9f9f9';
+      
+      // Header với icon Excel
+      const header = document.createElement('div');
+      header.innerHTML = '<i class="fas fa-file-excel" style="color: #1D6F42; margin-right: 8px;"></i> Excel File';
+      header.style.fontWeight = 'bold';
+      header.style.marginBottom = '8px';
+      header.style.display = 'flex';
+      header.style.alignItems = 'center';
+      excelContainer.appendChild(header);
+      
+      // Thông báo lỗi
+      const info = document.createElement('p');
+      info.textContent = 'Could not parse Excel data. Please check if the file is valid.';
+      info.style.margin = '0';
+      info.style.color = '#dc3545';
+      excelContainer.appendChild(info);
+      
+      // Chèn vào editor
+      const sel = window.getSelection();
+      if (sel.rangeCount && this.editor.contains(sel.anchorNode)) {
+        sel.getRangeAt(0).insertNode(excelContainer);
+      } else {
+        this.editor.appendChild(excelContainer);
+      }
+    }
+  }
+  
+  parseExcelToTable(base64Data, callback) {
+    // Hàm này xử lý file Excel và chuyển đổi thành HTML table
+    // Lưu ý: Cần thêm SheetJS/xlsx library vào trang
+    // <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    // Kiểm tra nếu XLSX đã được tải
+    if (typeof XLSX === 'undefined') {
+      // Nếu chưa có XLSX, thêm script
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+      script.onload = () => {
+        // Sau khi tải xong, xử lý file
+        this.processExcelFile(base64Data, callback);
+      };
+      script.onerror = () => {
+        console.error('Failed to load XLSX library');
+        callback('<p>Failed to load Excel processing library. Please add SheetJS/xlsx to your project.</p>');
+      };
+      document.head.appendChild(script);
+    } else {
+      // Nếu XLSX đã có sẵn, xử lý file ngay
+      this.processExcelFile(base64Data, callback);
+    }
+  }
+  
+  processExcelFile(base64Data, callback) {
+    try {
+      // Chuyển đổi base64 data URL thành binary string
+      const base64 = base64Data.split(',')[1];
+      const binaryString = window.atob(base64);
+      
+      // Chuyển binary string thành array buffer
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      
+      // Đọc file Excel
+      const workbook = XLSX.read(bytes, { type: 'array' });
+      
+      // Lấy sheet đầu tiên
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      
+      // Chuyển đổi thành HTML table
+      const tableHTML = XLSX.utils.sheet_to_html(worksheet, { 
+        editable: false,
+        header: `<div style="margin-bottom: 8px; font-style: italic; color: #666;">Sheet: ${firstSheetName}</div>`
+      });
+      
+      // Tạo tabs nếu có nhiều sheet
+      if (workbook.SheetNames.length > 1) {
+        let tabsHTML = '<div class="excel-tabs" style="display: flex; gap: 4px; margin-bottom: 10px; overflow-x: auto;">';
+        workbook.SheetNames.forEach((sheetName, index) => {
+          const isActive = index === 0;
+          tabsHTML += `
+            <button 
+              data-sheet="${sheetName}" 
+              style="
+                padding: 6px 12px; 
+                border: 1px solid #ccc; 
+                border-radius: 4px 4px 0 0;
+                background: ${isActive ? '#e0f0ff' : '#f5f5f5'}; 
+                color: ${isActive ? '#1976d2' : '#333'}; 
+                cursor: pointer;
+                font-size: 12px;
+                border-bottom: ${isActive ? '2px solid #1976d2' : '1px solid #ccc'};
+                margin-bottom: ${isActive ? '-1px' : '0'};
+              "
+            >${sheetName}</button>
+          `;
+        });
+        tabsHTML += '</div>';
+        
+        // Thêm tabs vào đầu HTML
+        const finalHTML = tabsHTML + tableHTML;
+        callback(finalHTML);
+      } else {
+        callback(tableHTML);
+      }
+    } catch (error) {
+      console.error('Error processing Excel file:', error);
+      callback('<p>Error processing Excel file. Please check if the file is valid.</p>');
+    }
+  }
+  
+  importPdfFile(content) {
+    try {
+      // Tải PDF.js nếu chưa có
+      this.loadPdfJs(() => {
+        this.renderPdfAsHtml(content);
+      });
+    } catch (error) {
+      console.error('Error importing PDF:', error);
+      this.showPdfErrorMessage();
+    }
+  }
+  
+  loadPdfJs(callback) {
+    // Kiểm tra nếu PDF.js đã được tải
+    if (typeof pdfjsLib === 'undefined') {
+      // Tải thư viện PDF.js
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+      script.onload = () => {
+        // Cần tải worker sau khi tải thư viện chính
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        callback();
+      };
+      script.onerror = () => {
+        console.error('Failed to load PDF.js library');
+        this.showPdfErrorMessage();
+      };
+      document.head.appendChild(script);
+    } else {
+      callback();
+    }
+  }
+  
+  renderPdfAsHtml(base64Data) {
+    try {
+      // Trích xuất dữ liệu từ base64 Data URL
+      const base64 = base64Data.split(',')[1];
+      const binary = atob(base64);
+      const len = binary.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      
+      // Tạo container để hiển thị PDF
+      const pdfContainer = document.createElement('div');
+      pdfContainer.className = 'pdf-import-container';
+      pdfContainer.style.border = '1px solid #ccc';
+      pdfContainer.style.borderRadius = '4px';
+      pdfContainer.style.padding = '10px';
+      pdfContainer.style.margin = '10px 0';
+      pdfContainer.style.background = '#f9f9f9';
+      
+      // Header với icon PDF
+      const header = document.createElement('div');
+      header.innerHTML = '<i class="fas fa-file-pdf" style="color: #F40F02; margin-right: 8px;"></i> PDF Document';
+      header.style.fontWeight = 'bold';
+      header.style.marginBottom = '8px';
+      header.style.display = 'flex';
+      header.style.alignItems = 'center';
+      pdfContainer.appendChild(header);
+      
+      // Tạo container cho các trang PDF
+      const pagesContainer = document.createElement('div');
+      pagesContainer.className = 'pdf-pages';
+      pagesContainer.style.maxWidth = '100%';
+      pagesContainer.style.overflow = 'hidden';
+      pdfContainer.appendChild(pagesContainer);
+      
+      // Thêm nút "Xem chi tiết"
+      const expandBtn = document.createElement('button');
+      expandBtn.textContent = 'Expand PDF';
+      expandBtn.style.marginTop = '8px';
+      expandBtn.style.padding = '4px 10px';
+      expandBtn.style.background = '#F40F02';
+      expandBtn.style.color = 'white';
+      expandBtn.style.border = 'none';
+      expandBtn.style.borderRadius = '4px';
+      expandBtn.style.cursor = 'pointer';
+      
+      let expanded = false;
+      expandBtn.onclick = () => {
+        expanded = !expanded;
+        pagesContainer.style.maxHeight = expanded ? 'none' : '300px';
+        expandBtn.textContent = expanded ? 'Collapse PDF' : 'Expand PDF';
+      };
+      pdfContainer.appendChild(expandBtn);
+      
+      // Chèn container vào editor
+      const sel = window.getSelection();
+      if (sel.rangeCount && this.editor.contains(sel.anchorNode)) {
+        sel.getRangeAt(0).insertNode(pdfContainer);
+      } else {
+        this.editor.appendChild(pdfContainer);
+      }
+      
+      // Tải PDF với PDF.js
+      pdfjsLib.getDocument(bytes).promise.then(pdf => {
+        const numPages = pdf.numPages;
+        
+        // Giới hạn số trang hiển thị
+        const pagesToRender = Math.min(numPages, 5);
+        pagesContainer.innerHTML = `<div style="margin-bottom: 8px; color: #666;">Total pages: ${numPages}</div>`;
+        
+        // Hiển thị thông báo nếu có nhiều trang
+        if (numPages > 5) {
+          const notice = document.createElement('div');
+          notice.textContent = `Showing first 5 out of ${numPages} pages`;
+          notice.style.margin = '5px 0';
+          notice.style.fontSize = '12px';
+          notice.style.color = '#666';
+          pagesContainer.appendChild(notice);
+        }
+        
+        // Tạo container cho trang
+        const pageContainer = document.createElement('div');
+        pageContainer.style.display = 'flex';
+        pageContainer.style.flexDirection = 'column';
+        pageContainer.style.gap = '10px';
+        pageContainer.style.maxHeight = '300px';
+        pageContainer.style.overflowY = 'auto';
+        pagesContainer.appendChild(pageContainer);
+        
+        // Render từng trang
+        for (let i = 1; i <= pagesToRender; i++) {
+          pdf.getPage(i).then(page => {
+            const scale = 1.5;
+            const viewport = page.getViewport({ scale });
+            
+            // Tạo canvas cho trang
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            canvas.style.maxWidth = '100%';
+            canvas.style.height = 'auto';
+            canvas.style.border = '1px solid #ddd';
+            canvas.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+            
+            // Thêm label trang
+            const pageWrapper = document.createElement('div');
+            pageWrapper.style.position = 'relative';
+            const pageLabel = document.createElement('div');
+            pageLabel.textContent = `Page ${i}`;
+            pageLabel.style.position = 'absolute';
+            pageLabel.style.top = '5px';
+            pageLabel.style.right = '5px';
+            pageLabel.style.background = 'rgba(255,255,255,0.8)';
+            pageLabel.style.padding = '2px 6px';
+            pageLabel.style.borderRadius = '3px';
+            pageLabel.style.fontSize = '12px';
+            pageWrapper.appendChild(canvas);
+            pageWrapper.appendChild(pageLabel);
+            pageContainer.appendChild(pageWrapper);
+            
+            // Render trang vào canvas
+            const renderContext = {
+              canvasContext: context,
+              viewport: viewport
+            };
+            page.render(renderContext);
+            
+            // Thêm text layer (chỉ hiển thị, không sao chép được)
+            page.getTextContent().then(textContent => {
+              const textLayer = document.createElement('div');
+              textLayer.style.position = 'absolute';
+              textLayer.style.left = '0';
+              textLayer.style.top = '0';
+              textLayer.style.right = '0';
+              textLayer.style.bottom = '0';
+              textLayer.style.overflow = 'hidden';
+              textLayer.style.color = 'transparent';
+              textLayer.style.pointerEvents = 'none';
+              pageWrapper.appendChild(textLayer);
+              
+              pdfjsLib.renderTextLayer({
+                textContent: textContent,
+                container: textLayer,
+                viewport: viewport,
+                textDivs: []
+              });
+            });
+          });
+        }
+      }).catch(error => {
+        console.error('Error rendering PDF:', error);
+        pagesContainer.innerHTML = '<p style="color: #dc3545;">Error rendering PDF. The file may be corrupted or password protected.</p>';
+      });
+      
+    } catch (error) {
+      console.error('Error processing PDF:', error);
+      this.showPdfErrorMessage();
+    }
+  }
+  
+  showPdfErrorMessage() {
+    const pdfContainer = document.createElement('div');
+    pdfContainer.className = 'pdf-import-container';
+    pdfContainer.style.border = '1px solid #ccc';
+    pdfContainer.style.borderRadius = '4px';
+    pdfContainer.style.padding = '10px';
+    pdfContainer.style.margin = '10px 0';
+    pdfContainer.style.background = '#f9f9f9';
+    
+    // Header với icon PDF
+    const header = document.createElement('div');
+    header.innerHTML = '<i class="fas fa-file-pdf" style="color: #F40F02; margin-right: 8px;"></i> PDF File';
+    header.style.fontWeight = 'bold';
+    header.style.marginBottom = '8px';
+    header.style.display = 'flex';
+    header.style.alignItems = 'center';
+    pdfContainer.appendChild(header);
+    
+    // Thông báo lỗi
+    const info = document.createElement('p');
+    info.textContent = 'Could not render PDF. Please check if the file is valid and not password protected.';
+    info.style.margin = '0';
+    info.style.color = '#dc3545';
+    pdfContainer.appendChild(info);
+    
+    // Chèn vào editor
+    const sel = window.getSelection();
+    if (sel.rangeCount && this.editor.contains(sel.anchorNode)) {
+      sel.getRangeAt(0).insertNode(pdfContainer);
+    } else {
+      this.editor.appendChild(pdfContainer);
+    }
+  }
+  
+  importDocFile(content) {
+    try {
+      // Tải mammoth.js nếu chưa có
+      this.loadMammoth(() => {
+        this.convertDocToHtml(content);
+      });
+    } catch (error) {
+      console.error('Error importing Word document:', error);
+      this.showDocErrorMessage();
+    }
+  }
+  
+  loadMammoth(callback) {
+    // Kiểm tra nếu mammoth.js đã được tải
+    if (typeof mammoth === 'undefined') {
+      // Tải thư viện mammoth.js
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';
+      script.onload = callback;
+      script.onerror = () => {
+        console.error('Failed to load mammoth.js library');
+        this.showDocErrorMessage();
+      };
+      document.head.appendChild(script);
+    } else {
+      callback();
+    }
+  }
+  
+  convertDocToHtml(base64Data) {
+    try {
+      // Trích xuất dữ liệu từ base64 Data URL
+      const base64 = base64Data.split(',')[1];
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      
+      // Chuyển đổi DOCX sang HTML bằng mammoth.js
+      mammoth.convertToHtml({ arrayBuffer: bytes.buffer })
+        .then(result => {
+          const html = result.value;
+          const warnings = result.messages;
+          
+          if (warnings.length > 0) {
+            console.warn('Warnings when converting Word document:', warnings);
+          }
+          
+          // Tạo container cho nội dung Word
+          const docContainer = document.createElement('div');
+          docContainer.className = 'doc-import-container';
+          docContainer.style.border = '1px solid #ccc';
+          docContainer.style.borderRadius = '4px';
+          docContainer.style.padding = '15px';
+          docContainer.style.margin = '10px 0';
+          docContainer.style.background = '#fff';
+          
+          // Header với icon Word
+          const header = document.createElement('div');
+          header.innerHTML = '<i class="fas fa-file-word" style="color: #2B579A; margin-right: 8px;"></i> Word Document';
+          header.style.fontWeight = 'bold';
+          header.style.marginBottom = '12px';
+          header.style.display = 'flex';
+          header.style.alignItems = 'center';
+          
+          // Container cho nội dung HTML
+          const contentContainer = document.createElement('div');
+          contentContainer.className = 'doc-content';
+          contentContainer.innerHTML = html;
+          
+          // Áp dụng style cho nội dung
+          contentContainer.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(heading => {
+            heading.style.marginTop = '1em';
+            heading.style.marginBottom = '0.5em';
+            heading.style.color = '#333';
+          });
+          
+          contentContainer.querySelectorAll('p').forEach(p => {
+            p.style.marginBottom = '0.8em';
+            p.style.lineHeight = '1.6';
+          });
+          
+          contentContainer.querySelectorAll('ul, ol').forEach(list => {
+            list.style.marginBottom = '1em';
+            list.style.paddingLeft = '2em';
+          });
+          
+          contentContainer.querySelectorAll('li').forEach(item => {
+            item.style.marginBottom = '0.5em';
+          });
+          
+          contentContainer.querySelectorAll('table').forEach(table => {
+            table.style.borderCollapse = 'collapse';
+            table.style.width = '100%';
+            table.style.marginBottom = '1em';
+            
+            // Style cho các cell trong bảng
+            table.querySelectorAll('td, th').forEach(cell => {
+              cell.style.border = '1px solid #ddd';
+              cell.style.padding = '8px';
+            });
+            
+            // Style cho header bảng
+            table.querySelectorAll('th').forEach(th => {
+              th.style.backgroundColor = '#f2f2f2';
+              th.style.fontWeight = 'bold';
+            });
+          });
+          
+          // Thêm các phần tử vào container
+          docContainer.appendChild(header);
+          docContainer.appendChild(contentContainer);
+          
+          // Chèn vào editor
+          const sel = window.getSelection();
+          if (sel.rangeCount && this.editor.contains(sel.anchorNode)) {
+            sel.getRangeAt(0).insertNode(docContainer);
+          } else {
+            this.editor.appendChild(docContainer);
+          }
+        })
+        .catch(error => {
+          console.error('Error converting Word document:', error);
+          this.showDocErrorMessage();
+        });
+    } catch (error) {
+      console.error('Error processing Word document:', error);
+      this.showDocErrorMessage();
+    }
+  }
+  
+  showDocErrorMessage() {
+    const docContainer = document.createElement('div');
+    docContainer.className = 'doc-import-container';
+    docContainer.style.border = '1px solid #ccc';
+    docContainer.style.borderRadius = '4px';
+    docContainer.style.padding = '10px';
+    docContainer.style.margin = '10px 0';
+    docContainer.style.background = '#f9f9f9';
+    
+    // Header với icon Word
+    const header = document.createElement('div');
+    header.innerHTML = '<i class="fas fa-file-word" style="color: #2B579A; margin-right: 8px;"></i> Word Document';
+    header.style.fontWeight = 'bold';
+    header.style.marginBottom = '8px';
+    header.style.display = 'flex';
+    header.style.alignItems = 'center';
+    docContainer.appendChild(header);
+    
+    // Thông báo lỗi
+    const info = document.createElement('p');
+    info.textContent = 'Could not import Word document. Please check if the file is a valid .docx file.';
+    info.style.margin = '0';
+    info.style.color = '#dc3545';
+    docContainer.appendChild(info);
+    
+    // Chèn vào editor
+    const sel = window.getSelection();
+    if (sel.rangeCount && this.editor.contains(sel.anchorNode)) {
+      sel.getRangeAt(0).insertNode(docContainer);
+    } else {
+      this.editor.appendChild(docContainer);
+    }
   }
 
   showImgResizeHandles(img) {
@@ -1841,7 +3013,9 @@ export class Editor {
       heading: '<i class="fas fa-heading"></i>',
       list: '<i class="fas fa-list-ul"></i>',
       quote: '<i class="fas fa-quote-left"></i>',
-      code: '<i class="fas fa-code"></i>'
+      code: '<i class="fas fa-code"></i>',
+      video: '<i class="fas fa-video"></i>',
+      import: '<i class="fas fa-file-import"></i>'
     };
     features.forEach(f => {
       const btn = document.createElement('button');
@@ -1915,6 +3089,10 @@ export class Editor {
       document.execCommand('formatBlock', false, 'BLOCKQUOTE');
     } else if (type === 'code') {
       document.execCommand('formatBlock', false, 'PRE');
+    } else if (type === 'video') {
+      this.toolbarBtns.video && this.toolbarBtns.video.click();
+    } else if (type === 'import') {
+      this.toolbarBtns.import && this.toolbarBtns.import.click();
     }
   }
 }
