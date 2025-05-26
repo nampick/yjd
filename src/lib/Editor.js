@@ -29,6 +29,12 @@ export class Editor {
     this.options.width = Math.min(this.options.width, this.options.maxWidth);
     this.options.height = Math.min(this.options.height, this.options.maxHeight);
 
+    // Initialize theme from localStorage or use default
+    const savedTheme = localStorage.getItem('richEditorTheme');
+    if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
+      this.options.theme = savedTheme;
+    }
+
     this.defaultContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <h1 style="color: #2c3e50; margin-bottom: 20px;">Team Meeting Invitation</h1>
@@ -113,6 +119,7 @@ export class Editor {
     this.root = typeof selector === 'string' ? document.querySelector(selector) : selector;
     this.toolbarBtns = {};
     this.statusbarEls = {};
+    this.dropdownMenus = {}; // Store dropdown menu references
     this.init();
   }
 
@@ -136,6 +143,10 @@ export class Editor {
     this.wrapper.style.display = 'flex';
     this.wrapper.style.flexDirection = 'column';
     this.wrapper.style.boxSizing = 'border-box';
+
+    // Menu bar (new dropdown menu bar above toolbar)
+    this.menuBar = this.createMenuBar();
+    this.wrapper.appendChild(this.menuBar);
 
     // Toolbar
     this.toolbar = this.createToolbar();
@@ -224,6 +235,52 @@ export class Editor {
 
     // Thêm block toolbar
     this.createBlockToolbar();
+
+    // Apply initial theme
+    this.applyTheme();
+    
+    // Setup content observer to update theme when content changes
+    this.setupContentObserver();
+  }
+
+  setupContentObserver() {
+    if (!this.editor) return;
+    
+    // Create observer to watch for content changes
+    this.contentObserver = new MutationObserver((mutations) => {
+      let shouldUpdate = false;
+      
+      mutations.forEach(mutation => {
+        // Check if new nodes were added with inline styles
+        if (mutation.type === 'childList') {
+          mutation.addedNodes.forEach(node => {
+            if (node.nodeType === 1) { // Element node
+              if (node.hasAttribute && node.hasAttribute('style')) {
+                shouldUpdate = true;
+              }
+              // Check child elements
+              const styledElements = node.querySelectorAll && node.querySelectorAll('*[style]');
+              if (styledElements && styledElements.length > 0) {
+                shouldUpdate = true;
+              }
+            }
+          });
+        }
+      });
+      
+      // Update theme for new content
+      if (shouldUpdate) {
+        setTimeout(() => this.updateEditorContentTheme(), 100);
+      }
+    });
+    
+    // Start observing
+    this.contentObserver.observe(this.editor, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['style']
+    });
   }
 
   updateEditorAreaHeight() {
@@ -514,8 +571,38 @@ export class Editor {
 
     // Thêm nút View Source
     const viewSourceBtn = this.createBtn('<i class="fas fa-code"></i>', 'View Source', 'viewSource');
+    viewSourceBtn.onclick = () => this.toggleSourceView();
     toolbar.appendChild(viewSourceBtn);
-    this.toolbarBtns.viewSource = viewSourceBtn;
+
+    // Theme toggle button
+    const themeBtn = document.createElement('button');
+    themeBtn.className = 'editor-btn theme-toggle';
+    themeBtn.innerHTML = this.options.theme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    themeBtn.title = this.options.theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme';
+    themeBtn.style.padding = '8px 12px';
+    themeBtn.style.border = '1px solid #e0e0e0';
+    themeBtn.style.borderRadius = '6px';
+    themeBtn.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#ffffff';
+    themeBtn.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#333333';
+    themeBtn.style.cursor = 'pointer';
+    themeBtn.style.fontSize = '14px';
+    themeBtn.style.transition = 'all 0.2s ease';
+    themeBtn.style.marginLeft = '8px';
+
+    themeBtn.onclick = () => {
+      this.toggleTheme();
+    };
+
+    themeBtn.onmouseover = () => {
+      themeBtn.style.background = this.options.theme === 'dark' ? '#404040' : '#f5f5f5';
+    };
+
+    themeBtn.onmouseout = () => {
+      themeBtn.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#ffffff';
+    };
+
+    toolbar.appendChild(themeBtn);
+    this.themeToggleBtn = themeBtn;
 
     // Thêm separator
     toolbar.appendChild(this.createSeparator());
@@ -1108,9 +1195,61 @@ export class Editor {
         sel.addRange(range);
       }
     });
+    function checkCaretPosition() {
+      const selection = window.getSelection();
+      if (!selection.rangeCount) {
+        console.log("Không có con trỏ nào được chọn.");
+        return;
+      }
 
+      const range = selection.getRangeAt(0);
+      const container = range.startContainer;
+
+      // Tìm thẻ chứa con trỏ (thường là node cha chứa text)
+      let parentElement = container.nodeType === 1 ? container : container.parentElement;
+
+      // Tìm phần tử cha gần nhất là thẻ p, h1-h6, pre, blockquote
+      const validTags = ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'PRE', 'BLOCKQUOTE'];
+      while (parentElement && !validTags.includes(parentElement.tagName)) {
+        parentElement = parentElement.parentElement;
+      }
+
+      if (!parentElement) {
+        console.log("Con trỏ không nằm trong các thẻ hợp lệ.");
+        return;
+      }
+
+      // Tính độ dài tổng của text trong thẻ
+      const totalText = parentElement.innerText;
+      const caretOffset = getCaretCharacterOffsetWithin(parentElement);
+
+      if (caretOffset === 0) {
+        console.log(`Con trỏ đang ở **ĐẦU** của thẻ <${parentElement.tagName.toLowerCase()}>.`);
+      } else if (caretOffset >= totalText.length) {
+        console.log(`Con trỏ đang ở **CUỐI** của thẻ <${parentElement.tagName.toLowerCase()}>.`);
+      } else {
+        console.log(`Con trỏ đang ở **GIỮA** của thẻ <${parentElement.tagName.toLowerCase()}>.`);
+      }
+    }
+
+    // Hàm phụ để lấy offset con trỏ tương đối trong element
+    function getCaretCharacterOffsetWithin(element) {
+      const selection = window.getSelection();
+      let caretOffset = 0;
+
+      if (selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const preCaretRange = range.cloneRange();
+        preCaretRange.selectNodeContents(element);
+        preCaretRange.setEnd(range.endContainer, range.endOffset);
+        caretOffset = preCaretRange.toString().length;
+      }
+
+      return caretOffset;
+    }
     this.editor.addEventListener('keydown', e => {
       if (e.key === 'Enter') {
+        checkCaretPosition();
         e.preventDefault();
         const sel = window.getSelection();
         if (sel.rangeCount > 0) {
@@ -1832,7 +1971,7 @@ export class Editor {
     overlay.style.left = 0;
     overlay.style.width = '100vw';
     overlay.style.height = '100vh';
-    overlay.style.background = 'rgba(0,0,0,0.08)';
+    overlay.style.background = this.options.theme === 'dark' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.08)';
     overlay.style.zIndex = 9998;
     overlay.onclick = () => { close(); };
 
@@ -1842,10 +1981,10 @@ export class Editor {
     tooltip.style.top = '120px';
     tooltip.style.left = '50%';
     tooltip.style.transform = 'translateX(-50%)';
-    tooltip.style.background = '#fff';
-    tooltip.style.border = '1px solid #ccc';
+    tooltip.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#fff';
+    tooltip.style.border = this.options.theme === 'dark' ? '1px solid #404040' : '1px solid #ccc';
     tooltip.style.borderRadius = '10px';
-    tooltip.style.boxShadow = '0 4px 24px rgba(0,0,0,0.18)';
+    tooltip.style.boxShadow = this.options.theme === 'dark' ? '0 4px 24px rgba(0,0,0,0.3)' : '0 4px 24px rgba(0,0,0,0.18)';
     tooltip.style.padding = '20px 24px 16px 24px';
     tooltip.style.zIndex = 9999;
     tooltip.style.display = 'flex';
@@ -1853,6 +1992,8 @@ export class Editor {
     tooltip.style.gap = '12px';
     tooltip.style.minWidth = '320px';
     tooltip.style.maxWidth = '90vw';
+    tooltip.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#333333';
+    tooltip.classList.add('editor-tooltip');
 
     if (title) {
       const h = document.createElement('div');
@@ -1883,10 +2024,14 @@ export class Editor {
         btn.innerHTML = `${option.icon} ${option.label}`;
         btn.dataset.type = option.id;
         btn.style.padding = '8px 12px';
-        btn.style.border = '1px solid #eee';
+        btn.style.border = this.options.theme === 'dark' ? '1px solid #404040' : '1px solid #eee';
         btn.style.borderRadius = '6px';
-        btn.style.background = option.id === 'excel' ? '#e0f0ff' : '#fff';
-        btn.style.color = option.id === 'excel' ? '#1976d2' : '#333';
+        btn.style.background = option.id === 'excel' ? 
+          (this.options.theme === 'dark' ? '#2a4a6b' : '#e0f0ff') : 
+          (this.options.theme === 'dark' ? '#2a2a2a' : '#fff');
+        btn.style.color = option.id === 'excel' ? 
+          (this.options.theme === 'dark' ? '#66ccff' : '#1976d2') : 
+          (this.options.theme === 'dark' ? '#e0e0e0' : '#333');
         btn.style.cursor = 'pointer';
         btn.style.fontSize = '14px';
         btn.style.display = 'flex';
@@ -1898,8 +2043,12 @@ export class Editor {
           options.forEach(opt => {
             const el = optionsDiv.querySelector(`[data-type="${opt.id}"]`);
             if (el) {
-              el.style.background = opt.id === option.id ? '#e0f0ff' : '#fff';
-              el.style.color = opt.id === option.id ? '#1976d2' : '#333';
+              el.style.background = opt.id === option.id ? 
+                (this.options.theme === 'dark' ? '#2a4a6b' : '#e0f0ff') : 
+                (this.options.theme === 'dark' ? '#2a2a2a' : '#fff');
+              el.style.color = opt.id === option.id ? 
+                (this.options.theme === 'dark' ? '#66ccff' : '#1976d2') : 
+                (this.options.theme === 'dark' ? '#e0e0e0' : '#333');
             }
           });
           
@@ -1922,9 +2071,11 @@ export class Editor {
     input.placeholder = placeholder;
     input.style.padding = '10px';
     input.style.fontSize = '16px';
-    input.style.border = '1px solid #ccc';
+    input.style.border = this.options.theme === 'dark' ? '1px solid #404040' : '1px solid #ccc';
     input.style.borderRadius = '5px';
     input.style.outline = 'none';
+    input.style.background = this.options.theme === 'dark' ? '#1e1e1e' : '#ffffff';
+    input.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#333333';
     tooltip.appendChild(input);
 
     let fileInput, fileInputWrapper, fileLabel, filePreview;
@@ -2040,7 +2191,7 @@ export class Editor {
     const confirmBtn = document.createElement('button');
     confirmBtn.textContent = confirmText;
     confirmBtn.style.padding = '8px 18px';
-    confirmBtn.style.background = '#007bff';
+    confirmBtn.style.background = this.options.theme === 'dark' ? '#0d7377' : '#007bff';
     confirmBtn.style.color = '#fff';
     confirmBtn.style.border = 'none';
     confirmBtn.style.borderRadius = '4px';
@@ -2050,8 +2201,8 @@ export class Editor {
     const closeBtn = document.createElement('button');
     closeBtn.textContent = 'Đóng';
     closeBtn.style.padding = '8px 18px';
-    closeBtn.style.background = '#eee';
-    closeBtn.style.color = '#333';
+    closeBtn.style.background = this.options.theme === 'dark' ? '#404040' : '#eee';
+    closeBtn.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#333';
     closeBtn.style.border = 'none';
     closeBtn.style.borderRadius = '4px';
     closeBtn.style.cursor = 'pointer';
@@ -4191,7 +4342,7 @@ export class Editor {
     overlay.style.left = '0';
     overlay.style.width = '100vw';
     overlay.style.height = '100vh';
-    overlay.style.background = 'rgba(0,0,0,0.08)';
+    overlay.style.background = this.options.theme === 'dark' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.08)';
     overlay.style.zIndex = '9998';
     overlay.onclick = () => { this.closeTagsPopup(); };
 
@@ -4774,25 +4925,7 @@ export class Editor {
       // Tạo div container cho template
       const templateDiv = document.createElement('div');
       templateDiv.innerHTML = templateContent;
-      templateDiv.style.margin = '20px 0';
-      templateDiv.style.border = '1px dashed #d1d5db';
-      templateDiv.style.borderRadius = '8px';
-      templateDiv.style.padding = '16px';
-      templateDiv.style.position = 'relative';
-      
-      // Thêm label cho template
-      const label = document.createElement('div');
-      label.textContent = 'Template';
-      label.style.position = 'absolute';
-      label.style.top = '-12px';
-      label.style.left = '12px';
-      label.style.background = '#fff';
-      label.style.padding = '2px 8px';
-      label.style.fontSize = '12px';
-      label.style.color = '#6b7280';
-      label.style.fontWeight = 'bold';
-      templateDiv.appendChild(label);
-      
+      templateDiv.style.position = 'relative';    
       sel.getRangeAt(0).insertNode(templateDiv);
       
       // Đặt cursor sau template
@@ -4819,6 +4952,1128 @@ export class Editor {
       this.templatesOverlay.remove();
       this.templatesOverlay = null;
     }
+  }
+
+  // Toggle theme between light and dark
+  toggleTheme() {
+    this.options.theme = this.options.theme === 'dark' ? 'light' : 'dark';
+    
+    // Save theme preference to localStorage
+    localStorage.setItem('richEditorTheme', this.options.theme);
+    
+    // Apply theme to the editor
+    this.applyTheme();
+    
+    // Update theme toggle button
+    this.updateThemeToggleButton();
+  }
+
+  // Apply theme styles to the editor and components
+  applyTheme() {
+    const isDark = this.options.theme === 'dark';
+    
+    // Set theme attribute on body to apply CSS variables
+    document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    
+    // Apply theme to specific elements that need JS styling
+    if (this.container) {
+      this.container.style.background = isDark ? '#1a1a1a' : '#ffffff';
+      this.container.style.color = isDark ? '#e0e0e0' : '#333333';
+      this.container.style.border = isDark ? '1px solid #404040' : '1px solid #e0e0e0';
+    }
+
+    // Apply theme to toolbar
+    if (this.toolbar) {
+      this.toolbar.style.background = isDark ? '#2a2a2a' : '#f8f9fa';
+      this.toolbar.style.borderBottom = isDark ? '1px solid #404040' : '1px solid #e0e0e0';
+    }
+
+    // Apply theme to editor area
+    if (this.editor) {
+      this.editor.style.background = isDark ? '#1e1e1e' : '#ffffff';
+      this.editor.style.color = isDark ? '#e0e0e0' : '#333333';
+    }
+
+    // Apply theme to status bar
+    if (this.statusbar) {
+      this.statusbar.style.background = isDark ? '#2a2a2a' : '#f8f9fa';
+      this.statusbar.style.borderTop = isDark ? '1px solid #404040' : '1px solid #e0e0e0';
+      this.statusbar.style.color = isDark ? '#b0b0b0' : '#666666';
+    }
+
+    // Update all toolbar buttons
+    this.updateToolbarButtonsTheme();
+    
+    // Update dropdown selectors
+    this.updateSelectorsTheme();
+
+    // Apply theme to dynamic content that CSS can't reach
+    this.updateDynamicElements();
+    
+    // Update inline styles in editor content
+    this.updateEditorContentTheme();
+  }
+
+  // Update theme toggle button appearance
+  updateThemeToggleButton() {
+    if (!this.themeToggleBtn) return;
+    
+    const isDark = this.options.theme === 'dark';
+    
+    this.themeToggleBtn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    this.themeToggleBtn.title = isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme';
+    this.themeToggleBtn.style.background = isDark ? '#2a2a2a' : '#ffffff';
+    this.themeToggleBtn.style.color = isDark ? '#e0e0e0' : '#333333';
+    this.themeToggleBtn.style.border = isDark ? '1px solid #404040' : '1px solid #e0e0e0';
+  }
+
+  // Update all toolbar buttons theme
+  updateToolbarButtonsTheme() {
+    const isDark = this.options.theme === 'dark';
+    const buttons = this.toolbar.querySelectorAll('.editor-btn');
+    
+    buttons.forEach(btn => {
+      if (btn === this.themeToggleBtn) return; // Skip theme button, it has its own styling
+      
+      btn.style.background = isDark ? '#2a2a2a' : '#ffffff';
+      btn.style.color = isDark ? '#e0e0e0' : '#333333';
+      btn.style.border = isDark ? '1px solid #404040' : '1px solid #e0e0e0';
+      
+      // Update hover effects
+      btn.onmouseover = () => {
+        btn.style.background = isDark ? '#404040' : '#f5f5f5';
+      };
+      
+      btn.onmouseout = () => {
+        const isActive = btn.classList.contains('active');
+        if (isActive) {
+          btn.style.background = isDark ? '#0f4c75' : '#007bff';
+          btn.style.color = '#ffffff';
+        } else {
+          btn.style.background = isDark ? '#2a2a2a' : '#ffffff';
+          btn.style.color = isDark ? '#e0e0e0' : '#333333';
+        }
+      };
+    });
+  }
+
+  // Update dropdown selectors theme
+  updateSelectorsTheme() {
+    const isDark = this.options.theme === 'dark';
+    
+    // Update font selector
+    if (this.fontSelector) {
+      this.fontSelector.style.background = isDark ? '#2a2a2a' : '#ffffff';
+      this.fontSelector.style.color = isDark ? '#e0e0e0' : '#333333';
+      this.fontSelector.style.border = isDark ? '1px solid #404040' : '1px solid #e0e0e0';
+      
+      // Add hover effects
+      this.fontSelector.onmouseover = () => {
+        this.fontSelector.style.background = isDark ? '#404040' : '#f5f5f5';
+      };
+      
+      this.fontSelector.onmouseout = () => {
+        this.fontSelector.style.background = isDark ? '#2a2a2a' : '#ffffff';
+      };
+    }
+
+    // Update heading selector
+    if (this.headingSelector) {
+      this.headingSelector.style.background = isDark ? '#2a2a2a' : '#ffffff';
+      this.headingSelector.style.color = isDark ? '#e0e0e0' : '#333333';
+      this.headingSelector.style.border = isDark ? '1px solid #404040' : '1px solid #e0e0e0';
+      
+      // Add hover effects
+      this.headingSelector.onmouseover = () => {
+        this.headingSelector.style.background = isDark ? '#404040' : '#f5f5f5';
+      };
+      
+      this.headingSelector.onmouseout = () => {
+        this.headingSelector.style.background = isDark ? '#2a2a2a' : '#ffffff';
+      };
+    }
+
+    // Update font size input
+    if (this.fontSizeInput) {
+      this.fontSizeInput.style.background = isDark ? '#2a2a2a' : '#ffffff';
+      this.fontSizeInput.style.color = isDark ? '#e0e0e0' : '#333333';
+      this.fontSizeInput.style.border = isDark ? '1px solid #404040' : '1px solid #e0e0e0';
+      
+      // Add focus effects for input
+      this.fontSizeInput.onfocus = () => {
+        this.fontSizeInput.style.background = isDark ? '#404040' : '#f5f5f5';
+        this.fontSizeInput.style.borderColor = isDark ? '#66ccff' : '#007bff';
+      };
+      
+      this.fontSizeInput.onblur = () => {
+        this.fontSizeInput.style.background = isDark ? '#2a2a2a' : '#ffffff';
+        this.fontSizeInput.style.borderColor = isDark ? '#404040' : '#e0e0e0';
+      };
+    }
+
+    // Update line height selector
+    if (this.lineHeightSelector) {
+      this.lineHeightSelector.style.background = isDark ? '#2a2a2a' : '#ffffff';
+      this.lineHeightSelector.style.color = isDark ? '#e0e0e0' : '#333333';
+      this.lineHeightSelector.style.border = isDark ? '1px solid #404040' : '1px solid #e0e0e0';
+      
+      // Add hover effects
+      this.lineHeightSelector.onmouseover = () => {
+        this.lineHeightSelector.style.background = isDark ? '#404040' : '#f5f5f5';
+      };
+      
+      this.lineHeightSelector.onmouseout = () => {
+        this.lineHeightSelector.style.background = isDark ? '#2a2a2a' : '#ffffff';
+      };
+    }
+
+    // Update capitalization selector
+    if (this.capitalizationSelector) {
+      this.capitalizationSelector.style.background = isDark ? '#2a2a2a' : '#ffffff';
+      this.capitalizationSelector.style.color = isDark ? '#e0e0e0' : '#333333';
+      this.capitalizationSelector.style.border = isDark ? '1px solid #404040' : '1px solid #e0e0e0';
+      
+      // Add hover effects
+      this.capitalizationSelector.onmouseover = () => {
+        this.capitalizationSelector.style.background = isDark ? '#404040' : '#f5f5f5';
+      };
+      
+      this.capitalizationSelector.onmouseout = () => {
+        this.capitalizationSelector.style.background = isDark ? '#2a2a2a' : '#ffffff';
+      };
+    }
+
+    // Update any other dropdown elements that might exist
+    const allSelectors = this.toolbar.querySelectorAll('select, input[type="number"], .font-select, .block-format-select');
+    allSelectors.forEach(selector => {
+      // Skip if already handled above
+      if (selector === this.fontSelector || selector === this.headingSelector || 
+          selector === this.fontSizeInput || selector === this.lineHeightSelector || 
+          selector === this.capitalizationSelector) {
+        return;
+      }
+      
+      selector.style.background = isDark ? '#2a2a2a' : '#ffffff';
+      selector.style.color = isDark ? '#e0e0e0' : '#333333';
+      selector.style.border = isDark ? '1px solid #404040' : '1px solid #e0e0e0';
+      
+      // Add appropriate hover/focus effects
+      if (selector.tagName.toLowerCase() === 'select') {
+        selector.onmouseover = () => {
+          selector.style.background = isDark ? '#404040' : '#f5f5f5';
+        };
+        
+        selector.onmouseout = () => {
+          selector.style.background = isDark ? '#2a2a2a' : '#ffffff';
+        };
+      } else if (selector.tagName.toLowerCase() === 'input') {
+        selector.onfocus = () => {
+          selector.style.background = isDark ? '#404040' : '#f5f5f5';
+          selector.style.borderColor = isDark ? '#66ccff' : '#007bff';
+        };
+        
+        selector.onblur = () => {
+          selector.style.background = isDark ? '#2a2a2a' : '#ffffff';
+          selector.style.borderColor = isDark ? '#404040' : '#e0e0e0';
+        };
+      }
+    });
+  }
+
+  // Update dynamic elements that CSS can't reach
+  updateDynamicElements() {
+    const isDark = this.options.theme === 'dark';
+    
+    // Update any existing tooltips
+    const tooltips = document.querySelectorAll('.editor-tooltip, #custom-tooltip');
+    tooltips.forEach(tooltip => {
+      tooltip.style.background = isDark ? '#2a2a2a' : '#ffffff';
+      tooltip.style.border = isDark ? '1px solid #404040' : '1px solid #ccc';
+      tooltip.style.color = isDark ? '#e0e0e0' : '#333333';
+      tooltip.style.boxShadow = isDark ? '0 4px 24px rgba(0,0,0,0.3)' : '0 4px 24px rgba(0,0,0,0.18)';
+    });
+
+    // Update overlay backgrounds
+    const overlays = document.querySelectorAll('#custom-tooltip-overlay, #tags-popup-overlay, #templates-popup-overlay');
+    overlays.forEach(overlay => {
+      overlay.style.background = isDark ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.08)';
+    });
+
+    // Update any existing popups
+    const popups = document.querySelectorAll('#tags-popup, #templates-popup');
+    popups.forEach(popup => {
+      popup.style.background = isDark ? '#2a2a2a' : '#ffffff';
+      popup.style.border = isDark ? '1px solid #404040' : '1px solid #e5e7eb';
+      popup.style.color = isDark ? '#e0e0e0' : '#333333';
+      popup.style.boxShadow = isDark ? '0 10px 25px rgba(0,0,0,0.3)' : '0 10px 25px rgba(0,0,0,0.15)';
+    });
+
+    // Update popup headers
+    const popupHeaders = document.querySelectorAll('#tags-popup .header, #templates-popup .header');
+    popupHeaders.forEach(header => {
+      header.style.borderBottom = isDark ? '1px solid #404040' : '1px solid #e5e7eb';
+    });
+
+    // Update close buttons in popups
+    const closeButtons = document.querySelectorAll('#tags-popup button[onclick*="close"], #templates-popup button[onclick*="close"]');
+    closeButtons.forEach(btn => {
+      btn.style.color = isDark ? '#b0b0b0' : '#6b7280';
+    });
+
+    // Update category buttons in tags popup
+    const categoryButtons = document.querySelectorAll('#tags-popup .category-btn');
+    categoryButtons.forEach(btn => {
+      const span = btn.querySelector('span:last-child');
+      if (span) {
+        span.style.color = isDark ? '#e0e0e0' : '#374151';
+      }
+    });
+
+    // Update block toolbar if exists
+    if (this.blockToolbar) {
+      this.blockToolbar.style.background = isDark ? '#2a2a2a' : '#ffffff';
+      this.blockToolbar.style.boxShadow = isDark ? '0 4px 24px rgba(0,0,0,0.4)' : '0 4px 24px rgba(0,0,0,0.13)';
+      
+      // Update arrow
+      const arrow = this.blockToolbar.querySelector('.block-toolbar-arrow');
+      if (arrow) {
+        arrow.style.borderRight = isDark ? '12px solid #2a2a2a' : '12px solid #fff';
+        arrow.style.filter = isDark ? 'drop-shadow(-2px 2px 2px rgba(0,0,0,0.4))' : 'drop-shadow(-2px 2px 2px rgba(0,0,0,0.08))';
+      }
+
+      // Update buttons in block toolbar
+      const buttons = this.blockToolbar.querySelectorAll('button');
+      buttons.forEach(btn => {
+        btn.style.background = isDark ? '#2a2a2a' : '#fff';
+        btn.style.color = isDark ? '#e0e0e0' : '#374151';
+      });
+    }
+
+    // Update color picker if exists
+    if (this.colorPicker) {
+      this.colorPicker.style.background = isDark ? '#2a2a2a' : '#fff';
+      this.colorPicker.style.border = isDark ? '1px solid #404040' : '1px solid #ccc';
+      this.colorPicker.style.boxShadow = isDark ? '0 2px 8px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.12)';
+      
+      // Update custom button in color picker
+      const customBtn = this.colorPicker.querySelector('button');
+      if (customBtn && customBtn.textContent === 'Custom') {
+        customBtn.style.background = isDark ? '#404040' : '#f4f6fa';
+        customBtn.style.color = isDark ? '#66ccff' : '#1976d2';
+        customBtn.style.border = isDark ? '1px solid #404040' : '1px solid #eee';
+      }
+    }
+  }
+
+  // Update inline styles in editor content for theme compatibility
+  updateEditorContentTheme() {
+    const isDark = this.options.theme === 'dark';
+    
+    if (!this.editor) return;
+    
+    // Define color mappings
+    const colorMappings = {
+      // Dark colors to light for dark theme
+      '#1f2937': isDark ? '#e0e0e0' : '#1f2937',
+      '#374151': isDark ? '#e0e0e0' : '#374151', 
+      '#111827': isDark ? '#f0f0f0' : '#111827',
+      '#6b7280': isDark ? '#b0b0b0' : '#6b7280',
+      '#333333': isDark ? '#e0e0e0' : '#333333',
+      '#000000': isDark ? '#f0f0f0' : '#000000',
+      // Light backgrounds to dark for dark theme
+      '#ffffff': isDark ? '#2a2a2a' : '#ffffff',
+      '#f9fafb': isDark ? '#2a2a2a' : '#f9fafb',
+      '#f3f4f6': isDark ? '#2a2a2a' : '#f3f4f6',
+      '#f8f9fa': isDark ? '#2a2a2a' : '#f8f9fa',
+      // Borders
+      '#e5e7eb': isDark ? '#404040' : '#e5e7eb',
+      '#d1d5db': isDark ? '#404040' : '#d1d5db'
+    };
+    
+    // Get all elements with inline styles in editor
+    const elementsWithInlineStyles = this.editor.querySelectorAll('*[style]');
+    
+    elementsWithInlineStyles.forEach(element => {
+      const style = element.getAttribute('style');
+      let newStyle = style;
+      
+      // Replace colors in style attribute
+      Object.keys(colorMappings).forEach(oldColor => {
+        const newColor = colorMappings[oldColor];
+        // Replace color values
+        newStyle = newStyle.replace(new RegExp(oldColor, 'gi'), newColor);
+      });
+      
+      // Update style if changed
+      if (newStyle !== style) {
+        element.setAttribute('style', newStyle);
+      }
+    });
+    
+    // Also update any text content that might have colors
+    this.updateTableThemes();
+  }
+  
+  // Update table themes specifically
+  updateTableThemes() {
+    const isDark = this.options.theme === 'dark';
+    const tables = this.editor.querySelectorAll('table');
+    
+    tables.forEach(table => {
+      // Reset table styles first
+      table.style.removeProperty('background');
+      table.style.removeProperty('background-color');
+      table.style.removeProperty('border-color');
+      
+      // Apply theme-specific styles
+      if (isDark) {
+        table.style.background = '#2a2a2a';
+        table.style.borderColor = '#404040';
+      } else {
+        table.style.background = '#ffffff';
+        table.style.borderColor = '#dee2e6';
+      }
+      
+      // Update table headers
+      const headers = table.querySelectorAll('th');
+      headers.forEach(th => {
+        const currentStyle = th.getAttribute('style') || '';
+        
+        if (isDark) {
+          // For dark theme, check if it has special colors
+          if (currentStyle.includes('background-color: #f59e0b') || 
+              currentStyle.includes('background: #f59e0b') ||
+              currentStyle.includes('background-color: #ef4444') || 
+              currentStyle.includes('background: #ef4444') ||
+              currentStyle.includes('background-color: #10b981') || 
+              currentStyle.includes('background: #10b981') ||
+              currentStyle.includes('background-color: #3b82f6') || 
+              currentStyle.includes('background: #3b82f6')) {
+            // Keep special colors but adjust for dark theme visibility
+            th.style.color = 'white';
+          } else {
+            // Standard dark theme header
+            th.style.background = '#404040';
+            th.style.color = '#f0f0f0';
+          }
+          th.style.borderColor = '#404040';
+        } else {
+          // For light theme, reset and apply proper colors
+          if (currentStyle.includes('background-color: #f59e0b') || 
+              currentStyle.includes('background: #f59e0b')) {
+            th.style.background = '#f59e0b';
+            th.style.color = 'white';
+          } else if (currentStyle.includes('background-color: #ef4444') || 
+                    currentStyle.includes('background: #ef4444')) {
+            th.style.background = '#ef4444';
+            th.style.color = 'white';
+          } else if (currentStyle.includes('background-color: #10b981') || 
+                    currentStyle.includes('background: #10b981')) {
+            th.style.background = '#10b981';
+            th.style.color = 'white';
+          } else if (currentStyle.includes('background-color: #3b82f6') || 
+                    currentStyle.includes('background: #3b82f6')) {
+            th.style.background = '#3b82f6';
+            th.style.color = 'white';
+          } else {
+            // Standard light theme header
+            th.style.background = '#f8f9fa';
+            th.style.color = '#333333';
+          }
+          th.style.borderColor = '#dee2e6';
+        }
+      });
+      
+      // Update table cells
+      const cells = table.querySelectorAll('td');
+      cells.forEach(td => {
+        // Reset cell styles first
+        td.style.removeProperty('background');
+        td.style.removeProperty('background-color');
+        
+        if (isDark) {
+          td.style.color = '#e0e0e0';
+          td.style.borderColor = '#404040';
+          
+          // Check if cell has special background colors and adjust
+          const currentStyle = td.getAttribute('style') || '';
+          if (currentStyle.includes('background-color:') || currentStyle.includes('background:')) {
+            // Keep background but ensure text is visible
+            if (currentStyle.includes('#ffffff') || currentStyle.includes('#f9fafb') || 
+                currentStyle.includes('#f3f4f6') || currentStyle.includes('#fff')) {
+              td.style.background = '#2a2a2a';
+            }
+          }
+        } else {
+          td.style.color = '#333333';
+          td.style.borderColor = '#dee2e6';
+          
+          // Reset any dark theme backgrounds
+          const currentStyle = td.getAttribute('style') || '';
+          if (currentStyle.includes('background-color: #2a2a2a') || 
+              currentStyle.includes('background: #2a2a2a')) {
+            td.style.background = 'transparent';
+          }
+        }
+      });
+    });
+  }
+
+  // Apply theme to a specific element and its children
+  applyThemeToElement(element) {
+    const isDark = this.options.theme === 'dark';
+    
+    // Define color mappings
+    const colorMappings = {
+      // Dark colors to light for dark theme
+      '#1f2937': isDark ? '#e0e0e0' : '#1f2937',
+      '#374151': isDark ? '#e0e0e0' : '#374151', 
+      '#111827': isDark ? '#f0f0f0' : '#111827',
+      '#6b7280': isDark ? '#b0b0b0' : '#6b7280',
+      '#333333': isDark ? '#e0e0e0' : '#333333',
+      '#000000': isDark ? '#f0f0f0' : '#000000',
+      '#2c3e50': isDark ? '#e0e0e0' : '#2c3e50',
+      '#34495e': isDark ? '#d0d0d0' : '#34495e',
+      // Light backgrounds to dark for dark theme
+      '#ffffff': isDark ? '#2a2a2a' : '#ffffff',
+      '#f9fafb': isDark ? '#2a2a2a' : '#f9fafb',
+      '#f3f4f6': isDark ? '#2a2a2a' : '#f3f4f6',
+      '#f8f9fa': isDark ? '#2a2a2a' : '#f8f9fa',
+      '#fff': isDark ? '#2a2a2a' : '#fff',
+      // Borders
+      '#e5e7eb': isDark ? '#404040' : '#e5e7eb',
+      '#d1d5db': isDark ? '#404040' : '#d1d5db',
+      '#dee2e6': isDark ? '#404040' : '#dee2e6'
+    };
+    
+    // Get all elements with inline styles in the element
+    const elementsWithInlineStyles = element.querySelectorAll('*[style]');
+    
+    // Include the element itself if it has styles
+    if (element.hasAttribute('style')) {
+      elementsWithInlineStyles.push(element);
+    }
+    
+    elementsWithInlineStyles.forEach(el => {
+      const style = el.getAttribute('style');
+      let newStyle = style;
+      
+      // Replace colors in style attribute
+      Object.keys(colorMappings).forEach(oldColor => {
+        const newColor = colorMappings[oldColor];
+        // Replace color values (case insensitive)
+        newStyle = newStyle.replace(new RegExp(oldColor, 'gi'), newColor);
+      });
+      
+      // Update style if changed
+      if (newStyle !== style) {
+        el.setAttribute('style', newStyle);
+      }
+    });
+  }
+
+  createMenuBar() {
+    const menuBar = document.createElement('div');
+    menuBar.className = 'menu-bar';
+
+    // Define menu configurations with all toolbar functionalities
+    const menuConfigs = [
+      {
+        label: 'File',
+        items: [
+          { 
+            label: 'New Document',
+            icon: '<i class="fas fa-file"></i>',
+            action: () => this.createNewDocument()
+          },
+          { 
+            label: 'Import Document',
+            icon: '<i class="fas fa-file-import"></i>',
+            action: () => this.importDocument()
+          },
+          { 
+            label: 'Import Content',
+            icon: '<i class="fas fa-file-import"></i>',
+            action: () => this.toolbarBtns.import?.click()
+          },
+          { type: 'separator' },
+          { 
+            label: 'Export as HTML',
+            icon: '<i class="fas fa-code"></i>',
+            action: () => this.exportAsHTML()
+          },
+          { 
+            label: 'View Source',
+            icon: '<i class="fas fa-code"></i>',
+            action: () => this.toggleSourceView()
+          },
+          { 
+            label: 'Print',
+            icon: '<i class="fas fa-print"></i>',
+            action: () => window.print()
+          }
+        ]
+      },
+      {
+        label: 'Edit',
+        items: [
+          { 
+            label: 'Undo',
+            icon: '<i class="fas fa-undo"></i>',
+            action: () => document.execCommand('undo')
+          },
+          { 
+            label: 'Redo',
+            icon: '<i class="fas fa-redo"></i>',
+            action: () => document.execCommand('redo')
+          },
+          { type: 'separator' },
+          { 
+            label: 'Cut',
+            icon: '<i class="fas fa-cut"></i>',
+            action: () => document.execCommand('cut')
+          },
+          { 
+            label: 'Copy',
+            icon: '<i class="fas fa-copy"></i>',
+            action: () => document.execCommand('copy')
+          },
+          { 
+            label: 'Paste',
+            icon: '<i class="fas fa-paste"></i>',
+            action: () => document.execCommand('paste')
+          },
+          { type: 'separator' },
+          { 
+            label: 'Select All',
+            icon: '<i class="fas fa-check-square"></i>',
+            action: () => document.execCommand('selectAll')
+          }
+        ]
+      },
+      {
+        label: 'Format',
+        items: [
+          { 
+            label: 'Bold',
+            icon: '<i class="fas fa-bold"></i>',
+            action: () => document.execCommand('bold')
+          },
+          { 
+            label: 'Italic',
+            icon: '<i class="fas fa-italic"></i>',
+            action: () => document.execCommand('italic')
+          },
+          { 
+            label: 'Underline',
+            icon: '<i class="fas fa-underline"></i>',
+            action: () => document.execCommand('underline')
+          },
+          { 
+            label: 'Strikethrough',
+            icon: '<i class="fas fa-strikethrough"></i>',
+            action: () => document.execCommand('strikeThrough')
+          },
+          { 
+            label: 'Superscript',
+            icon: '<i class="fas fa-superscript"></i>',
+            action: () => document.execCommand('superscript')
+          },
+          { 
+            label: 'Subscript',
+            icon: '<i class="fas fa-subscript"></i>',
+            action: () => document.execCommand('subscript')
+          },
+          { type: 'separator' },
+          { 
+            label: 'Clear Formatting',
+            icon: '<i class="fas fa-remove-format"></i>',
+            action: () => document.execCommand('removeFormat')
+          },
+          { type: 'separator' },
+          { 
+            label: 'Text Color',
+            icon: '<i class="fas fa-font"></i>',
+            action: () => this.toolbarBtns.textColor?.click()
+          },
+          { 
+            label: 'Background Color',
+            icon: '<i class="fas fa-fill-drip"></i>',
+            action: () => this.toolbarBtns.bgColor?.click()
+          }
+        ]
+      },
+      {
+        label: 'Paragraph',
+        items: [
+          { 
+            label: 'Heading 1',
+            icon: '<i class="fas fa-heading"></i>',
+            action: () => this.applyHeadingToSelection('H1')
+          },
+          { 
+            label: 'Heading 2',
+            icon: '<i class="fas fa-heading"></i>',
+            action: () => this.applyHeadingToSelection('H2')
+          },
+          { 
+            label: 'Heading 3',
+            icon: '<i class="fas fa-heading"></i>',
+            action: () => this.applyHeadingToSelection('H3')
+          },
+          { 
+            label: 'Heading 4',
+            icon: '<i class="fas fa-heading"></i>',
+            action: () => this.applyHeadingToSelection('H4')
+          },
+          { 
+            label: 'Heading 5',
+            icon: '<i class="fas fa-heading"></i>',
+            action: () => this.applyHeadingToSelection('H5')
+          },
+          { 
+            label: 'Heading 6',
+            icon: '<i class="fas fa-heading"></i>',
+            action: () => this.applyHeadingToSelection('H6')
+          },
+          { 
+            label: 'Paragraph',
+            icon: '<i class="fas fa-paragraph"></i>',
+            action: () => this.applyHeadingToSelection('P')
+          },
+          { type: 'separator' },
+          { 
+            label: 'Quote',
+            icon: '<i class="fas fa-quote-right"></i>',
+            action: () => document.execCommand('formatBlock', false, 'BLOCKQUOTE')
+          },
+          { 
+            label: 'Code Block',
+            icon: '<i class="fas fa-code"></i>',
+            action: () => document.execCommand('formatBlock', false, 'PRE')
+          },
+          { type: 'separator' },
+          { 
+            label: 'Align Left',
+            icon: '<i class="fas fa-align-left"></i>',
+            action: () => document.execCommand('justifyLeft')
+          },
+          { 
+            label: 'Align Center',
+            icon: '<i class="fas fa-align-center"></i>',
+            action: () => document.execCommand('justifyCenter')
+          },
+          { 
+            label: 'Align Right',
+            icon: '<i class="fas fa-align-right"></i>',
+            action: () => document.execCommand('justifyRight')
+          },
+          { 
+            label: 'Justify',
+            icon: '<i class="fas fa-align-justify"></i>',
+            action: () => document.execCommand('justifyFull')
+          },
+          { type: 'separator' },
+          { 
+            label: 'Increase Indent',
+            icon: '<i class="fas fa-indent"></i>',
+            action: () => this.applyPaddingIndentToSelection(true)
+          },
+          { 
+            label: 'Decrease Indent',
+            icon: '<i class="fas fa-outdent"></i>',
+            action: () => this.applyPaddingIndentToSelection(false)
+          },
+          { type: 'separator' },
+          { 
+            label: 'Bulleted List',
+            icon: '<i class="fas fa-list-ul"></i>',
+            action: () => document.execCommand('insertUnorderedList')
+          },
+          { 
+            label: 'Numbered List',
+            icon: '<i class="fas fa-list-ol"></i>',
+            action: () => document.execCommand('insertOrderedList')
+          }
+        ]
+      },
+      {
+        label: 'Insert',
+        items: [
+          { 
+            label: 'Image',
+            icon: '<i class="far fa-image"></i>',
+            action: () => this.insertImage()
+          },
+          { 
+            label: 'Table',
+            icon: '<i class="fas fa-table"></i>',
+            action: () => this.toolbarBtns.table?.click()
+          },
+          { 
+            label: 'Link',
+            icon: '<i class="fas fa-link"></i>',
+            action: () => this.insertLink()
+          },
+          { type: 'separator' },
+          { 
+            label: 'Emoji',
+            icon: '<i class="far fa-smile"></i>',
+            action: () => this.insertEmoji()
+          },
+          { 
+            label: 'Video',
+            icon: '<i class="fas fa-video"></i>',
+            action: () => this.insertVideo()
+          },
+          { type: 'separator' },
+          { 
+            label: 'Tags',
+            icon: '<i class="fas fa-tags"></i>',
+            action: () => this.toolbarBtns.insertTags?.click()
+          },
+          { 
+            label: 'Template',
+            icon: '<i class="fas fa-file-alt"></i>',
+            action: () => this.toolbarBtns.insertTemplate?.click()
+          }
+        ]
+      },
+      {
+        label: 'Tools',
+        items: [
+          { 
+            label: 'Font Family',
+            icon: '<i class="fas fa-font"></i>',
+            action: () => this.showFontSelector()
+          },
+          { 
+            label: 'Font Size',
+            icon: '<i class="fas fa-text-height"></i>',
+            action: () => this.showFontSizeSelector()
+          },
+          { 
+            label: 'Line Height',
+            icon: '<i class="fas fa-arrows-alt-v"></i>',
+            action: () => this.showLineHeightSelector()
+          },
+          { type: 'separator' },
+          { 
+            label: 'Uppercase',
+            icon: '<i class="fas fa-font"></i>',
+            action: () => this.applyCapitalization('uppercase')
+          },
+          { 
+            label: 'Lowercase',
+            icon: '<i class="fas fa-font"></i>',
+            action: () => this.applyCapitalization('lowercase')
+          },
+          { 
+            label: 'Title Case',
+            icon: '<i class="fas fa-font"></i>',
+            action: () => this.applyCapitalization('titlecase')
+          },
+          { 
+            label: 'Capitalize First',
+            icon: '<i class="fas fa-font"></i>',
+            action: () => this.applyCapitalization('capitalize')
+          }
+        ]
+      },
+      {
+        label: 'View',
+        items: [
+          { 
+            label: 'Dark Theme',
+            icon: '<i class="fas fa-moon"></i>',
+            action: () => this.toggleTheme()
+          },
+          { 
+            label: 'Light Theme',
+            icon: '<i class="fas fa-sun"></i>',
+            action: () => {
+              if (this.options.theme === 'dark') {
+                this.toggleTheme();
+              }
+            }
+          },
+          { type: 'separator' },
+          { 
+            label: 'Zoom In',
+            icon: '<i class="fas fa-search-plus"></i>',
+            action: () => this.adjustEditorZoom(1.1)
+          },
+          { 
+            label: 'Zoom Out',
+            icon: '<i class="fas fa-search-minus"></i>',
+            action: () => this.adjustEditorZoom(0.9)
+          },
+          { 
+            label: 'Reset Zoom',
+            icon: '<i class="fas fa-search"></i>',
+            action: () => this.resetEditorZoom()
+          }
+        ]
+      }
+    ];
+
+    // Create dropdown buttons for each menu
+    menuConfigs.forEach(menuConfig => {
+      const dropdownBtn = this.createDropdownButton(menuConfig.label, menuConfig.items);
+      menuBar.appendChild(dropdownBtn);
+    });
+
+    return menuBar;
+  }
+
+  createDropdownButton(label, items) {
+    const container = document.createElement('div');
+    container.style.position = 'relative';
+    container.style.display = 'inline-block';
+
+    // Create the button
+    const button = document.createElement('button');
+    button.className = 'tox-mbtn tox-mbtn--select';
+    button.setAttribute('aria-haspopup', 'true');
+    button.setAttribute('role', 'menuitem');
+    button.setAttribute('type', 'button');
+    button.setAttribute('tabindex', '-1');
+    button.setAttribute('data-alloy-tabstop', 'true');
+    button.setAttribute('unselectable', 'on');
+    button.setAttribute('aria-expanded', 'false');
+
+    // Button label
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'tox-mbtn__select-label';
+    labelSpan.textContent = label;
+    button.appendChild(labelSpan);
+
+    // Chevron
+    const chevronDiv = document.createElement('div');
+    chevronDiv.className = 'tox-mbtn__select-chevron';
+    chevronDiv.innerHTML = `
+      <svg width="10" height="10" focusable="false">
+        <path d="M8.7 2.2c.3-.3.8-.3 1 0 .4.4.4.9 0 1.2L5.7 7.8c-.3.3-.9.3-1.2 0L.2 3.4a.8.8 0 0 1 0-1.2c.3-.3.8-.3 1.1 0L5 6l3.7-3.8Z" fill-rule="nonzero"></path>
+      </svg>
+    `;
+    button.appendChild(chevronDiv);
+
+    // Create dropdown menu
+    const menu = document.createElement('div');
+    menu.className = 'tox-menu';
+
+    items.forEach(item => {
+      if (item.type === 'separator') {
+        const separator = document.createElement('div');
+        separator.className = 'tox-collection__item-separator';
+        menu.appendChild(separator);
+      } else {
+        const menuItem = document.createElement('div');
+        menuItem.className = 'tox-collection__item';
+        
+        if (item.icon) {
+          const iconDiv = document.createElement('div');
+          iconDiv.className = 'tox-collection__item-icon';
+          iconDiv.innerHTML = item.icon;
+          menuItem.appendChild(iconDiv);
+        }
+
+        const labelDiv = document.createElement('div');
+        labelDiv.className = 'tox-collection__item-label';
+        labelDiv.textContent = item.label;
+        menuItem.appendChild(labelDiv);
+
+        menuItem.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.closeAllDropdowns();
+          if (item.action) {
+            item.action();
+          }
+          this.editor.focus();
+        });
+
+        menu.appendChild(menuItem);
+      }
+    });
+
+    // Toggle dropdown on button click
+    button.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = button.getAttribute('aria-expanded') === 'true';
+      
+      this.closeAllDropdowns();
+      
+      if (!isOpen) {
+        button.setAttribute('aria-expanded', 'true');
+        menu.classList.add('tox-menu--visible');
+      }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!container.contains(e.target)) {
+        button.setAttribute('aria-expanded', 'false');
+        menu.classList.remove('tox-menu--visible');
+      }
+    });
+
+    container.appendChild(button);
+    container.appendChild(menu);
+
+    // Store menu reference for later cleanup
+    if (!this.dropdownMenus[label]) {
+      this.dropdownMenus[label] = { button, menu, container };
+    }
+
+    return container;
+  }
+
+  closeAllDropdowns() {
+    Object.values(this.dropdownMenus).forEach(({ button, menu }) => {
+      button.setAttribute('aria-expanded', 'false');
+      menu.classList.remove('tox-menu--visible');
+    });
+  }
+
+  // Menu action methods
+  createNewDocument() {
+    if (confirm('This will clear the current document. Are you sure?')) {
+      this.editor.innerHTML = '<p>Start typing here...</p>';
+      this.updateStatusbar();
+    }
+  }
+
+  importDocument() {
+    this.savedSelection = this.saveSelection();
+    this.showTooltip({
+      title: 'Import Document',
+      placeholder: 'Paste HTML content to import...',
+      confirmText: 'Import',
+      showImportOptions: true,
+      onSubmit: (content, fileType) => this.importContent(content, fileType)
+    });
+  }
+
+  exportAsHTML() {
+    const htmlContent = this.editor.innerHTML;
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'document.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  insertImage() {
+    this.savedSelection = this.saveSelection();
+    this.showTooltip({
+      title: 'Insert Image',
+      placeholder: 'Paste image URL or select file...',
+      confirmText: 'Insert',
+      file: true,
+      onSubmit: url => this.insertImageWithStyle(url)
+    });
+  }
+
+  insertLink() {
+    this.showTooltip({
+      title: 'Insert Link',
+      placeholder: 'Enter URL (https://...)',
+      confirmText: 'Insert',
+      onSubmit: url => document.execCommand('createLink', false, url)
+    });
+  }
+
+  insertEmoji() {
+    this.savedEmojiSelection = this.saveSelection();
+    this.showTooltip({
+      title: 'Insert Emoji',
+      placeholder: 'Search or select emoji...',
+      confirmText: 'Insert',
+      emojis: true,
+      onSubmit: emoji => {
+        this.restoreSelection(this.savedEmojiSelection);
+        this.editor.focus();
+        const sel = window.getSelection();
+        if (sel.rangeCount && this.editor.contains(sel.anchorNode)) {
+          sel.getRangeAt(0).insertNode(document.createTextNode(emoji));
+        } else {
+          this.editor.appendChild(document.createTextNode(emoji));
+        }
+      }
+    });
+  }
+
+  insertVideo() {
+    this.savedSelection = this.saveSelection();
+    this.showTooltip({
+      title: 'Insert Video',
+      placeholder: 'Paste video URL (YouTube, Vimeo, etc.)...',
+      confirmText: 'Insert',
+      onSubmit: url => this.insertVideo(url)
+    });
+  }
+
+  // Helper methods for dropdown menu functionalities
+  showFontSelector() {
+    // Focus on the font selector in toolbar
+    const fontSelect = this.wrapper.querySelector('.font-select');
+    if (fontSelect) {
+      fontSelect.focus();
+      fontSelect.click();
+    }
+  }
+
+  showFontSizeSelector() {
+    // Focus on the font size selector in toolbar
+    const fontSizeSelect = this.fontSizeSelector;
+    if (fontSizeSelect) {
+      fontSizeSelect.focus();
+      fontSizeSelect.click();
+    }
+  }
+
+  showLineHeightSelector() {
+    // Focus on the line height selector in toolbar
+    const lineHeightSelect = this.lineHeightSelector;
+    if (lineHeightSelect) {
+      lineHeightSelect.focus();
+      lineHeightSelect.click();
+    }
+  }
+
+  adjustEditorZoom(factor) {
+    // Get current zoom level or default to 1
+    if (!this.currentZoom) {
+      this.currentZoom = 1;
+    }
+    
+    // Apply zoom factor
+    this.currentZoom *= factor;
+    
+    // Limit zoom between 0.5x and 3x
+    this.currentZoom = Math.max(0.5, Math.min(3, this.currentZoom));
+    
+    // Apply zoom to editor
+    this.editor.style.zoom = this.currentZoom;
+    
+    // Update status if needed
+    this.updateZoomStatus();
+  }
+
+  resetEditorZoom() {
+    this.currentZoom = 1;
+    this.editor.style.zoom = '1';
+    this.updateZoomStatus();
+  }
+
+  updateZoomStatus() {
+    // You can add zoom level display in status bar if needed
+    const zoomPercentage = Math.round(this.currentZoom * 100);
+    console.log(`Zoom: ${zoomPercentage}%`);
   }
 }
 
