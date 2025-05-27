@@ -294,24 +294,126 @@ export class Editor {
 
   createToolbar() {
     const toolbar = document.createElement('div');
-    toolbar.className = 'toolbar';
-    toolbar.style.padding = '6px 16px';
-    toolbar.style.borderBottom = '1px solid #d1d5db';
+    toolbar.className = 'editor-toolbar';
     toolbar.style.display = 'flex';
-    toolbar.style.gap = '8px';
     toolbar.style.flexWrap = 'wrap';
-    toolbar.style.background = '#f4f6fa';
-    toolbar.style.transition = 'all 0.3s ease';
-    toolbar.style.alignItems = 'stretch';
-    toolbar.style.minHeight = '56px';
-    toolbar.style.paddingBottom = '8px';
+    toolbar.style.gap = '4px';
+    toolbar.style.padding = '8px';
+    toolbar.style.borderBottom = '1px solid #e0e0e0';
+    toolbar.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#ffffff';
+    toolbar.style.position = 'relative';
+    toolbar.style.zIndex = '1000';
+    toolbar.style.alignItems = 'center';
+    toolbar.style.justifyContent = 'flex-start';
+    toolbar.style.minHeight = '48px';
     toolbar.style.boxSizing = 'border-box';
-    toolbar.style.width = '100%';
-    toolbar.style.overflow = 'hidden';
-    toolbar.style.borderTopLeftRadius = '6px';
-    toolbar.style.borderTopRightRadius = '6px';
-    toolbar.style.borderBottomLeftRadius = '0';
-    toolbar.style.borderBottomRightRadius = '0';
+    toolbar.style.transition = 'all 0.2s ease';
+
+    // Thêm mobile menu button
+    const mobileMenuBtn = document.createElement('button');
+    mobileMenuBtn.className = 'mobile-menu-btn';
+    mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+    mobileMenuBtn.style.display = 'none';
+    mobileMenuBtn.style.padding = '8px 12px';
+    mobileMenuBtn.style.border = '1px solid #e0e0e0';
+    mobileMenuBtn.style.borderRadius = '6px';
+    mobileMenuBtn.style.background = '#ffffff';
+    mobileMenuBtn.style.color = '#333333';
+    mobileMenuBtn.style.cursor = 'pointer';
+    mobileMenuBtn.style.fontSize = '14px';
+    mobileMenuBtn.style.marginRight = '8px';
+    toolbar.appendChild(mobileMenuBtn);
+
+    // Thêm mobile menu container
+    const mobileMenu = document.createElement('div');
+    mobileMenu.className = 'mobile-menu';
+    mobileMenu.style.display = 'none';
+    mobileMenu.style.position = 'fixed';
+    mobileMenu.style.top = '0';
+    mobileMenu.style.left = '0';
+    mobileMenu.style.width = '100%';
+    mobileMenu.style.height = '100%';
+    mobileMenu.style.background = 'rgba(0,0,0,0.5)';
+    mobileMenu.style.zIndex = '2000';
+    document.body.appendChild(mobileMenu);
+
+    // Thêm mobile menu content
+    const mobileMenuContent = document.createElement('div');
+    mobileMenuContent.className = 'mobile-menu-content';
+    mobileMenuContent.style.position = 'fixed';
+    mobileMenuContent.style.top = '0';
+    mobileMenuContent.style.left = '0';
+    mobileMenuContent.style.width = '80%';
+    mobileMenuContent.style.maxWidth = '300px';
+    mobileMenuContent.style.height = '100%';
+    mobileMenuContent.style.background = '#ffffff';
+    mobileMenuContent.style.padding = '20px';
+    mobileMenuContent.style.boxSizing = 'border-box';
+    mobileMenuContent.style.overflowY = 'auto';
+    mobileMenu.appendChild(mobileMenuContent);
+
+    // Thêm close button
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+    closeBtn.style.position = 'absolute';
+    closeBtn.style.top = '10px';
+    closeBtn.style.right = '10px';
+    closeBtn.style.background = 'none';
+    closeBtn.style.border = 'none';
+    closeBtn.style.fontSize = '20px';
+    closeBtn.style.cursor = 'pointer';
+    closeBtn.style.color = '#333';
+    mobileMenuContent.appendChild(closeBtn);
+
+    // Thêm style cho responsive
+    const style = document.createElement('style');
+    style.textContent = `
+      @media (max-width: 768px) {
+        .editor-toolbar {
+          display: none !important;
+        }
+        .mobile-menu-btn {
+          display: block !important;
+        }
+      }
+      @media (min-width: 769px) {
+        .mobile-menu-btn {
+          display: none !important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Xử lý sự kiện cho mobile menu
+    mobileMenuBtn.onclick = () => {
+      mobileMenu.style.display = 'block';
+      // Clone các nút từ toolbar sang mobile menu
+      const buttons = toolbar.querySelectorAll('button:not(.mobile-menu-btn), select');
+      buttons.forEach(btn => {
+        const clone = btn.cloneNode(true);
+        clone.style.display = 'block';
+        clone.style.width = '100%';
+        clone.style.margin = '5px 0';
+        clone.style.padding = '10px';
+        mobileMenuContent.appendChild(clone);
+      });
+    };
+
+    closeBtn.onclick = () => {
+      mobileMenu.style.display = 'none';
+      // Xóa các nút đã clone
+      const clonedButtons = mobileMenuContent.querySelectorAll('button:not(.mobile-menu-btn), select');
+      clonedButtons.forEach(btn => btn.remove());
+    };
+
+    mobileMenu.onclick = (e) => {
+      if (e.target === mobileMenu) {
+        mobileMenu.style.display = 'none';
+        // Xóa các nút đã clone
+        const clonedButtons = mobileMenuContent.querySelectorAll('button:not(.mobile-menu-btn), select');
+        clonedButtons.forEach(btn => btn.remove());
+      }
+    };
 
     // Lưu các nút để có thể truy cập sau này
     this.toolbarBtns = {};
@@ -1695,44 +1797,67 @@ export class Editor {
 
     // Thêm sự kiện cho block toolbar
     this.editor.addEventListener('keyup', e => {
-      // if (e.key === 'Enter') {
-      //   setTimeout(() => {
-      //     const sel = window.getSelection();
-      //     if (sel.rangeCount > 0) {
-      //       const range = sel.getRangeAt(0);
-      //       const node = range.startContainer;
-      //       let block = node.nodeType === 3 ? node.parentNode : node;
-      //       // Kiểm tra block là dòng trống: chỉ chứa <br> hoặc text rỗng
-      //       let isEmptyBlock = false;
-      //       if (block && (block.nodeName === 'DIV' || block.nodeName === 'P')) {
-      //         if (
-      //           block.textContent.trim() === '' ||
-      //           (block.childNodes.length === 1 && block.childNodes[0].nodeName === 'BR')
-      //         ) {
-      //           isEmptyBlock = true;
-      //         }
-      //       }
-      //       // Nếu block là editor-area và chỉ có 1 child là <br> hoặc text rỗng
-      //       if (!isEmptyBlock && block === this.editor) {
-      //         if (
-      //           this.editor.childNodes.length === 1 &&
-      //           (this.editor.firstChild.nodeName === 'BR' || this.editor.textContent.trim() === '')
-      //         ) {
-      //           isEmptyBlock = true;
-      //         }
-      //       }
-      //       if (isEmptyBlock && block.offsetHeight > 0) {
-      //         const rect = block.getBoundingClientRect();
-      //         this.showBlockToolbar(rect);
-      //       } else {
-      //         this.hideBlockToolbar();
-      //       }
-      //     }
-      //   }, 10);
-      // } else {
-      //   this.hideBlockToolbar();
-      // }
+      if (e.key === 'Enter') {
+        setTimeout(() => {
+          const sel = window.getSelection();
+          if (sel.rangeCount > 0) {
+            const range = sel.getRangeAt(0);
+            const node = range.startContainer;
+            let block = node.nodeType === 3 ? node.parentNode : node;
+            // Kiểm tra block là dòng trống: chỉ chứa <br> hoặc text rỗng
+            let isEmptyBlock = false;
+            if (block && (block.nodeName === 'DIV' || block.nodeName === 'P')) {
+              if (
+                block.textContent.trim() === '' ||
+                (block.childNodes.length === 1 && block.childNodes[0].nodeName === 'BR')
+              ) {
+                isEmptyBlock = true;
+              }
+            }
+            // Nếu block là editor-area và chỉ có 1 child là <br> hoặc text rỗng
+            if (!isEmptyBlock && block === this.editor) {
+              if (
+                this.editor.childNodes.length === 1 &&
+                (this.editor.firstChild.nodeName === 'BR' || this.editor.textContent.trim() === '')
+              ) {
+                isEmptyBlock = true;
+              }
+            }
+            if (isEmptyBlock && block.offsetHeight > 0) {
+              const rect = block.getBoundingClientRect();
+              this.showBlockToolbar(rect);
+            } else {
+              this.hideBlockToolbar();
+            }
+          }
+        }, 10);
+      } else {
+        this.hideBlockToolbar();
+      }
     });
+
+    // Hiển thị toolbar khi select text
+    this.editor.addEventListener('mouseup', e => {
+      const sel = window.getSelection();
+      if (sel.rangeCount > 0) {
+        const range = sel.getRangeAt(0);
+        if (!range.collapsed) { // Nếu có text được chọn
+          // Kiểm tra xem tooltip đã hiển thị chưa
+          if (this.blockToolbar.style.display === 'flex') {
+            // Nếu đã hiển thị thì ẩn đi
+            this.hideBlockToolbar();
+          } else {
+            // Nếu chưa hiển thị thì hiện lên
+            const rect = range.getBoundingClientRect();
+            this.showBlockToolbar({
+              left: rect.left + (rect.width / 2),
+              top: rect.top - 10
+            });
+          }
+        }
+      }
+    });
+
     // Ẩn toolbar khi click ra ngoài hoặc nhập nội dung
     this.editor.addEventListener('input', () => {
       const sel = window.getSelection();
@@ -1740,17 +1865,14 @@ export class Editor {
         const range = sel.getRangeAt(0);
         let block = range.startContainer.nodeType === 3 ? range.startContainer.parentNode : range.startContainer;
         if (block && (block.nodeName === 'DIV' || block.nodeName === 'P')) {
-          // Nếu block đã có nội dung, ẩn toolbar
+          // Nếu block đã có nội dung và không phải là dòng trống, ẩn toolbar
           if (block.textContent.trim() !== '' && !(block.childNodes.length === 1 && block.childNodes[0].nodeName === 'BR')) {
             this.hideBlockToolbar();
           }
-        } else {
-          this.hideBlockToolbar();
         }
-      } else {
-        this.hideBlockToolbar();
       }
     });
+
     document.addEventListener('mousedown', e => {
       // Chỉ ẩn nếu click ra ngoài toolbar và ngoài editor-area
       if (
@@ -1761,61 +1883,49 @@ export class Editor {
         this.hideBlockToolbar();
       }
     });
-    // Hiển thị block toolbar khi click vào dòng trống (tối ưu)
-    this.editor.addEventListener('click', e => {
-      setTimeout(() => {
-        const sel = window.getSelection();
-        if (!sel.rangeCount) return;
-        let node = sel.anchorNode;
-        // Nếu là text node hoặc <br>, lấy parent
-        if (node.nodeType === 3 || node.nodeName === 'BR') node = node.parentNode;
-        // Tìm block cha gần nhất là DIV/P/editor-area
-        let block = node;
-        while (block && block !== this.editor && !['DIV', 'P'].includes(block.nodeName)) {
-          block = block.parentNode;
-        }
-        if (!block) block = this.editor;
-        // Kiểm tra dòng trống
-        let isEmptyBlock = false;
-        if (block === this.editor) {
-          // Nếu là editor-area, kiểm tra childNodes tại vị trí selection
-          if (
-            this.editor.childNodes.length === 1 &&
-            (this.editor.firstChild.nodeName === 'BR' || this.editor.textContent.trim() === '')
-          ) {
-            isEmptyBlock = true;
-          }
-        } else if (['DIV', 'P'].includes(block.nodeName)) {
-          if (
-            block.textContent.trim() === '' ||
-            (block.childNodes.length === 1 && block.childNodes[0].nodeName === 'BR')
-          ) {
-            isEmptyBlock = true;
-          }
-        }
-        if (isEmptyBlock && block.offsetHeight > 0) {
-          const rect = block.getBoundingClientRect();
-          this.showBlockToolbar(rect);
-        } else {
-          this.hideBlockToolbar();
-        }
-      }, 10);
-    });
 
-    // Hiển thị toolbar khi select text
-    this.editor.addEventListener('mouseup', e => {
-      const sel = window.getSelection();
-      if (sel.rangeCount > 0) {
-        const range = sel.getRangeAt(0);
-        if (!range.collapsed) { // Nếu có text được chọn
-          const rect = range.getBoundingClientRect();
-          // Hiển thị toolbar phía trên vùng chọn
-          this.showBlockToolbar({
-            left: rect.left + (rect.width / 2),
-            top: rect.top - 10
-          });
-        } else {
-          this.hideBlockToolbar();
+    // Thêm sự kiện keyup để ẩn toolbar khi nhấn phím
+    this.editor.addEventListener('keyup', e => {
+      if (e.key === 'Enter') {
+        setTimeout(() => {
+          const sel = window.getSelection();
+          if (sel.rangeCount > 0) {
+            const range = sel.getRangeAt(0);
+            const node = range.startContainer;
+            let block = node.nodeType === 3 ? node.parentNode : node;
+            // Kiểm tra block là dòng trống: chỉ chứa <br> hoặc text rỗng
+            let isEmptyBlock = false;
+            if (block && (block.nodeName === 'DIV' || block.nodeName === 'P')) {
+              if (
+                block.textContent.trim() === '' ||
+                (block.childNodes.length === 1 && block.childNodes[0].nodeName === 'BR')
+              ) {
+                isEmptyBlock = true;
+              }
+            }
+            // Nếu block là editor-area và chỉ có 1 child là <br> hoặc text rỗng
+            if (!isEmptyBlock && block === this.editor) {
+              if (
+                this.editor.childNodes.length === 1 &&
+                (this.editor.firstChild.nodeName === 'BR' || this.editor.textContent.trim() === '')
+              ) {
+                isEmptyBlock = true;
+              }
+            }
+            if (isEmptyBlock && block.offsetHeight > 0) {
+              const rect = block.getBoundingClientRect();
+              this.showBlockToolbar(rect);
+            }
+          }
+        }, 10);
+      } else {
+        // Chỉ ẩn toolbar khi nhấn phím khác Enter và không có text được chọn
+        const sel = window.getSelection();
+        if (sel.rangeCount > 0) {
+          const range = sel.getRangeAt(0);
+          if (range.collapsed) {
+            this.hideBlockToolbar();
+          }
         }
       }
     });
@@ -2007,63 +2117,84 @@ export class Editor {
     // Nếu là chức năng import với nhiều lựa chọn
     let selectedFileType = 'html';
     if (showImportOptions) {
-      const optionsDiv = document.createElement('div');
-      optionsDiv.style.display = 'flex';
-      optionsDiv.style.gap = '10px';
-      optionsDiv.style.marginBottom = '12px';
-      optionsDiv.style.flexWrap = 'wrap';
-      
-      const options = [
-        { id: 'excel', label: 'Excel', icon: '<i class="fas fa-file-excel"></i>' },
-        { id: 'pdf', label: 'PDF', icon: '<i class="fas fa-file-pdf"></i>' },
-        { id: 'doc', label: 'Word', icon: '<i class="fas fa-file-word"></i>' }
+      const importOptions = document.createElement('div');
+      importOptions.className = 'import-options';
+      importOptions.style.display = 'flex';
+      importOptions.style.flexDirection = 'column';
+      importOptions.style.gap = '8px';
+      importOptions.style.marginBottom = '16px';
+
+      const importTypes = [
+        { label: 'Import HTML', icon: '<i class="fas fa-code"></i>', type: 'html' },
+        { label: 'Import Excel', icon: '<i class="fas fa-file-excel"></i>', type: 'excel' },
+        { label: 'Import PDF', icon: '<i class="fas fa-file-pdf"></i>', type: 'pdf' },
+        { label: 'Import Word', icon: '<i class="fas fa-file-word"></i>', type: 'doc' }
       ];
-      
-      options.forEach(option => {
-        const btn = document.createElement('button');
-        btn.innerHTML = `${option.icon} ${option.label}`;
-        btn.dataset.type = option.id;
-        btn.style.padding = '8px 12px';
-        btn.style.border = this.options.theme === 'dark' ? '1px solid #404040' : '1px solid #eee';
-        btn.style.borderRadius = '6px';
-        btn.style.background = option.id === 'excel' ? 
-          (this.options.theme === 'dark' ? '#2a4a6b' : '#e0f0ff') : 
-          (this.options.theme === 'dark' ? '#2a2a2a' : '#fff');
-        btn.style.color = option.id === 'excel' ? 
-          (this.options.theme === 'dark' ? '#66ccff' : '#1976d2') : 
-          (this.options.theme === 'dark' ? '#e0e0e0' : '#333');
-        btn.style.cursor = 'pointer';
-        btn.style.fontSize = '14px';
-        btn.style.display = 'flex';
-        btn.style.alignItems = 'center';
-        btn.style.gap = '6px';
-        
-        btn.onclick = () => {
-          // Cập nhật UI và placeholder cho loại file được chọn
-          options.forEach(opt => {
-            const el = optionsDiv.querySelector(`[data-type="${opt.id}"]`);
-            if (el) {
-              el.style.background = opt.id === option.id ? 
-                (this.options.theme === 'dark' ? '#2a4a6b' : '#e0f0ff') : 
-                (this.options.theme === 'dark' ? '#2a2a2a' : '#fff');
-              el.style.color = opt.id === option.id ? 
-                (this.options.theme === 'dark' ? '#66ccff' : '#1976d2') : 
-                (this.options.theme === 'dark' ? '#e0e0e0' : '#333');
+
+      importTypes.forEach(type => {
+        const button = document.createElement('button');
+        button.className = 'import-type-btn';
+        button.style.display = 'flex';
+        button.style.alignItems = 'center';
+        button.style.gap = '8px';
+        button.style.padding = '8px 12px';
+        button.style.border = '1px solid #e0e0e0';
+        button.style.borderRadius = '4px';
+        button.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#ffffff';
+        button.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#333333';
+        button.style.cursor = 'pointer';
+        button.style.transition = 'all 0.2s ease';
+        button.style.width = '100%';
+        button.style.textAlign = 'left';
+
+        button.innerHTML = `${type.icon} ${type.label}`;
+
+        button.addEventListener('mouseover', () => {
+          button.style.background = this.options.theme === 'dark' ? '#3a3a3a' : '#f5f5f5';
+        });
+
+        button.addEventListener('mouseout', () => {
+          button.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#ffffff';
+        });
+
+        button.addEventListener('click', () => {
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.accept = `.${type.type}`;
+          
+          fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = (event) => {
+                const content = event.target.result;
+                switch (type.type) {
+                  case 'html':
+                    this.importContent(content, 'html');
+                    break;
+                  case 'excel':
+                    this.importExcelFile(content);
+                    break;
+                  case 'pdf':
+                    this.importPdfFile(content);
+                    break;
+                  case 'doc':
+                    this.importDocFile(content);
+                    break;
+                }
+                close();
+              };
+              reader.readAsDataURL(file);
             }
           });
-          
-          selectedFileType = option.id;
-          
-          // Cập nhật placeholder và hiển thị file input
-          input.placeholder = `Select ${option.label} file to import...`;
-          input.style.display = 'block';
-          if (fileInputWrapper) fileInputWrapper.style.display = 'block';
-        };
-        
-        optionsDiv.appendChild(btn);
+
+          fileInput.click();
+        });
+
+        importOptions.appendChild(button);
       });
-      
-      tooltip.appendChild(optionsDiv);
+
+      content.appendChild(importOptions);
     }
 
     const input = document.createElement('input');
@@ -3430,6 +3561,10 @@ export class Editor {
 
   showBlockToolbar(rect) {
     if (!this.blockToolbar) return;
+    // Kiểm tra kích thước màn hình
+    if (window.innerWidth <= 768) {
+      return;
+    }
     this.blockToolbar.style.left = rect.left + 'px';
     this.blockToolbar.style.top = (rect.top + window.scrollY - 8) + 'px';
     this.blockToolbar.style.display = 'flex';
