@@ -132,7 +132,7 @@ export class Editor {
     this.wrapper.style.border = '1px solid #d1d5db';
     this.wrapper.style.borderRadius = '6px';
     this.wrapper.style.overflow = 'visible';
-    this.wrapper.style.width = this.options.width + 'px';
+    this.wrapper.style.width = '100%';
     this.wrapper.style.maxWidth = this.options.maxWidth + 'px';
     this.wrapper.style.boxShadow = '0 2px 8px rgba(31,41,55,0.08)';
     this.wrapper.style.minHeight = this.options.height + 'px';

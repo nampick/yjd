@@ -798,4 +798,127 @@ body {
 
 [data-theme="light"] .tox-collection__item:hover {
   background: var(--editor-btn-hover);
+}
+
+/* Responsive styles */
+@media (min-width: 769px) {
+  .editor-wrapper {
+    width: calc(100% - 32px) !important;
+    max-width: 900px !important;
+    margin: 16px auto !important;
+    border-radius: 6px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .editor-wrapper {
+    width: calc(100% - 32px) !important;
+    max-width: 900px !important;
+    margin: 16px auto !important;
+    border-radius: 6px !important;
+  }
+
+  .menu-bar {
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 2px 4px;
+  }
+
+  .tox-mbtn {
+    height: 32px;
+    font-size: 13px;
+  }
+
+  .tox-mbtn__select-label {
+    padding: 0 6px;
+  }
+
+  .tox-mbtn__select-chevron {
+    width: 14px;
+    height: 32px;
+  }
+
+  .editor-toolbar {
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px;
+  }
+
+  .editor-toolbar button {
+    min-width: 32px;
+    min-height: 32px;
+    font-size: 13px;
+  }
+
+  .editor-area {
+    padding: 8px;
+    font-size: 15px;
+  }
+
+  .editor-statusbar {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+
+  .tox-menu {
+    min-width: 140px;
+    max-width: 90vw;
+  }
+
+  .tox-collection__item {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .editor-wrapper {
+    width: calc(100% - 32px) !important;
+    max-width: calc(100% - 32px) !important;
+    margin: 16px !important;
+    border-radius: 6px !important;
+  }
+
+  .menu-bar {
+    justify-content: center;
+  }
+
+  .tox-mbtn {
+    height: 30px;
+    font-size: 12px;
+  }
+
+  .tox-mbtn__select-label {
+    padding: 0 4px;
+  }
+
+  .tox-mbtn__select-chevron {
+    width: 12px;
+    height: 30px;
+  }
+
+  .editor-toolbar button {
+    min-width: 30px;
+    min-height: 30px;
+    font-size: 12px;
+  }
+
+  .editor-area {
+    padding: 6px;
+    font-size: 14px;
+  }
+
+  .editor-statusbar {
+    padding: 3px 6px;
+    font-size: 11px;
+  }
+
+  .tox-menu {
+    min-width: 120px;
+  }
+
+  .tox-collection__item {
+    padding: 5px 8px;
+    font-size: 12px;
+  }
 } 
