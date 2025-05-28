@@ -1,6 +1,10 @@
 // Editor.js - Editor library giống TinyMCE/Quill cấu hình được
 import '../style.css';
 
+import * as XLSX from 'xlsx';
+import * as pdfjsLib from 'pdfjs-dist';
+import * as mammoth from 'mammoth';
+
 export class Editor {
   constructor(selector, options = {}) {
     this.options = Object.assign({
@@ -1030,6 +1034,9 @@ export class Editor {
         break;
       case 'deleteTable':
         this.deleteTable();
+        break;
+      default:
+        // Không làm gì hoặc có thể log ra nếu cần
         break;
     }
   }
@@ -2078,7 +2085,7 @@ export class Editor {
     input.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#333333';
     tooltip.appendChild(input);
 
-    let fileInput, fileInputWrapper, fileLabel, filePreview;
+    let fileInput, fileInputWrapper, filePreview;
     if (file || showImportOptions) {
       fileInputWrapper = document.createElement('div');
       fileInputWrapper.style.marginTop = '8px';
@@ -2745,13 +2752,6 @@ export class Editor {
               textLayer.style.color = 'transparent';
               textLayer.style.pointerEvents = 'none';
               pageWrapper.appendChild(textLayer);
-              
-              pdfjsLib.renderTextLayer({
-                textContent: textContent,
-                container: textLayer,
-                viewport: viewport,
-                textDivs: []
-              });
             });
           });
         }
@@ -2971,8 +2971,8 @@ export class Editor {
     this.currentImg = img;
     this.imgAspect = img.naturalWidth / img.naturalHeight;
     // Tính vị trí ảnh trên trang
-    const rect = img.getBoundingClientRect();
-    const scrollY = window.scrollY, scrollX = window.scrollX;
+    //const rect = img.getBoundingClientRect();
+   // const scrollY = window.scrollY, scrollX = window.scrollX;
     this.imgHandles = ['tl', 'tr', 'bl', 'br'].map(pos => {
       const div = document.createElement('div');
       div.className = 'img-resize-handle ' + pos;
@@ -3088,7 +3088,7 @@ export class Editor {
 
   addTableResizeHandles(table) {
     this.removeTableResizeHandles();
-    const rect = table.getBoundingClientRect();
+    //const rect = table.getBoundingClientRect();
     const handles = ['tl', 'tr', 'bl', 'br'].map(pos => {
       const div = document.createElement('div');
       div.className = 'table-resize-handle ' + pos;
@@ -3526,8 +3526,8 @@ export class Editor {
     // Tạo vùng bao phủ toàn bộ selection
     const startContainer = range.startContainer;
     const endContainer = range.endContainer;
-    const startOffset = range.startOffset;
-    const endOffset = range.endOffset;
+    //const startOffset = range.startOffset;
+    //const endOffset = range.endOffset;
     
     // Nếu cả hai container đều là text nodes và cùng thuộc một block, chỉ trả về block đó
     if (startContainer === endContainer && startContainer.nodeType === 3) {
@@ -5937,6 +5937,7 @@ export class Editor {
 
   // Menu action methods
   createNewDocument() {
+    // eslint-disable-next-line no-restricted-globals
     if (confirm('This will clear the current document. Are you sure?')) {
       this.editor.innerHTML = '<p>Start typing here...</p>';
       this.updateStatusbar();
@@ -6074,6 +6075,20 @@ export class Editor {
     // You can add zoom level display in status bar if needed
     const zoomPercentage = Math.round(this.currentZoom * 100);
     console.log(`Zoom: ${zoomPercentage}%`);
+  }
+
+  applyLineHeightToText(lineHeight) {
+    // Apply line height to the selected text
+    const sel = window.getSelection();
+    if (sel.rangeCount > 0) {
+      const range = sel.getRangeAt(0);
+      const selectedText = range.extractContents();
+      const span = document.createElement('span');
+      span.style.fontSize = 'inherit';
+      span.style.lineHeight = lineHeight;
+      span.appendChild(selectedText);
+      range.insertNode(span);
+    }
   }
 }
 
