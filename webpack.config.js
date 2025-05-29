@@ -1,8 +1,9 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { VueLoaderPlugin } = require('vue-loader');
 
 module.exports = {
-  entry: './src/lib/Editor.js',
+  entry: './src/main.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.[contenthash].js',
@@ -10,6 +11,10 @@ module.exports = {
   },
   module: {
     rules: [
+      {
+        test: /\.vue$/,
+        loader: 'vue-loader'
+      },
       {
         test: /\.js$/,
         exclude: /node_modules/,
@@ -28,10 +33,13 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './src/index.html',
-      filename: 'index.html'
-    })
+      template: './index.html'
+    }),
+    new VueLoaderPlugin()
   ],
+  resolve: {
+    extensions: ['.js', '.vue', '.json']
+  },
   devServer: {
     static: {
       directory: path.join(__dirname, 'dist'),
