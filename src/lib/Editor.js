@@ -353,25 +353,116 @@ export class Editor {
     toolbar.appendChild(this.createSeparator());
 
     // Căn lề
-    const alignBtns = [
+    const alignDropdown = document.createElement('div');
+    alignDropdown.className = 'toolbar-dropdown';
+    alignDropdown.style.position = 'relative';
+    alignDropdown.style.display = 'inline-block';
+
+    const alignBtn = this.createBtn('<i class="fas fa-align-left"></i>', 'Text Alignment');
+    alignDropdown.appendChild(alignBtn);
+    this.toolbarBtns['textAlignment'] = alignBtn;
+
+    const alignMenu = document.createElement('div');
+    alignMenu.className = 'dropdown-menu';
+    alignMenu.style.display = 'none';
+    alignMenu.style.position = 'fixed'; // Changed from absolute to fixed
+    alignMenu.style.zIndex = '99999'; // Increased z-index
+    alignMenu.style.backgroundColor = '#fff';
+    alignMenu.style.border = '1px solid #d1d5db';
+    alignMenu.style.borderRadius = '8px';
+    alignMenu.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
+    alignMenu.style.minWidth = '160px';
+    alignMenu.style.padding = '4px';
+    alignMenu.style.transition = 'all 0.2s ease';
+    alignMenu.style.opacity = '0';
+    alignMenu.style.transform = 'translateY(-10px)';
+    alignMenu.style.pointerEvents = 'none';
+
+    const alignOptions = [
       { icon: '<i class="fas fa-align-left"></i>', title: 'Left', cmd: 'justifyLeft' },
       { icon: '<i class="fas fa-align-center"></i>', title: 'Center', cmd: 'justifyCenter' },
       { icon: '<i class="fas fa-align-right"></i>', title: 'Right', cmd: 'justifyRight' },
-      { icon: '<i class="fas fa-align-justify"></i>', title: 'Justify', cmd: 'justifyFull' },
-      { icon: '<i class="fas fa-indent"></i>', title: 'Indent', cmd: 'indent' },
-      { icon: '<i class="fas fa-long-arrow-alt-right"></i>', title: 'Increase Indent', cmd: 'indentIncrease' },
-      { icon: '<i class="fas fa-long-arrow-alt-left"></i>', title: 'Decrease Indent', cmd: 'indentDecrease' }
+      { icon: '<i class="fas fa-align-justify"></i>', title: 'Justify', cmd: 'justifyFull' }
     ];
 
-    alignBtns.forEach(btn => {
-      const button = this.createBtn(btn.icon, btn.title, btn.cmd);
-      toolbar.appendChild(button);
-      this.toolbarBtns[btn.cmd] = button;
+    alignOptions.forEach(option => {
+      const button = this.createBtn(option.icon, option.title, option.cmd);
+      button.style.display = 'flex';
+      button.style.width = '100%';
+      button.style.alignItems = 'center';
+      button.style.padding = '8px 12px';
+      button.style.border = 'none';
+      button.style.backgroundColor = 'transparent';
+      button.style.cursor = 'pointer';
+      button.style.borderRadius = '6px';
+      button.style.transition = 'all 0.2s ease';
+      button.style.color = '#374151';
+      button.style.fontSize = '14px';
+      button.style.gap = '8px';
       
-      // Initially hide the decrease indent button
-      if (btn.cmd === 'indentDecrease') {
-        button.style.display = 'none';
+      const label = document.createElement('span');
+      label.textContent = option.title;
+      button.appendChild(label);
+      
+      button.addEventListener('mouseover', () => {
+        button.style.backgroundColor = '#f3f4f6';
+      });
+      
+      button.addEventListener('mouseout', () => {
+        button.style.backgroundColor = 'transparent';
+      });
+      
+      button.addEventListener('click', () => {
+        document.execCommand(option.cmd, false, null);
+        alignBtn.innerHTML = option.icon;
+        alignMenu.style.display = 'none';
+        alignMenu.style.opacity = '0';
+        alignMenu.style.transform = 'translateY(-10px)';
+        alignMenu.style.pointerEvents = 'none';
+      });
+      
+      alignMenu.appendChild(button);
+    });
+
+    alignDropdown.appendChild(alignMenu);
+    toolbar.appendChild(alignDropdown);
+
+    // Thêm sự kiện click cho nút dropdown
+    alignBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isVisible = alignMenu.style.display === 'block';
+      this.closeAllDropdowns();
+      
+      if (!isVisible) {
+        // Calculate position
+        const btnRect = alignBtn.getBoundingClientRect();
+        alignMenu.style.top = (btnRect.bottom + 5) + 'px';
+        alignMenu.style.left = btnRect.left + 'px';
+        
+        alignMenu.style.display = 'block';
+        requestAnimationFrame(() => {
+          alignMenu.style.opacity = '1';
+          alignMenu.style.transform = 'translateY(0)';
+          alignMenu.style.pointerEvents = 'auto';
+        });
+      } else {
+        alignMenu.style.opacity = '0';
+        alignMenu.style.transform = 'translateY(-10px)';
+        alignMenu.style.pointerEvents = 'none';
+        setTimeout(() => {
+          alignMenu.style.display = 'none';
+        }, 200);
       }
+    });
+
+    // Thêm sự kiện click cho document để đóng dropdown khi click ra ngoài
+    document.addEventListener('click', () => {
+      alignMenu.style.opacity = '0';
+      alignMenu.style.transform = 'translateY(-10px)';
+      alignMenu.style.pointerEvents = 'none';
+      setTimeout(() => {
+        alignMenu.style.display = 'none';
+      }, 200);
     });
 
     // Thêm separator
@@ -1823,43 +1914,20 @@ export class Editor {
 
   updateStatusbar() {
     if (!this.statusbar) return;
-    // Breadcrumb
-    const sel = window.getSelection();
-    let node = sel.anchorNode;
-    if (node && node.nodeType === 3) node = node.parentNode;
-    let path = [];
-    while (node && node !== this.editor && node.nodeType === 1) {
-      path.unshift(node.tagName.toLowerCase());
-      node = node.parentNode;
-    }
-    if (this.options.features.breadcrumb && this.statusbarEls.breadcrumb)
-      this.statusbarEls.breadcrumb.textContent = path.join(' › ');
-    // Wordcount
-    if (this.options.features.wordCount && this.statusbarEls.wordcount) {
-      const text = this.editor.innerText || '';
-      const words = text.trim().split(/\s+/).filter(Boolean);
-      this.statusbarEls.wordcount.textContent = words.length + ' words  |  ' + text.length + ' chars';
-    }
 
-    // Update toolbar buttons state based on current selection
+    const sel = window.getSelection();
+    if (!sel) return;
+
+    // Update toolbar buttons state based on current selection or cursor position
     if (sel.rangeCount > 0) {
       const range = sel.getRangeAt(0);
-      if (range.collapsed) {
-        // No selection, reset all buttons
-        Object.values(this.toolbarBtns).forEach(btn => {
-          if (btn.tagName === 'BUTTON' || btn.classList.contains('toolbar-btn')) {
-            btn._setActive(false);
-          }
-        });
-        return;
-      }
-
+      
       // Check text formatting
       const formatCommands = {
         'bold': 'bold',
         'italic': 'italic',
         'underline': 'underline',
-        'strikeThrough': 'strike',
+        'strikeThrough': 'strikeThrough',
         'superscript': 'superscript',
         'subscript': 'subscript'
       };
@@ -1893,26 +1961,47 @@ export class Editor {
         }
       });
 
+      // Get the current block element at cursor position
+      const currentBlock = this.getBlockElementAtCaret();
+      
       // Check text formatting
       Object.entries(formatCommands).forEach(([cmd, btnKey]) => {
-        if (document.queryCommandState(cmd)) {
-          const btn = this.toolbarBtns[btnKey];
-          if (btn && (btn.tagName === 'BUTTON' || btn.classList.contains('toolbar-btn'))) {
-            btn._setActive(true);
+        const btn = this.toolbarBtns[btnKey];
+        if (btn && (btn.tagName === 'BUTTON' || btn.classList.contains('toolbar-btn'))) {
+          // Check if the command is active
+          const isActive = document.queryCommandState(cmd);
+          
+          // If we're in an empty paragraph, check if the parent has the style
+          if (currentBlock && currentBlock.tagName.toLowerCase() === 'p' && !currentBlock.textContent.trim()) {
+            const parentStyle = window.getComputedStyle(currentBlock);
+            if (cmd === 'bold' && parentStyle.fontWeight >= 600) {
+              btn._setActive(true);
+            } else if (cmd === 'italic' && parentStyle.fontStyle === 'italic') {
+              btn._setActive(true);
+            } else if (cmd === 'underline' && parentStyle.textDecoration.includes('underline')) {
+              btn._setActive(true);
+            } else if (cmd === 'strikeThrough' && parentStyle.textDecoration.includes('line-through')) {
+              btn._setActive(true);
+            } else {
+              btn._setActive(isActive);
+            }
+          } else {
+            btn._setActive(isActive);
           }
         }
       });
 
       // Check block formatting
-      const blockFormat = document.queryCommandValue('formatBlock').toLowerCase();
-      Object.entries(blockCommands).forEach(([tag, btnKey]) => {
-        if (blockFormat === tag) {
+      if (currentBlock) {
+        const tagName = currentBlock.tagName.toLowerCase();
+        const btnKey = blockCommands[tagName];
+        if (btnKey) {
           const btn = this.toolbarBtns[btnKey];
           if (btn && (btn.tagName === 'BUTTON' || btn.classList.contains('toolbar-btn'))) {
             btn._setActive(true);
           }
         }
-      });
+      }
 
       // Check alignment
       Object.entries(alignCommands).forEach(([cmd, btnKey]) => {
@@ -1934,17 +2023,46 @@ export class Editor {
         }
       });
 
-      // Update font select if exists
-      const fontSelect = this.toolbar.querySelector('.font-select');
-      if (fontSelect) {
-        const currentFont = document.queryCommandValue('fontName');
-        if (currentFont) {
-          fontSelect.value = currentFont;
-        } else {
-          fontSelect.value = 'default';
+      // Update text alignment button icon based on current alignment
+      const alignmentBtn = this.toolbarBtns['textAlignment'];
+      if (alignmentBtn) {
+        if (document.queryCommandState('justifyLeft')) {
+          alignmentBtn.innerHTML = '<i class="fas fa-align-left"></i>';
+        } else if (document.queryCommandState('justifyCenter')) {
+          alignmentBtn.innerHTML = '<i class="fas fa-align-center"></i>';
+        } else if (document.queryCommandState('justifyRight')) {
+          alignmentBtn.innerHTML = '<i class="fas fa-align-right"></i>';
+        } else if (document.queryCommandState('justifyFull')) {
+          alignmentBtn.innerHTML = '<i class="fas fa-align-justify"></i>';
         }
       }
     }
+  }
+
+  // Thêm hàm mới để xử lý việc toggle định dạng
+  toggleFormat(cmd) {
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount) return;
+
+    // Lưu selection hiện tại
+    this.savedSelection = this.saveSelection();
+
+    // Thực hiện command
+    document.execCommand(cmd, false, null);
+
+    // Cập nhật trạng thái active ngay lập tức
+    const isActive = document.queryCommandState(cmd);
+    const buttons = this.toolbar.querySelectorAll('button[data-command]');
+    buttons.forEach(btn => {
+      const btnCmd = btn.getAttribute('data-command');
+      if (btnCmd === cmd) {
+        btn._setActive(isActive);
+      }
+    });
+
+    // Khôi phục selection
+    this.restoreSelection(this.savedSelection);
+    this.editor.focus();
   }
 
   // Thêm các phương thức mới
