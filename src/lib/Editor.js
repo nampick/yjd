@@ -21,7 +21,7 @@ export class Editor {
         breadcrumb: true
       },
       blockToolbarFeatures: [
-        'image', 'table', 'heading', 'list', 'quote', 'code', 'video', 'import', 'indent'
+        'bold', 'italic', 'underline', 'strikeThrough', 'code', 'fontFamily'
       ]
     }, options);
 
@@ -120,6 +120,7 @@ export class Editor {
     this.toolbarBtns = {};
     this.statusbarEls = {};
     this.dropdownMenus = {}; // Store dropdown menu references
+    this.blockToolbarTimeout = null; // Timeout cho block toolbar
     this.init();
   }
 
@@ -143,10 +144,6 @@ export class Editor {
     this.wrapper.style.display = 'flex';
     this.wrapper.style.flexDirection = 'column';
     this.wrapper.style.boxSizing = 'border-box';
-
-    // Menu bar (new dropdown menu bar above toolbar)
-    this.menuBar = this.createMenuBar();
-    this.wrapper.appendChild(this.menuBar);
 
     // Toolbar
     this.toolbar = this.createToolbar();
@@ -335,19 +332,106 @@ export class Editor {
     // Thêm separator
     toolbar.appendChild(this.createSeparator());
 
-    // Định dạng khối
-    const blockBtns = [
-      { icon: '<i class="fas fa-heading"></i>', title: 'Heading 1', cmd: 'formatBlock', value: 'H1' },
-      { icon: '<i class="fas fa-heading"></i>', title: 'Heading 2', cmd: 'formatBlock', value: 'H2' },
-      { icon: '<i class="fas fa-quote-right"></i>', title: 'Quote', cmd: 'formatBlock', value: 'BLOCKQUOTE' },
-      { icon: '<i class="fas fa-code"></i>', title: 'Code', cmd: 'formatBlock', value: 'PRE' }
+    // Heading/Block selector (custom button + dropdown)
+    const headingDropdownWrapper = document.createElement('div');
+    headingDropdownWrapper.className = 'heading-dropdown-wrapper';
+    headingDropdownWrapper.style.position = 'relative';
+    headingDropdownWrapper.style.display = 'inline-block';
+
+    // Button để mở dropdown
+    const headingBtn = this.createBtn('P', 'Chọn kiểu Heading');
+    headingBtn.style.fontWeight = 'bold';
+    headingBtn.style.fontSize = '16px';
+    headingBtn.style.letterSpacing = '1px';
+    headingBtn.style.minWidth = '40px';
+    headingBtn.style.padding = '6px 12px';
+    headingBtn.style.display = 'flex';
+    headingBtn.style.alignItems = 'center';
+    headingBtn.style.justifyContent = 'center';
+    headingBtn.style.gap = '6px';
+    headingBtn.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#fff';
+    headingBtn.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#374151';
+    headingBtn.style.border = '1px solid #e0e0e0';
+    headingBtn.style.borderRadius = '7px';
+    headingBtn.style.cursor = 'pointer';
+    headingBtn.style.transition = 'all 0.2s ease';
+
+    // Dropdown div
+    const headingDropdown = document.createElement('div');
+    headingDropdown.className = 'heading-dropdown';
+    headingDropdown.style.display = 'none';
+    headingDropdown.style.position = 'fixed';
+    headingDropdown.style.zIndex = '99999';
+    headingDropdown.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#fff';
+    headingDropdown.style.border = '1px solid #d1d5db';
+    headingDropdown.style.borderRadius = '8px';
+    headingDropdown.style.boxShadow = '0 4px 24px rgba(0,0,0,0.18)';
+    headingDropdown.style.padding = '6px 0';
+    headingDropdown.style.minWidth = '180px';
+    headingDropdown.style.maxHeight = '320px';
+    headingDropdown.style.overflowY = 'auto';
+
+    const headingOptions = [
+      { value: 'P', text: '<p style="margin:0;font-size:15px;">Đoạn văn bản (Paragraph)</p>' },
+      { value: 'H1', text: '<h1 style="margin:0;">Heading 1</h1>' },
+      { value: 'H2', text: '<h2 style="margin:0;">Heading 2</h2>' },
+      { value: 'H3', text: '<h3 style="margin:0;">Heading 3</h3>' },
+      { value: 'H4', text: '<h4 style="margin:0;">Heading 4</h4>' },
+      { value: 'H5', text: '<h5 style="margin:0;">Heading 5</h5>' },
+      { value: 'H6', text: '<h6 style="margin:0;">Heading 6</h6>' },
+      { value: 'PRE', text: '<pre style="margin:0;">Code Block</pre>' },
+      { value: 'BLOCKQUOTE', text: '<blockquote style="margin:0;">Quote</blockquote>' }
     ];
 
-    blockBtns.forEach(btn => {
-      const button = this.createBtn(btn.icon, btn.title, btn.cmd, btn.value);
-      toolbar.appendChild(button);
-      this.toolbarBtns[btn.cmd + btn.value] = button;
+    headingOptions.forEach(option => {
+      const item = document.createElement('div');
+      item.className = 'heading-dropdown-item';
+      item.innerHTML = option.text;
+      item.style.padding = '7px 18px';
+      item.style.cursor = 'pointer';
+      item.style.fontSize = '15px';
+      item.style.transition = 'background 0.18s';
+      item.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#374151';
+      item.addEventListener('mouseover', () => {
+        item.style.background = this.options.theme === 'dark' ? '#404040' : '#f0f4fa';
+      });
+      item.addEventListener('mouseout', () => {
+        item.style.background = 'transparent';
+      });
+      item.addEventListener('click', () => {
+        headingDropdown.style.display = 'none';
+        if (this.savedHeadingSelection) {
+          this.restoreSelection(this.savedHeadingSelection);
+        }
+        console.log('Applying heading:', option.value); // Debug log
+        this.applyHeadingToSelection(option.value);
+      });
+      headingDropdown.appendChild(item);
     });
+
+    // Hiển thị dropdown khi bấm nút
+    headingBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      // Save selection trước khi hiển thị dropdown
+      this.savedHeadingSelection = this.saveSelection();
+      // Tính toán vị trí xuất hiện của dropdown
+      const rect = headingBtn.getBoundingClientRect();
+      headingDropdown.style.display = 'block';
+      headingDropdown.style.top = (rect.bottom + 5) + 'px';
+      headingDropdown.style.left = rect.left + 'px';
+    });
+
+    // Ẩn dropdown khi click ra ngoài
+    document.addEventListener('mousedown', (e) => {
+      if (!headingDropdown.contains(e.target) && e.target !== headingBtn) {
+        headingDropdown.style.display = 'none';
+      }
+    });
+
+    headingDropdownWrapper.appendChild(headingBtn);
+    headingDropdownWrapper.appendChild(headingDropdown);
+    toolbar.appendChild(headingDropdownWrapper);
+    this.headingSelector = headingBtn; // Để updateHeadingSelector không lỗi
 
     // Thêm separator
     toolbar.appendChild(this.createSeparator());
@@ -371,8 +455,9 @@ export class Editor {
     alignMenu.style.border = '1px solid #d1d5db';
     alignMenu.style.borderRadius = '8px';
     alignMenu.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
-    alignMenu.style.minWidth = '160px';
-    alignMenu.style.padding = '4px';
+    alignMenu.style.width = '98px';
+    alignMenu.style.height = '115px';
+    alignMenu.style.padding = '0';
     alignMenu.style.transition = 'all 0.2s ease';
     alignMenu.style.opacity = '0';
     alignMenu.style.transform = 'translateY(-10px)';
@@ -385,34 +470,87 @@ export class Editor {
       { icon: '<i class="fas fa-align-justify"></i>', title: 'Justify', cmd: 'justifyFull' }
     ];
 
-    alignOptions.forEach(option => {
-      const button = this.createBtn(option.icon, option.title, option.cmd);
+    alignOptions.forEach((option, index) => {
+      // Create button completely from scratch without createBtn
+      const button = document.createElement('button');
+      button.title = option.title;
+      button.classList.add('align-dropdown-btn');
+      
+      // Create icon element
+      const iconElement = document.createElement('i');
+      iconElement.className = option.icon.match(/class="([^"]+)"/)[1];
+      iconElement.style.marginLeft = '7px';
+      
+      // Create text element  
+      const textElement = document.createElement('span');
+      textElement.textContent = option.title;
+      
+      button.appendChild(iconElement);
+      button.appendChild(textElement);
+      
+      // Apply styles directly - no inheritance from createBtn
+      button.style.setProperty('width', '90px', 'important');
+      button.style.setProperty('height', '24px', 'important');
+      button.style.setProperty('min-width', 'auto', 'important');
+      button.style.setProperty('min-height', 'auto', 'important');
+      button.style.flexShrink = '0';
       button.style.display = 'flex';
-      button.style.width = '100%';
       button.style.alignItems = 'center';
-      button.style.padding = '8px 12px';
-      button.style.border = 'none';
-      button.style.backgroundColor = 'transparent';
+      button.style.justifyContent = 'flex-start';
+      button.style.setProperty('border', 'none', 'important');
+      button.style.setProperty('outline', 'none', 'important');
+      button.style.setProperty('box-shadow', 'none', 'important');
+      button.style.setProperty('background', 'transparent', 'important');
+      button.style.setProperty('background-color', 'transparent', 'important');
       button.style.cursor = 'pointer';
-      button.style.borderRadius = '6px';
       button.style.transition = 'all 0.2s ease';
       button.style.color = '#374151';
       button.style.fontSize = '14px';
-      button.style.gap = '8px';
+      button.style.gap = '5px';
+      button.style.padding = '0px';
+      button.style.margin = '0';
+      button.style.outline = 'none';
       
-      const label = document.createElement('span');
-      label.textContent = option.title;
-      button.appendChild(label);
+      // Add spacing: 7px top for first item, 4px left/right for all items
+      if (index === 0) {
+        button.style.margin = '7px 4px 0 4px';
+        // Set first option as active by default
+        button.classList.add('active');
+        button.style.setProperty('background-color', '#EEE', 'important');
+        button.style.setProperty('color', '#252424', 'important');
+      } else {
+        button.style.margin = '0px 4px';
+      }
       
       button.addEventListener('mouseover', () => {
-        button.style.backgroundColor = '#f3f4f6';
+        button.style.setProperty('background-color', '#EEE', 'important');
+        button.style.setProperty('color', '#252424', 'important');
       });
       
       button.addEventListener('mouseout', () => {
-        button.style.backgroundColor = 'transparent';
+        // Keep #EEE if active, otherwise transparent
+        if (!button.classList.contains('active')) {
+          button.style.setProperty('background-color', 'transparent', 'important');
+          button.style.setProperty('color', '#252424', 'important');
+          button.style.setProperty('border', 'none', 'important');
+        } else {
+          button.style.setProperty('background-color', '#EEE', 'important');
+          button.style.setProperty('color', '#252424', 'important');
+        }
       });
       
       button.addEventListener('click', () => {
+        // Remove active state from all buttons
+        alignMenu.querySelectorAll('button').forEach(btn => {
+          btn.classList.remove('active');
+          btn.style.setProperty('background-color', 'transparent', 'important');
+        });
+        
+        // Set active state for clicked button
+        button.classList.add('active');
+        button.style.setProperty('background-color', '#EEE', 'important');
+        button.style.setProperty('color', '#252424', 'important');
+        button.style.setProperty('border', 'none', 'important');
         document.execCommand(option.cmd, false, null);
         alignBtn.innerHTML = option.icon;
         alignMenu.style.display = 'none';
@@ -464,17 +602,185 @@ export class Editor {
         alignMenu.style.display = 'none';
       }, 200);
     });
-
     // Thêm separator
     toolbar.appendChild(this.createSeparator());
 
-    // Danh sách
-    const listBtns = [
+    // Danh sách dropdown
+    const listDropdown = document.createElement('div');
+    listDropdown.className = 'toolbar-dropdown';
+    listDropdown.style.position = 'relative';
+    listDropdown.style.display = 'inline-block';
+
+    const listBtn = this.createBtn('<i class="fas fa-list-ul"></i>', 'Lists');
+    listDropdown.appendChild(listBtn);
+    this.toolbarBtns['listDropdown'] = listBtn;
+
+    const listMenu = document.createElement('div');
+    listMenu.className = 'dropdown-menu';
+    listMenu.style.display = 'none';
+    listMenu.style.position = 'fixed';
+    listMenu.style.zIndex = '99999';
+    listMenu.style.backgroundColor = '#fff';
+    listMenu.style.border = '1px solid #d1d5db';
+    listMenu.style.borderRadius = '8px';
+    listMenu.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
+    listMenu.style.width = 'auto';
+    listMenu.style.height = 'auto';
+    listMenu.style.padding = '12px';
+    listMenu.style.transition = 'all 0.2s ease';
+    listMenu.style.opacity = '0';
+    listMenu.style.transform = 'translateY(-10px)';
+    listMenu.style.pointerEvents = 'none';
+
+    const listOptions = [
       { icon: '<i class="fas fa-list-ul"></i>', title: 'Unordered List', cmd: 'insertUnorderedList' },
-      { icon: '<i class="fas fa-list-ol"></i>', title: 'Ordered List', cmd: 'insertOrderedList' }
+      { icon: '<i class="fas fa-list-ol"></i>', title: 'Ordered List', cmd: 'insertOrderedList' },
+      { icon: '<i class="fas fa-tasks"></i>', title: 'Task List', cmd: 'insertUnorderedList' },
+      { icon: '<i class="fas fa-tasks"></i>', title: 'Task List', cmd: 'insertUnorderedList' },
+      { icon: '<i class="fas fa-tasks"></i>', title: 'Task List', cmd: 'insertUnorderedList' },
     ];
 
-    listBtns.forEach(btn => {
+    listOptions.forEach((option, index) => {
+      const button = document.createElement('button');
+      button.title = option.title;
+      button.classList.add('list-dropdown-btn');
+      
+      const iconElement = document.createElement('i');
+      iconElement.className = option.icon.match(/class="([^"]+)"/)[1];
+      iconElement.style.fontSize = '16px';
+      
+      button.appendChild(iconElement);
+      // No text element - only icon
+      
+      // Apply grid button styles
+      button.style.setProperty('width', '32px', 'important');
+      button.style.setProperty('height', '32px', 'important');
+      button.style.setProperty('min-width', '32px', 'important');
+      button.style.setProperty('min-height', '32px', 'important');
+      button.style.flexShrink = '0';
+      button.style.display = 'flex';
+      button.style.alignItems = 'center';
+      button.style.justifyContent = 'center';
+      button.style.setProperty('border', 'none', 'important');
+      button.style.setProperty('outline', 'none', 'important');
+      button.style.setProperty('box-shadow', 'none', 'important');
+      button.style.setProperty('background', 'transparent', 'important');
+      button.style.setProperty('background-color', 'transparent', 'important');
+      button.style.cursor = 'pointer';
+      button.style.transition = 'all 0.2s ease';
+      button.style.color = '#374151';
+      button.style.padding = '0px';
+      button.style.margin = '0';
+      button.style.outline = 'none';
+      button.style.borderRadius = '4px';
+      
+      // Grid handles spacing automatically, no manual margins needed
+      
+      button.addEventListener('mouseover', () => {
+        button.style.setProperty('background-color', '#EEE', 'important');
+        button.style.setProperty('color', '#252424', 'important');
+      });
+      
+      button.addEventListener('mouseout', () => {
+        if (!button.classList.contains('active')) {
+          button.style.setProperty('background-color', 'transparent', 'important');
+          button.style.setProperty('color', '#252424', 'important');
+          button.style.setProperty('border', 'none', 'important');
+        } else {
+          button.style.setProperty('background-color', '#EEE', 'important');
+          button.style.setProperty('color', '#252424', 'important');
+        }
+      });
+      
+      button.addEventListener('click', () => {
+        // Remove active state from all buttons
+        listMenu.querySelectorAll('button').forEach(btn => {
+          btn.classList.remove('active');
+          btn.style.setProperty('background-color', 'transparent', 'important');
+        });
+        
+        // Set active state for clicked button
+        button.classList.add('active');
+        button.style.setProperty('background-color', '#EEE', 'important');
+        button.style.setProperty('color', '#252424', 'important');
+        button.style.setProperty('border', 'none', 'important');
+        
+        // Execute command
+        document.execCommand(option.cmd, false, null);
+        
+        // Update main button icon
+        listBtn.innerHTML = option.icon;
+        
+        // Close menu
+        listMenu.style.display = 'none';
+        listMenu.style.opacity = '0';
+        listMenu.style.transform = 'translateY(-10px)';
+        listMenu.style.pointerEvents = 'none';
+        
+        // Focus back to editor
+        this.editor.focus();
+      });
+      
+      // Store button reference for status updates (avoid duplicates)
+      if (index < 2) { // Only store first two unique commands
+        this.toolbarBtns[option.cmd] = button;
+      }
+      
+      listMenu.appendChild(button);
+    });
+
+    listDropdown.appendChild(listMenu);
+    toolbar.appendChild(listDropdown);
+
+    // Add click event for dropdown button
+    listBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isVisible = listMenu.style.display === 'grid' || listMenu.style.display === 'block';
+      
+      if (!isVisible) {
+        // Calculate position
+        const btnRect = listBtn.getBoundingClientRect();
+        listMenu.style.top = (btnRect.bottom + 5) + 'px';
+        listMenu.style.left = btnRect.left + 'px';
+        
+        // Set up grid layout and show
+        listMenu.style.gridTemplateColumns = 'repeat(3, 32px)';
+        listMenu.style.gap = '12px 16px';
+        listMenu.style.display = 'grid';
+        requestAnimationFrame(() => {
+          listMenu.style.opacity = '1';
+          listMenu.style.transform = 'translateY(0)';
+          listMenu.style.pointerEvents = 'auto';
+        });
+      } else {
+        listMenu.style.opacity = '0';
+        listMenu.style.transform = 'translateY(-10px)';
+        listMenu.style.pointerEvents = 'none';
+        setTimeout(() => {
+          listMenu.style.display = 'none';
+        }, 200);
+      }
+    });
+
+    // Add document click event to close dropdown when clicking outside
+    document.addEventListener('click', () => {
+      listMenu.style.opacity = '0';
+      listMenu.style.transform = 'translateY(-10px)';
+      listMenu.style.pointerEvents = 'none';
+      setTimeout(() => {
+        listMenu.style.display = 'none';
+      }, 200);
+    });
+
+    // Thêm separator
+    toolbar.appendChild(this.createSeparator());
+    // Thêm nút indentIncrease và indentDecrease
+    const indentBtns = [
+      { icon: '<i class="fas fa-indent"></i>', title: 'Increase Indent', cmd: 'indentIncrease' },
+      { icon: '<i class="fas fa-outdent"></i>', title: 'Decrease Indent', cmd: 'indentDecrease' }
+    ];
+
+    indentBtns.forEach(btn => {
       const button = this.createBtn(btn.icon, btn.title, btn.cmd);
       toolbar.appendChild(button);
       this.toolbarBtns[btn.cmd] = button;
@@ -482,8 +788,7 @@ export class Editor {
 
     // Thêm separator
     toolbar.appendChild(this.createSeparator());
-
-    // Font select
+    // Font selectoralign-dropdown-btnalign-dropdown-btn
     const fontSelect = document.createElement('select');
     fontSelect.className = 'font-select';
     fontSelect.style.padding = '6px 12px';
@@ -636,12 +941,12 @@ export class Editor {
     toolbar.appendChild(this.createSeparator());
 
     // Nút chọn màu chữ
-    const textColorBtn = this.createBtn('<i class="fas fa-font"></i>', 'Text Color', 'textColor');
+    const textColorBtn = this.createColorBtn('<i class="fas fa-font"></i>', 'Text Color', 'textColor');
     toolbar.appendChild(textColorBtn);
     this.toolbarBtns.textColor = textColorBtn;
 
     // Nút chọn màu nền
-    const bgColorBtn = this.createBtn('<i class="fas fa-fill-drip"></i>', 'Background Color', 'bgColor');
+    const bgColorBtn = this.createColorBtn('<i class="fas fa-fill-drip"></i>', 'Background Color', 'bgColor');
     toolbar.appendChild(bgColorBtn);
     this.toolbarBtns.bgColor = bgColorBtn;
 
@@ -698,49 +1003,6 @@ export class Editor {
     // Thêm separator
     toolbar.appendChild(this.createSeparator());
 
-    // Heading/Block selector (simple select like font selector)
-    const headingSelect = document.createElement('select');
-    headingSelect.className = 'heading-select';
-    headingSelect.style.padding = '6px 12px';
-    headingSelect.style.border = '1px solid #e0e0e0';
-    headingSelect.style.borderRadius = '6px';
-    headingSelect.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#ffffff';
-    headingSelect.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#333333';
-    headingSelect.style.fontSize = '14px';
-    headingSelect.style.cursor = 'pointer';
-    headingSelect.style.transition = 'all 0.2s ease';
-    headingSelect.style.minWidth = '130px';
-
-    const headingOptions = [
-      { value: 'P', text: 'Paragraph' },
-      { value: 'H1', text: 'Heading 1' },
-      { value: 'H2', text: 'Heading 2' },
-      { value: 'H3', text: 'Heading 3' },
-      { value: 'H4', text: 'Heading 4' },
-      { value: 'H5', text: 'Heading 5' },
-      { value: 'H6', text: 'Heading 6' },
-      { value: 'PRE', text: 'Code Block' },
-      { value: 'BLOCKQUOTE', text: 'Quote' }
-    ];
-
-    headingOptions.forEach(option => {
-      const optionElement = document.createElement('option');
-      optionElement.value = option.value;
-      optionElement.textContent = option.text;
-      headingSelect.appendChild(optionElement);
-    });
-
-    headingSelect.addEventListener('change', () => {
-      const selectedValue = headingSelect.value;
-      this.applyHeadingToSelection(selectedValue);
-    });
-
-    toolbar.appendChild(headingSelect);
-    this.headingSelector = headingSelect;
-
-    // Thêm separator
-    toolbar.appendChild(this.createSeparator());
-
     // Font size selector (simple select like font selector)
     const fontSizeSelect = document.createElement('select');
     fontSizeSelect.className = 'font-size-select';
@@ -772,6 +1034,9 @@ export class Editor {
     toolbar.appendChild(fontSizeSelect);
     this.fontSizeSelector = fontSizeSelect;
 
+    // Update format button states
+    this.updateFormatButtonStates();
+
     return toolbar;
   }
 
@@ -783,8 +1048,8 @@ export class Editor {
     btn.style.padding = '6px 9px';
     btn.style.border = '1.5px solid transparent';
     btn.style.borderRadius = '7px';
-    btn.style.background = '#fff';
-    btn.style.color = '#374151';
+    btn.style.background = this.options?.theme === 'dark' ? '#2a2a2a' : '#fff';
+    btn.style.color = this.options?.theme === 'dark' ? '#e0e0e0' : '#374151';
     btn.style.cursor = 'pointer';
     btn.style.transition = 'all 0.18s cubic-bezier(.4,0,.2,1)';
     btn.style.display = 'flex';
@@ -803,38 +1068,43 @@ export class Editor {
     btn._setActive = function(active) {
       if (active) {
         btn.classList.add('active');
-        btn.style.background = '#e0f0ff';
-        btn.style.color = '#1976d2';
-        btn.style.borderColor = '#90caf9';
-        btn.style.boxShadow = '0 2px 8px rgba(25, 118, 210, 0.08)';
+        const isDark = this.options?.theme === 'dark';
+        btn.style.background = isDark ? '#3a4a6b' : '#e0f0ff';
+        btn.style.color = isDark ? '#66ccff' : '#1976d2';
+        btn.style.borderColor = isDark ? '#4a5a7b' : '#90caf9';
+        btn.style.boxShadow = isDark ? '0 2px 8px rgba(102, 204, 255, 0.15)' : '0 2px 8px rgba(25, 118, 210, 0.08)';
       } else {
         btn.classList.remove('active');
-        btn.style.background = '#fff';
-        btn.style.color = '#374151';
+        const isDark = this.options?.theme === 'dark';
+        btn.style.background = isDark ? '#2a2a2a' : '#fff';
+        btn.style.color = isDark ? '#e0e0e0' : '#374151';
         btn.style.borderColor = 'transparent';
         btn.style.boxShadow = 'none';
       }
-    };
+    }.bind(this);
 
     btn.onmouseover = () => {
       if (!btn.classList.contains('active')) {
-        btn.style.background = '#e9ecef';
-        btn.style.color = '#374151';
-        btn.style.borderColor = '#b6d4fe';
+        const isDark = this.options?.theme === 'dark';
+        btn.style.background = isDark ? '#3a3a3a' : '#e9ecef';
+        btn.style.color = isDark ? '#e0e0e0' : '#374151';
+        btn.style.borderColor = isDark ? '#4a5a7b' : '#b6d4fe';
         btn.style.transform = 'translateY(-1px)';
-        btn.style.boxShadow = '0 2px 8px rgba(25, 118, 210, 0.06)';
+        btn.style.boxShadow = isDark ? '0 2px 8px rgba(102, 204, 255, 0.12)' : '0 2px 8px rgba(25, 118, 210, 0.06)';
       }
     };
 
     btn.onmouseout = () => {
       if (btn.classList.contains('active')) {
-        btn.style.background = '#e0f0ff';
-        btn.style.color = '#1976d2';
-        btn.style.borderColor = '#90caf9';
-        btn.style.boxShadow = '0 2px 8px rgba(25, 118, 210, 0.08)';
+        const isDark = this.options?.theme === 'dark';
+        btn.style.background = isDark ? '#3a4a6b' : '#e0f0ff';
+        btn.style.color = isDark ? '#66ccff' : '#1976d2';
+        btn.style.borderColor = isDark ? '#4a5a7b' : '#90caf9';
+        btn.style.boxShadow = isDark ? '0 2px 8px rgba(102, 204, 255, 0.15)' : '0 2px 8px rgba(25, 118, 210, 0.08)';
       } else {
-        btn.style.background = '#fff';
-        btn.style.color = '#374151';
+        const isDark = this.options?.theme === 'dark';
+        btn.style.background = isDark ? '#2a2a2a' : '#fff';
+        btn.style.color = isDark ? '#e0e0e0' : '#374151';
         btn.style.borderColor = 'transparent';
         btn.style.transform = 'translateY(0)';
         btn.style.boxShadow = 'none';
@@ -851,12 +1121,14 @@ export class Editor {
         this.showColorPicker(btn, cmd);
         return;
       }
+      // Handle format commands (bold, italic, underline, strikeThrough) with custom logic
+      if (['bold', 'italic', 'underline', 'strikeThrough', 'superscript', 'subscript'].includes(cmd)) {
+        this.handleFormatCommand(cmd, btn);
+        return;
+      }
       if (cmd === 'emoji') {
         this.savedEmojiSelection = this.saveSelection();
         this.showTooltip({
-          title: 'Insert Emoji',
-          placeholder: 'Search or select emoji...',
-          confirmText: 'Insert',
           emojis: true,
           onSubmit: emoji => {
             this.restoreSelection(this.savedEmojiSelection);
@@ -947,6 +1219,31 @@ export class Editor {
     return btn;
   }
 
+  createColorBtn(icon, title, cmd) {
+    const btn = this.createBtn(icon, title, cmd);
+    
+    // Tạo color indicator (thanh màu nhỏ ở dưới icon)
+    const colorIndicator = document.createElement('div');
+    colorIndicator.style.position = 'absolute';
+    colorIndicator.style.bottom = '2px';
+    colorIndicator.style.left = '50%';
+    colorIndicator.style.transform = 'translateX(-50%)';
+    colorIndicator.style.width = '20px';
+    colorIndicator.style.height = '3px';
+    colorIndicator.style.backgroundColor = cmd === 'textColor' ? '#000000' : 'transparent';
+    colorIndicator.style.borderRadius = '1px';
+    colorIndicator.style.border = cmd === 'bgColor' ? '1px solid #ccc' : 'none';
+    
+    // Cần đặt position relative cho btn để indicator có thể absolute
+    btn.style.position = 'relative';
+    btn.appendChild(colorIndicator);
+    
+    // Lưu reference để có thể update màu
+    btn._colorIndicator = colorIndicator;
+    
+    return btn;
+  }
+
   createSeparator() {
     const separator = document.createElement('div');
     separator.style.width = '1px';
@@ -977,8 +1274,17 @@ export class Editor {
     this.tableGrid.style.marginBottom = '8px';
     this.tablePopup.appendChild(this.tableGrid);
     // Tạo label kích thước
+     // Đường kẻ ngang chia cắt
+    const divider = document.createElement('div');
+    //divider.style.marginTop = '8px';
+    divider.style.gridColumn = '1 / -1'; // Spanning toàn bộ 6 cột
+    divider.style.height = '1px';
+    divider.style.background = '#eee';
+    this.tablePopup.appendChild(divider);
+
     this.tableSizeLabel = document.createElement('div');
     this.tableSizeLabel.className = 'table-size-label';
+    this.tableSizeLabel.style.marginTop = '4px';
     this.tableSizeLabel.textContent = '0x0';
     this.tablePopup.appendChild(this.tableSizeLabel);
     // Thêm popup vào wrapper
@@ -1257,13 +1563,297 @@ export class Editor {
     }
   }
 
+  // Thêm method mới để update trạng thái active của các nút format
+  updateFormatButtonStates() {
+    if (!this.toolbarBtns || !this.editor) return;
+    
+    // Kiểm tra xem có selection trong editor không
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount) return;
+    
+    const range = selection.getRangeAt(0);
+    if (!this.editor.contains(range.commonAncestorContainer) && 
+        !this.editor.contains(range.commonAncestorContainer.parentNode)) {
+      return;
+    }
+
+    // Danh sách các command cần kiểm tra
+    const formatCommands = ['bold', 'italic', 'underline', 'strikeThrough', 'superscript', 'subscript'];
+    
+    formatCommands.forEach(cmd => {
+      if (this.toolbarBtns[cmd]) {
+        try {
+          const isActive = document.queryCommandState(cmd);
+          this.toolbarBtns[cmd]._setActive(isActive);
+        } catch (e) {
+          // Fallback: kiểm tra style computed
+          const isActive = this.checkFormatByStyle(cmd, range);
+          this.toolbarBtns[cmd]._setActive(isActive);
+        }
+      }
+    });
+
+    // Update màu cho nút text color và background color
+    this.updateColorButtonStates(range);
+  }
+
+  // Helper method để kiểm tra format bằng computed style
+  checkFormatByStyle(cmd, range) {
+    const node = range.startContainer.nodeType === 3 ? 
+                  range.startContainer.parentNode : 
+                  range.startContainer;
+    
+    if (!node || !node.style) return false;
+    
+    const computedStyle = window.getComputedStyle(node);
+    
+    switch (cmd) {
+      case 'bold':
+        return computedStyle.fontWeight === 'bold' || 
+               computedStyle.fontWeight === '700' || 
+               parseInt(computedStyle.fontWeight) >= 700 ||
+               node.tagName === 'B' || node.tagName === 'STRONG';
+      case 'italic':
+        return computedStyle.fontStyle === 'italic' ||
+               node.tagName === 'I' || node.tagName === 'EM';
+      case 'underline':
+        return computedStyle.textDecoration.includes('underline') ||
+               node.tagName === 'U';
+      case 'strikeThrough':
+        return computedStyle.textDecoration.includes('line-through') ||
+               node.tagName === 'STRIKE' || node.tagName === 'S';
+      case 'superscript':
+        return computedStyle.verticalAlign === 'super' ||
+               node.tagName === 'SUP';
+      case 'subscript':
+        return computedStyle.verticalAlign === 'sub' ||
+               node.tagName === 'SUB';
+      default:
+        return false;
+    }
+  }
+
+  // Method để update màu hiện tại cho nút text color và background color
+  updateColorButtonStates(range) {
+    if (!this.toolbarBtns || !this.editor) return;
+    
+    // Lấy range nếu không được truyền vào
+    if (!range) {
+      const selection = window.getSelection();
+      if (!selection || !selection.rangeCount) return;
+      range = selection.getRangeAt(0);
+    }
+    
+    // Lấy node hiện tại
+    const node = range.startContainer.nodeType === 3 ? 
+                  range.startContainer.parentNode : 
+                  range.startContainer;
+    
+    if (!node) return;
+    
+    // Update text color
+    if (this.toolbarBtns.textColor && this.toolbarBtns.textColor._colorIndicator) {
+      const textColor = this.getCurrentTextColor(node);
+      this.toolbarBtns.textColor._colorIndicator.style.backgroundColor = textColor;
+    }
+    
+    // Update background color
+    if (this.toolbarBtns.bgColor && this.toolbarBtns.bgColor._colorIndicator) {
+      const bgColor = this.getCurrentBackgroundColor(node);
+      if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
+        this.toolbarBtns.bgColor._colorIndicator.style.backgroundColor = bgColor;
+        this.toolbarBtns.bgColor._colorIndicator.style.border = 'none';
+      } else {
+        this.toolbarBtns.bgColor._colorIndicator.style.backgroundColor = 'transparent';
+        this.toolbarBtns.bgColor._colorIndicator.style.border = '1px solid #ccc';
+      }
+    }
+  }
+
+  // Helper method để lấy màu text hiện tại
+  getCurrentTextColor(node) {
+    if (!node) return '#000000';
+    
+    // Kiểm tra style inline trước
+    if (node.style && node.style.color) {
+      return this.normalizeColor(node.style.color);
+    }
+    
+    // Kiểm tra computed style
+    const computedStyle = window.getComputedStyle(node);
+    if (computedStyle.color) {
+      return this.normalizeColor(computedStyle.color);
+    }
+    
+    // Traverse lên parent để tìm màu
+    let parent = node.parentNode;
+    while (parent && parent !== this.editor) {
+      if (parent.style && parent.style.color) {
+        return this.normalizeColor(parent.style.color);
+      }
+      const parentComputed = window.getComputedStyle(parent);
+      if (parentComputed.color && parentComputed.color !== 'rgb(0, 0, 0)') {
+        return this.normalizeColor(parentComputed.color);
+      }
+      parent = parent.parentNode;
+    }
+    
+    return '#000000'; // Default
+  }
+
+  // Helper method để lấy màu background hiện tại
+  getCurrentBackgroundColor(node) {
+    if (!node) return 'transparent';
+    
+    // Kiểm tra style inline trước
+    if (node.style && node.style.backgroundColor) {
+      return this.normalizeColor(node.style.backgroundColor);
+    }
+    
+    // Kiểm tra computed style
+    const computedStyle = window.getComputedStyle(node);
+    if (computedStyle.backgroundColor && 
+        computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)' && 
+        computedStyle.backgroundColor !== 'transparent') {
+      return this.normalizeColor(computedStyle.backgroundColor);
+    }
+    
+    // Traverse lên parent để tìm background color
+    let parent = node.parentNode;
+    while (parent && parent !== this.editor) {
+      if (parent.style && parent.style.backgroundColor) {
+        const bgColor = this.normalizeColor(parent.style.backgroundColor);
+        if (bgColor !== 'transparent' && bgColor !== 'rgba(0, 0, 0, 0)') {
+          return bgColor;
+        }
+      }
+      const parentComputed = window.getComputedStyle(parent);
+      if (parentComputed.backgroundColor && 
+          parentComputed.backgroundColor !== 'rgba(0, 0, 0, 0)' && 
+          parentComputed.backgroundColor !== 'transparent') {
+        return this.normalizeColor(parentComputed.backgroundColor);
+      }
+      parent = parent.parentNode;
+    }
+    
+    return 'transparent';
+  }
+
+  // Helper method để normalize màu về hex format
+  normalizeColor(color) {
+    if (!color) return '#000000';
+    
+    // Nếu đã là hex thì return luôn
+    if (color.startsWith('#')) return color;
+    
+    // Convert rgb/rgba to hex
+    if (color.startsWith('rgb')) {
+      const matches = color.match(/\d+/g);
+      if (matches && matches.length >= 3) {
+        const r = parseInt(matches[0]);
+        const g = parseInt(matches[1]);
+        const b = parseInt(matches[2]);
+        return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+      }
+    }
+    
+    return color;
+  }
+
+  // Method để apply background color sử dụng style thay vì execCommand
+  applyBackgroundColor(color) {
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    
+    // Nếu không có text được chọn
+    if (range.collapsed) {
+      // Tạo span để wrap text sẽ được nhập
+      const span = document.createElement('span');
+      span.style.backgroundColor = color === 'transparent' ? '' : color;
+      span.textContent = '\u200B'; // Zero-width space
+      range.insertNode(span);
+      
+      // Di chuyển cursor vào trong span
+      range.setStart(span, 1);
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    } else {
+      // Nếu có text được chọn
+      const contents = range.extractContents();
+      const span = document.createElement('span');
+      span.style.backgroundColor = color === 'transparent' ? '' : color;
+      span.appendChild(contents);
+      range.insertNode(span);
+    }
+    
+    // Giữ selection
+    selection.removeAllRanges();
+    selection.addRange(range);
+    
+    // Update indicator ngay lập tức
+    if (this.toolbarBtns.bgColor && this.toolbarBtns.bgColor._colorIndicator) {
+      if (color && color !== 'transparent') {
+        this.toolbarBtns.bgColor._colorIndicator.style.backgroundColor = color;
+        this.toolbarBtns.bgColor._colorIndicator.style.border = 'none';
+      } else {
+        this.toolbarBtns.bgColor._colorIndicator.style.backgroundColor = 'transparent';
+        this.toolbarBtns.bgColor._colorIndicator.style.border = '1px solid #ccc';
+      }
+    }
+  }
+
+  // Method để apply text color và update indicator
+  applyTextColor(color) {
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    
+    // Nếu không có text được chọn
+    if (range.collapsed) {
+      // Tạo span để wrap text sẽ được nhập
+      const span = document.createElement('span');
+      span.style.color = color;
+      span.textContent = '\u200B'; // Zero-width space
+      range.insertNode(span);
+      
+      // Di chuyển cursor vào trong span
+      range.setStart(span, 1);
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    } else {
+      // Nếu có text được chọn
+      const contents = range.extractContents();
+      const span = document.createElement('span');
+      span.style.color = color;
+      span.appendChild(contents);
+      range.insertNode(span);
+      
+      // Giữ selection
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+    
+    // Update indicator ngay lập tức
+    if (this.toolbarBtns.textColor && this.toolbarBtns.textColor._colorIndicator) {
+      this.toolbarBtns.textColor._colorIndicator.style.backgroundColor = color;
+    }
+  }
+
   bindEvents() {
     this.editor.addEventListener('input', () => {
       this.updateStatusbar();
-      this.updateIndentButtonState(); // Update indent button state when content changes
-      this.updateHeadingSelector(); // Update heading selector when content changes
-      this.updateFontSizeDisplay(); // Update font size display when content changes
-      this.updateLineHeightDisplay(); // Update line height display when content changes
+      this.updateIndentButtonState();
+      this.updateHeadingSelector();
+      this.updateFontSizeDisplay();
+      this.updateLineHeightDisplay();
+      this.updateFormatButtonStates(); // Thêm cập nhật trạng thái nút format
+      this.updateColorButtonStates(); // Thêm cập nhật màu sắc
+      
       // Kiểm tra nếu editor trống thì tạo thẻ div và p
       if (this.editor.innerHTML === '' || this.editor.innerHTML === '<br>') {
         const div = document.createElement('div');
@@ -1286,58 +1876,41 @@ export class Editor {
         sel.addRange(range);
       }
     });
-    function checkCaretPosition() {
-      const selection = window.getSelection();
-      if (!selection.rangeCount) {
-        console.log("Không có con trỏ nào được chọn.");
-        return;
+
+    // Cập nhật trạng thái nút khi con trỏ di chuyển hoặc selection thay đổi
+    document.addEventListener('selectionchange', () => {
+      if (document.activeElement === this.editor || this.editor.contains(document.activeElement)) {
+        // Debounce để tránh gọi quá nhiều lần
+        clearTimeout(this.selectionTimeout);
+        this.selectionTimeout = setTimeout(() => {
+          this.updateIndentButtonState();
+          this.updateHeadingSelector();
+          this.updateFontSizeDisplay();
+          this.updateLineHeightDisplay();
+          this.updateFormatButtonStates(); // Thêm cập nhật trạng thái nút format
+          this.updateColorButtonStates(); // Thêm cập nhật màu sắc
+        }, 10);
       }
+    });
 
-      const range = selection.getRangeAt(0);
-      const container = range.startContainer;
+    // Thêm event listeners cho mouse và keyboard để cập nhật trạng thái ngay lập tức
+    this.editor.addEventListener('mouseup', () => {
+      setTimeout(() => {
+        this.updateFormatButtonStates();
+        this.updateColorButtonStates();
+      }, 10);
+    });
 
-      // Tìm thẻ chứa con trỏ (thường là node cha chứa text)
-      let parentElement = container.nodeType === 1 ? container : container.parentElement;
-
-      // Tìm phần tử cha gần nhất là thẻ p, h1-h6, pre, blockquote
-      const validTags = ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'PRE', 'BLOCKQUOTE'];
-      while (parentElement && !validTags.includes(parentElement.tagName)) {
-        parentElement = parentElement.parentElement;
+    this.editor.addEventListener('keyup', (e) => {
+      // Chỉ cập nhật khi không phải là các phím điều hướng
+      if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'].includes(e.key)) {
+        setTimeout(() => {
+          this.updateFormatButtonStates();
+          this.updateColorButtonStates();
+        }, 10);
       }
+    });
 
-      if (!parentElement) {
-        console.log("Con trỏ không nằm trong các thẻ hợp lệ.");
-        return;
-      }
-
-      // Tính độ dài tổng của text trong thẻ
-      const totalText = parentElement.innerText;
-      const caretOffset = getCaretCharacterOffsetWithin(parentElement);
-
-      if (caretOffset === 0) {
-        console.log(`Con trỏ đang ở **ĐẦU** của thẻ <${parentElement.tagName.toLowerCase()}>.`);
-      } else if (caretOffset >= totalText.length) {
-        console.log(`Con trỏ đang ở **CUỐI** của thẻ <${parentElement.tagName.toLowerCase()}>.`);
-      } else {
-        console.log(`Con trỏ đang ở **GIỮA** của thẻ <${parentElement.tagName.toLowerCase()}>.`);
-      }
-    }
-
-    // Hàm phụ để lấy offset con trỏ tương đối trong element
-    function getCaretCharacterOffsetWithin(element) {
-      const selection = window.getSelection();
-      let caretOffset = 0;
-
-      if (selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        const preCaretRange = range.cloneRange();
-        preCaretRange.selectNodeContents(element);
-        preCaretRange.setEnd(range.endContainer, range.endOffset);
-        caretOffset = preCaretRange.toString().length;
-      }
-
-      return caretOffset;
-    }
     this.editor.addEventListener('keydown', e => {
       if (e.key === 'Enter') {
         checkCaretPosition();
@@ -1786,61 +2359,48 @@ export class Editor {
 
     // Thêm sự kiện cho block toolbar
     this.editor.addEventListener('keyup', e => {
-      // if (e.key === 'Enter') {
-      //   setTimeout(() => {
-      //     const sel = window.getSelection();
-      //     if (sel.rangeCount > 0) {
-      //       const range = sel.getRangeAt(0);
-      //       const node = range.startContainer;
-      //       let block = node.nodeType === 3 ? node.parentNode : node;
-      //       // Kiểm tra block là dòng trống: chỉ chứa <br> hoặc text rỗng
-      //       let isEmptyBlock = false;
-      //       if (block && (block.nodeName === 'DIV' || block.nodeName === 'P')) {
-      //         if (
-      //           block.textContent.trim() === '' ||
-      //           (block.childNodes.length === 1 && block.childNodes[0].nodeName === 'BR')
-      //         ) {
-      //           isEmptyBlock = true;
-      //         }
-      //       }
-      //       // Nếu block là editor-area và chỉ có 1 child là <br> hoặc text rỗng
-      //       if (!isEmptyBlock && block === this.editor) {
-      //         if (
-      //           this.editor.childNodes.length === 1 &&
-      //           (this.editor.firstChild.nodeName === 'BR' || this.editor.textContent.trim() === '')
-      //         ) {
-      //           isEmptyBlock = true;
-      //         }
-      //       }
-      //       if (isEmptyBlock && block.offsetHeight > 0) {
-      //         const rect = block.getBoundingClientRect();
-      //         this.showBlockToolbar(rect);
-      //       } else {
-      //         this.hideBlockToolbar();
-      //       }
-      //     }
-      //   }, 10);
-      // } else {
-      //   this.hideBlockToolbar();
-      // }
-    });
-    // Ẩn toolbar khi click ra ngoài hoặc nhập nội dung
-    this.editor.addEventListener('input', () => {
-      const sel = window.getSelection();
-      if (sel.rangeCount > 0) {
-        const range = sel.getRangeAt(0);
-        let block = range.startContainer.nodeType === 3 ? range.startContainer.parentNode : range.startContainer;
-        if (block && (block.nodeName === 'DIV' || block.nodeName === 'P')) {
-          // Nếu block đã có nội dung, ẩn toolbar
-          if (block.textContent.trim() !== '' && !(block.childNodes.length === 1 && block.childNodes[0].nodeName === 'BR')) {
-            this.hideBlockToolbar();
+      if (e.key === 'Enter') {
+        setTimeout(() => {
+          const sel = window.getSelection();
+          if (sel.rangeCount > 0) {
+            const range = sel.getRangeAt(0);
+            const node = range.startContainer;
+            let block = node.nodeType === 3 ? node.parentNode : node;
+            // Kiểm tra block là dòng trống: chỉ chứa <br> hoặc text rỗng
+            let isEmptyBlock = false;
+            if (block && (block.nodeName === 'DIV' || block.nodeName === 'P')) {
+              if (
+                block.textContent.trim() === '' ||
+                (block.childNodes.length === 1 && block.childNodes[0].nodeName === 'BR')
+              ) {
+                isEmptyBlock = true;
+              }
+            }
+            // Nếu block là editor-area và chỉ có 1 child là <br> hoặc text rỗng
+            if (!isEmptyBlock && block === this.editor) {
+              if (
+                this.editor.childNodes.length === 1 &&
+                (this.editor.firstChild.nodeName === 'BR' || this.editor.textContent.trim() === '')
+              ) {
+                isEmptyBlock = true;
+              }
+            }
+            if (isEmptyBlock && block.offsetHeight > 0) {
+              const rect = block.getBoundingClientRect();
+              this.showBlockToolbar(rect);
+            } else {
+              this.hideBlockToolbar();
+            }
           }
-        } else {
-          this.hideBlockToolbar();
-        }
+        }, 10);
       } else {
         this.hideBlockToolbar();
       }
+    });
+    // Ẩn toolbar khi click ra ngoài hoặc nhập nội dung
+    this.editor.addEventListener('input', () => {
+      // Luôn ẩn toolbar khi có input
+      this.hideBlockToolbar();
     });
     document.addEventListener('mousedown', e => {
       // Chỉ ẩn nếu click ra ngoài toolbar và ngoài editor-area
@@ -1851,46 +2411,6 @@ export class Editor {
       ) {
         this.hideBlockToolbar();
       }
-    });
-    // Hiển thị block toolbar khi click vào dòng trống (tối ưu)
-    this.editor.addEventListener('click', e => {
-      setTimeout(() => {
-        const sel = window.getSelection();
-        if (!sel.rangeCount) return;
-        let node = sel.anchorNode;
-        // Nếu là text node hoặc <br>, lấy parent
-        if (node.nodeType === 3 || node.nodeName === 'BR') node = node.parentNode;
-        // Tìm block cha gần nhất là DIV/P/editor-area
-        let block = node;
-        while (block && block !== this.editor && !['DIV', 'P'].includes(block.nodeName)) {
-          block = block.parentNode;
-        }
-        if (!block) block = this.editor;
-        // Kiểm tra dòng trống
-        let isEmptyBlock = false;
-        if (block === this.editor) {
-          // Nếu là editor-area, kiểm tra childNodes tại vị trí selection
-          if (
-            this.editor.childNodes.length === 1 &&
-            (this.editor.firstChild.nodeName === 'BR' || this.editor.textContent.trim() === '')
-          ) {
-            isEmptyBlock = true;
-          }
-        } else if (['DIV', 'P'].includes(block.nodeName)) {
-          if (
-            block.textContent.trim() === '' ||
-            (block.childNodes.length === 1 && block.childNodes[0].nodeName === 'BR')
-          ) {
-            isEmptyBlock = true;
-          }
-        }
-        if (isEmptyBlock && block.offsetHeight > 0) {
-          const rect = block.getBoundingClientRect();
-          this.showBlockToolbar(rect);
-        } else {
-          this.hideBlockToolbar();
-        }
-      }, 10);
     });
 
     // Hiển thị toolbar khi select text
@@ -1908,6 +2428,29 @@ export class Editor {
         } else {
           this.hideBlockToolbar();
         }
+      } else {
+        this.hideBlockToolbar();
+      }
+    });
+
+    // Thêm support cho keyboard selection (Shift + Arrow keys)
+    this.editor.addEventListener('keyup', e => {
+      if (e.shiftKey && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+        setTimeout(() => {
+          const sel = window.getSelection();
+          if (sel.rangeCount > 0) {
+            const range = sel.getRangeAt(0);
+            if (!range.collapsed) { // Có text được select bằng keyboard
+              const rect = range.getBoundingClientRect();
+              this.showBlockToolbar({
+                left: rect.left + (rect.width / 2),
+                top: rect.top - 10
+              });
+            } else {
+              this.hideBlockToolbar();
+            }
+          }
+        }, 10);
       }
     });
   }
@@ -2065,6 +2608,50 @@ export class Editor {
     this.editor.focus();
   }
 
+  // Handle format commands with immediate button state updates
+  handleFormatCommand(cmd, btn) {
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount) {
+      this.editor.focus();
+      return;
+    }
+
+    // Save current selection
+    this.savedSelection = this.saveSelection();
+
+    // Execute the command
+    document.execCommand(cmd, false, null);
+
+    // Immediately update button active state
+    // For empty paragraphs like <p><br></p>, queryCommandState might not work correctly
+    // So we'll check for actual formatting and update the button state
+    setTimeout(() => {
+      const isActive = document.queryCommandState(cmd);
+      btn._setActive(isActive);
+      
+      // Also update all other buttons of the same command type if any
+      const allButtons = this.toolbar.querySelectorAll('button');
+      allButtons.forEach(button => {
+        const buttonTitle = button.title.toLowerCase();
+        const cmdMap = {
+          'bold': 'Bold',
+          'italic': 'Italic', 
+          'underline': 'Underline',
+          'strikeThrough': 'Strike Through',
+          'superscript': 'Superscript',
+          'subscript': 'Subscript'
+        };
+        
+        if (cmdMap[cmd] && buttonTitle.includes(cmdMap[cmd].toLowerCase())) {
+          button._setActive(isActive);
+        }
+      });
+    }, 10);
+
+    // Focus back to editor
+    this.editor.focus();
+  }
+
   // Thêm các phương thức mới
   showTooltip({ 
     title = '', 
@@ -2103,11 +2690,11 @@ export class Editor {
     tooltip.style.border = this.options.theme === 'dark' ? '1px solid #404040' : '1px solid #ccc';
     tooltip.style.borderRadius = '10px';
     tooltip.style.boxShadow = this.options.theme === 'dark' ? '0 4px 24px rgba(0,0,0,0.3)' : '0 4px 24px rgba(0,0,0,0.18)';
-    tooltip.style.padding = '20px 24px 16px 24px';
+    tooltip.style.padding = '12px';
     tooltip.style.zIndex = 9999;
     tooltip.style.display = 'flex';
     tooltip.style.flexDirection = 'column';
-    tooltip.style.gap = '12px';
+    //tooltip.style.gap = '12px';
     tooltip.style.minWidth = '320px';
     tooltip.style.maxWidth = '90vw';
     tooltip.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#333333';
@@ -2138,7 +2725,7 @@ export class Editor {
       ];
       
       options.forEach(option => {
-        const btn = document.createElement('button');
+    const btn = document.createElement('button');
         btn.innerHTML = `${option.icon} ${option.label}`;
         btn.dataset.type = option.id;
         btn.style.padding = '8px 12px';
@@ -2194,7 +2781,9 @@ export class Editor {
     input.style.outline = 'none';
     input.style.background = this.options.theme === 'dark' ? '#1e1e1e' : '#ffffff';
     input.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#333333';
-    tooltip.appendChild(input);
+    if (!emojis) {
+      tooltip.appendChild(input);
+    }
 
     let fileInput, fileInputWrapper, fileLabel, filePreview;
     if (file || showImportOptions) {
@@ -2270,18 +2859,28 @@ export class Editor {
     if (emojis) {
       const emojiList = '😀 😃 😄 😁 😆 😅 😂 😊 😇 😉 😍 😘 😜 🤗 🤔 🤩 🤨 🥳 🥰 😎 😏 😤 😱 😭 😡 🤬 🥶 🥵 🤯 🥳 🥺 🙏 👍 👎 👏 🙌 💪 🤝 🧠 🦾 🦿 🦵 🦶 👀 👋'.split(' ');
       const emojiBox = document.createElement('div');
-      emojiBox.style.display = 'flex';
-      emojiBox.style.flexWrap = 'wrap';
-      emojiBox.style.gap = '6px';
-      emojiBox.style.margin = '8px 0';
+      emojiBox.style.display = 'grid';
+      emojiBox.style.gridTemplateColumns = 'repeat(10, 1fr)';
+      emojiBox.style.gap = '8px';
       emojiList.forEach(emo => {
         const btn = document.createElement('button');
         btn.textContent = emo;
-        btn.style.fontSize = '22px';
-        btn.style.padding = '4px 8px';
+        btn.style.fontSize = '24px';
+        btn.style.padding = '4px';
         btn.style.border = 'none';
         btn.style.background = 'none';
         btn.style.cursor = 'pointer';
+        btn.style.borderRadius = '4px';
+        btn.style.transition = 'background-color 0.2s ease';
+        
+        // Thêm hover effect
+        btn.addEventListener('mouseenter', () => {
+          btn.style.backgroundColor = '#EEEEEE';
+        });
+        btn.addEventListener('mouseleave', () => {
+          btn.style.backgroundColor = 'transparent';
+        });
+        
         btn.onclick = () => {
           // Khôi phục selection emoji và chèn emoji ngay lập tức
           this.restoreSelection(this.savedEmojiSelection);
@@ -2298,68 +2897,81 @@ export class Editor {
         };
         emojiBox.appendChild(btn);
       });
-      tooltip.insertBefore(emojiBox, input);
+      tooltip.appendChild(emojiBox);
+      
+      // Thêm dòng hướng dẫn
+      const hintText = document.createElement('div');
+      hintText.innerHTML = 'Get more emojis with <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">⌘</span> <span style="color: #000;">+</span> <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">CTRL</span> <span style="color: #000;">+</span> <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">SPACE</span>';
+      hintText.style.color = '#71787C';
+      hintText.style.fontStyle = 'normal';
+      hintText.style.marginTop = '12px';
+      hintText.style.fontWeight = '400';
+      hintText.style.lineHeight = 'normal';
+      hintText.style.textAlign = 'center';
+      tooltip.appendChild(hintText);
     }
 
-    const btnRow = document.createElement('div');
-    btnRow.style.display = 'flex';
-    btnRow.style.gap = '8px';
-    btnRow.style.justifyContent = 'flex-end';
+    if (!emojis) {
+      const btnRow = document.createElement('div');
+      btnRow.style.display = 'flex';
+      btnRow.style.gap = '8px';
+      btnRow.style.justifyContent = 'flex-end';
 
-    const confirmBtn = document.createElement('button');
-    confirmBtn.textContent = confirmText;
-    confirmBtn.style.padding = '8px 18px';
-    confirmBtn.style.background = this.options.theme === 'dark' ? '#0d7377' : '#007bff';
-    confirmBtn.style.color = '#fff';
-    confirmBtn.style.border = 'none';
-    confirmBtn.style.borderRadius = '4px';
-    confirmBtn.style.cursor = 'pointer';
-    confirmBtn.style.fontWeight = 'bold';
+      const confirmBtn = document.createElement('button');
+      confirmBtn.textContent = confirmText;
+      confirmBtn.style.padding = '8px 18px';
+      confirmBtn.style.background = this.options.theme === 'dark' ? '#0d7377' : '#007bff';
+      confirmBtn.style.color = '#fff';
+      confirmBtn.style.border = 'none';
+      confirmBtn.style.borderRadius = '4px';
+      confirmBtn.style.cursor = 'pointer';
+      confirmBtn.style.fontWeight = 'bold';
 
-    const closeBtn = document.createElement('button');
-    closeBtn.textContent = 'Đóng';
-    closeBtn.style.padding = '8px 18px';
-    closeBtn.style.background = this.options.theme === 'dark' ? '#404040' : '#eee';
-    closeBtn.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#333';
-    closeBtn.style.border = 'none';
-    closeBtn.style.borderRadius = '4px';
-    closeBtn.style.cursor = 'pointer';
+      const closeBtn = document.createElement('button');
+      closeBtn.textContent = 'Đóng';
+      closeBtn.style.padding = '8px 18px';
+      closeBtn.style.background = this.options.theme === 'dark' ? '#404040' : '#eee';
+      closeBtn.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#333';
+      closeBtn.style.border = 'none';
+      closeBtn.style.borderRadius = '4px';
+      closeBtn.style.cursor = 'pointer';
 
-    btnRow.appendChild(confirmBtn);
-    btnRow.appendChild(closeBtn);
-    tooltip.appendChild(btnRow);
+      btnRow.appendChild(confirmBtn);
+      btnRow.appendChild(closeBtn);
+      tooltip.appendChild(btnRow);
+
+      confirmBtn.onclick = () => {
+        if (showImportOptions && fileInput && fileInput.files && fileInput.files[0] && selectedFileType !== 'html') {
+          // Xử lý file import
+          const file = fileInput.files[0];
+          const reader = new FileReader();
+          reader.onload = e => {
+            onSubmit(e.target.result, selectedFileType);
+            close();
+          };
+          reader.readAsDataURL(file);
+        } else if (input.value.trim() && input.value !== 'Đang upload...') {
+          onSubmit(input.value.trim(), selectedFileType);
+          close();
+        } else {
+          input.focus();
+        }
+      };
+      closeBtn.onclick = close;
+
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') confirmBtn.click();
+        if (e.key === 'Escape') close();
+      });
+
+      setTimeout(() => input.focus(), 10);
+    }
 
     function close() {
       overlay.remove();
       tooltip.remove();
       if (onClose) onClose();
     }
-
-    confirmBtn.onclick = () => {
-      if (showImportOptions && fileInput && fileInput.files && fileInput.files[0] && selectedFileType !== 'html') {
-        // Xử lý file import
-        const file = fileInput.files[0];
-        const reader = new FileReader();
-        reader.onload = e => {
-          onSubmit(e.target.result, selectedFileType);
-          close();
-        };
-        reader.readAsDataURL(file);
-      } else if (input.value.trim() && input.value !== 'Đang upload...') {
-        onSubmit(input.value.trim(), selectedFileType);
-        close();
-      } else {
-        input.focus();
-      }
-    };
-    closeBtn.onclick = close;
-
-    input.addEventListener('keydown', e => {
-      if (e.key === 'Enter') confirmBtn.click();
-      if (e.key === 'Escape') close();
-    });
-
-    setTimeout(() => input.focus(), 10);
 
     document.body.appendChild(overlay);
     document.body.appendChild(tooltip);
@@ -3304,6 +3916,7 @@ export class Editor {
       this.sourceTextarea.value = this.editor.innerHTML;
       this.sourceTextarea.style.flex = '1';
       this.sourceTextarea.style.minHeight = '200px';
+      this.sourceTextarea.style.height = '100%';
       this.sourceTextarea.style.width = '100%';
       this.sourceTextarea.style.padding = '12px';
       this.sourceTextarea.style.fontFamily = 'inherit';
@@ -3348,55 +3961,198 @@ export class Editor {
     paletteDiv.style.border = '1px solid #ccc';
     paletteDiv.style.borderRadius = '8px';
     paletteDiv.style.boxShadow = '0 2px 8px rgba(0,0,0,0.12)';
-    paletteDiv.style.padding = '8px 10px 6px 10px';
-    paletteDiv.style.display = 'flex';
-    paletteDiv.style.flexWrap = 'wrap';
-    paletteDiv.style.gap = '6px';
-    paletteDiv.style.width = '220px';
+    paletteDiv.style.padding = '8px'; // Item cách box 8px
+    paletteDiv.style.display = 'grid';
+    paletteDiv.style.gridTemplateColumns = 'repeat(6, 1fr)'; // 6 cột
+    paletteDiv.style.columnGap = '4px'; // Item ngang cách nhau 4px
+    paletteDiv.style.rowGap = '6px'; // Item dọc cách nhau 6px
+    paletteDiv.style.width = 'auto';
 
     palette.forEach(color => {
       const colorBtn = document.createElement('button');
-      colorBtn.style.width = '22px';
-      colorBtn.style.height = '22px';
+      colorBtn.style.width = '24px';
+      colorBtn.style.height = '24px';
       colorBtn.style.border = '1.5px solid #eee';
-      colorBtn.style.borderRadius = '4px';
+      colorBtn.style.borderRadius = '50%'; // Hình tròn
       colorBtn.style.background = color;
       colorBtn.style.cursor = 'pointer';
       colorBtn.style.outline = 'none';
-      colorBtn.style.transition = 'box-shadow 0.15s';
+      colorBtn.style.transition = 'all 0.15s ease';
+      colorBtn.style.padding = '0';
+      colorBtn.style.margin = '0';
       colorBtn.title = color;
       colorBtn.onclick = e => {
         e.preventDefault();
         this.restoreSelection && this.restoreSelection(this.savedColorSelection);
         if (type === 'textColor') {
-          document.execCommand('foreColor', false, color);
+          this.applyTextColor(color);
         } else {
-          document.execCommand('hiliteColor', false, color);
+          this.applyBackgroundColor(color);
         }
         paletteDiv.remove();
         this.colorPicker = null;
       };
       colorBtn.onmouseover = () => {
+        colorBtn.style.transform = 'scale(1.1)';
         colorBtn.style.boxShadow = '0 0 0 2px #007bff44';
       };
       colorBtn.onmouseout = () => {
+        colorBtn.style.transform = 'scale(1)';
         colorBtn.style.boxShadow = 'none';
       };
       paletteDiv.appendChild(colorBtn);
     });
 
-    // Nút custom
+    // Đường kẻ ngang chia cắt
+    const divider = document.createElement('div');
+    //divider.style.marginTop = '8px';
+    divider.style.gridColumn = '1 / -1'; // Spanning toàn bộ 6 cột
+    divider.style.height = '1px';
+    divider.style.background = '#eee';
+    paletteDiv.appendChild(divider);
+
+    // Container cho 4 nút tùy chọn
+    const optionsContainer = document.createElement('div');
+    //optionsContainer.style.marginTop = '8px';
+    optionsContainer.style.gridColumn = '1 / -1'; // Spanning toàn bộ 6 cột
+    optionsContainer.style.display = 'flex';
+    optionsContainer.style.gap = '4px';
+
+    // Nút no color (SVG với đường kẻ chéo)
+    const noColorBtn = document.createElement('button');
+    noColorBtn.style.width = '24px';
+    noColorBtn.style.height = '24px';
+    noColorBtn.style.border = '1px solid #eee';
+    noColorBtn.style.borderRadius = '50%'; // Hình tròn
+    noColorBtn.style.background = '#fff';
+    noColorBtn.style.cursor = 'pointer';
+    noColorBtn.style.display = 'flex';
+    noColorBtn.style.alignItems = 'center';
+    noColorBtn.style.justifyContent = 'center';
+    noColorBtn.style.padding = '0';
+    noColorBtn.style.margin = '0';
+
+    noColorBtn.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none">
+      <line x1="1.24715" y1="6.41398" x2="21.5343" y2="18.1268" stroke="#EA6666" stroke-width="0.842105"/>
+      <circle cx="11.7127" cy="11.7128" r="11.2918" transform="rotate(90 11.7127 11.7128)" stroke="#D7D7D7" stroke-width="0.842105"/>
+    </svg>
+    `;
+
+    noColorBtn.title = 'No Color';
+    noColorBtn.onmouseover = () => {
+        noColorBtn.style.transform = 'scale(1.1)';
+        noColorBtn.style.boxShadow = '0 0 0 2px #007bff44';
+      };
+      noColorBtn.onmouseout = () => {
+        noColorBtn.style.transform = 'scale(1)';
+        noColorBtn.style.boxShadow = 'none';
+      };
+    noColorBtn.onclick = e => {
+      e.preventDefault();
+      paletteDiv.remove();
+      this.restoreSelection && this.restoreSelection(this.savedColorSelection);
+      if (type === 'textColor') {
+        this.applyTextColor('transparent');
+      } else {
+        this.applyBackgroundColor('transparent');
+      }
+      this.colorPicker = null;
+    };
+
+    // Nút màu đen
+    const blackBtn = document.createElement('button');
+    blackBtn.style.width = '24px';
+    blackBtn.style.height = '24px';
+    blackBtn.style.border = '1px solid #eee';
+    blackBtn.style.borderRadius = '4px';
+    blackBtn.style.background = '#000000';
+    blackBtn.style.cursor = 'pointer';
+    blackBtn.title = 'Black';
+    blackBtn.style.borderRadius = '50%'; // Hình tròn
+    blackBtn.onmouseover = () => {
+        blackBtn.style.transform = 'scale(1.1)';
+        blackBtn.style.boxShadow = '0 0 0 2px #007bff44';
+      };
+      blackBtn.onmouseout = () => {
+        blackBtn.style.transform = 'scale(1)';
+        blackBtn.style.boxShadow = 'none';
+      };
+    blackBtn.onclick = e => {
+      e.preventDefault();
+      paletteDiv.remove();
+      this.restoreSelection && this.restoreSelection(this.savedColorSelection);
+      if (type === 'textColor') {
+        this.applyTextColor('#000000');
+      } else {
+        this.applyBackgroundColor('#000000');
+      }
+      this.colorPicker = null;
+    };
+
+    // Nút màu trắng
+    const whiteBtn = document.createElement('button');
+    whiteBtn.style.width = '24px';
+    whiteBtn.style.height = '24px';
+    whiteBtn.style.border = '1px solid #eee';
+    whiteBtn.style.borderRadius = '4px';
+    whiteBtn.style.background = '#ffffff';
+    whiteBtn.style.cursor = 'pointer';
+    whiteBtn.style.borderRadius = '50%'; // Hình tròn
+    whiteBtn.title = 'White';
+    whiteBtn.onmouseover = () => {
+        whiteBtn.style.transform = 'scale(1.1)';
+        whiteBtn.style.boxShadow = '0 0 0 2px #007bff44';
+      };
+      whiteBtn.onmouseout = () => {
+        whiteBtn.style.transform = 'scale(1)';
+        whiteBtn.style.boxShadow = 'none';
+      };
+    whiteBtn.onclick = e => {
+      e.preventDefault();
+      paletteDiv.remove();
+      this.restoreSelection && this.restoreSelection(this.savedColorSelection);
+      if (type === 'textColor') {
+        this.applyTextColor('#ffffff');
+      } else {
+        this.applyBackgroundColor('#ffffff');
+      }
+      this.colorPicker = null;
+    };
+
+    // Nút custom color (SVG chỉ có vòng tròn)
     const customBtn = document.createElement('button');
-    customBtn.textContent = 'Custom';
-    customBtn.style.marginTop = '8px';
-    customBtn.style.width = '100%';
-    customBtn.style.padding = '4px 0';
+    customBtn.style.width = '24px';
+    customBtn.style.height = '24px';
     customBtn.style.border = '1px solid #eee';
     customBtn.style.borderRadius = '4px';
-    customBtn.style.background = '#f4f6fa';
-    customBtn.style.color = '#1976d2';
-    customBtn.style.fontWeight = 'bold';
+    customBtn.style.background = '#fff';
     customBtn.style.cursor = 'pointer';
+    customBtn.style.display = 'flex';
+    customBtn.style.alignItems = 'center';
+    customBtn.style.justifyContent = 'center';
+    customBtn.style.borderRadius = '50%'; // Hình tròn
+    customBtn.style.padding = '0';
+    customBtn.style.margin = '0';
+    customBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="17" height="16" viewBox="0 0 17 16" fill="none">
+      <g clip-path="url(#clip0_6_132)">
+        <path d="M16.07 7.7128C16.07 7.73944 16.07 7.76609 16.07 7.79273C16.0582 8.87332 15.0753 9.60753 13.9947 9.60753H11.0963C10.3118 9.60753 9.67527 10.244 9.67527 11.0286C9.67527 11.1292 9.68711 11.2269 9.70487 11.3217C9.76704 11.6237 9.89731 11.9138 10.0246 12.2069C10.2052 12.6154 10.3828 13.021 10.3828 13.4503C10.3828 14.3917 9.74336 15.2473 8.80191 15.2858C8.69829 15.2888 8.59468 15.2917 8.4881 15.2917C4.30487 15.2917 0.912109 11.899 0.912109 7.7128C0.912109 3.52661 4.30487 0.13385 8.49106 0.13385C12.6772 0.13385 16.07 3.52661 16.07 7.7128ZM4.70158 8.66017C4.70158 8.40891 4.60177 8.16794 4.42411 7.99028C4.24644 7.81261 4.00547 7.7128 3.75421 7.7128C3.50296 7.7128 3.26199 7.81261 3.08432 7.99028C2.90666 8.16794 2.80685 8.40891 2.80685 8.66017C2.80685 8.91142 2.90666 9.15239 3.08432 9.33006C3.26199 9.50772 3.50296 9.60753 3.75421 9.60753C4.00547 9.60753 4.24644 9.50772 4.42411 9.33006C4.60177 9.15239 4.70158 8.91142 4.70158 8.66017ZM4.70158 5.81806C4.95284 5.81806 5.19381 5.71825 5.37147 5.54058C5.54914 5.36292 5.64895 5.12195 5.64895 4.87069C5.64895 4.61943 5.54914 4.37847 5.37147 4.2008C5.19381 4.02314 4.95284 3.92332 4.70158 3.92332C4.45033 3.92332 4.20936 4.02314 4.03169 4.2008C3.85403 4.37847 3.75421 4.61943 3.75421 4.87069C3.75421 5.12195 3.85403 5.36292 4.03169 5.54058C4.20936 5.71825 4.45033 5.81806 4.70158 5.81806ZM9.43843 2.97596C9.43843 2.7247 9.33861 2.48373 9.16095 2.30606C8.98328 2.1284 8.74231 2.02859 8.49106 2.02859C8.2398 2.02859 7.99883 2.1284 7.82117 2.30606C7.6435 2.48373 7.54369 2.7247 7.54369 2.97596C7.54369 3.22721 7.6435 3.46818 7.82117 3.64585C7.99883 3.82351 8.2398 3.92332 8.49106 3.92332C8.74231 3.92332 8.98328 3.82351 9.16095 3.64585C9.33861 3.46818 9.43843 3.22721 9.43843 2.97596ZM12.2805 5.81806C12.5318 5.81806 12.7728 5.71825 12.9504 5.54058C13.1281 5.36292 13.2279 5.12195 13.2279 4.87069C13.2279 4.61943 13.1281 4.37847 12.9504 4.2008C12.7728 4.02314 12.5318 3.92332 12.2805 3.92332C12.0293 3.92332 11.7883 4.02314 11.6106 4.2008C11.433 4.37847 11.3332 4.61943 11.3332 4.87069C11.3332 5.12195 11.433 5.36292 11.6106 5.54058C11.7883 5.71825 12.0293 5.81806 12.2805 5.81806Z" fill="#454545"/>
+      </g>
+      <defs>
+        <clipPath id="clip0_6_132">
+          <rect width="15.1579" height="15.1579" fill="white" transform="translate(0.912109 0.13385)"/>
+        </clipPath>
+      </defs>
+    </svg>`;
+    customBtn.title = 'Custom Color';
+    customBtn.onmouseover = () => {
+        customBtn.style.transform = 'scale(1.1)';
+        customBtn.style.boxShadow = '0 0 0 2px #007bff44';
+      };
+      customBtn.onmouseout = () => {
+        customBtn.style.transform = 'scale(1)';
+        customBtn.style.boxShadow = 'none';
+      };
     customBtn.onclick = e => {
       e.preventDefault();
       paletteDiv.remove();
@@ -3417,9 +4173,9 @@ export class Editor {
         const color = e.target.value;
         this.restoreSelection && this.restoreSelection(this.savedColorSelection);
         if (type === 'textColor') {
-          document.execCommand('foreColor', false, color);
+          this.applyTextColor(color);
         } else {
-          document.execCommand('hiliteColor', false, color);
+          this.applyBackgroundColor(color);
         }
         input.remove();
         this.colorPicker = null;
@@ -3433,7 +4189,13 @@ export class Editor {
       this.colorPicker = input;
       this.savedColorSelection = this.saveSelection();
     };
-    paletteDiv.appendChild(customBtn);
+
+    // Thêm tất cả nút vào container
+    optionsContainer.appendChild(noColorBtn);
+    optionsContainer.appendChild(blackBtn);
+    optionsContainer.appendChild(whiteBtn);
+    optionsContainer.appendChild(customBtn);
+    paletteDiv.appendChild(optionsContainer);
 
     document.body.appendChild(paletteDiv);
     this.colorPicker = paletteDiv;
@@ -3475,19 +4237,20 @@ export class Editor {
     this.blockToolbar.style.width = 'auto';
     this.blockToolbar.style.height = 'auto';
     this.blockToolbar.style.overflow = 'visible';
-    // Thêm mũi tên bên trái
+    // Thêm mũi tên bên dưới
     if (!this.blockToolbar.arrow) {
       const arrow = document.createElement('div');
       arrow.className = 'block-toolbar-arrow';
       arrow.style.position = 'absolute';
-      arrow.style.left = '-12px';
-      arrow.style.top = '18px';
+      arrow.style.left = '50%';
+      arrow.style.bottom = '-14px';
+      arrow.style.transform = 'translateX(-50%)';
       arrow.style.width = '0';
       arrow.style.height = '0';
-      arrow.style.borderTop = '10px solid transparent';
-      arrow.style.borderBottom = '10px solid transparent';
-      arrow.style.borderRight = '12px solid #fff';
-      arrow.style.filter = 'drop-shadow(-2px 2px 2px rgba(0,0,0,0.08))';
+      arrow.style.borderLeft = '6px solid transparent';
+      arrow.style.borderRight = '6px solid transparent';
+      arrow.style.borderTop = '14px solid #fff';
+      arrow.style.filter = 'drop-shadow(0px 1px 1px rgba(0,0,0,0.08))';
       this.blockToolbar.appendChild(arrow);
       this.blockToolbar.arrow = arrow;
     }
@@ -3498,15 +4261,12 @@ export class Editor {
     this.blockToolbar.innerHTML = '';
     const features = this.options.blockToolbarFeatures;
     const icons = {
-      image: '<i class="fas fa-image"></i>',
-      table: '<i class="fas fa-table"></i>',
-      heading: '<i class="fas fa-heading"></i>',
-      list: '<i class="fas fa-list-ul"></i>',
-      quote: '<i class="fas fa-quote-left"></i>',
+      bold: '<i class="fas fa-bold"></i>',
+      italic: '<i class="fas fa-italic"></i>',
+      underline: '<i class="fas fa-underline"></i>',
+      strikeThrough: '<i class="fas fa-strikethrough"></i>',
       code: '<i class="fas fa-code"></i>',
-      video: '<i class="fas fa-video"></i>',
-      import: '<i class="fas fa-file-import"></i>',
-      indent: '<i class="fas fa-indent"></i>'
+      fontFamily: '<i class="fas fa-font"></i>'
     };
     features.forEach(f => {
       const btn = document.createElement('button');
@@ -3548,13 +4308,27 @@ export class Editor {
 
   showBlockToolbar(rect) {
     if (!this.blockToolbar) return;
-    this.blockToolbar.style.left = rect.left + 'px';
-    this.blockToolbar.style.top = (rect.top + window.scrollY - 8) + 'px';
-    this.blockToolbar.style.display = 'flex';
-    setTimeout(() => {
-      this.blockToolbar.style.opacity = '1';
-      this.blockToolbar.style.pointerEvents = 'auto';
-    }, 10);
+    
+    // Clear timeout hiện tại nếu có
+    if (this.blockToolbarTimeout) {
+      clearTimeout(this.blockToolbarTimeout);
+    }
+    
+    // Delay 0.7s trước khi hiện toolbar
+    this.blockToolbarTimeout = setTimeout(() => {
+      // Tính toán vị trí hiển thị ở phía trên
+      const toolbarHeight = 50; // Chiều cao ước tính của toolbar
+      const topPosition = rect.top + window.scrollY - toolbarHeight - 30; // Hiển thị phía trên với khoảng cách 15px
+      
+      this.blockToolbar.style.left = rect.left-195 + 'px';
+      this.blockToolbar.style.top = topPosition + 'px';
+      this.blockToolbar.style.display = 'flex';
+      
+      setTimeout(() => {
+        this.blockToolbar.style.opacity = '1';
+        this.blockToolbar.style.pointerEvents = 'auto';
+      }, 10);
+    }, 500); // Delay 0.55s
   }
 
   hideBlockToolbar() {
@@ -3568,33 +4342,17 @@ export class Editor {
 
   handleBlockToolbarAction(type) {
     // Thực hiện chức năng tương ứng
-    if (type === 'image') {
-      this.toolbarBtns.image && this.toolbarBtns.image.click();
-    } else if (type === 'table') {
-      this.toolbarBtns.table && this.toolbarBtns.table.click();
-    } else if (type === 'heading') {
-      document.execCommand('formatBlock', false, 'H2');
-    } else if (type === 'list') {
-      document.execCommand('insertUnorderedList');
-    } else if (type === 'quote') {
-      document.execCommand('formatBlock', false, 'BLOCKQUOTE');
-    } else if (type === 'code') {
-      document.execCommand('formatBlock', false, 'PRE');
-    } else if (type === 'video') {
-      this.toolbarBtns.video && this.toolbarBtns.video.click();
-    } else if (type === 'import') {
-      this.toolbarBtns.import && this.toolbarBtns.import.click();
-    } else if (type === 'indent') {
-      // Cho phép chọn giữa text-indent và padding-left
-      const sel = window.getSelection();
-      if (sel.rangeCount > 0 && !sel.getRangeAt(0).collapsed) {
-        // Nếu có text đã được chọn, sử dụng padding-left
-        this.applyPaddingIndentToSelection(true);
-      } else {
-        // Nếu chỉ có caret, sử dụng text-indent toggle
-        this.applyIndentToSelection();
-      }
-    }
+    if (type === 'bold') {
+      document.execCommand('bold');
+    } else if (type === 'italic') {
+      document.execCommand('italic');
+    } else if (type === 'underline') {
+      document.execCommand('underline');
+    } else if (type === 'strikethrough') {
+      document.execCommand('strikeThrough');
+    } else if (type === 'fontFamily') {
+      document.execCommand('fontFamily');
+    } 
   }
 
   // Thêm phương thức để xử lý indentation cho nhiều block đã được chọn
@@ -3631,7 +4389,40 @@ export class Editor {
       block = block.parentNode;
     }
     
-    return block === this.editor ? null : block;
+    // Nếu block là chính editor hoặc không tìm thấy block hợp lệ
+    if (block === this.editor || !block) {
+      // Tạo một thẻ P mặc định nếu cần
+      if (this.editor.innerHTML.trim() === '' || this.editor.innerHTML === '<br>') {
+        const p = document.createElement('P');
+        p.innerHTML = '<br>';
+        this.editor.appendChild(p);
+        
+        // Đặt selection vào thẻ P mới tạo
+        const range = document.createRange();
+        const selection = window.getSelection();
+        range.selectNodeContents(p);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        
+        return p;
+      }
+      
+      // Nếu editor có nội dung nhưng không có block element, wrap trong P
+      const firstChild = this.editor.firstChild;
+      if (firstChild && firstChild.nodeType === 3) {
+        const p = document.createElement('P');
+        while (this.editor.firstChild) {
+          p.appendChild(this.editor.firstChild);
+        }
+        this.editor.appendChild(p);
+        return p;
+      }
+      
+      return null;
+    }
+    
+    return block;
   }
   
   // Lấy tất cả các blocks trong vùng selection
@@ -3724,24 +4515,16 @@ export class Editor {
     }
     
     // Cập nhật trạng thái nút indent
-    this.updateIndentButtonState();
+        this.updateIndentButtonState();
   }
   
   // Cập nhật trạng thái nút indent dựa trên block hiện tại
   updateIndentButtonState() {
-    const indentButton = this.toolbarBtns.indent;
-    if (!indentButton) return;
+    // Cập nhật trạng thái hiển thị của nút indentDecrease
+    this.updateIndentDecreaseButtonVisibility();
     
-    // Kiểm tra block hiện tại
-    const block = this.getBlockElementAtCaret();
-    const hasIndent = this.blockHasTextIndent(block);
-    
-    // Cập nhật trạng thái nút
-    if (hasIndent) {
-      indentButton._setActive(true);
-    } else {
-      indentButton._setActive(false);
-    }
+    // Cập nhật trạng thái hiển thị của nút indentIncrease  
+    this.updateIndentIncreaseButtonVisibility();
   }
   
   // Kiểm tra xem block có text-indent không
@@ -3893,23 +4676,29 @@ export class Editor {
   
   // Áp dụng heading cho selection
   applyHeadingToSelection(tagName) {
+    console.log('applyHeadingToSelection called with:', tagName); // Debug log
     const sel = window.getSelection();
+    console.log('Selection range count:', sel.rangeCount); // Debug log
     if (!sel.rangeCount) return;
     
     const range = sel.getRangeAt(0);
+    console.log('Range collapsed:', range.collapsed); // Debug log
     
     // Nếu không có selection (chỉ có caret), áp dụng cho block hiện tại
     if (range.collapsed) {
-      this.changeBlockTag(this.getBlockElementAtCaret(), tagName);
+      const block = this.getBlockElementAtCaret();
+      console.log('Current block:', block, 'tagName:', block?.tagName); // Debug log
+      this.changeBlockTag(block, tagName);
     } else {
       // Nếu có selection, tìm tất cả các blocks trong vùng chọn
       const blocks = this.getBlocksInSelection();
+      console.log('Selected blocks:', blocks.length); // Debug log
       blocks.forEach(block => this.changeBlockTag(block, tagName));
     }
     
     // Giữ nguyên selection sau khi áp dụng
     this.editor.focus();
-    this.updateHeadingSelector();
+        this.updateHeadingSelector();
   }
   
   // Thay đổi tag của một block
@@ -3948,7 +4737,25 @@ export class Editor {
     if (!block) return;
     
     const tagName = block.tagName.toUpperCase();
-    this.headingSelector.value = tagName;
+    // Đổi text trên button theo block hiện tại
+    let label = 'P';
+    if (tagName === 'H1') label = 'H1';
+    else if (tagName === 'H2') label = 'H2';
+    else if (tagName === 'H3') label = 'H3';
+    else if (tagName === 'H4') label = 'H4';
+    else if (tagName === 'H5') label = 'H5';
+    else if (tagName === 'H6') label = 'H6';
+    else if (tagName === 'PRE') label = 'C';
+    else if (tagName === 'BLOCKQUOTE') label = 'Q';
+    this.headingSelector.innerHTML = label;
+    // Đổi trạng thái active nếu là heading
+    if ([
+      'H1','H2','H3','H4','H5','H6','PRE','BLOCKQUOTE'
+    ].includes(tagName)) {
+      this.headingSelector._setActive?.(true);
+    } else {
+      this.headingSelector._setActive?.(false);
+    }
   }
   
   // Điều chỉnh font size
@@ -3976,7 +4783,7 @@ export class Editor {
     }
     
     this.editor.focus();
-    this.updateFontSizeDisplay();
+        this.updateFontSizeDisplay();
   }
   
   // Áp dụng font size cho một block
@@ -4103,7 +4910,7 @@ export class Editor {
     }
     
     this.editor.focus();
-    this.updateLineHeightDisplay();
+        this.updateLineHeightDisplay();
   }
   
   // Áp dụng line height cho một block
@@ -4709,7 +5516,7 @@ export class Editor {
       range.collapse(true);
       sel.removeAllRanges();
       sel.addRange(range);
-    } else {
+      } else {
       this.editor.appendChild(document.createTextNode(tagText + ' '));
     }
   }
@@ -4879,16 +5686,16 @@ export class Editor {
     Object.entries(categories).forEach(([categoryName, categoryData]) => {
       const categoryBtn = document.createElement('button');
       categoryBtn.style.width = '100%';
-      categoryBtn.style.padding = '14px 20px';
+      categoryBtn.style.padding = '8px';
       categoryBtn.style.border = 'none';
       categoryBtn.style.background = 'transparent';
       categoryBtn.style.textAlign = 'left';
       categoryBtn.style.cursor = 'pointer';
       categoryBtn.style.display = 'flex';
       categoryBtn.style.alignItems = 'center';
-      categoryBtn.style.gap = '12px';
+      //categoryBtn.style.gap = '12px';
       categoryBtn.style.borderRadius = '8px';
-      categoryBtn.style.margin = '4px 16px';
+      //categoryBtn.style.margin = '4px 16px';
       categoryBtn.style.transition = 'all 0.2s ease';
       categoryBtn.style.fontSize = '15px';
       categoryBtn.style.fontWeight = '500';
@@ -5052,7 +5859,7 @@ export class Editor {
       range.collapse(true);
       sel.removeAllRanges();
       sel.addRange(range);
-    } else {
+      } else {
       // Fallback: chèn vào cuối editor
       const templateDiv = document.createElement('div');
       templateDiv.innerHTML = templateContent;
@@ -5355,7 +6162,7 @@ export class Editor {
       // Update arrow
       const arrow = this.blockToolbar.querySelector('.block-toolbar-arrow');
       if (arrow) {
-        arrow.style.borderRight = isDark ? '12px solid #2a2a2a' : '12px solid #fff';
+        arrow.style.borderTop = isDark ? '14px solid #2a2a2a' : '14px solid #fff';
         arrow.style.filter = isDark ? 'drop-shadow(-2px 2px 2px rgba(0,0,0,0.4))' : 'drop-shadow(-2px 2px 2px rgba(0,0,0,0.08))';
       }
 
@@ -5590,360 +6397,6 @@ export class Editor {
     });
   }
 
-  createMenuBar() {
-    const menuBar = document.createElement('div');
-    menuBar.className = 'menu-bar';
-
-    // Define menu configurations with all toolbar functionalities
-    const menuConfigs = [
-      {
-        label: 'File',
-        items: [
-          { 
-            label: 'New Document',
-            icon: '<i class="fas fa-file"></i>',
-            action: () => this.createNewDocument()
-          },
-          { 
-            label: 'Import Document',
-            icon: '<i class="fas fa-file-import"></i>',
-            action: () => this.importDocument()
-          },
-          { 
-            label: 'Import Content',
-            icon: '<i class="fas fa-file-import"></i>',
-            action: () => this.toolbarBtns.import?.click()
-          },
-          { type: 'separator' },
-          { 
-            label: 'Export as HTML',
-            icon: '<i class="fas fa-code"></i>',
-            action: () => this.exportAsHTML()
-          },
-          { 
-            label: 'View Source',
-            icon: '<i class="fas fa-code"></i>',
-            action: () => this.toggleSourceView()
-          },
-          { 
-            label: 'Print',
-            icon: '<i class="fas fa-print"></i>',
-            action: () => window.print()
-          }
-        ]
-      },
-      {
-        label: 'Edit',
-        items: [
-          { 
-            label: 'Undo',
-            icon: '<i class="fas fa-undo"></i>',
-            action: () => document.execCommand('undo')
-          },
-          { 
-            label: 'Redo',
-            icon: '<i class="fas fa-redo"></i>',
-            action: () => document.execCommand('redo')
-          },
-          { type: 'separator' },
-          { 
-            label: 'Cut',
-            icon: '<i class="fas fa-cut"></i>',
-            action: () => document.execCommand('cut')
-          },
-          { 
-            label: 'Copy',
-            icon: '<i class="fas fa-copy"></i>',
-            action: () => document.execCommand('copy')
-          },
-          { 
-            label: 'Paste',
-            icon: '<i class="fas fa-paste"></i>',
-            action: () => document.execCommand('paste')
-          },
-          { type: 'separator' },
-          { 
-            label: 'Select All',
-            icon: '<i class="fas fa-check-square"></i>',
-            action: () => document.execCommand('selectAll')
-          }
-        ]
-      },
-      {
-        label: 'Format',
-        items: [
-          { 
-            label: 'Bold',
-            icon: '<i class="fas fa-bold"></i>',
-            action: () => document.execCommand('bold')
-          },
-          { 
-            label: 'Italic',
-            icon: '<i class="fas fa-italic"></i>',
-            action: () => document.execCommand('italic')
-          },
-          { 
-            label: 'Underline',
-            icon: '<i class="fas fa-underline"></i>',
-            action: () => document.execCommand('underline')
-          },
-          { 
-            label: 'Strikethrough',
-            icon: '<i class="fas fa-strikethrough"></i>',
-            action: () => document.execCommand('strikeThrough')
-          },
-          { 
-            label: 'Superscript',
-            icon: '<i class="fas fa-superscript"></i>',
-            action: () => document.execCommand('superscript')
-          },
-          { 
-            label: 'Subscript',
-            icon: '<i class="fas fa-subscript"></i>',
-            action: () => document.execCommand('subscript')
-          },
-          { type: 'separator' },
-          { 
-            label: 'Clear Formatting',
-            icon: '<i class="fas fa-remove-format"></i>',
-            action: () => document.execCommand('removeFormat')
-          },
-          { type: 'separator' },
-          { 
-            label: 'Text Color',
-            icon: '<i class="fas fa-font"></i>',
-            action: () => this.toolbarBtns.textColor?.click()
-          },
-          { 
-            label: 'Background Color',
-            icon: '<i class="fas fa-fill-drip"></i>',
-            action: () => this.toolbarBtns.bgColor?.click()
-          }
-        ]
-      },
-      {
-        label: 'Paragraph',
-        items: [
-          { 
-            label: 'Heading 1',
-            icon: '<i class="fas fa-heading"></i>',
-            action: () => this.applyHeadingToSelection('H1')
-          },
-          { 
-            label: 'Heading 2',
-            icon: '<i class="fas fa-heading"></i>',
-            action: () => this.applyHeadingToSelection('H2')
-          },
-          { 
-            label: 'Heading 3',
-            icon: '<i class="fas fa-heading"></i>',
-            action: () => this.applyHeadingToSelection('H3')
-          },
-          { 
-            label: 'Heading 4',
-            icon: '<i class="fas fa-heading"></i>',
-            action: () => this.applyHeadingToSelection('H4')
-          },
-          { 
-            label: 'Heading 5',
-            icon: '<i class="fas fa-heading"></i>',
-            action: () => this.applyHeadingToSelection('H5')
-          },
-          { 
-            label: 'Heading 6',
-            icon: '<i class="fas fa-heading"></i>',
-            action: () => this.applyHeadingToSelection('H6')
-          },
-          { 
-            label: 'Paragraph',
-            icon: '<i class="fas fa-paragraph"></i>',
-            action: () => this.applyHeadingToSelection('P')
-          },
-          { type: 'separator' },
-          { 
-            label: 'Quote',
-            icon: '<i class="fas fa-quote-right"></i>',
-            action: () => document.execCommand('formatBlock', false, 'BLOCKQUOTE')
-          },
-          { 
-            label: 'Code Block',
-            icon: '<i class="fas fa-code"></i>',
-            action: () => document.execCommand('formatBlock', false, 'PRE')
-          },
-          { type: 'separator' },
-          { 
-            label: 'Align Left',
-            icon: '<i class="fas fa-align-left"></i>',
-            action: () => document.execCommand('justifyLeft')
-          },
-          { 
-            label: 'Align Center',
-            icon: '<i class="fas fa-align-center"></i>',
-            action: () => document.execCommand('justifyCenter')
-          },
-          { 
-            label: 'Align Right',
-            icon: '<i class="fas fa-align-right"></i>',
-            action: () => document.execCommand('justifyRight')
-          },
-          { 
-            label: 'Justify',
-            icon: '<i class="fas fa-align-justify"></i>',
-            action: () => document.execCommand('justifyFull')
-          },
-          { type: 'separator' },
-          { 
-            label: 'Increase Indent',
-            icon: '<i class="fas fa-indent"></i>',
-            action: () => this.applyPaddingIndentToSelection(true)
-          },
-          { 
-            label: 'Decrease Indent',
-            icon: '<i class="fas fa-outdent"></i>',
-            action: () => this.applyPaddingIndentToSelection(false)
-          },
-          { type: 'separator' },
-          { 
-            label: 'Bulleted List',
-            icon: '<i class="fas fa-list-ul"></i>',
-            action: () => document.execCommand('insertUnorderedList')
-          },
-          { 
-            label: 'Numbered List',
-            icon: '<i class="fas fa-list-ol"></i>',
-            action: () => document.execCommand('insertOrderedList')
-          }
-        ]
-      },
-      {
-        label: 'Insert',
-        items: [
-          { 
-            label: 'Image',
-            icon: '<i class="far fa-image"></i>',
-            action: () => this.insertImage()
-          },
-          { 
-            label: 'Table',
-            icon: '<i class="fas fa-table"></i>',
-            action: () => this.toolbarBtns.table?.click()
-          },
-          { 
-            label: 'Link',
-            icon: '<i class="fas fa-link"></i>',
-            action: () => this.insertLink()
-          },
-          { type: 'separator' },
-          { 
-            label: 'Emoji',
-            icon: '<i class="far fa-smile"></i>',
-            action: () => this.insertEmoji()
-          },
-          { 
-            label: 'Video',
-            icon: '<i class="fas fa-video"></i>',
-            action: () => this.insertVideo()
-          },
-          { type: 'separator' },
-          { 
-            label: 'Tags',
-            icon: '<i class="fas fa-tags"></i>',
-            action: () => this.toolbarBtns.insertTags?.click()
-          },
-          { 
-            label: 'Template',
-            icon: '<i class="fas fa-file-alt"></i>',
-            action: () => this.toolbarBtns.insertTemplate?.click()
-          }
-        ]
-      },
-      {
-        label: 'Tools',
-        items: [
-          { 
-            label: 'Font Family',
-            icon: '<i class="fas fa-font"></i>',
-            action: () => this.showFontSelector()
-          },
-          { 
-            label: 'Font Size',
-            icon: '<i class="fas fa-text-height"></i>',
-            action: () => this.showFontSizeSelector()
-          },
-          { 
-            label: 'Line Height',
-            icon: '<i class="fas fa-arrows-alt-v"></i>',
-            action: () => this.showLineHeightSelector()
-          },
-          { type: 'separator' },
-          { 
-            label: 'Uppercase',
-            icon: '<i class="fas fa-font"></i>',
-            action: () => this.applyCapitalization('uppercase')
-          },
-          { 
-            label: 'Lowercase',
-            icon: '<i class="fas fa-font"></i>',
-            action: () => this.applyCapitalization('lowercase')
-          },
-          { 
-            label: 'Title Case',
-            icon: '<i class="fas fa-font"></i>',
-            action: () => this.applyCapitalization('titlecase')
-          },
-          { 
-            label: 'Capitalize First',
-            icon: '<i class="fas fa-font"></i>',
-            action: () => this.applyCapitalization('capitalize')
-          }
-        ]
-      },
-      {
-        label: 'View',
-        items: [
-          { 
-            label: 'Dark Theme',
-            icon: '<i class="fas fa-moon"></i>',
-            action: () => this.toggleTheme()
-          },
-          { 
-            label: 'Light Theme',
-            icon: '<i class="fas fa-sun"></i>',
-            action: () => {
-              if (this.options.theme === 'dark') {
-                this.toggleTheme();
-              }
-            }
-          },
-          { type: 'separator' },
-          { 
-            label: 'Zoom In',
-            icon: '<i class="fas fa-search-plus"></i>',
-            action: () => this.adjustEditorZoom(1.1)
-          },
-          { 
-            label: 'Zoom Out',
-            icon: '<i class="fas fa-search-minus"></i>',
-            action: () => this.adjustEditorZoom(0.9)
-          },
-          { 
-            label: 'Reset Zoom',
-            icon: '<i class="fas fa-search"></i>',
-            action: () => this.resetEditorZoom()
-          }
-        ]
-      }
-    ];
-
-    // Create dropdown buttons for each menu
-    menuConfigs.forEach(menuConfig => {
-      const dropdownBtn = this.createDropdownButton(menuConfig.label, menuConfig.items);
-      menuBar.appendChild(dropdownBtn);
-    });
-
-    return menuBar;
-  }
-
   createDropdownButton(label, items) {
     const container = document.createElement('div');
     container.style.position = 'relative';
@@ -6108,9 +6561,6 @@ export class Editor {
   insertEmoji() {
     this.savedEmojiSelection = this.saveSelection();
     this.showTooltip({
-      title: 'Insert Emoji',
-      placeholder: 'Search or select emoji...',
-      confirmText: 'Insert',
       emojis: true,
       onSubmit: emoji => {
         this.restoreSelection(this.savedEmojiSelection);
@@ -6197,4 +6647,4 @@ export class Editor {
 
 export function createEditor(selector, options) {
   return new Editor(selector, options);
-} 
+}
