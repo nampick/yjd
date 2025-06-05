@@ -228,7 +228,11 @@ export class Editor {
 
     // Tính toán lại chiều cao editor-area
     setTimeout(() => this.updateEditorAreaHeight(), 0);
-    window.addEventListener('resize', () => this.updateEditorAreaHeight());
+    window.addEventListener('resize', () => {
+      this.updateEditorAreaHeight();
+      // Re-add toolbar2 separators on resize
+      setTimeout(() => this.addToolbar2RowSeparators(), 100);
+    });
 
     // Thêm block toolbar
     this.createBlockToolbar();
@@ -238,6 +242,20 @@ export class Editor {
     
     // Setup content observer to update theme when content changes
     this.setupContentObserver();
+    
+    // Auto-focus editor when page loads
+    setTimeout(() => {
+      if (this.editor) {
+        this.editor.focus();
+        // Set cursor to the beginning of the editor
+        const range = document.createRange();
+        const selection = window.getSelection();
+        range.setStart(this.editor, 0);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+    }, 100);
   }
 
   setupContentObserver() {
@@ -290,47 +308,89 @@ export class Editor {
   }
 
   createToolbar() {
-    const toolbar = document.createElement('div');
-    toolbar.className = 'toolbar';
-    toolbar.style.padding = '6px 16px';
-    toolbar.style.borderBottom = '1px solid #d1d5db';
-    toolbar.style.display = 'flex';
-    toolbar.style.gap = '8px';
-    toolbar.style.flexWrap = 'wrap';
-    toolbar.style.background = '#f4f6fa';
-    toolbar.style.transition = 'all 0.3s ease';
-    toolbar.style.alignItems = 'stretch';
-    toolbar.style.minHeight = '56px';
-    toolbar.style.paddingBottom = '8px';
-    toolbar.style.boxSizing = 'border-box';
-    toolbar.style.width = '100%';
-    toolbar.style.overflow = 'hidden';
-    toolbar.style.borderTopLeftRadius = '6px';
-    toolbar.style.borderTopRightRadius = '6px';
-    toolbar.style.borderBottomLeftRadius = '0';
-    toolbar.style.borderBottomRightRadius = '0';
+    // Tạo container chứa cả 2 toolbar
+    const toolbarContainer = document.createElement('div');
+    toolbarContainer.className = 'toolbar-container';
+    toolbarContainer.style.display = 'flex';
+    toolbarContainer.style.flexDirection = 'column';
+    toolbarContainer.style.width = '100%';
+    toolbarContainer.style.borderTopLeftRadius = '6px';
+    toolbarContainer.style.borderTopRightRadius = '6px';
+
+    // ============ TOOLBAR 1 - Basic formatting ============
+    const toolbar1 = document.createElement('div');
+    toolbar1.className = 'toolbar toolbar-primary';
+    toolbar1.style.padding = '8px 16px';
+    toolbar1.style.display = 'flex';
+    toolbar1.style.justifyContent = 'space-between';
+    toolbar1.style.gap = '20px';
+    toolbar1.style.flexWrap = 'wrap';
+    toolbar1.style.background = '#FCFCFC';
+    toolbar1.style.alignItems = 'center';
+    toolbar1.style.transition = 'all 0.3s ease';
+    toolbar1.style.minHeight = '48px';
+    toolbar1.style.paddingBottom = '8px';
+    toolbar1.style.boxSizing = 'border-box';
+    toolbar1.style.width = '100%';
+    toolbar1.style.overflow = 'hidden';
 
     // Lưu các nút để có thể truy cập sau này
-    this.toolbarBtns = {};
 
-    // Định dạng văn bản
-    const formatBtns = [
+    // B, I, U buttons
+    const basicFormatBtns = [
       { icon: '<i class="fas fa-bold"></i>', title: 'Bold', cmd: 'bold' },
       { icon: '<i class="fas fa-italic"></i>', title: 'Italic', cmd: 'italic' },
       { icon: '<i class="fas fa-underline"></i>', title: 'Underline', cmd: 'underline' },
-      { icon: '<i class="fas fa-strikethrough"></i>', title: 'Strike', cmd: 'strikeThrough' },
+      { icon: '<i class="fas fa-strikethrough"></i>', title: 'Strike', cmd: 'strikeThrough' }
+    ];
+    const typeibiu = document.createElement('div');
+    typeibiu.style.gap = '12px';
+    typeibiu.style.alignItems = 'center';
+    typeibiu.style.display = 'flex';
+    basicFormatBtns.forEach(btn => {
+      const button = this.createBtn(btn.icon, btn.title, btn.cmd);
+      typeibiu.appendChild(button);
+      this.toolbarBtns[btn.cmd] = button;
+    });
+    toolbar1.appendChild(typeibiu);
+
+    // Superscript and Subscript
+    const typesup = document.createElement('div');
+    typesup.style.gap = '12px';
+    typesup.style.alignItems = 'center';
+    typesup.style.display = 'flex'; 
+    const scriptBtns = [
       { icon: '<i class="fas fa-superscript"></i>', title: 'Superscript', cmd: 'superscript' },
       { icon: '<i class="fas fa-subscript"></i>', title: 'Subscript', cmd: 'subscript' }
     ];
 
-    formatBtns.forEach(btn => {
+    scriptBtns.forEach(btn => {
       const button = this.createBtn(btn.icon, btn.title, btn.cmd);
-      toolbar.appendChild(button);
+      typesup.appendChild(button);
       this.toolbarBtns[btn.cmd] = button;
     });
+    toolbar1.appendChild(typesup);
+    // Text Color and Background Color buttons
+    const typecolor = document.createElement('div');
+    typecolor.style.gap = '12px';
+    typecolor.style.alignItems = 'center';
+    typecolor.style.display = 'flex';
 
-    // Thêm separator
-    toolbar.appendChild(this.createSeparator());
+    const textColorBtn = this.createColorBtn('<i class="fas fa-font"></i>', 'Text Color', 'textColor');
+    typecolor.appendChild(textColorBtn);
+    this.toolbarBtns.textColor = textColorBtn;
+
+    const bgColorBtn = this.createColorBtn('<i class="fas fa-fill-drip"></i>', 'Background Color', 'bgColor');
+    typecolor.appendChild(bgColorBtn);
+    this.toolbarBtns.bgColor = bgColorBtn;
+    toolbar1.appendChild(typecolor);
+
+    
+    // Link button
+    const linkBtn = this.createBtn('<i class="fas fa-link"></i>', 'Link', 'link');
+    toolbar1.appendChild(linkBtn);
+    this.toolbarBtns.link = linkBtn;
+
 
     // Heading/Block selector (custom button + dropdown)
     const headingDropdownWrapper = document.createElement('div');
@@ -339,22 +399,61 @@ export class Editor {
     headingDropdownWrapper.style.display = 'inline-block';
 
     // Button để mở dropdown
-    const headingBtn = this.createBtn('P', 'Chọn kiểu Heading');
-    headingBtn.style.fontWeight = 'bold';
-    headingBtn.style.fontSize = '16px';
-    headingBtn.style.letterSpacing = '1px';
-    headingBtn.style.minWidth = '40px';
-    headingBtn.style.padding = '6px 12px';
-    headingBtn.style.display = 'flex';
-    headingBtn.style.alignItems = 'center';
-    headingBtn.style.justifyContent = 'center';
-    headingBtn.style.gap = '6px';
-    headingBtn.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#fff';
-    headingBtn.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#374151';
-    headingBtn.style.border = '1px solid #e0e0e0';
-    headingBtn.style.borderRadius = '7px';
+    const headingBtn = this.createBtn('Paragraph');
+    headingBtn.className = 'custom-select-button';
+    headingBtn.style.width = '120px';
+    headingBtn.style.padding = '0px 5px 0px 8px';
+    headingBtn.style.setProperty('height', '32px', 'important');
+    headingBtn.style.setProperty('borderRadius', '6px', 'important');
+    headingBtn.style.setProperty('alignItems', 'center', 'important');
+    headingBtn.style.fontSize = '14px';
+    headingBtn.style.fontWeight = '400';
+    headingBtn.style.color = '#374151';
+    headingBtn.style.background = '#FFFFFF';
     headingBtn.style.cursor = 'pointer';
-    headingBtn.style.transition = 'all 0.2s ease';
+    
+    // Override event handlers để giữ nguyên border
+    headingBtn.onmouseover = () => {
+      headingBtn.style.setProperty('background', '#f8f9fa', 'important');
+    };
+    
+    headingBtn.onmouseout = () => {
+      headingBtn.style.setProperty('background', '#FFFFFF', 'important');
+    };
+    
+    
+    // Thêm icon dropdown SVG
+    const dropdownIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    dropdownIcon.setAttribute('width', '12');
+    dropdownIcon.setAttribute('height', '12');
+    dropdownIcon.setAttribute('viewBox', '0 0 8 7');
+    dropdownIcon.setAttribute('fill', 'none');
+    dropdownIcon.style.marginLeft = 'auto';
+    dropdownIcon.style.opacity = '0.7';
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.setAttribute('clip-path', 'url(#clip0_4_66)');
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M3.81655 5.55897C3.98745 5.72987 4.26499 5.72987 4.43589 5.55897L7.06089 2.93397C7.23179 2.76307 7.23179 2.48553 7.06089 2.31464C6.88999 2.14374 6.61245 2.14374 6.44155 2.31464L4.12554 4.63065L1.80952 2.316C1.63862 2.1451 1.36108 2.1451 1.19019 2.316C1.01929 2.4869 1.01929 2.76444 1.19019 2.93534L3.81519 5.56034L3.81655 5.55897Z');
+    path.setAttribute('fill', '#CCCCCC');
+
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const clipPath = document.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
+    clipPath.setAttribute('id', 'clip0_4_66');
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('width', '7');
+    rect.setAttribute('height', '7');
+    rect.setAttribute('fill', 'white');
+    rect.setAttribute('transform', 'translate(0.625488)');
+
+    clipPath.appendChild(rect);
+    defs.appendChild(clipPath);
+    g.appendChild(path);
+    dropdownIcon.appendChild(g);
+    dropdownIcon.appendChild(defs);
+    
+    headingBtn.appendChild(dropdownIcon);
 
     // Dropdown div
     const headingDropdown = document.createElement('div');
@@ -362,25 +461,28 @@ export class Editor {
     headingDropdown.style.display = 'none';
     headingDropdown.style.position = 'fixed';
     headingDropdown.style.zIndex = '99999';
+    headingDropdown.style.border = '1px solid #E1E1E1 !important';
+    headingDropdown.style.borderRadius = '3px !important';
     headingDropdown.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#fff';
-    headingDropdown.style.border = '1px solid #d1d5db';
-    headingDropdown.style.borderRadius = '8px';
+    headingDropdown.style.fontSize = '12px !important';
+    headingDropdown.style.fontWeight = '400 !important';
     headingDropdown.style.boxShadow = '0 4px 24px rgba(0,0,0,0.18)';
     headingDropdown.style.padding = '6px 0';
     headingDropdown.style.minWidth = '180px';
+
     headingDropdown.style.maxHeight = '320px';
     headingDropdown.style.overflowY = 'auto';
 
     const headingOptions = [
-      { value: 'P', text: '<p style="margin:0;font-size:15px;">Đoạn văn bản (Paragraph)</p>' },
-      { value: 'H1', text: '<h1 style="margin:0;">Heading 1</h1>' },
-      { value: 'H2', text: '<h2 style="margin:0;">Heading 2</h2>' },
-      { value: 'H3', text: '<h3 style="margin:0;">Heading 3</h3>' },
-      { value: 'H4', text: '<h4 style="margin:0;">Heading 4</h4>' },
-      { value: 'H5', text: '<h5 style="margin:0;">Heading 5</h5>' },
-      { value: 'H6', text: '<h6 style="margin:0;">Heading 6</h6>' },
-      { value: 'PRE', text: '<pre style="margin:0;">Code Block</pre>' },
-      { value: 'BLOCKQUOTE', text: '<blockquote style="margin:0;">Quote</blockquote>' }
+      { value: 'P', text: '<p style="margin:0;font-size:15px;">Paragraph</p>', displayText: 'Paragraph' },
+      { value: 'H1', text: '<h1 style="margin:0;">Heading 1</h1>', displayText: 'Heading 1' },
+      { value: 'H2', text: '<h2 style="margin:0;">Heading 2</h2>', displayText: 'Heading 2' },
+      { value: 'H3', text: '<h3 style="margin:0;">Heading 3</h3>', displayText: 'Heading 3' },
+      { value: 'H4', text: '<h4 style="margin:0;">Heading 4</h4>', displayText: 'Heading 4' },
+      { value: 'H5', text: '<h5 style="margin:0;">Heading 5</h5>', displayText: 'Heading 5' },
+      { value: 'H6', text: '<h6 style="margin:0;">Heading 6</h6>', displayText: 'Heading 6' },
+      { value: 'PRE', text: '<pre style="margin:0;">Code Block</pre>', displayText: 'Code Block' },
+      { value: 'BLOCKQUOTE', text: '<blockquote style="margin:0;">Quote</blockquote>', displayText: 'Quote' }
     ];
 
     headingOptions.forEach(option => {
@@ -389,7 +491,7 @@ export class Editor {
       item.innerHTML = option.text;
       item.style.padding = '7px 18px';
       item.style.cursor = 'pointer';
-      item.style.fontSize = '15px';
+      item.style.fontSize = '14px';
       item.style.transition = 'background 0.18s';
       item.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#374151';
       item.addEventListener('mouseover', () => {
@@ -400,6 +502,47 @@ export class Editor {
       });
       item.addEventListener('click', () => {
         headingDropdown.style.display = 'none';
+        
+        // Cập nhật text của nút (giữ lại dropdown icon)
+        const textNode = headingBtn.firstChild;
+        if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+          textNode.textContent = option.displayText;
+        } else {
+          // Nếu không tìm thấy text node, tạo lại nội dung button
+          headingBtn.innerHTML = option.displayText;
+          const dropdownIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          dropdownIcon.setAttribute('width', '8');
+          dropdownIcon.setAttribute('height', '7');
+          dropdownIcon.setAttribute('viewBox', '0 0 8 7');
+          dropdownIcon.setAttribute('fill', 'none');
+          dropdownIcon.style.marginLeft = 'auto';
+          dropdownIcon.style.opacity = '0.7';
+
+          const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          g.setAttribute('clip-path', 'url(#clip0_4_66_alt)');
+
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('d', 'M3.81655 5.55897C3.98745 5.72987 4.26499 5.72987 4.43589 5.55897L7.06089 2.93397C7.23179 2.76307 7.23179 2.48553 7.06089 2.31464C6.88999 2.14374 6.61245 2.14374 6.44155 2.31464L4.12554 4.63065L1.80952 2.316C1.63862 2.1451 1.36108 2.1451 1.19019 2.316C1.01929 2.4869 1.01929 2.76444 1.19019 2.93534L3.81519 5.56034L3.81655 5.55897Z');
+          path.setAttribute('fill', '#CCCCCC');
+
+          const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+          const clipPath = document.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
+          clipPath.setAttribute('id', 'clip0_4_66_alt');
+          const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          rect.setAttribute('width', '7');
+          rect.setAttribute('height', '7');
+          rect.setAttribute('fill', 'white');
+          rect.setAttribute('transform', 'translate(0.625488)');
+
+          clipPath.appendChild(rect);
+          defs.appendChild(clipPath);
+          g.appendChild(path);
+          dropdownIcon.appendChild(g);
+          dropdownIcon.appendChild(defs);
+          
+          headingBtn.appendChild(dropdownIcon);
+        }
+        
         if (this.savedHeadingSelection) {
           this.restoreSelection(this.savedHeadingSelection);
         }
@@ -430,13 +573,21 @@ export class Editor {
 
     headingDropdownWrapper.appendChild(headingBtn);
     headingDropdownWrapper.appendChild(headingDropdown);
-    toolbar.appendChild(headingDropdownWrapper);
+    toolbar1.appendChild(headingDropdownWrapper);
     this.headingSelector = headingBtn; // Để updateHeadingSelector không lỗi
+    
+    // Lưu reference để có thể cập nhật button text từ bên ngoài
+    this.headingButton = headingBtn;
+    this.headingOptions = headingOptions;
 
-    // Thêm separator
-    toolbar.appendChild(this.createSeparator());
 
-    // Căn lề
+    // Insert Table button
+    const tableBtn = this.createBtn('<i class="fas fa-table"></i>', 'Insert Table', 'table');
+    toolbar1.appendChild(tableBtn);
+    this.toolbarBtns.table = tableBtn;
+
+
+    // Align Justify button
     const alignDropdown = document.createElement('div');
     alignDropdown.className = 'toolbar-dropdown';
     alignDropdown.style.position = 'relative';
@@ -508,18 +659,17 @@ export class Editor {
       button.style.fontSize = '14px';
       button.style.gap = '5px';
       button.style.padding = '0px';
-      button.style.margin = '0';
       button.style.outline = 'none';
       
       // Add spacing: 7px top for first item, 4px left/right for all items
       if (index === 0) {
-        button.style.margin = '7px 4px 0 4px';
+        button.style.margin = '7px 4px 2px 4px';
         // Set first option as active by default
         button.classList.add('active');
         button.style.setProperty('background-color', '#EEE', 'important');
         button.style.setProperty('color', '#252424', 'important');
       } else {
-        button.style.margin = '0px 4px';
+        button.style.margin = '0px 4px 2px 4px';
       }
       
       button.addEventListener('mouseover', () => {
@@ -563,7 +713,7 @@ export class Editor {
     });
 
     alignDropdown.appendChild(alignMenu);
-    toolbar.appendChild(alignDropdown);
+    toolbar1.appendChild(alignDropdown);
 
     // Thêm sự kiện click cho nút dropdown
     alignBtn.addEventListener('click', (e) => {
@@ -580,7 +730,6 @@ export class Editor {
         alignMenu.style.display = 'block';
         requestAnimationFrame(() => {
           alignMenu.style.opacity = '1';
-          alignMenu.style.transform = 'translateY(0)';
           alignMenu.style.pointerEvents = 'auto';
         });
       } else {
@@ -602,8 +751,42 @@ export class Editor {
         alignMenu.style.display = 'none';
       }, 200);
     });
-    // Thêm separator
-    toolbar.appendChild(this.createSeparator());
+
+    const unredo = document.createElement('div'); 
+    unredo.style.gap = '12px';
+    unredo.style.display = 'flex';
+    // Undo and Redo buttons
+    const undoBtn = this.createBtn('<i class="fas fa-undo"></i>', 'Undo', 'undo');
+    unredo.appendChild(undoBtn);
+    this.toolbarBtns.undo = undoBtn;
+
+    const redoBtn = this.createBtn('<i class="fas fa-redo"></i>', 'Redo', 'redo');
+    unredo.appendChild(redoBtn);
+    this.toolbarBtns.redo = redoBtn;
+    toolbar1.appendChild(unredo);
+    // More options button (3 dots)
+    const moreBtn = this.createBtn('<i class="fas fa-ellipsis-h"></i>', 'More Options');
+    toolbar1.appendChild(moreBtn);
+    this.toolbarBtns.moreOptions = moreBtn;
+
+    // ============ TOOLBAR 2 - Extended options ============
+    const toolbar2 = document.createElement('div');
+    toolbar2.className = 'toolbar toolbar-secondary';
+    toolbar2.style.position = 'relative';
+    toolbar2.style.padding = '8px 16px';
+    toolbar2.style.display = 'flex';
+    toolbar2.style.gap = '16px 20px';
+    toolbar2.style.flexWrap = 'wrap';
+    toolbar2.style.background = '#f8fafc';
+    toolbar2.style.transition = 'all 0.3s ease';
+    toolbar2.style.minHeight = '48px';
+    toolbar2.style.alignItems = 'center';
+    toolbar2.style.paddingBottom = '8px';
+    toolbar2.style.boxSizing = 'border-box';
+    toolbar2.style.width = '100%';
+    toolbar2.style.overflow = 'hidden';
+    toolbar2.style.borderBottomLeftRadius = '6px';
+    toolbar2.style.borderBottomRightRadius = '6px';
 
     // Danh sách dropdown
     const listDropdown = document.createElement('div');
@@ -730,7 +913,7 @@ export class Editor {
     });
 
     listDropdown.appendChild(listMenu);
-    toolbar.appendChild(listDropdown);
+    toolbar2.appendChild(listDropdown);
 
     // Add click event for dropdown button
     listBtn.addEventListener('click', (e) => {
@@ -749,7 +932,6 @@ export class Editor {
         listMenu.style.display = 'grid';
         requestAnimationFrame(() => {
           listMenu.style.opacity = '1';
-          listMenu.style.transform = 'translateY(0)';
           listMenu.style.pointerEvents = 'auto';
         });
       } else {
@@ -771,9 +953,7 @@ export class Editor {
         listMenu.style.display = 'none';
       }, 200);
     });
-
-    // Thêm separator
-    toolbar.appendChild(this.createSeparator());
+    
     // Thêm nút indentIncrease và indentDecrease
     const indentBtns = [
       { icon: '<i class="fas fa-indent"></i>', title: 'Increase Indent', cmd: 'indentIncrease' },
@@ -782,12 +962,10 @@ export class Editor {
 
     indentBtns.forEach(btn => {
       const button = this.createBtn(btn.icon, btn.title, btn.cmd);
-      toolbar.appendChild(button);
+      toolbar2.appendChild(button);
       this.toolbarBtns[btn.cmd] = button;
     });
 
-    // Thêm separator
-    toolbar.appendChild(this.createSeparator());
     // Font selectoralign-dropdown-btnalign-dropdown-btn
     const fontSelect = document.createElement('select');
     fontSelect.className = 'font-select';
@@ -825,7 +1003,7 @@ export class Editor {
       document.execCommand('fontName', false, font);
     });
 
-    toolbar.appendChild(fontSelect);
+    toolbar2.appendChild(fontSelect);
 
     // Line height select
     const lineHeightSelect = document.createElement('select');
@@ -869,7 +1047,7 @@ export class Editor {
       this.applyLineHeight(lineHeight);
     });
 
-    toolbar.appendChild(lineHeightSelect);
+    toolbar2.appendChild(lineHeightSelect);
     this.lineHeightSelector = lineHeightSelect;
 
     // Capitalization select
@@ -913,18 +1091,15 @@ export class Editor {
       }, 100);
     });
 
-    toolbar.appendChild(capitalizationSelect);
+    toolbar2.appendChild(capitalizationSelect);
     this.capitalizationSelector = capitalizationSelect;
 
-    // Thêm separator
-    toolbar.appendChild(this.createSeparator());
+  
 
     // Chèn nội dung
     const insertBtns = [
       { icon: '<i class="far fa-smile"></i>', title: 'Emoji', cmd: 'emoji' },
       { icon: '<i class="far fa-image"></i>', title: 'Image', cmd: 'image' },
-      { icon: '<i class="fas fa-link"></i>', title: 'Link', cmd: 'link' },
-      { icon: '<i class="fas fa-table"></i>', title: 'Table', cmd: 'table' },
       { icon: '<i class="fas fa-video"></i>', title: 'Video', cmd: 'video' },
       { icon: '<i class="fas fa-file-import"></i>', title: 'Import', cmd: 'import' },
       { icon: '<i class="fas fa-tags"></i>', title: 'Insert Tags', cmd: 'insertTags' },
@@ -933,42 +1108,14 @@ export class Editor {
 
     insertBtns.forEach(btn => {
       const button = this.createBtn(btn.icon, btn.title, btn.cmd);
-      toolbar.appendChild(button);
+      toolbar2.appendChild(button);
       this.toolbarBtns[btn.cmd] = button;
     });
-
-    // Thêm separator
-    toolbar.appendChild(this.createSeparator());
-
-    // Nút chọn màu chữ
-    const textColorBtn = this.createColorBtn('<i class="fas fa-font"></i>', 'Text Color', 'textColor');
-    toolbar.appendChild(textColorBtn);
-    this.toolbarBtns.textColor = textColorBtn;
-
-    // Nút chọn màu nền
-    const bgColorBtn = this.createColorBtn('<i class="fas fa-fill-drip"></i>', 'Background Color', 'bgColor');
-    toolbar.appendChild(bgColorBtn);
-    this.toolbarBtns.bgColor = bgColorBtn;
-
-    // Hoàn tác/Làm lại
-    const undoRedoBtns = [
-      { icon: '<i class="fas fa-undo"></i>', title: 'Undo', cmd: 'undo' },
-      { icon: '<i class="fas fa-redo"></i>', title: 'Redo', cmd: 'redo' }
-    ];
-
-    undoRedoBtns.forEach(btn => {
-      const button = this.createBtn(btn.icon, btn.title, btn.cmd);
-      toolbar.appendChild(button);
-      this.toolbarBtns[btn.cmd] = button;
-    });
-
-    // Thêm separator
-    toolbar.appendChild(this.createSeparator());
 
     // Thêm nút View Source
     const viewSourceBtn = this.createBtn('<i class="fas fa-code"></i>', 'View Source', 'viewSource');
     viewSourceBtn.onclick = () => this.toggleSourceView();
-    toolbar.appendChild(viewSourceBtn);
+    toolbar2.appendChild(viewSourceBtn);
 
     // Theme toggle button
     const themeBtn = document.createElement('button');
@@ -997,11 +1144,8 @@ export class Editor {
       themeBtn.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#ffffff';
     };
 
-    toolbar.appendChild(themeBtn);
+    toolbar2.appendChild(themeBtn);
     this.themeToggleBtn = themeBtn;
-
-    // Thêm separator
-    toolbar.appendChild(this.createSeparator());
 
     // Font size selector (simple select like font selector)
     const fontSizeSelect = document.createElement('select');
@@ -1031,13 +1175,138 @@ export class Editor {
       this.setFontSize(selectedSize);
     });
 
-    toolbar.appendChild(fontSizeSelect);
+    toolbar2.appendChild(fontSizeSelect);
     this.fontSizeSelector = fontSizeSelect;
+
+    // Store toolbar references
+    this.toolbar1 = toolbar1;
+    this.toolbar2 = toolbar2;
+    this.toolbarContainer = toolbarContainer;
+    
+    // Add row separators to toolbar2 when it wraps to multiple lines
+    this.addToolbar2RowSeparators();
+
+    // Initially hide toolbar2
+    toolbar2.style.display = 'none';
+
+    // Add event listener to more button to toggle toolbar2
+    moreBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      this.toggleToolbar2();
+    });
 
     // Update format button states
     this.updateFormatButtonStates();
 
-    return toolbar;
+    // Add toolbars to container
+    toolbarContainer.appendChild(toolbar1);
+    
+    // Add horizontal separator between toolbar1 and toolbar2
+    const toolbarSeparator = document.createElement('div');
+    toolbarSeparator.className = 'toolbar-separator';
+    toolbarSeparator.style.width = '100%';
+    toolbarSeparator.style.height = '1px';
+    toolbarSeparator.style.background = this.options.theme === 'dark' ? '#404040' : '#e5e7eb';
+    toolbarSeparator.style.margin = '0';
+    toolbarSeparator.style.boxSizing = 'border-box';
+    toolbarSeparator.style.transition = 'all 0.3s ease';
+    toolbarSeparator.style.display = 'none';
+    
+    // Store reference for theme updates
+    this.toolbarSeparator = toolbarSeparator;
+    
+    toolbarContainer.appendChild(toolbarSeparator);
+    toolbarContainer.appendChild(toolbar2);
+
+    return toolbarContainer;
+  }
+
+  // Add method to toggle toolbar2 visibility
+  toggleToolbar2() {
+    if (this.toolbar2.style.display === 'none' || this.toolbar2.style.display === '') {
+      this.toolbar2.style.display = 'flex';
+      this.toolbarSeparator.style.display = 'block';
+      // Add row separators after toolbar becomes visible
+      setTimeout(() => this.addToolbar2RowSeparators(), 10);
+    } else {
+      this.toolbar2.style.display = 'none';
+      this.toolbarSeparator.style.display = 'none';
+    }
+  }
+
+  // Add horizontal separators between rows in toolbar2
+  addToolbar2RowSeparators() {
+    if (!this.toolbar2 || this.toolbar2.style.display === 'none') return;
+    
+    // Remove existing separators
+    const existingSeparators = this.toolbar2.querySelectorAll('.toolbar-row-separator');
+    existingSeparators.forEach(sep => sep.remove());
+    
+    // Wait for layout to complete
+    setTimeout(() => {
+      const children = Array.from(this.toolbar2.children);
+      if (children.length === 0) return;
+      
+      let currentRowY = null;
+      let rowElements = [];
+      const rows = [];
+      
+      // Group elements by row based on their Y position
+      children.forEach(child => {
+        if (child.classList.contains('toolbar-row-separator')) return; // Skip separators
+        
+        const rect = child.getBoundingClientRect();
+        const childY = Math.round(rect.top + rect.height / 2); // Use center point for better accuracy with alignItems: center
+        
+        if (currentRowY === null || Math.abs(childY - currentRowY) > 10) {
+          // New row detected (increased tolerance for center alignment)
+          if (rowElements.length > 0) {
+            rows.push([...rowElements]);
+          }
+          rowElements = [child];
+          currentRowY = childY;
+        } else {
+          // Same row
+          rowElements.push(child);
+        }
+      });
+      
+      // Add the last row
+      if (rowElements.length > 0) {
+        rows.push(rowElements);
+      }
+      
+      // Add separators between rows (not after the last row)
+      for (let i = 0; i < rows.length - 1; i++) {
+        const currentRow = rows[i];
+        const nextRow = rows[i + 1];
+        
+                 if (currentRow.length > 0 && nextRow.length > 0) {
+           // Calculate separator position with center alignment
+           const currentRowBottom = Math.max(...currentRow.map(el => el.getBoundingClientRect().bottom));
+           const nextRowTop = Math.min(...nextRow.map(el => el.getBoundingClientRect().top));
+           const toolbar2Rect = this.toolbar2.getBoundingClientRect();
+           
+           // Position separator exactly in the middle of the gap between rows
+           const gapMiddle = (currentRowBottom + nextRowTop) / 2;
+           const separatorTop = gapMiddle - toolbar2Rect.top;
+           
+           const separator = document.createElement('div');
+           separator.className = 'toolbar-row-separator';
+           separator.style.position = 'absolute';
+           separator.style.left = '-16px';
+           separator.style.right = '-16px';
+          separator.style.top = separatorTop + 'px';
+          separator.style.height = '1px';
+          separator.style.background = this.options.theme === 'dark' ? '#404040' : '#e5e7eb';
+          separator.style.pointerEvents = 'none';
+          separator.style.zIndex = '0';
+          separator.style.transition = 'all 0.3s ease';
+          
+          this.toolbar2.appendChild(separator);
+        }
+      }
+    }, 50);
   }
 
   createBtn(icon, title, cmd, value = null) {
@@ -1045,9 +1314,7 @@ export class Editor {
     btn.innerHTML = icon;
     btn.title = title;
     btn.classList.add('toolbar-btn');
-    btn.style.padding = '6px 9px';
-    btn.style.border = '1.5px solid transparent';
-    btn.style.borderRadius = '7px';
+    btn.style.borderRadius = '3px';
     btn.style.background = this.options?.theme === 'dark' ? '#2a2a2a' : '#fff';
     btn.style.color = this.options?.theme === 'dark' ? '#e0e0e0' : '#374151';
     btn.style.cursor = 'pointer';
@@ -1055,9 +1322,8 @@ export class Editor {
     btn.style.display = 'flex';
     btn.style.alignItems = 'center';
     btn.style.justifyContent = 'center';
-    btn.style.minWidth = '32px';
-    btn.style.height = '32px';
-    btn.style.fontSize = '17px';
+    btn.style.height = '14px';
+    btn.style.fontSize = '14px';
     btn.style.boxSizing = 'border-box';
     btn.style.margin = '0';
     btn.style.marginTop = '0';
@@ -1089,7 +1355,6 @@ export class Editor {
         btn.style.background = isDark ? '#3a3a3a' : '#e9ecef';
         btn.style.color = isDark ? '#e0e0e0' : '#374151';
         btn.style.borderColor = isDark ? '#4a5a7b' : '#b6d4fe';
-        btn.style.transform = 'translateY(-1px)';
         btn.style.boxShadow = isDark ? '0 2px 8px rgba(102, 204, 255, 0.12)' : '0 2px 8px rgba(25, 118, 210, 0.06)';
       }
     };
@@ -1106,7 +1371,6 @@ export class Editor {
         btn.style.background = isDark ? '#2a2a2a' : '#fff';
         btn.style.color = isDark ? '#e0e0e0' : '#374151';
         btn.style.borderColor = 'transparent';
-        btn.style.transform = 'translateY(0)';
         btn.style.boxShadow = 'none';
       }
     };
@@ -1222,24 +1486,52 @@ export class Editor {
   createColorBtn(icon, title, cmd) {
     const btn = this.createBtn(icon, title, cmd);
     
-    // Tạo color indicator (thanh màu nhỏ ở dưới icon)
-    const colorIndicator = document.createElement('div');
-    colorIndicator.style.position = 'absolute';
-    colorIndicator.style.bottom = '2px';
-    colorIndicator.style.left = '50%';
-    colorIndicator.style.transform = 'translateX(-50%)';
-    colorIndicator.style.width = '20px';
-    colorIndicator.style.height = '3px';
-    colorIndicator.style.backgroundColor = cmd === 'textColor' ? '#000000' : 'transparent';
-    colorIndicator.style.borderRadius = '1px';
-    colorIndicator.style.border = cmd === 'bgColor' ? '1px solid #ccc' : 'none';
+    // Store the current color for this button
+    btn._currentColor = cmd === 'textColor' ? '#000000' : 'transparent';
     
-    // Cần đặt position relative cho btn để indicator có thể absolute
-    btn.style.position = 'relative';
-    btn.appendChild(colorIndicator);
+    // Override hover behavior for color buttons to preserve color
+    btn.onmouseover = () => {
+      if (!btn.classList.contains('active')) {
+        const isDark = this.options?.theme === 'dark';
+        btn.style.background = isDark ? '#3a3a3a' : '#e9ecef';
+        btn.style.boxShadow = isDark ? '0 2px 8px rgba(102, 204, 255, 0.12)' : '0 2px 8px rgba(25, 118, 210, 0.06)';
+        
+        // Preserve current color for text color or background color
+        if (cmd === 'textColor') {
+          btn.style.setProperty('color', btn._currentColor, 'important');
+        } else if (cmd === 'bgColor') {
+          btn.style.setProperty('background-color', btn._currentColor, 'important');
+        }
+      }
+    };
+
+    btn.onmouseout = () => {
+      if (btn.classList.contains('active')) {
+        const isDark = this.options?.theme === 'dark';
+        btn.style.background = isDark ? '#3a4a6b' : '#e0f0ff';
+        btn.style.boxShadow = isDark ? '0 2px 8px rgba(102, 204, 255, 0.15)' : '0 2px 8px rgba(25, 118, 210, 0.08)';
+      } else {
+        const isDark = this.options?.theme === 'dark';
+        btn.style.background = isDark ? '#2a2a2a' : '#fff';
+        btn.style.boxShadow = 'none';
+      }
+      
+      // Preserve current color for text color or background color
+      if (cmd === 'textColor') {
+        btn.style.setProperty('color', btn._currentColor, 'important');
+      } else if (cmd === 'bgColor') {
+        btn.style.setProperty('background-color', btn._currentColor, 'important');
+        if (btn._currentColor === 'transparent') {
+        }
+      }
+    };
     
-    // Lưu reference để có thể update màu
-    btn._colorIndicator = colorIndicator;
+    // Set initial colors for icons
+    if (cmd === 'textColor') {
+      btn.style.setProperty('color', '#000000', 'important');
+    } else if (cmd === 'bgColor') {
+      btn.style.setProperty('background-color', 'transparent', 'important');
+    }
     
     return btn;
   }
@@ -1274,10 +1566,10 @@ export class Editor {
     this.tableGrid.style.marginBottom = '8px';
     this.tablePopup.appendChild(this.tableGrid);
     // Tạo label kích thước
-     // Đường kẻ ngang chia cắt
+    // Đường kẻ ngang chia cắt
     const divider = document.createElement('div');
-    //divider.style.marginTop = '8px';
-    divider.style.gridColumn = '1 / -1'; // Spanning toàn bộ 6 cột
+    divider.style.marginLeft = '-8px';
+    divider.style.marginRight = '-8px';
     divider.style.height = '1px';
     divider.style.background = '#eee';
     this.tablePopup.appendChild(divider);
@@ -1350,17 +1642,64 @@ export class Editor {
     this.tableToolbar.style.boxShadow = '0 2px 8px rgba(0,0,0,0.12)';
     this.tableToolbar.style.zIndex = 100;
     this.tableToolbar.style.gap = '4px';
+    if (!this.tableToolbar.arrow) {
+      const arrow = document.createElement('div');
+      arrow.className = 'table-toolbar-arrow';
+      arrow.style.position = 'absolute';
+      arrow.style.left = '50%';
+      arrow.style.bottom = '-8px';
+      arrow.style.transform = 'translateX(-50%)';
+      arrow.style.borderLeft = '6px solid transparent';
+      arrow.style.borderRight = '6px solid transparent';
+      arrow.style.borderTop = '8px solid #fff';
+      arrow.style.filter = 'drop-shadow(0px 1px 1px rgba(0,0,0,0.08))';
+      this.tableToolbar.appendChild(arrow);
+      this.tableToolbar.arrow = arrow;
+    }
+    // Xóa cũ nếu có
+    if (this.tableToolbar.parentNode) this.tableToolbar.parentNode.removeChild(this.tableToolbar);
+    document.body.appendChild(this.tableToolbar);
 
     // Thêm các nút vào toolbar
     const buttons = [
-      { icon: '<i class="fas fa-arrow-up"></i>', title: 'Thêm dòng trên', cmd: 'addRowAbove' },
-      { icon: '<i class="fas fa-arrow-down"></i>', title: 'Thêm dòng dưới', cmd: 'addRowBelow' },
-      { icon: '<i class="fas fa-arrow-left"></i>', title: 'Thêm cột trái', cmd: 'addColLeft' },
-      { icon: '<i class="fas fa-arrow-right"></i>', title: 'Thêm cột phải', cmd: 'addColRight' },
-      { icon: '<i class="fas fa-trash"></i>', title: 'Xóa dòng', cmd: 'deleteRow' },
-      { icon: '<i class="fas fa-trash"></i>', title: 'Xóa cột', cmd: 'deleteCol' },
-      { icon: '<i class="fas fa-object-group"></i>', title: 'Merge cells', cmd: 'mergeCells' },
-      { icon: '<i class="fas fa-object-ungroup"></i>', title: 'Split cells', cmd: 'splitCells' },
+      { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="14" viewBox="0 0 18 14" fill="none">
+  <g clip-path="url(#clip0_23_620)">
+    <path d="M17.2744 10.9348V2.16365C17.2744 0.994844 16.3413 0.0475311 15.1901 0.0475311H2.35536C1.20413 0.0475311 0.274414 0.991437 0.274414 2.16024V10.9382C0.274414 12.1036 1.20413 13.0509 2.35536 13.0509H15.1935C16.3447 13.0509 17.2744 12.1036 17.2744 10.9382V10.9348ZM2.31844 7.60218H7.66178V10.8803H2.31844V7.60218ZM15.0827 10.8803H9.74273V7.60218H15.0827V10.8803ZM15.0827 5.48947H9.74273V2.21477H15.0827V5.48947ZM2.31844 2.21477H7.66178V5.48947H2.31844V2.21477Z" fill="#454545"/>
+  </g>
+  <defs>
+    <clipPath id="clip0_23_620">
+      <rect width="17" height="13" fill="white" transform="translate(0.274414 0.0475311)"/>
+    </clipPath>
+  </defs>
+</svg>`, title: 'Thêm dòng trên', cmd: 'addRowAbove' },
+      { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="14" viewBox="0 0 18 14" fill="none">
+  <path d="M15.3864 0.0123596H2.37934C1.21636 0.0123596 0.274414 0.964798 0.274414 2.1365V10.962C0.274414 12.1337 1.21636 13.0827 2.37934 13.0827H15.3864C16.5528 13.0827 17.4981 12.1337 17.4981 10.9586V2.13993C17.4981 0.964798 16.5528 0.0123596 15.3864 0.0123596ZM15.2776 5.48374H13.2542C13.4209 6.18265 13.4209 6.9124 13.2542 7.60789H15.2776V10.9037H10.1257C9.31642 11.1367 8.45609 11.1367 7.64676 10.9037H2.34534V7.60789H4.51488C4.34825 6.9124 4.34825 6.18265 4.51488 5.48374H2.34534V2.19132H7.66037C8.46289 1.96178 9.31302 1.96178 10.1155 2.19132H15.2776V5.48374Z" fill="#454545"/>
+  <path d="M12.2715 5.48376C12.1083 4.9493 11.8158 4.44567 11.3942 4.02084C10.9521 3.57546 10.4284 3.27396 9.86732 3.11294C9.18041 2.9108 8.4425 2.92793 7.75899 3.15748C7.25231 3.32535 6.77624 3.61657 6.37497 4.02084C5.95331 4.44567 5.66086 4.9493 5.49764 5.48376C5.28 6.17239 5.28 6.91927 5.49424 7.6079C5.65746 8.14579 5.95331 8.65284 6.37497 9.07767C6.79664 9.5025 7.25231 9.77316 7.75899 9.94103C8.4425 10.1706 9.18041 10.1877 9.86732 9.98557C10.4284 9.82455 10.9521 9.52306 11.3942 9.07767C11.8362 8.63229 12.1117 8.14579 12.2749 7.6079C12.4891 6.91927 12.4891 6.17239 12.2715 5.48376ZM10.3774 7.59077C10.3774 7.59077 10.3876 7.60105 10.391 7.6079C10.5032 7.73467 10.4964 7.92995 10.3774 8.05329C10.2516 8.18005 10.0441 8.18005 9.91833 8.05329L9.86732 8.0019L8.88457 7.01177L7.8508 8.05329C7.8236 8.0807 7.793 8.10468 7.75899 8.11838C7.63997 8.1732 7.49375 8.15264 7.39173 8.05329C7.27271 7.92995 7.26591 7.73467 7.37813 7.6079C7.38153 7.60105 7.38493 7.59762 7.39173 7.59077L8.42549 6.54926L7.39173 5.50774C7.39173 5.50774 7.37813 5.49404 7.37133 5.48376C7.26591 5.357 7.27271 5.16514 7.39173 5.04523C7.49375 4.94587 7.63997 4.92531 7.75899 4.98013C7.793 4.99384 7.8236 5.01782 7.8508 5.04523L8.88457 6.08674L9.86732 5.09662L9.91833 5.04523C10.0441 4.91846 10.2516 4.91846 10.3774 5.04523C10.4964 5.16514 10.5032 5.357 10.3978 5.48376C10.391 5.49404 10.3842 5.50089 10.3774 5.50774L9.34364 6.54926L10.3774 7.59077Z" fill="#454545"/>
+</svg>`, title: 'Thêm dòng dưới', cmd: 'addRowBelow' },
+      { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="16" viewBox="0 0 18 16" fill="none">
+  <path d="M15.6134 2.02472H13.216C13.3691 2.47353 13.4541 2.9566 13.4541 3.4568C13.4541 3.71033 13.4337 3.96043 13.3895 4.20368H15.6508V7.49953H10.7847C10.2678 7.71537 9.70328 7.83528 9.10819 7.83528C8.5131 7.83528 7.94861 7.71537 7.43173 7.49953H2.71859V4.20368H4.82692C4.78271 3.96043 4.76231 3.71033 4.76231 3.4568C4.76231 2.9566 4.84732 2.47353 5.00035 2.02472H2.60637C1.43999 2.02472 0.498047 2.97716 0.498047 4.15229V12.9709C0.498047 14.146 1.43999 15.0951 2.60637 15.0951H15.6134C16.7764 15.0951 17.7217 14.146 17.7217 12.9743V4.14886C17.7217 2.97716 16.7764 2.02472 15.6134 2.02472ZM8.12884 12.9161H2.71859V9.62367H8.12884V12.9161ZM15.6508 12.9161H10.2372V9.62367H15.6508V12.9161Z" fill="#454545"/>
+  <path d="M12.2335 2.02479C11.6962 0.832527 10.4992 0 9.1118 0C7.72438 0 6.52739 0.832527 5.99011 2.02479C5.78948 2.4599 5.68066 2.94639 5.68066 3.45687C5.68066 3.71383 5.70787 3.96393 5.76228 4.20375C6.02752 5.4337 6.94566 6.41697 8.13245 6.77328C8.44189 6.86578 8.77174 6.91717 9.1118 6.91717C9.50626 6.91717 9.88712 6.84865 10.2408 6.72531C11.3527 6.33474 12.2063 5.38231 12.4613 4.20375C12.5157 3.96393 12.5429 3.71383 12.5429 3.45687C12.5429 2.94639 12.4341 2.4599 12.2335 2.02479ZM10.8393 3.77549H9.42465V5.1973C9.42465 5.37203 9.28522 5.5125 9.1118 5.5125C8.93837 5.5125 8.79895 5.37203 8.79895 5.1973V3.77549H7.38433C7.2109 3.77549 7.07148 3.6316 7.07148 3.45687C7.07148 3.28214 7.2109 3.14168 7.38433 3.14168H8.79895V1.71987C8.79895 1.54514 8.93837 1.40125 9.1118 1.40125C9.28522 1.40125 9.42465 1.54514 9.42465 1.71987V3.14168H10.8393C11.0127 3.14168 11.1521 3.28214 11.1521 3.45687C11.1521 3.6316 11.0127 3.77549 10.8393 3.77549Z" fill="#454545"/>
+</svg>`, title: 'Thêm cột trái', cmd: 'addColLeft' },
+      { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="16" viewBox="0 0 18 16" fill="none">
+  <path d="M2.83001 13.0703H5.22738C5.07436 12.6215 4.98935 12.1385 4.98935 11.6383C4.98935 11.3847 5.00975 11.1346 5.05396 10.8914H2.79261V7.59554H7.65876C8.17564 7.3797 8.74013 7.25979 9.33522 7.25979C9.93032 7.25979 10.4948 7.3797 11.0117 7.59554H15.7248V10.8914H13.6165C13.6607 11.1346 13.6811 11.3847 13.6811 11.6383C13.6811 12.1385 13.5961 12.6215 13.4431 13.0703H15.837C17.0034 13.0703 17.9454 12.1179 17.9454 10.9428V2.12416C17.9454 0.949028 17.0034 1.52588e-05 15.837 1.52588e-05H2.83001C1.66703 1.52588e-05 0.72168 0.949028 0.72168 2.12073V10.9462C0.72168 12.1179 1.66703 13.0703 2.83001 13.0703ZM10.3146 2.17898H15.7248V5.4714H10.3146V2.17898ZM2.79261 2.17898H8.20625V5.4714H2.79261V2.17898Z" fill="#454545"/>
+  <path d="M6.2135 13.0703C6.75079 14.2625 7.94777 15.095 9.33519 15.095C10.7226 15.095 11.9196 14.2625 12.4569 13.0703C12.6575 12.6351 12.7663 12.1486 12.7663 11.6382C12.7663 11.3812 12.7391 11.1311 12.6847 10.8913C12.4195 9.66135 11.5013 8.67807 10.3145 8.32177C10.0051 8.22926 9.67524 8.17787 9.33519 8.17787C8.94072 8.17787 8.55987 8.24639 8.20621 8.36973C7.09424 8.7603 6.24071 9.71274 5.98567 10.8913C5.93126 11.1311 5.90405 11.3812 5.90405 11.6382C5.90405 12.1486 6.01287 12.6351 6.2135 13.0703ZM7.60772 11.3195H9.02234V9.89774C9.02234 9.72302 9.16176 9.58255 9.33519 9.58255C9.50861 9.58255 9.64803 9.72302 9.64803 9.89774V11.3195H11.0627C11.2361 11.3195 11.3755 11.4634 11.3755 11.6382C11.3755 11.8129 11.2361 11.9534 11.0627 11.9534H9.64803V13.3752C9.64803 13.5499 9.50861 13.6938 9.33519 13.6938C9.16176 13.6938 9.02234 13.5499 9.02234 13.3752V11.9534H7.60772C7.43429 11.9534 7.29487 11.8129 7.29487 11.6382C7.29487 11.4634 7.43429 11.3195 7.60772 11.3195Z" fill="#454545"/>
+</svg>`, title: 'Thêm cột phải', cmd: 'addColRight' },
+      { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="19" height="14" viewBox="0 0 19 14" fill="none">
+  <path d="M18.169 2.13993V10.9586C18.169 12.1337 17.2271 13.0827 16.0607 13.0827H3.05365C1.89066 13.0827 0.945312 12.1337 0.945312 10.962V2.1365C0.945312 0.964798 1.89066 0.0123596 3.05365 0.0123596H7.45053C7.10367 0.204218 6.77723 0.450893 6.48478 0.745532C6.06311 1.17036 5.74346 1.66371 5.53263 2.19132H3.01624V5.48374H5.53263C5.74346 6.01135 6.05971 6.50813 6.48478 6.93638C6.74662 7.20019 7.03226 7.42288 7.33831 7.60789H3.01624V10.9037H8.42988V8.0704C9.12019 8.25541 9.8445 8.26911 10.5382 8.10466V10.9037H15.9485V7.60789H11.7794C12.0855 7.42288 12.3711 7.20019 12.6329 6.93638C13.058 6.50813 13.3743 6.01135 13.5851 5.48374H15.9485V2.19132H13.5851C13.3743 1.66371 13.0546 1.17036 12.6329 0.745532C12.3405 0.450893 12.014 0.204218 11.6672 0.0123596H16.0607C17.2271 0.0123596 18.169 0.964798 18.169 2.13993Z" fill="#454545"/>
+  <path d="M12.5751 2.19137C12.4221 1.90701 12.2249 1.63635 11.9869 1.39653C10.6436 0.04324 8.4707 0.04324 7.1309 1.39653C6.89286 1.63635 6.69563 1.90701 6.5426 2.19137C5.98832 3.21575 5.98832 4.4594 6.53921 5.48379C6.69223 5.77158 6.88946 6.04223 7.1309 6.28548C8.4707 7.63534 10.6436 7.63534 11.9869 6.28548C12.2283 6.04223 12.4255 5.77158 12.5785 5.48379C13.1294 4.4594 13.1294 3.21575 12.5751 2.19137ZM10.5382 4.3806L11.0007 4.84655C11.1231 4.96988 11.1231 5.16859 11.0007 5.29536C10.8783 5.41869 10.681 5.41869 10.5586 5.29536L9.55887 4.2881L8.55912 5.29536C8.52171 5.33304 8.47751 5.36045 8.4299 5.37073C8.32108 5.40842 8.20207 5.38101 8.11705 5.29536C7.99463 5.16859 7.99463 4.96988 8.11705 4.84655L8.4299 4.53135L9.1134 3.83929L8.11705 2.83546C7.99463 2.71212 7.99463 2.50999 8.11705 2.38665C8.20207 2.301 8.32108 2.27359 8.4299 2.31128C8.47751 2.32156 8.52171 2.34896 8.55912 2.38665L9.55887 3.39391L10.5586 2.38665C10.681 2.26331 10.8783 2.26331 11.0007 2.38665C11.1231 2.50999 11.1231 2.71212 11.0007 2.83546L10.5382 3.3014L10.0009 3.83929L10.5382 4.3806Z" fill="#454545"/>
+</svg>`, title: 'Xóa dòng', cmd: 'deleteRow' },
+      { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="19" height="14" viewBox="0 0 19 14" fill="none">
+  <path d="M16.4982 0.0123596H3.49115C2.32476 0.0123596 1.38281 0.964798 1.38281 2.1365V2.78402C2.03231 2.39346 2.79063 2.17076 3.60336 2.17076C3.73938 2.17076 3.872 2.17762 4.00462 2.19132H9.0136V5.48717H7.82001C7.90503 5.82977 7.94924 6.18265 7.94924 6.54924C7.94924 6.91583 7.90503 7.27213 7.82001 7.61131H9.0136V10.9037H4.04883C3.9026 10.9209 3.75298 10.9277 3.60336 10.9277C2.79063 10.9277 2.03231 10.705 1.38281 10.3145V10.9586C1.38281 12.1303 2.32476 13.0827 3.49115 13.0827H16.4982C17.6612 13.0827 18.6065 12.1337 18.6065 10.962V2.1365C18.6065 0.964798 17.6612 0.0123596 16.4982 0.0123596ZM16.5356 10.9037H11.1219V7.61131H16.5356V10.9037ZM16.5356 5.48717H11.1219V2.19132H16.5356V5.48717Z" fill="#454545"/>
+  <path d="M6.87164 5.48725C6.42617 4.09627 5.13057 3.08902 3.60373 3.08902C2.75699 3.08902 1.98167 3.39736 1.38318 3.91469C0.638465 4.54509 0.169189 5.49067 0.169189 6.54932C0.169189 7.60796 0.638465 8.55012 1.38318 9.18052C1.98167 9.69785 2.75699 10.0062 3.60373 10.0062C5.13057 10.0062 6.42617 8.99894 6.87164 7.61139C6.97706 7.27906 7.03486 6.91933 7.03486 6.54932C7.03486 6.17931 6.97706 5.81957 6.87164 5.48725ZM5.3278 6.86451H3.91658V8.28632C3.91658 8.46105 3.77715 8.60494 3.60373 8.60494C3.4303 8.60494 3.28748 8.46105 3.28748 8.28632V6.86451H1.87626C1.70284 6.86451 1.56341 6.72405 1.56341 6.54932C1.56341 6.37459 1.70284 6.2307 1.87626 6.2307H3.28748V4.80889C3.28748 4.63416 3.4303 4.4937 3.60373 4.4937C3.77715 4.4937 3.91658 4.63416 3.91658 4.80889V6.2307H5.3278C5.50123 6.2307 5.64405 6.37459 5.64405 6.54932C5.64405 6.72405 5.50123 6.86451 5.3278 6.86451Z" fill="#454545"/>
+</svg>`, title: 'Xóa cột', cmd: 'deleteCol' },
+      { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="14" viewBox="0 0 20 14" fill="none">
+  <path d="M2.71478 13.0827H15.7218C16.8882 13.0827 17.8301 12.1303 17.8301 10.9586V10.311C17.1806 10.7016 16.4223 10.9243 15.6096 10.9243C15.4736 10.9243 15.3409 10.9174 15.2083 10.9037H10.1993V7.60789H11.3929C11.3079 7.26528 11.2637 6.9124 11.2637 6.54581C11.2637 6.17923 11.3079 5.82292 11.3929 5.48374H10.1993V2.19132H15.1641C15.3103 2.17419 15.46 2.16734 15.6096 2.16734C16.4223 2.16734 17.1806 2.39003 17.8301 2.7806V2.1365C17.8301 0.964798 16.8882 0.0123596 15.7218 0.0123596H2.71478C1.5518 0.0123596 0.606445 0.961372 0.606445 2.13308V10.9586C0.606445 12.1303 1.5518 13.0827 2.71478 13.0827ZM2.67737 2.19132H8.09102V5.48374H2.67737V2.19132ZM2.67737 7.60789H8.09102V10.9037H2.67737V7.60789Z" fill="#454545"/>
+  <path d="M12.3419 7.60796C12.7874 8.99894 14.083 10.0062 15.6098 10.0062C16.4566 10.0062 17.2319 9.69785 17.8304 9.18052C18.5751 8.55012 19.0444 7.60454 19.0444 6.54589C19.0444 5.48725 18.5751 4.54509 17.8304 3.91469C17.2319 3.39736 16.4566 3.08902 15.6098 3.08902C14.083 3.08902 12.7874 4.09627 12.3419 5.48382C12.2365 5.81615 12.1787 6.17588 12.1787 6.54589C12.1787 6.9159 12.2365 7.27564 12.3419 7.60796ZM13.8858 6.2307H15.297V4.80889C15.297 4.63416 15.4364 4.49027 15.6098 4.49027C15.7833 4.49027 15.9261 4.63416 15.9261 4.80889V6.2307H17.3373C17.5107 6.2307 17.6502 6.37116 17.6502 6.54589C17.6502 6.72062 17.5107 6.86451 17.3373 6.86451H15.9261V8.28632C15.9261 8.46105 15.7833 8.60152 15.6098 8.60152C15.4364 8.60152 15.297 8.46105 15.297 8.28632V6.86451H13.8858C13.7124 6.86451 13.5695 6.72062 13.5695 6.54589C13.5695 6.37116 13.7124 6.2307 13.8858 6.2307Z" fill="#454545"/>
+</svg>`, title: 'Merge cells', cmd: 'mergeCells' },
+      { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="19" height="14" viewBox="0 0 19 14" fill="none">
+  <path d="M16.5185 0.0123596H3.51142C2.34844 0.0123596 1.40649 0.964798 1.40649 2.1365V2.69495C2.18522 2.27012 3.06596 2.10224 3.92289 2.19132H8.89106V5.48374H7.69069C7.86412 6.17923 7.86412 6.9124 7.69069 7.60789H8.89106V10.9037H3.89228C3.04215 10.986 2.17501 10.8181 1.40649 10.3967V10.962C1.40649 12.1337 2.34844 13.0827 3.51142 13.0827H16.5185C17.6848 13.0827 18.6302 12.1303 18.6302 10.9586V2.13993C18.6302 0.964798 17.6848 0.0123596 16.5185 0.0123596ZM16.4096 10.9037H10.9994V7.60789H16.4096V10.9037ZM16.4096 5.48374H10.9994V2.19132H16.4096V5.48374Z" fill="#454545"/>
+  <path d="M6.74518 5.48377C6.58195 4.97671 6.30312 4.50049 5.90185 4.09965C5.23195 3.42472 4.35801 3.08554 3.47727 3.08554C2.74616 3.08554 2.01504 3.31851 1.40634 3.78788C1.28052 3.88038 1.16151 3.98659 1.04929 4.09965C-0.290519 5.44951 -0.290519 7.64217 1.04929 8.99203C1.16151 9.10509 1.28052 9.2113 1.40634 9.3038C2.01504 9.77317 2.74616 10.0061 3.47727 10.0061C4.35801 10.0061 5.23195 9.66696 5.90185 8.99203C6.30312 8.59119 6.58195 8.11496 6.74518 7.60791C6.96281 6.91928 6.96281 6.1724 6.74518 5.48377ZM4.9191 7.55309C4.9191 7.55309 4.9497 7.58736 4.9633 7.60791C5.03812 7.72782 5.02451 7.89227 4.9191 7.99848C4.79668 8.12182 4.59605 8.12182 4.47363 7.99848L4.08596 7.60791L3.47727 6.99465L2.47752 7.99848C2.3551 8.12182 2.15787 8.12182 2.03205 7.99848C1.90963 7.87514 1.90963 7.67643 2.03205 7.55309L3.0318 6.54584L2.03205 5.53858C1.90963 5.41525 1.90963 5.21654 2.03205 5.0932C2.15787 4.96986 2.3551 4.96986 2.47752 5.0932L3.47727 6.09703L4.47363 5.0932C4.59605 4.96986 4.79668 4.96986 4.9191 5.0932C5.02451 5.19941 5.03812 5.36386 4.9633 5.48377C4.9497 5.50432 4.9361 5.52145 4.9191 5.53858L3.91934 6.54584L4.9191 7.55309Z" fill="#454545"/>
+</svg>`, title: 'Split cells', cmd: 'splitCells' },
       { icon: '<i class="fas fa-times"></i>', title: 'Xóa bảng', cmd: 'deleteTable' }
     ];
 
@@ -1368,9 +1707,17 @@ export class Editor {
       const button = document.createElement('button');
       button.innerHTML = btn.icon;
       button.title = btn.title;
+      button.style.display = 'flex';
+      button.style.alignItems = 'center';
+      button.style.justifyContent = 'center';
       button.style.padding = '4px 8px';
-      button.style.border = '1px solid #ccc';
       button.style.borderRadius = '4px';
+      button.style.setProperty('border', 'none', 'important');
+
+
+
+
+
       button.style.background = '#fff';
       button.style.cursor = 'pointer';
       button.onclick = e => {
@@ -1651,21 +1998,23 @@ export class Editor {
     
     if (!node) return;
     
-    // Update text color
-    if (this.toolbarBtns.textColor && this.toolbarBtns.textColor._colorIndicator) {
+    // Update text color - change icon text color
+    if (this.toolbarBtns.textColor) {
       const textColor = this.getCurrentTextColor(node);
-      this.toolbarBtns.textColor._colorIndicator.style.backgroundColor = textColor;
+      this.toolbarBtns.textColor.style.setProperty('color', textColor, 'important');
+      this.toolbarBtns.textColor._currentColor = textColor; // Store current color
     }
     
-    // Update background color
-    if (this.toolbarBtns.bgColor && this.toolbarBtns.bgColor._colorIndicator) {
+    // Update background color - change icon background color
+    if (this.toolbarBtns.bgColor) {
       const bgColor = this.getCurrentBackgroundColor(node);
       if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
-        this.toolbarBtns.bgColor._colorIndicator.style.backgroundColor = bgColor;
-        this.toolbarBtns.bgColor._colorIndicator.style.border = 'none';
+        this.toolbarBtns.bgColor.style.setProperty('background-color', bgColor, 'important');
+        this.toolbarBtns.bgColor.style.setProperty('border', 'none', 'important');
+        this.toolbarBtns.bgColor._currentColor = bgColor; // Store current color
       } else {
-        this.toolbarBtns.bgColor._colorIndicator.style.backgroundColor = 'transparent';
-        this.toolbarBtns.bgColor._colorIndicator.style.border = '1px solid #ccc';
+        this.toolbarBtns.bgColor.style.setProperty('background-color', 'transparent', 'important');
+        this.toolbarBtns.bgColor._currentColor = 'transparent'; // Store current color
       }
     }
   }
@@ -1793,14 +2142,14 @@ export class Editor {
     selection.removeAllRanges();
     selection.addRange(range);
     
-    // Update indicator ngay lập tức
-    if (this.toolbarBtns.bgColor && this.toolbarBtns.bgColor._colorIndicator) {
+    // Update button background color immediately
+    if (this.toolbarBtns.bgColor) {
       if (color && color !== 'transparent') {
-        this.toolbarBtns.bgColor._colorIndicator.style.backgroundColor = color;
-        this.toolbarBtns.bgColor._colorIndicator.style.border = 'none';
+        this.toolbarBtns.bgColor.style.setProperty('background-color', color, 'important');
+        this.toolbarBtns.bgColor._currentColor = color; // Store current color
       } else {
-        this.toolbarBtns.bgColor._colorIndicator.style.backgroundColor = 'transparent';
-        this.toolbarBtns.bgColor._colorIndicator.style.border = '1px solid #ccc';
+        this.toolbarBtns.bgColor.style.setProperty('background-color', 'transparent', 'important');
+        this.toolbarBtns.bgColor._currentColor = 'transparent'; // Store current color
       }
     }
   }
@@ -1838,9 +2187,10 @@ export class Editor {
       selection.addRange(range);
     }
     
-    // Update indicator ngay lập tức
-    if (this.toolbarBtns.textColor && this.toolbarBtns.textColor._colorIndicator) {
-      this.toolbarBtns.textColor._colorIndicator.style.backgroundColor = color;
+    // Update button text color immediately
+    if (this.toolbarBtns.textColor) {
+      this.toolbarBtns.textColor.style.setProperty('color', color, 'important');
+      this.toolbarBtns.textColor._currentColor = color; // Store current color
     }
   }
 
@@ -1883,13 +2233,14 @@ export class Editor {
         // Debounce để tránh gọi quá nhiều lần
         clearTimeout(this.selectionTimeout);
         this.selectionTimeout = setTimeout(() => {
+          //this.updateStatusbar(); // Thêm để cập nhật breadcrumb khi di chuyển cursor
           this.updateIndentButtonState();
           this.updateHeadingSelector();
           this.updateFontSizeDisplay();
           this.updateLineHeightDisplay();
           this.updateFormatButtonStates(); // Thêm cập nhật trạng thái nút format
           this.updateColorButtonStates(); // Thêm cập nhật màu sắc
-        }, 10);
+        }, 1);
       }
     });
 
@@ -2327,8 +2678,8 @@ export class Editor {
         // Hiển thị toolbar phía trên và căn giữa bảng
         const rect = table.getBoundingClientRect();
         this.tableToolbar.style.display = 'flex';
-        this.tableToolbar.style.top = (window.scrollY + rect.top - this.tableToolbar.offsetHeight - 8) + 'px';
-        this.tableToolbar.style.left = (window.scrollX + rect.left + rect.width/2 - this.tableToolbar.offsetWidth/2) + 'px';
+        this.tableToolbar.style.top = (window.scrollY + rect.top - this.tableToolbar.offsetHeight - 55) + 'px';
+        this.tableToolbar.style.left = (window.scrollX + rect.left + rect.width/2 - this.tableToolbar.offsetWidth/2 - 300) + 'px';
         this.addTableResizeHandles(table);
       } else {
         // Ẩn toolbar nếu click ra ngoài bảng
@@ -2460,6 +2811,64 @@ export class Editor {
 
     const sel = window.getSelection();
     if (!sel) return;
+
+    // Kiểm tra xem selection có nằm trong editor-area không
+    if (sel.rangeCount > 0) {
+      const range = sel.getRangeAt(0);
+      const container = range.commonAncestorContainer;
+      const element = container.nodeType === 3 ? container.parentElement : container;
+      
+      // Kiểm tra xem element có nằm trong editor-area không
+      if (!this.editor.contains(element) && element !== this.editor) {
+        return; // Bỏ qua nếu cursor không nằm trong editor-area
+      }
+    } else {
+      // Nếu không có selection, kiểm tra activeElement
+      if (document.activeElement !== this.editor && !this.editor.contains(document.activeElement)) {
+        return; // Bỏ qua nếu focus không nằm trong editor-area
+      }
+    }
+
+    // Update breadcrumb (show current element path)
+    if (this.statusbarEls.breadcrumb && this.options.features.breadcrumb) {
+      const currentNode = sel.anchorNode;
+      const path = [];
+      let element = currentNode?.nodeType === 3 ? currentNode.parentElement : currentNode;
+      
+      while (element && element !== this.editor && element !== document.body) {
+        if (element.tagName) {
+          let tagInfo = element.tagName.toLowerCase();
+          
+          // Add class info if available
+          if (element.className && typeof element.className === 'string') {
+            const classes = element.className.trim();
+            if (classes) {
+              tagInfo += '.' + classes.split(' ').join('.');
+            }
+          }
+          
+          // Add id info if available
+          if (element.id) {
+            tagInfo += '#' + element.id;
+          }
+          
+          path.unshift(tagInfo);
+        }
+        element = element.parentElement;
+      }
+      
+      this.statusbarEls.breadcrumb.textContent = path.length > 0 ? path.join(' > ') : 'editor';
+    }
+
+    // Update word count
+    if (this.statusbarEls.wordcount && this.options.features.wordCount) {
+      const text = this.editor.textContent || '';
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      const chars = text.length;
+      const charsNoSpaces = text.replace(/\s/g, '').length;
+      
+      this.statusbarEls.wordcount.textContent = `${words} words, ${chars} chars (${charsNoSpaces} no spaces)`;
+    }
 
     // Update toolbar buttons state based on current selection or cursor position
     if (sel.rangeCount > 0) {
@@ -3946,7 +4355,7 @@ export class Editor {
     }
     // Danh sách màu phổ biến
     const palette = [
-      '#000000', '#333333', '#666666', '#999999', '#cccccc', '#ffffff',
+      '#000000', '#333333', '#666666', '#999999', '#cccccc', '#eeeeee',
       '#e60000', '#ff9900', '#ffff00', '#008a00', '#0066cc', '#9933ff',
       '#ff33cc', '#ff6600', '#ffcc00', '#33cc33', '#3366ff', '#6600cc',
       '#ff99cc', '#ffcc99', '#ffff99', '#ccffcc', '#ccffff', '#99ccff'
@@ -3972,10 +4381,10 @@ export class Editor {
       const colorBtn = document.createElement('button');
       colorBtn.style.width = '24px';
       colorBtn.style.height = '24px';
-      colorBtn.style.border = '1.5px solid #eee';
       colorBtn.style.borderRadius = '50%'; // Hình tròn
       colorBtn.style.background = color;
       colorBtn.style.cursor = 'pointer';
+      colorBtn.style.setProperty('border', 'none', 'important');
       colorBtn.style.outline = 'none';
       colorBtn.style.transition = 'all 0.15s ease';
       colorBtn.style.padding = '0';
@@ -4007,6 +4416,8 @@ export class Editor {
     const divider = document.createElement('div');
     //divider.style.marginTop = '8px';
     divider.style.gridColumn = '1 / -1'; // Spanning toàn bộ 6 cột
+    divider.style.marginLeft = '-8px';
+    divider.style.marginRight = '-8px';
     divider.style.height = '1px';
     divider.style.background = '#eee';
     paletteDiv.appendChild(divider);
@@ -4213,6 +4624,7 @@ export class Editor {
       document.addEventListener('mousedown', closePalette);
     }, 10);
   }
+  
 
   createBlockToolbar() {
     // Tạo block toolbar floating
@@ -4223,10 +4635,11 @@ export class Editor {
     this.blockToolbar.style.zIndex = 1001;
     this.blockToolbar.style.background = '#fff';
     this.blockToolbar.style.border = 'none';
-    this.blockToolbar.style.borderRadius = '12px';
+    this.blockToolbar.style.borderRadius = '6.9px';
+    this.blockToolbar.style.boxSizing = 'border-box';
     this.blockToolbar.style.boxShadow = '0 4px 24px rgba(0,0,0,0.13)';
-    this.blockToolbar.style.padding = '10px 16px';
-    this.blockToolbar.style.gap = '16px';
+    this.blockToolbar.style.padding = '12px';
+    this.blockToolbar.style.gap = '28px';
     this.blockToolbar.style.display = 'flex';
     this.blockToolbar.style.alignItems = 'center';
     this.blockToolbar.style.transition = 'opacity 0.18s';
@@ -4243,13 +4656,12 @@ export class Editor {
       arrow.className = 'block-toolbar-arrow';
       arrow.style.position = 'absolute';
       arrow.style.left = '50%';
-      arrow.style.bottom = '-14px';
+      arrow.style.bottom = '-8px';
       arrow.style.transform = 'translateX(-50%)';
-      arrow.style.width = '0';
-      arrow.style.height = '0';
       arrow.style.borderLeft = '6px solid transparent';
       arrow.style.borderRight = '6px solid transparent';
-      arrow.style.borderTop = '14px solid #fff';
+      arrow.style.borderTop = '8px solid #fff';
+      arrow.style.setProperty('borderTop', '8px solid #fff', 'important');
       arrow.style.filter = 'drop-shadow(0px 1px 1px rgba(0,0,0,0.08))';
       this.blockToolbar.appendChild(arrow);
       this.blockToolbar.arrow = arrow;
@@ -4275,15 +4687,13 @@ export class Editor {
       btn.style.background = '#fff';
       btn.style.border = 'none';
       btn.style.borderRadius = '8px';
-      btn.style.width = '38px';
-      btn.style.height = '38px';
+      btn.style.height = '14px';
       btn.style.display = 'flex';
       btn.style.alignItems = 'center';
       btn.style.justifyContent = 'center';
-      btn.style.fontSize = '20px';
+      btn.style.fontSize = '14px';
       btn.style.color = '#374151';
       btn.style.cursor = 'pointer';
-      btn.style.margin = '0 4px';
       btn.style.transition = 'all 0.18s';
       btn.onmouseover = () => {
         btn.style.background = '#f4f6fa';
@@ -4618,7 +5028,8 @@ export class Editor {
     }
     
     // Cập nhật trạng thái hiển thị
-    decreaseButton.style.display = shouldShow ? '' : 'none';
+    decreaseButton.style.cursor = shouldShow ? 'pointer' : 'not-allowed';
+    decreaseButton.style.opacity = shouldShow ? '1' : '0.5';
     
     // Cập nhật cả nút increase
     this.updateIndentIncreaseButtonVisibility();
@@ -4649,7 +5060,8 @@ export class Editor {
     }
     
     // Cập nhật trạng thái hiển thị
-    increaseButton.style.display = shouldHide ? 'none' : '';
+    increaseButton.style.cursor = shouldHide ? 'not-allowed' : 'pointer';
+    increaseButton.style.opacity = shouldHide ? '0.5' : '1';
   }
   
   // Kiểm tra xem một block có padding-left > 0 không
@@ -4738,23 +5150,29 @@ export class Editor {
     
     const tagName = block.tagName.toUpperCase();
     // Đổi text trên button theo block hiện tại
-    let label = 'P';
-    if (tagName === 'H1') label = 'H1';
-    else if (tagName === 'H2') label = 'H2';
-    else if (tagName === 'H3') label = 'H3';
-    else if (tagName === 'H4') label = 'H4';
-    else if (tagName === 'H5') label = 'H5';
-    else if (tagName === 'H6') label = 'H6';
-    else if (tagName === 'PRE') label = 'C';
-    else if (tagName === 'BLOCKQUOTE') label = 'Q';
-    this.headingSelector.innerHTML = label;
-    // Đổi trạng thái active nếu là heading
-    if ([
-      'H1','H2','H3','H4','H5','H6','PRE','BLOCKQUOTE'
-    ].includes(tagName)) {
-      this.headingSelector._setActive?.(true);
+    let label = 'Paragraph';
+    if (tagName === 'H1') label = 'Heading 1';
+    else if (tagName === 'H2') label = 'Heading 2';
+    else if (tagName === 'H3') label = 'Heading 3';
+    else if (tagName === 'H4') label = 'Heading 4';
+    else if (tagName === 'H5') label = 'Heading 5';
+    else if (tagName === 'H6') label = 'Heading 6';
+    else if (tagName === 'PRE') label = 'Code Block';
+    else if (tagName === 'BLOCKQUOTE') label = 'Quote';
+    
+    // Cập nhật text mà vẫn giữ dropdown icon
+    const textNode = this.headingSelector.firstChild;
+    if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+      textNode.textContent = label;
     } else {
-      this.headingSelector._setActive?.(false);
+      // Tạo lại nội dung button với dropdown icon
+      this.headingSelector.innerHTML = label;
+      const dropdownIcon = document.createElement('span');
+      dropdownIcon.innerHTML = '▼';
+      dropdownIcon.style.fontSize = '10px';
+      dropdownIcon.style.opacity = '0.7';
+      dropdownIcon.style.marginLeft = 'auto';
+      this.headingSelector.appendChild(dropdownIcon);
     }
   }
   
@@ -5460,14 +5878,12 @@ export class Editor {
       tagBtn.onmouseover = () => {
         tagBtn.style.background = '#f3f4f6';
         tagBtn.style.borderColor = categoryData.color;
-        tagBtn.style.transform = 'translateY(-1px)';
         tagBtn.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
       };
 
       tagBtn.onmouseout = () => {
         tagBtn.style.background = '#fff';
         tagBtn.style.borderColor = '#e5e7eb';
-        tagBtn.style.transform = 'translateY(0)';
         tagBtn.style.boxShadow = 'none';
       };
 
@@ -5697,7 +6113,7 @@ export class Editor {
       categoryBtn.style.borderRadius = '8px';
       //categoryBtn.style.margin = '4px 16px';
       categoryBtn.style.transition = 'all 0.2s ease';
-      categoryBtn.style.fontSize = '15px';
+      categoryBtn.style.fontSize = '14px';
       categoryBtn.style.fontWeight = '500';
 
       categoryBtn.innerHTML = `
@@ -5755,7 +6171,7 @@ export class Editor {
     this.templatesPopup = popup;
     this.templatesOverlay = overlay;
   }
-
+  
   // Hiển thị templates cho một category
   showTemplatesForCategory(container, categoryName, categoryData) {
     container.innerHTML = '';
@@ -5809,7 +6225,7 @@ export class Editor {
               font-weight: 500;
               cursor: pointer;
               transition: all 0.2s ease;
-            " onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+            " onmouseover=" this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'" onmouseout=" this.style.boxShadow='none'">
               Insert Template
             </button>
           </div>
@@ -5824,7 +6240,6 @@ export class Editor {
 
       templateCard.onmouseout = () => {
         templateCard.style.borderColor = '#e5e7eb';
-        templateCard.style.transform = 'translateY(0)';
         templateCard.style.boxShadow = 'none';
       };
 
@@ -5911,6 +6326,19 @@ export class Editor {
     if (this.toolbar) {
       this.toolbar.style.background = isDark ? '#2a2a2a' : '#f8f9fa';
       this.toolbar.style.borderBottom = isDark ? '1px solid #404040' : '1px solid #e0e0e0';
+    }
+
+    // Apply theme to toolbar separator
+    if (this.toolbarSeparator) {
+      this.toolbarSeparator.style.background = isDark ? '#404040' : '#e5e7eb';
+    }
+
+    // Update toolbar2 row separators theme
+    const rowSeparators = this.toolbar2?.querySelectorAll('.toolbar-row-separator');
+    if (rowSeparators) {
+      rowSeparators.forEach(separator => {
+        separator.style.background = isDark ? '#404040' : '#e5e7eb';
+      });
     }
 
     // Apply theme to editor area
@@ -6162,7 +6590,7 @@ export class Editor {
       // Update arrow
       const arrow = this.blockToolbar.querySelector('.block-toolbar-arrow');
       if (arrow) {
-        arrow.style.borderTop = isDark ? '14px solid #2a2a2a' : '14px solid #fff';
+        arrow.style.borderTop = isDark ? '8px solid #2a2a2a' : '8px solid #fff';
         arrow.style.filter = isDark ? 'drop-shadow(-2px 2px 2px rgba(0,0,0,0.4))' : 'drop-shadow(-2px 2px 2px rgba(0,0,0,0.08))';
       }
 
