@@ -72,7 +72,6 @@ body {
   border-radius: 10px;
   box-shadow: 0 4px 24px var(--editor-shadow);
   padding: 24px 24px 16px 24px;
-  transition: all 0.3s ease;
 }
 
 .toolbar {
@@ -80,7 +79,6 @@ body {
   flex-wrap: wrap;
   background: #FCFCFC !important;
   border-radius: 6px;
-  transition: all 0.3s ease;
 }
 
 .toolbar button,
@@ -175,7 +173,6 @@ body {
   margin-top: 8px;
   max-height: 200px;
   overflow: auto;
-  transition: all 0.3s ease;
 }
 
 .color-picker-inline {
@@ -201,7 +198,6 @@ body {
   gap: 6px;
   margin-top: 4px;
   z-index: 100;
-  transition: all 0.3s ease;
 }
 
 .color-swatch {
@@ -257,7 +253,6 @@ body {
   padding: 12px 16px 8px 12px;
   z-index: 200;
   min-width: 180px;
-  transition: all 0.3s ease;
 }
 
 .table-grid {
@@ -293,25 +288,22 @@ body {
 .table-toolbar {
   position: absolute;
   background: var(--editor-popup-bg);
-  border: 1px solid var(--editor-popup-border);
   border-radius: 6px;
   box-shadow: 0 4px 16px var(--editor-shadow);
-  padding: 6px 8px;
+  padding: 8px;
   z-index: 300;
   display: flex;
   gap: 6px;
   top: 0;
   left: 0;
-  transition: all 0.3s ease;
 }
 
 .table-toolbar button {
   background: var(--editor-btn-bg);
   color: var(--editor-btn-text);
-  border: 1px solid var(--editor-btn-border);
   border-radius: 4px;
-  padding: 4px 7px;
-  font-size: 15px;
+  padding: 4px;
+  font-size: 14px;
   cursor: pointer;
   outline: none;
 }
@@ -384,7 +376,6 @@ body {
   align-items: center;
   min-height: 28px;
   box-sizing: border-box;
-  transition: all 0.3s ease;
 }
 
 #breadcrumb {
@@ -525,6 +516,8 @@ body {
 .toolbar button,
 .editor-toolbar button {
   height: 20px;
+  min-width: 22px;
+  width: 22px;
   display: inline-flex;
   font-size: 14px;
   align-items: center;
@@ -538,7 +531,6 @@ body {
 [data-theme="dark"] .editor-toolbar button {
   background: var(--editor-btn-bg) !important;
   color: var(--editor-btn-text) !important;
-  border: 1px solid var(--editor-btn-border) !important;
 }
 
 
@@ -576,7 +568,6 @@ body {
   gap: 2px;
   min-height: 36px;
   box-sizing: border-box;
-  transition: all 0.3s ease;
 }
 
 /* TinyMCE-like Dropdown Button */
@@ -645,7 +636,6 @@ body {
   top: 100%;
   left: 0;
   z-index: 1000;
-  transition: all 0.3s ease;
 }
 
 .tox-menu.tox-menu--visible {
@@ -701,6 +691,33 @@ body {
   padding: 0;
 }
 
+.heading-dropdown{
+  padding: 8px 8px !important;
+  gap: 4px !important;
+  border-radius: 6px;
+}
+.fontsize-dropdown{
+  padding: 8px 8px !important;
+  gap: 4px !important;
+  border-radius: 6px;
+}
+.font-dropdown{
+  padding: 8px 8px !important;
+  gap: 4px !important;
+  border-radius: 6px;
+  width: 170px;
+}
+.lineheight-dropdown{
+  padding: 8px 8px !important;
+  gap: 4px !important;
+  border-radius: 6px;
+  width: 130px;
+}
+.capitalization-dropdown{ 
+  padding: 8px 8px !important;
+  gap: 4px !important;
+  border-radius: 6px;
+}
 
 /* Dark theme overrides for dropdown menus */
 [data-theme="dark"] .tox-mbtn {
@@ -709,10 +726,6 @@ body {
   color: var(--editor-btn-text);
 }
 
-
-[data-theme="dark"] .tox-mbtn__select-chevron {
-  border-left-color: var(--editor-btn-border);
-}
 
 [data-theme="dark"] .tox-mbtn__select-chevron svg {
   fill: var(--editor-btn-text);
@@ -749,7 +762,6 @@ body {
   background: var(--editor-toolbar-border);
   margin: 0;
   box-sizing: border-box;
-  transition: all 0.3s ease;
 }
 
 [data-theme="dark"] .toolbar-separator {
@@ -780,7 +792,6 @@ body {
   background: var(--editor-toolbar-border);
   pointer-events: none;
   z-index: 0;
-  transition: all 0.3s ease;
 }
 
 [data-theme="dark"] .toolbar-row-separator {

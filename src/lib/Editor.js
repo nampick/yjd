@@ -138,7 +138,6 @@ export class Editor {
     this.wrapper.style.boxShadow = '0 2px 8px rgba(31,41,55,0.08)';
     this.wrapper.style.minHeight = this.options.height + 'px';
     this.wrapper.style.maxHeight = this.options.maxHeight + 'px';
-    this.wrapper.style.transition = 'all 0.3s ease';
     this.wrapper.style.margin = '0 auto';
     this.wrapper.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     this.wrapper.style.display = 'flex';
@@ -160,7 +159,7 @@ export class Editor {
     this.editor.contentEditable = true;
     this.editor.style.flex = '1 1 auto';
     this.editor.style.minHeight = '40px';
-    this.editor.style.padding = '12px';
+    this.editor.style.padding = '40px';
     this.editor.style.fontSize = '16px';
     this.editor.style.lineHeight = '1.7';
     this.editor.style.outline = 'none';
@@ -243,19 +242,39 @@ export class Editor {
     // Setup content observer to update theme when content changes
     this.setupContentObserver();
     
-    // Auto-focus editor when page loads
+    // Add global click handler to close all dropdowns when clicking outside
+    this.addGlobalClickHandler();
+    
     setTimeout(() => {
-      if (this.editor) {
-        this.editor.focus();
-        // Set cursor to the beginning of the editor
-        const range = document.createRange();
-        const selection = window.getSelection();
+    if (this.editor) {
+      this.editor.focus();
+
+      // Tìm node đầu tiên có thể đặt con trỏ (text node)
+      const walker = document.createTreeWalker(
+        this.editor,
+        NodeFilter.SHOW_TEXT,
+        {
+          acceptNode: (node) => {
+            return node.textContent.trim().length > 0 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+          }
+        }
+      );
+
+      const firstTextNode = walker.nextNode();
+      const range = document.createRange();
+      const selection = window.getSelection();
+      if (firstTextNode) {
+        range.setStart(firstTextNode, 0);
+      } else {
+        // fallback nếu không tìm được text node
         range.setStart(this.editor, 0);
-        range.collapse(true);
-        selection.removeAllRanges();
-        selection.addRange(range);
       }
-    }, 100);
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+  }, 100);
+
   }
 
   setupContentObserver() {
@@ -298,6 +317,21 @@ export class Editor {
     });
   }
 
+  addGlobalClickHandler() {
+    // Add global click handler to close dropdowns when clicking outside
+    document.addEventListener('mousedown', (e) => {
+      // Check if click is inside any dropdown or toolbar button
+      const clickedInsideDropdown = e.target.closest('#image-dropdown, #link-dropdown, #emoji-dropdown, #video-dropdown, #import-dropdown, .heading-dropdown, .fontsize-dropdown, .font-dropdown, .lineheight-dropdown, .capitalization-dropdown');
+      const clickedInsideToolbarButton = e.target.closest('.toolbar button, .toolbar .custom-select-button');
+      const clickedInsideColorPicker = this.colorPicker && this.colorPicker.contains(e.target);
+
+      // If clicked outside all dropdowns and toolbar buttons, close all dropdowns
+      if (!clickedInsideDropdown && !clickedInsideToolbarButton && !clickedInsideColorPicker) {
+        this.closeAllDropdowns();
+      }
+    });
+  }
+
   updateEditorAreaHeight() {
     const toolbarHeight = this.toolbar ? this.toolbar.getBoundingClientRect().height : 0;
     const statusbarHeight = this.statusbar ? this.statusbar.getBoundingClientRect().height : 0;
@@ -305,6 +339,70 @@ export class Editor {
     const editorHeight = Math.max(40, total - toolbarHeight - statusbarHeight);
     this.editor.style.height = editorHeight + 'px';
     this.editor.style.overflowY = 'auto';
+  }
+
+  // Helper function to create checkmark SVG
+  createCheckmarkSVG() {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '10');
+    svg.setAttribute('height', '11');
+    svg.setAttribute('viewBox', '0 0 10 11');
+    svg.setAttribute('fill', 'none');
+    svg.style.marginLeft = '8px';
+    svg.style.flexShrink = '0';
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.setAttribute('clip-path', 'url(#clip0_4_79)');
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M9.68012 2.27338C9.93724 2.52649 9.93724 2.93753 9.68012 3.19063L4.41429 8.37417C4.15717 8.62728 3.73961 8.62728 3.48249 8.37417L0.849578 5.7824C0.592458 5.5293 0.592458 5.11826 0.849578 4.86516C1.1067 4.61205 1.52426 4.61205 1.78138 4.86516L3.94942 6.99729L8.75037 2.27338C9.00749 2.02028 9.42505 2.02028 9.68217 2.27338H9.68012Z');
+    path.setAttribute('fill', 'black');
+
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const clipPath = document.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
+    clipPath.setAttribute('id', 'clip0_4_79');
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('width', '9.21519');
+    rect.setAttribute('height', '10.3671');
+    rect.setAttribute('fill', 'white');
+    rect.setAttribute('transform', 'translate(0.658203 0.139252)');
+
+    clipPath.appendChild(rect);
+    defs.appendChild(clipPath);
+    g.appendChild(path);
+    svg.appendChild(g);
+    svg.appendChild(defs);
+
+    return svg;
+  }
+
+  // Helper function to update dropdown item checkmarks
+  updateDropdownCheckmarks(dropdown, selectedValue, getValueFromItem) {
+    const items = dropdown.querySelectorAll('.heading-dropdown-item, .font-dropdown-item, .fontsize-dropdown-item, .lineheight-dropdown-item, .capitalization-dropdown-item');
+    
+    items.forEach(item => {
+      // Remove existing checkmark
+      const existingCheckmark = item.querySelector('svg');
+      if (existingCheckmark) {
+        existingCheckmark.remove();
+      }
+      
+      // Get item value
+      const itemValue = getValueFromItem(item);
+      
+      // Add checkmark if this is the selected item
+      if (itemValue === selectedValue) {
+        const checkmark = this.createCheckmarkSVG();
+        item.style.display = 'flex';
+        item.style.alignItems = 'center';
+        item.style.justifyContent = 'space-between';
+        item.appendChild(checkmark);
+      } else {
+        // Reset display if no checkmark
+        item.style.display = 'block';
+        item.style.justifyContent = 'flex-start';
+      }
+    });
   }
 
   createToolbar() {
@@ -327,7 +425,6 @@ export class Editor {
     toolbar1.style.flexWrap = 'wrap';
     toolbar1.style.background = '#FCFCFC';
     toolbar1.style.alignItems = 'center';
-    toolbar1.style.transition = 'all 0.3s ease';
     toolbar1.style.minHeight = '48px';
     toolbar1.style.paddingBottom = '8px';
     toolbar1.style.boxSizing = 'border-box';
@@ -489,7 +586,9 @@ export class Editor {
       const item = document.createElement('div');
       item.className = 'heading-dropdown-item';
       item.innerHTML = option.text;
-      item.style.padding = '7px 18px';
+      item.style.padding = '2px';
+      item.style.minHeight='20px';
+
       item.style.cursor = 'pointer';
       item.style.fontSize = '14px';
       item.style.transition = 'background 0.18s';
@@ -502,6 +601,13 @@ export class Editor {
       });
       item.addEventListener('click', () => {
         headingDropdown.style.display = 'none';
+        
+        // Update checkmarks for all items
+        this.updateDropdownCheckmarks(headingDropdown, option.value, (item) => {
+          // Get value from the option that created this item
+          const itemIndex = Array.from(headingDropdown.children).indexOf(item);
+          return headingOptions[itemIndex]?.value;
+        });
         
         // Cập nhật text của nút (giữ lại dropdown icon)
         const textNode = headingBtn.firstChild;
@@ -555,13 +661,34 @@ export class Editor {
     // Hiển thị dropdown khi bấm nút
     headingBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      // Save selection trước khi hiển thị dropdown
-      this.savedHeadingSelection = this.saveSelection();
-      // Tính toán vị trí xuất hiện của dropdown
-      const rect = headingBtn.getBoundingClientRect();
-      headingDropdown.style.display = 'block';
-      headingDropdown.style.top = (rect.bottom + 5) + 'px';
-      headingDropdown.style.left = rect.left + 'px';
+      
+      // Check if dropdown is already visible
+      const isVisible = headingDropdown.style.display === 'block';
+      
+      // Close all dropdowns first (including insert dropdowns)
+      this.closeAllDropdowns();
+      
+      // If it wasn't visible, show it
+      if (!isVisible) {
+        // Save selection trước khi hiển thị dropdown
+        this.savedHeadingSelection = this.saveSelection();
+        
+        // Get current heading to show checkmark
+        const block = this.getBlockElementAtCaret();
+        const currentHeading = block ? block.tagName.toUpperCase() : 'P';
+        
+        // Update checkmarks before showing dropdown
+        this.updateDropdownCheckmarks(headingDropdown, currentHeading, (item) => {
+          const itemIndex = Array.from(headingDropdown.children).indexOf(item);
+          return headingOptions[itemIndex]?.value;
+        });
+        
+        // Tính toán vị trí xuất hiện của dropdown
+        const rect = headingBtn.getBoundingClientRect();
+        headingDropdown.style.display = 'block';
+        headingDropdown.style.top = (rect.bottom + 5) + 'px';
+        headingDropdown.style.left = rect.left + 'px';
+      }
     });
 
     // Ẩn dropdown khi click ra ngoài
@@ -579,7 +706,167 @@ export class Editor {
     // Lưu reference để có thể cập nhật button text từ bên ngoài
     this.headingButton = headingBtn;
     this.headingOptions = headingOptions;
+    // Font size dropdown
+    const fontSizeDropdownWrapper = document.createElement('div');
+    fontSizeDropdownWrapper.className = 'fontsize-dropdown-wrapper';
+    fontSizeDropdownWrapper.style.position = 'relative';
+    fontSizeDropdownWrapper.style.display = 'inline-block';
 
+    const fontSizeBtn = this.createBtn('16px');
+    fontSizeBtn.className = 'custom-select-button';
+    fontSizeBtn.style.width = '80px';
+    fontSizeBtn.style.padding = '0px 5px 0px 8px';
+    fontSizeBtn.style.setProperty('height', '32px', 'important');
+    fontSizeBtn.style.setProperty('borderRadius', '6px', 'important');
+    fontSizeBtn.style.setProperty('alignItems', 'center', 'important');
+    fontSizeBtn.style.fontSize = '14px';
+    fontSizeBtn.style.fontWeight = '400';
+    fontSizeBtn.style.color = '#374151';
+    fontSizeBtn.style.background = '#FFFFFF';
+    fontSizeBtn.style.cursor = 'pointer';
+    
+    fontSizeBtn.onmouseover = () => {
+      fontSizeBtn.style.setProperty('background', '#f8f9fa', 'important');
+    };
+    
+    fontSizeBtn.onmouseout = () => {
+      fontSizeBtn.style.setProperty('background', '#FFFFFF', 'important');
+    };
+
+    // Add dropdown icon
+    const fontSizeDropdownIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    fontSizeDropdownIcon.setAttribute('width', '12');
+    fontSizeDropdownIcon.setAttribute('height', '12');
+    fontSizeDropdownIcon.setAttribute('viewBox', '0 0 8 7');
+    fontSizeDropdownIcon.setAttribute('fill', 'none');
+    fontSizeDropdownIcon.style.marginLeft = 'auto';
+    fontSizeDropdownIcon.style.opacity = '0.7';
+
+    const fontSizeG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    fontSizeG.setAttribute('clip-path', 'url(#clip0_fontsize)');
+
+    const fontSizePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    fontSizePath.setAttribute('d', 'M3.81655 5.55897C3.98745 5.72987 4.26499 5.72987 4.43589 5.55897L7.06089 2.93397C7.23179 2.76307 7.23179 2.48553 7.06089 2.31464C6.88999 2.14374 6.61245 2.14374 6.44155 2.31464L4.12554 4.63065L1.80952 2.316C1.63862 2.1451 1.36108 2.1451 1.19019 2.316C1.01929 2.4869 1.01929 2.76444 1.19019 2.93534L3.81519 5.56034L3.81655 5.55897Z');
+    fontSizePath.setAttribute('fill', '#CCCCCC');
+
+    const fontSizeDefs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const fontSizeClipPath = document.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
+    fontSizeClipPath.setAttribute('id', 'clip0_fontsize');
+    const fontSizeRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    fontSizeRect.setAttribute('width', '7');
+    fontSizeRect.setAttribute('height', '7');
+    fontSizeRect.setAttribute('fill', 'white');
+    fontSizeRect.setAttribute('transform', 'translate(0.625488)');
+
+    fontSizeClipPath.appendChild(fontSizeRect);
+    fontSizeDefs.appendChild(fontSizeClipPath);
+    fontSizeG.appendChild(fontSizePath);
+    fontSizeDropdownIcon.appendChild(fontSizeG);
+    fontSizeDropdownIcon.appendChild(fontSizeDefs);
+    
+    fontSizeBtn.appendChild(fontSizeDropdownIcon);
+
+    // Font size dropdown
+    const fontSizeDropdown = document.createElement('div');
+    fontSizeDropdown.className = 'fontsize-dropdown';
+    fontSizeDropdown.style.display = 'none';
+    fontSizeDropdown.style.position = 'fixed';
+    fontSizeDropdown.style.zIndex = '99999';
+    fontSizeDropdown.style.border = '1px solid #E1E1E1 !important';
+    fontSizeDropdown.style.borderRadius = '3px !important';
+    fontSizeDropdown.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#fff';
+    fontSizeDropdown.style.fontSize = '12px !important';
+    fontSizeDropdown.style.fontWeight = '400 !important';
+    fontSizeDropdown.style.boxShadow = '0 4px 24px rgba(0,0,0,0.18)';
+    fontSizeDropdown.style.padding = '6px 0';
+    fontSizeDropdown.style.minWidth = '100px';
+    fontSizeDropdown.style.maxHeight = '320px';
+    fontSizeDropdown.style.overflowY = 'auto';
+
+    const fontSizes = [8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 36, 40, 44, 48, 54, 60, 66, 72];
+
+    fontSizes.forEach(size => {
+      const item = document.createElement('div');
+      item.className = 'fontsize-dropdown-item';
+      item.textContent = size + 'px';
+      item.style.padding = '2px';
+      item.style.minHeight='20px';
+
+      item.style.cursor = 'pointer';
+      item.style.fontSize = '14px';
+      item.style.transition = 'background 0.18s';
+      item.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#374151';
+      
+      item.addEventListener('mouseover', () => {
+        item.style.background = this.options.theme === 'dark' ? '#404040' : '#f0f4fa';
+      });
+      item.addEventListener('mouseout', () => {
+        item.style.background = 'transparent';
+      });
+      item.addEventListener('click', () => {
+        fontSizeDropdown.style.display = 'none';
+        
+        // Update checkmarks for all items
+        this.updateDropdownCheckmarks(fontSizeDropdown, size + 'px', (item) => {
+          return item.textContent;
+        });
+        
+        // Update button text
+        const textNode = fontSizeBtn.firstChild;
+        if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+          textNode.textContent = size + 'px';
+        } else {
+          fontSizeBtn.innerHTML = size + 'px';
+          fontSizeBtn.appendChild(fontSizeDropdownIcon.cloneNode(true));
+        }
+        
+        if (this.savedFontSizeSelection) {
+          this.restoreSelection(this.savedFontSizeSelection);
+        }
+        
+        this.setFontSize(size);
+      });
+      fontSizeDropdown.appendChild(item);
+    });
+
+    fontSizeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      
+      // Check if dropdown is already visible
+      const isVisible = fontSizeDropdown.style.display === 'block';
+      
+      // Close all dropdowns first (including insert dropdowns)
+      this.closeAllDropdowns();
+      
+      // If it wasn't visible, show it
+      if (!isVisible) {
+        this.savedFontSizeSelection = this.saveSelection();
+        
+        // Get current font size to show checkmark
+        const currentSize = fontSizeBtn.textContent || '16px';
+        
+        // Update checkmarks before showing dropdown
+        this.updateDropdownCheckmarks(fontSizeDropdown, currentSize, (item) => {
+          return item.textContent;
+        });
+        
+        const rect = fontSizeBtn.getBoundingClientRect();
+        fontSizeDropdown.style.display = 'block';
+        fontSizeDropdown.style.top = (rect.bottom + 5) + 'px';
+        fontSizeDropdown.style.left = rect.left + 'px';
+      }
+    });
+
+    document.addEventListener('mousedown', (e) => {
+      if (!fontSizeDropdown.contains(e.target) && e.target !== fontSizeBtn) {
+        fontSizeDropdown.style.display = 'none';
+      }
+    });
+
+    fontSizeDropdownWrapper.appendChild(fontSizeBtn);
+    fontSizeDropdownWrapper.appendChild(fontSizeDropdown);
+    toolbar1.appendChild(fontSizeDropdownWrapper);
+    this.fontSizeSelector = fontSizeBtn;
 
     // Insert Table button
     const tableBtn = this.createBtn('<i class="fas fa-table"></i>', 'Insert Table', 'table');
@@ -611,7 +898,6 @@ export class Editor {
     alignMenu.style.padding = '0';
     alignMenu.style.transition = 'all 0.2s ease';
     alignMenu.style.opacity = '0';
-    alignMenu.style.transform = 'translateY(-10px)';
     alignMenu.style.pointerEvents = 'none';
 
     const alignOptions = [
@@ -734,7 +1020,6 @@ export class Editor {
         });
       } else {
         alignMenu.style.opacity = '0';
-        alignMenu.style.transform = 'translateY(-10px)';
         alignMenu.style.pointerEvents = 'none';
         setTimeout(() => {
           alignMenu.style.display = 'none';
@@ -745,7 +1030,6 @@ export class Editor {
     // Thêm sự kiện click cho document để đóng dropdown khi click ra ngoài
     document.addEventListener('click', () => {
       alignMenu.style.opacity = '0';
-      alignMenu.style.transform = 'translateY(-10px)';
       alignMenu.style.pointerEvents = 'none';
       setTimeout(() => {
         alignMenu.style.display = 'none';
@@ -766,27 +1050,24 @@ export class Editor {
     toolbar1.appendChild(unredo);
     // More options button (3 dots)
     const moreBtn = this.createBtn('<i class="fas fa-ellipsis-h"></i>', 'More Options');
+    moreBtn.className = 'more-options-btn';
     toolbar1.appendChild(moreBtn);
     this.toolbarBtns.moreOptions = moreBtn;
 
     // ============ TOOLBAR 2 - Extended options ============
     const toolbar2 = document.createElement('div');
     toolbar2.className = 'toolbar toolbar-secondary';
-    toolbar2.style.position = 'relative';
     toolbar2.style.padding = '8px 16px';
     toolbar2.style.display = 'flex';
-    toolbar2.style.gap = '16px 20px';
+    toolbar2.style.gap = '20px';
     toolbar2.style.flexWrap = 'wrap';
-    toolbar2.style.background = '#f8fafc';
-    toolbar2.style.transition = 'all 0.3s ease';
-    toolbar2.style.minHeight = '48px';
+    toolbar2.style.background = '#FCFCFC';
     toolbar2.style.alignItems = 'center';
+    toolbar2.style.minHeight = '48px';
     toolbar2.style.paddingBottom = '8px';
     toolbar2.style.boxSizing = 'border-box';
     toolbar2.style.width = '100%';
     toolbar2.style.overflow = 'hidden';
-    toolbar2.style.borderBottomLeftRadius = '6px';
-    toolbar2.style.borderBottomRightRadius = '6px';
 
     // Danh sách dropdown
     const listDropdown = document.createElement('div');
@@ -802,7 +1083,7 @@ export class Editor {
     listMenu.className = 'dropdown-menu';
     listMenu.style.display = 'none';
     listMenu.style.position = 'fixed';
-    listMenu.style.zIndex = '99999';
+    listMenu.style.zIndex = '999999';
     listMenu.style.backgroundColor = '#fff';
     listMenu.style.border = '1px solid #d1d5db';
     listMenu.style.borderRadius = '8px';
@@ -893,7 +1174,7 @@ export class Editor {
         
         // Update main button icon
         listBtn.innerHTML = option.icon;
-        
+          
         // Close menu
         listMenu.style.display = 'none';
         listMenu.style.opacity = '0';
@@ -912,7 +1193,12 @@ export class Editor {
       listMenu.appendChild(button);
     });
 
-    listDropdown.appendChild(listMenu);
+    // Append listMenu to document.body to avoid z-index issues
+    document.body.appendChild(listMenu);
+    
+    // Store reference for cleanup
+    this.listMenu = listMenu;
+    
     toolbar2.appendChild(listDropdown);
 
     // Add click event for dropdown button
@@ -923,13 +1209,40 @@ export class Editor {
       if (!isVisible) {
         // Calculate position
         const btnRect = listBtn.getBoundingClientRect();
-        listMenu.style.top = (btnRect.bottom + 5) + 'px';
-        listMenu.style.left = btnRect.left + 'px';
+        const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
+        
+        // Calculate menu dimensions
+        const menuHeight = 120; // Approximate height
+        const menuWidth = 150; // Approximate width
+        
+        // Position below button by default
+        let top = btnRect.bottom + 5;
+        let left = btnRect.left;
+        
+        // Adjust if menu would go below viewport
+        if (top + menuHeight > viewportHeight) {
+          top = btnRect.top - menuHeight - 5;
+        }
+        
+        // Adjust if menu would go beyond right edge
+        if (left + menuWidth > viewportWidth) {
+          left = viewportWidth - menuWidth - 10;
+        }
+        
+        // Ensure menu doesn't go beyond left edge
+        if (left < 10) {
+          left = 10;
+        }
+        
+        listMenu.style.top = top + 'px';
+        listMenu.style.left = left + 'px';
         
         // Set up grid layout and show
         listMenu.style.gridTemplateColumns = 'repeat(3, 32px)';
         listMenu.style.gap = '12px 16px';
         listMenu.style.display = 'grid';
+        listMenu.style.transform = 'translateY(0)';
         requestAnimationFrame(() => {
           listMenu.style.opacity = '1';
           listMenu.style.pointerEvents = 'auto';
@@ -945,13 +1258,16 @@ export class Editor {
     });
 
     // Add document click event to close dropdown when clicking outside
-    document.addEventListener('click', () => {
-      listMenu.style.opacity = '0';
-      listMenu.style.transform = 'translateY(-10px)';
-      listMenu.style.pointerEvents = 'none';
-      setTimeout(() => {
-        listMenu.style.display = 'none';
-      }, 200);
+    document.addEventListener('click', (e) => {
+      // Check if click is outside both the button and the menu
+      if (!listBtn.contains(e.target) && !listMenu.contains(e.target)) {
+        listMenu.style.opacity = '0';
+        listMenu.style.transform = 'translateY(-10px)';
+        listMenu.style.pointerEvents = 'none';
+        setTimeout(() => {
+          listMenu.style.display = 'none';
+        }, 200);
+      }
     });
     
     // Thêm nút indentIncrease và indentDecrease
@@ -966,17 +1282,83 @@ export class Editor {
       this.toolbarBtns[btn.cmd] = button;
     });
 
-    // Font selectoralign-dropdown-btnalign-dropdown-btn
-    const fontSelect = document.createElement('select');
-    fontSelect.className = 'font-select';
-    fontSelect.style.padding = '6px 12px';
-    fontSelect.style.border = '1px solid #e0e0e0';
-    fontSelect.style.borderRadius = '6px';
-    fontSelect.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#ffffff';
-    fontSelect.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#333333';
-    fontSelect.style.fontSize = '14px';
-    fontSelect.style.cursor = 'pointer';
-    fontSelect.style.transition = 'all 0.2s ease';
+    // Font selector dropdown
+    const fontDropdownWrapper = document.createElement('div');
+    fontDropdownWrapper.className = 'font-dropdown-wrapper';
+    fontDropdownWrapper.style.position = 'relative';
+    fontDropdownWrapper.style.display = 'inline-block';
+
+    const fontBtn = this.createBtn('Default');
+    fontBtn.className = 'custom-select-button';
+    fontBtn.style.width = '170px';
+    fontBtn.style.padding = '0px 5px 0px 8px';
+    fontBtn.style.setProperty('height', '32px', 'important');
+    fontBtn.style.setProperty('borderRadius', '6px', 'important');
+    fontBtn.style.setProperty('alignItems', 'center', 'important');
+    fontBtn.style.fontSize = '14px';
+    fontBtn.style.fontWeight = '400';
+    fontBtn.style.color = '#374151';
+    fontBtn.style.background = '#FFFFFF';
+    fontBtn.style.cursor = 'pointer';
+    
+    fontBtn.onmouseover = () => {
+      fontBtn.style.setProperty('background', '#f8f9fa', 'important');
+    };
+    
+    fontBtn.onmouseout = () => {
+      fontBtn.style.setProperty('background', '#FFFFFF', 'important');
+    };
+
+    // Add dropdown icon
+    const fontDropdownIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    fontDropdownIcon.setAttribute('width', '12');
+    fontDropdownIcon.setAttribute('height', '12');
+    fontDropdownIcon.setAttribute('viewBox', '0 0 8 7');
+    fontDropdownIcon.setAttribute('fill', 'none');
+    fontDropdownIcon.style.marginLeft = 'auto';
+    fontDropdownIcon.style.opacity = '0.7';
+
+    const fontG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    fontG.setAttribute('clip-path', 'url(#clip0_font)');
+
+    const fontPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    fontPath.setAttribute('d', 'M3.81655 5.55897C3.98745 5.72987 4.26499 5.72987 4.43589 5.55897L7.06089 2.93397C7.23179 2.76307 7.23179 2.48553 7.06089 2.31464C6.88999 2.14374 6.61245 2.14374 6.44155 2.31464L4.12554 4.63065L1.80952 2.316C1.63862 2.1451 1.36108 2.1451 1.19019 2.316C1.01929 2.4869 1.01929 2.76444 1.19019 2.93534L3.81519 5.56034L3.81655 5.55897Z');
+    fontPath.setAttribute('fill', '#CCCCCC');
+
+    const fontDefs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const fontClipPath = document.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
+    fontClipPath.setAttribute('id', 'clip0_font');
+    const fontRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    fontRect.setAttribute('width', '7');
+    fontRect.setAttribute('height', '7');
+    fontRect.setAttribute('fill', 'white');
+    fontRect.setAttribute('transform', 'translate(0.625488)');
+
+    fontClipPath.appendChild(fontRect);
+    fontDefs.appendChild(fontClipPath);
+    fontG.appendChild(fontPath);
+    fontDropdownIcon.appendChild(fontG);
+    fontDropdownIcon.appendChild(fontDefs);
+    
+    fontBtn.appendChild(fontDropdownIcon);
+
+    // Font dropdown
+    const fontDropdown = document.createElement('div');
+    fontDropdown.className = 'font-dropdown';
+    fontDropdown.style.display = 'none';
+    fontDropdown.style.position = 'fixed';
+    fontDropdown.style.zIndex = '99999';
+    fontDropdown.style.border = '1px solid #E1E1E1 !important';
+    fontDropdown.style.borderRadius = '3px !important';
+    fontDropdown.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#fff';
+    fontDropdown.style.fontSize = '12px !important';
+    fontDropdown.style.fontWeight = '400 !important';
+    fontDropdown.style.boxShadow = '0 4px 24px rgba(0,0,0,0.18)';
+    fontDropdown.style.transform = 'translateY(0)';
+    fontDropdown.style.padding = '6px 0';
+    fontDropdown.style.minWidth = '140px';
+    fontDropdown.style.maxHeight = '320px';
+    fontDropdown.style.overflowY = 'auto';
 
     const fonts = [
       { value: 'default', text: 'Default' },
@@ -988,35 +1370,169 @@ export class Editor {
     ];
 
     fonts.forEach(font => {
-      const option = document.createElement('option');
-      option.value = font.value;
-      option.textContent = font.text;
-      fontSelect.appendChild(option);
+      const item = document.createElement('div');
+      item.className = 'font-dropdown-item';
+      item.textContent = font.text;
+      item.style.padding = '2px';
+      item.style.minHeight='20px';
+
+      item.style.cursor = 'pointer';
+      item.style.fontSize = '14px';
+      item.style.transition = 'background 0.18s';
+      item.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#374151';
+      item.style.fontFamily = font.value === 'default' ? 'inherit' : font.value;
+      
+      item.addEventListener('mouseover', () => {
+        item.style.background = this.options.theme === 'dark' ? '#404040' : '#f0f4fa';
+      });
+      item.addEventListener('mouseout', () => {
+        item.style.background = 'transparent';
+      });
+      item.addEventListener('click', () => {
+        fontDropdown.style.display = 'none';
+        
+        // Update checkmarks for all items
+        this.updateDropdownCheckmarks(fontDropdown, font.text, (item) => {
+          return item.textContent;
+        });
+        
+        // Update button text
+        const textNode = fontBtn.firstChild;
+        if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+          textNode.textContent = font.text;
+        } else {
+          fontBtn.innerHTML = font.text;
+          fontBtn.appendChild(fontDropdownIcon.cloneNode(true));
+        }
+        
+        if (this.savedFontSelection) {
+          this.restoreSelection(this.savedFontSelection);
+        }
+        
+        if (font.value === 'default') {
+          document.execCommand('removeFormat');
+        } else {
+          document.execCommand('fontName', false, font.value);
+        }
+      });
+      fontDropdown.appendChild(item);
     });
 
-    fontSelect.addEventListener('change', () => {
-      const font = fontSelect.value;
-      if (font === 'default') {
-        document.execCommand('removeFormat');
-        return;
+    fontBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      
+      // Check if dropdown is already visible
+      const isVisible = fontDropdown.style.display === 'block';
+      
+      // Close all dropdowns first (including insert dropdowns)
+      this.closeAllDropdowns();
+      
+      // If it wasn't visible, show it
+      if (!isVisible) {
+        this.savedFontSelection = this.saveSelection();
+        
+        // Get current font to show checkmark
+        const currentFont = fontBtn.textContent || 'Default';
+        
+        // Update checkmarks before showing dropdown
+        this.updateDropdownCheckmarks(fontDropdown, currentFont, (item) => {
+          return item.textContent;
+        });
+        
+        const rect = fontBtn.getBoundingClientRect();
+        fontDropdown.style.display = 'block';
+        fontDropdown.style.top = (rect.bottom + 5) + 'px';
+        fontDropdown.style.left = rect.left + 'px';
       }
-      document.execCommand('fontName', false, font);
     });
 
-    toolbar2.appendChild(fontSelect);
+    document.addEventListener('mousedown', (e) => {
+      if (!fontDropdown.contains(e.target) && e.target !== fontBtn) {
+        fontDropdown.style.display = 'none';
+      }
+    });
 
-    // Line height select
-    const lineHeightSelect = document.createElement('select');
-    lineHeightSelect.className = 'line-height-select';
-    lineHeightSelect.style.padding = '6px 12px';
-    lineHeightSelect.style.border = '1px solid #e0e0e0';
-    lineHeightSelect.style.borderRadius = '6px';
-    lineHeightSelect.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#ffffff';
-    lineHeightSelect.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#333333';
-    lineHeightSelect.style.fontSize = '14px';
-    lineHeightSelect.style.cursor = 'pointer';
-    lineHeightSelect.style.transition = 'all 0.2s ease';
-    lineHeightSelect.style.minWidth = '100px';
+    fontDropdownWrapper.appendChild(fontBtn);
+    document.body.appendChild(fontDropdown);
+    toolbar2.appendChild(fontDropdownWrapper);
+    this.fontSelector = fontBtn;
+
+    // Line height dropdown
+    const lineHeightDropdownWrapper = document.createElement('div');
+    lineHeightDropdownWrapper.className = 'lineheight-dropdown-wrapper';
+    lineHeightDropdownWrapper.style.position = 'relative';
+    lineHeightDropdownWrapper.style.display = 'inline-block';
+
+    const lineHeightBtn = this.createBtn('Line Height');
+    lineHeightBtn.className = 'custom-select-button';
+    lineHeightBtn.style.width = '120px';
+    lineHeightBtn.style.padding = '0px 5px 0px 8px';
+    lineHeightBtn.style.setProperty('height', '32px', 'important');
+    lineHeightBtn.style.setProperty('borderRadius', '6px', 'important');
+    lineHeightBtn.style.setProperty('alignItems', 'center', 'important');
+    lineHeightBtn.style.fontSize = '14px';
+    lineHeightBtn.style.fontWeight = '400';
+    lineHeightBtn.style.color = '#374151';
+    lineHeightBtn.style.background = '#FFFFFF';
+    lineHeightBtn.style.cursor = 'pointer';
+    
+    lineHeightBtn.onmouseover = () => {
+      lineHeightBtn.style.setProperty('background', '#f8f9fa', 'important');
+    };
+    
+    lineHeightBtn.onmouseout = () => {
+      lineHeightBtn.style.setProperty('background', '#FFFFFF', 'important');
+    };
+
+    // Add dropdown icon
+    const lineHeightDropdownIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    lineHeightDropdownIcon.setAttribute('width', '12');
+    lineHeightDropdownIcon.setAttribute('height', '12');
+    lineHeightDropdownIcon.setAttribute('viewBox', '0 0 8 7');
+    lineHeightDropdownIcon.setAttribute('fill', 'none');
+    lineHeightDropdownIcon.style.marginLeft = 'auto';
+    lineHeightDropdownIcon.style.opacity = '0.7';
+
+    const lineHeightG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    lineHeightG.setAttribute('clip-path', 'url(#clip0_lineheight)');
+
+    const lineHeightPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    lineHeightPath.setAttribute('d', 'M3.81655 5.55897C3.98745 5.72987 4.26499 5.72987 4.43589 5.55897L7.06089 2.93397C7.23179 2.76307 7.23179 2.48553 7.06089 2.31464C6.88999 2.14374 6.61245 2.14374 6.44155 2.31464L4.12554 4.63065L1.80952 2.316C1.63862 2.1451 1.36108 2.1451 1.19019 2.316C1.01929 2.4869 1.01929 2.76444 1.19019 2.93534L3.81519 5.56034L3.81655 5.55897Z');
+    lineHeightPath.setAttribute('fill', '#CCCCCC');
+
+    const lineHeightDefs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const lineHeightClipPath = document.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
+    lineHeightClipPath.setAttribute('id', 'clip0_lineheight');
+    const lineHeightRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    lineHeightRect.setAttribute('width', '7');
+    lineHeightRect.setAttribute('height', '7');
+    lineHeightRect.setAttribute('fill', 'white');
+    lineHeightRect.setAttribute('transform', 'translate(0.625488)');
+
+    lineHeightClipPath.appendChild(lineHeightRect);
+    lineHeightDefs.appendChild(lineHeightClipPath);
+    lineHeightG.appendChild(lineHeightPath);
+    lineHeightDropdownIcon.appendChild(lineHeightG);
+    lineHeightDropdownIcon.appendChild(lineHeightDefs);
+    
+    lineHeightBtn.appendChild(lineHeightDropdownIcon);
+
+    // Line height dropdown
+    const lineHeightDropdown = document.createElement('div');
+    lineHeightDropdown.className = 'lineheight-dropdown';
+    lineHeightDropdown.style.display = 'none';
+    lineHeightDropdown.style.position = 'fixed';
+    lineHeightDropdown.style.zIndex = '99999';
+    lineHeightDropdown.style.border = '1px solid #E1E1E1 !important';
+    lineHeightDropdown.style.borderRadius = '3px !important';
+    lineHeightDropdown.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#fff';
+    lineHeightDropdown.style.fontSize = '12px !important';
+    lineHeightDropdown.style.fontWeight = '400 !important';
+    lineHeightDropdown.style.boxShadow = '0 4px 24px rgba(0,0,0,0.18)';
+    lineHeightDropdown.style.padding = '6px 0';
+    lineHeightDropdown.style.minWidth = '120px';
+    lineHeightDropdown.style.maxHeight = '320px';
+    lineHeightDropdown.style.overflowY = 'auto';
 
     const lineHeights = [
       { value: 'default', text: 'Line Height' },
@@ -1032,36 +1548,169 @@ export class Editor {
     ];
 
     lineHeights.forEach(lineHeight => {
-      const option = document.createElement('option');
-      option.value = lineHeight.value;
-      option.textContent = lineHeight.text;
-      lineHeightSelect.appendChild(option);
+      const item = document.createElement('div');
+      item.className = 'lineheight-dropdown-item';
+      item.textContent = lineHeight.text;
+      item.style.padding = '2px';
+      item.style.minHeight='20px';
+      item.style.justifyItems = 'center';
+      item.style.cursor = 'pointer';
+      item.style.fontSize = '14px';
+      item.style.transition = 'background 0.18s';
+      item.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#374151';
+      
+      item.addEventListener('mouseover', () => {
+        item.style.background = this.options.theme === 'dark' ? '#404040' : '#f0f4fa';
+      });
+      item.addEventListener('mouseout', () => {
+        item.style.background = 'transparent';
+      });
+      item.addEventListener('click', () => {
+        lineHeightDropdown.style.display = 'none';
+        
+        // Update checkmarks for all items
+        this.updateDropdownCheckmarks(lineHeightDropdown, lineHeight.text, (item) => {
+          return item.textContent;
+        });
+        
+        // Update button text
+        const textNode = lineHeightBtn.firstChild;
+        if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+          textNode.textContent = lineHeight.text;
+        } else {
+          lineHeightBtn.innerHTML = lineHeight.text;
+          lineHeightBtn.appendChild(lineHeightDropdownIcon.cloneNode(true));
+        }
+        
+        if (this.savedLineHeightSelection) {
+          this.restoreSelection(this.savedLineHeightSelection);
+        }
+        
+        if (lineHeight.value === 'default') {
+          this.removeLineHeight();
+        } else {
+          this.applyLineHeight(lineHeight.value);
+        }
+      });
+      lineHeightDropdown.appendChild(item);
     });
 
-    lineHeightSelect.addEventListener('change', () => {
-      const lineHeight = lineHeightSelect.value;
-      if (lineHeight === 'default') {
-        this.removeLineHeight();
-        return;
+    lineHeightBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      
+      // Check if dropdown is already visible
+      const isVisible = lineHeightDropdown.style.display === 'block';
+      
+      // Close all dropdowns first (including insert dropdowns)
+      this.closeAllDropdowns();
+      
+      // If it wasn't visible, show it
+      if (!isVisible) {
+        this.savedLineHeightSelection = this.saveSelection();
+        
+        // Get current line height to show checkmark
+        const currentLineHeight = lineHeightBtn.textContent || 'Line Height';
+        
+        // Update checkmarks before showing dropdown
+        this.updateDropdownCheckmarks(lineHeightDropdown, currentLineHeight, (item) => {
+          return item.textContent;
+        });
+        
+        const rect = lineHeightBtn.getBoundingClientRect();
+        lineHeightDropdown.style.display = 'block';
+        lineHeightDropdown.style.top = (rect.bottom + 5) + 'px';
+        lineHeightDropdown.style.left = rect.left + 'px';
       }
-      this.applyLineHeight(lineHeight);
     });
 
-    toolbar2.appendChild(lineHeightSelect);
-    this.lineHeightSelector = lineHeightSelect;
+    document.addEventListener('mousedown', (e) => {
+      if (!lineHeightDropdown.contains(e.target) && e.target !== lineHeightBtn) {
+        lineHeightDropdown.style.display = 'none';
+      }
+    });
 
-    // Capitalization select
-    const capitalizationSelect = document.createElement('select');
-    capitalizationSelect.className = 'capitalization-select';
-    capitalizationSelect.style.padding = '6px 12px';
-    capitalizationSelect.style.border = '1px solid #e0e0e0';
-    capitalizationSelect.style.borderRadius = '6px';
-    capitalizationSelect.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#ffffff';
-    capitalizationSelect.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#333333';
-    capitalizationSelect.style.fontSize = '14px';
-    capitalizationSelect.style.cursor = 'pointer';
-    capitalizationSelect.style.transition = 'all 0.2s ease';
-    capitalizationSelect.style.minWidth = '120px';
+    lineHeightDropdownWrapper.appendChild(lineHeightBtn);
+    document.body.appendChild(lineHeightDropdown); // ✅ đúng
+
+    toolbar2.appendChild(lineHeightDropdownWrapper);
+    this.lineHeightSelector = lineHeightBtn;
+
+    // Capitalization dropdown
+    const capitalizationDropdownWrapper = document.createElement('div');
+    capitalizationDropdownWrapper.className = 'capitalization-dropdown-wrapper';
+    capitalizationDropdownWrapper.style.position = 'relative';
+    capitalizationDropdownWrapper.style.display = 'inline-block';
+
+    const capitalizationBtn = this.createBtn('Capitalization');
+    capitalizationBtn.className = 'custom-select-button';
+    capitalizationBtn.style.width = '130px';
+    capitalizationBtn.style.padding = '0px 5px 0px 8px';
+    capitalizationBtn.style.setProperty('height', '32px', 'important');
+    capitalizationBtn.style.setProperty('borderRadius', '6px', 'important');
+    capitalizationBtn.style.setProperty('alignItems', 'center', 'important');
+    capitalizationBtn.style.fontSize = '14px';
+    capitalizationBtn.style.fontWeight = '400';
+    capitalizationBtn.style.color = '#374151';
+    capitalizationBtn.style.background = '#FFFFFF';
+    capitalizationBtn.style.cursor = 'pointer';
+    
+    capitalizationBtn.onmouseover = () => {
+      capitalizationBtn.style.setProperty('background', '#f8f9fa', 'important');
+    };
+    
+    capitalizationBtn.onmouseout = () => {
+      capitalizationBtn.style.setProperty('background', '#FFFFFF', 'important');
+    };
+
+    // Add dropdown icon
+    const capitalizationDropdownIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    capitalizationDropdownIcon.setAttribute('width', '12');
+    capitalizationDropdownIcon.setAttribute('height', '12');
+    capitalizationDropdownIcon.setAttribute('viewBox', '0 0 8 7');
+    capitalizationDropdownIcon.setAttribute('fill', 'none');
+    capitalizationDropdownIcon.style.marginLeft = 'auto';
+    capitalizationDropdownIcon.style.opacity = '0.7';
+
+    const capitalizationG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    capitalizationG.setAttribute('clip-path', 'url(#clip0_capitalization)');
+
+    const capitalizationPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    capitalizationPath.setAttribute('d', 'M3.81655 5.55897C3.98745 5.72987 4.26499 5.72987 4.43589 5.55897L7.06089 2.93397C7.23179 2.76307 7.23179 2.48553 7.06089 2.31464C6.88999 2.14374 6.61245 2.14374 6.44155 2.31464L4.12554 4.63065L1.80952 2.316C1.63862 2.1451 1.36108 2.1451 1.19019 2.316C1.01929 2.4869 1.01929 2.76444 1.19019 2.93534L3.81519 5.56034L3.81655 5.55897Z');
+    capitalizationPath.setAttribute('fill', '#CCCCCC');
+
+    const capitalizationDefs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const capitalizationClipPath = document.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
+    capitalizationClipPath.setAttribute('id', 'clip0_capitalization');
+    const capitalizationRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    capitalizationRect.setAttribute('width', '7');
+    capitalizationRect.setAttribute('height', '7');
+    capitalizationRect.setAttribute('fill', 'white');
+    capitalizationRect.setAttribute('transform', 'translate(0.625488)');
+
+    capitalizationClipPath.appendChild(capitalizationRect);
+    capitalizationDefs.appendChild(capitalizationClipPath);
+    capitalizationG.appendChild(capitalizationPath);
+    capitalizationDropdownIcon.appendChild(capitalizationG);
+    capitalizationDropdownIcon.appendChild(capitalizationDefs);
+    
+    capitalizationBtn.appendChild(capitalizationDropdownIcon);
+
+    // Capitalization dropdown
+    const capitalizationDropdown = document.createElement('div');
+    capitalizationDropdown.className = 'capitalization-dropdown';
+    capitalizationDropdown.style.display = 'none';
+    capitalizationDropdown.style.position = 'fixed';
+    capitalizationDropdown.style.zIndex = '99999';
+    capitalizationDropdown.style.border = '1px solid #E1E1E1 !important';
+    capitalizationDropdown.style.borderRadius = '3px !important';
+    capitalizationDropdown.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#fff';
+    capitalizationDropdown.style.fontSize = '12px !important';
+    capitalizationDropdown.style.fontWeight = '400 !important';
+    capitalizationDropdown.style.boxShadow = '0 4px 24px rgba(0,0,0,0.18)';
+    capitalizationDropdown.style.padding = '6px 0';
+    capitalizationDropdown.style.minWidth = '150px';
+    capitalizationDropdown.style.maxHeight = '320px';
+    capitalizationDropdown.style.overflowY = 'auto';
 
     const capitalizationOptions = [
       { value: 'default', text: 'Capitalization' },
@@ -1072,27 +1721,95 @@ export class Editor {
     ];
 
     capitalizationOptions.forEach(option => {
-      const optionElement = document.createElement('option');
-      optionElement.value = option.value;
-      optionElement.textContent = option.text;
-      capitalizationSelect.appendChild(optionElement);
+      const item = document.createElement('div');
+      item.className = 'capitalization-dropdown-item';
+      item.textContent = option.text;
+      item.style.padding = '2px';
+      item.style.minHeight='20px';
+
+      item.style.cursor = 'pointer';
+      item.style.fontSize = '14px';
+      item.style.transition = 'background 0.18s';
+      item.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#374151';
+      
+      item.addEventListener('mouseover', () => {
+        item.style.background = this.options.theme === 'dark' ? '#404040' : '#f0f4fa';
+      });
+      item.addEventListener('mouseout', () => {
+        item.style.background = 'transparent';
+      });
+      item.addEventListener('click', () => {
+        capitalizationDropdown.style.display = 'none';
+        
+        // Update checkmarks for all items
+        this.updateDropdownCheckmarks(capitalizationDropdown, option.text, (item) => {
+          return item.textContent;
+        });
+        
+        if (this.savedCapitalizationSelection) {
+          this.restoreSelection(this.savedCapitalizationSelection);
+        }
+        
+        if (option.value === 'default') {
+          // Reset to default without applying
+          return;
+        }
+        
+        this.applyCapitalization(option.value);
+        
+        // Reset button text after applying
+        setTimeout(() => {
+          const textNode = capitalizationBtn.firstChild;
+          if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+            textNode.textContent = 'Capitalization';
+          } else {
+            capitalizationBtn.innerHTML = 'Capitalization';
+            capitalizationBtn.appendChild(capitalizationDropdownIcon.cloneNode(true));
+          }
+        }, 100);
+      });
+      capitalizationDropdown.appendChild(item);
     });
 
-    capitalizationSelect.addEventListener('change', () => {
-      const capitalization = capitalizationSelect.value;
-      if (capitalization === 'default') {
-        capitalizationSelect.value = 'default'; // Reset to default
-        return;
+    capitalizationBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      
+      // Check if dropdown is already visible
+      const isVisible = capitalizationDropdown.style.display === 'block';
+      
+      // Close all dropdowns first (including insert dropdowns)
+      this.closeAllDropdowns();
+      
+      // If it wasn't visible, show it
+      if (!isVisible) {
+        this.savedCapitalizationSelection = this.saveSelection();
+        
+        // Get current capitalization to show checkmark (default to first option)
+        const currentCapitalization = 'Capitalization';
+        
+        // Update checkmarks before showing dropdown
+        this.updateDropdownCheckmarks(capitalizationDropdown, currentCapitalization, (item) => {
+          return item.textContent;
+        });
+        
+        const rect = capitalizationBtn.getBoundingClientRect();
+        capitalizationDropdown.style.display = 'block';
+        capitalizationDropdown.style.top = (rect.bottom + 5) + 'px';
+        capitalizationDropdown.style.left = rect.left + 'px';
       }
-      this.applyCapitalization(capitalization);
-      // Reset to default after applying
-      setTimeout(() => {
-        capitalizationSelect.value = 'default';
-      }, 100);
     });
 
-    toolbar2.appendChild(capitalizationSelect);
-    this.capitalizationSelector = capitalizationSelect;
+    document.addEventListener('mousedown', (e) => {
+      if (!capitalizationDropdown.contains(e.target) && e.target !== capitalizationBtn) {
+        capitalizationDropdown.style.display = 'none';
+      }
+    });
+
+    capitalizationDropdownWrapper.appendChild(capitalizationBtn);
+    document.body.appendChild(capitalizationDropdown); // ✅ đúng
+
+    toolbar2.appendChild(capitalizationDropdownWrapper);
+    this.capitalizationSelector = capitalizationBtn;
 
   
 
@@ -1123,14 +1840,12 @@ export class Editor {
     themeBtn.innerHTML = this.options.theme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
     themeBtn.title = this.options.theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme';
     themeBtn.style.padding = '8px 12px';
-    themeBtn.style.border = '1px solid #e0e0e0';
     themeBtn.style.borderRadius = '6px';
     themeBtn.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#ffffff';
     themeBtn.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#333333';
     themeBtn.style.cursor = 'pointer';
     themeBtn.style.fontSize = '14px';
     themeBtn.style.transition = 'all 0.2s ease';
-    themeBtn.style.marginLeft = '8px';
 
     themeBtn.onclick = () => {
       this.toggleTheme();
@@ -1146,37 +1861,6 @@ export class Editor {
 
     toolbar2.appendChild(themeBtn);
     this.themeToggleBtn = themeBtn;
-
-    // Font size selector (simple select like font selector)
-    const fontSizeSelect = document.createElement('select');
-    fontSizeSelect.className = 'font-size-select';
-    fontSizeSelect.style.padding = '6px 12px';
-    fontSizeSelect.style.border = '1px solid #e0e0e0';
-    fontSizeSelect.style.borderRadius = '6px';
-    fontSizeSelect.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#ffffff';
-    fontSizeSelect.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#333333';
-    fontSizeSelect.style.fontSize = '14px';
-    fontSizeSelect.style.cursor = 'pointer';
-    fontSizeSelect.style.transition = 'all 0.2s ease';
-    fontSizeSelect.style.width = '80px';
-
-    const fontSizes = [8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 36, 40, 44, 48, 54, 60, 66, 72];
-
-    fontSizes.forEach(size => {
-      const option = document.createElement('option');
-      option.value = size;
-      option.textContent = size + 'px';
-      if (size === 16) option.selected = true; // Default selection
-      fontSizeSelect.appendChild(option);
-    });
-
-    fontSizeSelect.addEventListener('change', () => {
-      const selectedSize = parseInt(fontSizeSelect.value);
-      this.setFontSize(selectedSize);
-    });
-
-    toolbar2.appendChild(fontSizeSelect);
-    this.fontSizeSelector = fontSizeSelect;
 
     // Store toolbar references
     this.toolbar1 = toolbar1;
@@ -1209,7 +1893,6 @@ export class Editor {
     toolbarSeparator.style.background = this.options.theme === 'dark' ? '#404040' : '#e5e7eb';
     toolbarSeparator.style.margin = '0';
     toolbarSeparator.style.boxSizing = 'border-box';
-    toolbarSeparator.style.transition = 'all 0.3s ease';
     toolbarSeparator.style.display = 'none';
     
     // Store reference for theme updates
@@ -1223,16 +1906,33 @@ export class Editor {
 
   // Add method to toggle toolbar2 visibility
   toggleToolbar2() {
-    if (this.toolbar2.style.display === 'none' || this.toolbar2.style.display === '') {
-      this.toolbar2.style.display = 'flex';
-      this.toolbarSeparator.style.display = 'block';
-      // Add row separators after toolbar becomes visible
+    const isOpening = this.toolbar2.style.display === 'none' || this.toolbar2.style.display === '';
+
+    this.toolbar2.style.display = isOpening ? 'flex' : 'none';
+    this.toolbarSeparator.style.display = isOpening ? 'block' : 'none';
+
+    // Cập nhật trạng thái active cho more-options-btn
+    this.updateMoreOptionsButtonState();
+
+    // Thêm dòng phân cách nếu mở
+    if (isOpening) {
       setTimeout(() => this.addToolbar2RowSeparators(), 10);
-    } else {
-      this.toolbar2.style.display = 'none';
-      this.toolbarSeparator.style.display = 'none';
     }
   }
+
+  // Method để duy trì trạng thái active của more-options-btn
+  updateMoreOptionsButtonState() {
+    const moreOptionsBtn = this.toolbarBtns.moreOptions;
+    if (moreOptionsBtn) {
+      const isToolbar2Visible = this.toolbar2.style.display === 'flex';
+      if (isToolbar2Visible) {
+        moreOptionsBtn.classList.add('active');
+      } else {
+        moreOptionsBtn.classList.remove('active');
+      }
+    }
+  }
+
 
   // Add horizontal separators between rows in toolbar2
   addToolbar2RowSeparators() {
@@ -1301,7 +2001,6 @@ export class Editor {
           separator.style.background = this.options.theme === 'dark' ? '#404040' : '#e5e7eb';
           separator.style.pointerEvents = 'none';
           separator.style.zIndex = '0';
-          separator.style.transition = 'all 0.3s ease';
           
           this.toolbar2.appendChild(separator);
         }
@@ -1391,52 +2090,19 @@ export class Editor {
         return;
       }
       if (cmd === 'emoji') {
-        this.savedEmojiSelection = this.saveSelection();
-        this.showTooltip({
-          emojis: true,
-          onSubmit: emoji => {
-            this.restoreSelection(this.savedEmojiSelection);
-            this.editor.focus();
-            const sel = window.getSelection();
-            if (sel.rangeCount && this.editor.contains(sel.anchorNode)) {
-              sel.getRangeAt(0).insertNode(document.createTextNode(emoji));
-            } else {
-              this.editor.appendChild(document.createTextNode(emoji));
-            }
-          }
-        });
+        this.insertEmoji();
         return;
       }
       if (cmd === 'image') {
-        this.savedSelection = this.saveSelection();
-        this.showTooltip({
-          title: 'Insert Image',
-          placeholder: 'Paste image URL or select file...',
-          confirmText: 'Insert',
-          file: true,
-          onSubmit: url => this.insertImageWithStyle(url)
-        });
+        this.insertImage();
         return;
       }
       if (cmd === 'video') {
-        this.savedSelection = this.saveSelection();
-        this.showTooltip({
-          title: 'Insert Video',
-          placeholder: 'Paste video URL (YouTube, Vimeo, etc.)...',
-          confirmText: 'Insert',
-          onSubmit: url => this.insertVideo(url)
-        });
+        this.insertVideo();
         return;
       }
       if (cmd === 'import') {
-        this.savedSelection = this.saveSelection();
-        this.showTooltip({
-          title: 'Import Content',
-          placeholder: 'Paste HTML content to import...',
-          confirmText: 'Import',
-          showImportOptions: true, // Thêm tùy chọn cho các loại file
-          onSubmit: (content, fileType) => this.importContent(content, fileType)
-        });
+        this.importDocument();
         return;
       }
       if (cmd === 'insertTags') {
@@ -1450,12 +2116,7 @@ export class Editor {
         return;
       }
       if (cmd === 'link') {
-        this.showTooltip({
-          title: 'Insert Link',
-          placeholder: 'Enter URL (https://...)',
-          confirmText: 'Insert',
-          onSubmit: url => document.execCommand('createLink', false, url)
-        });
+        this.insertLink();
         return;
       }
       if (cmd === 'table') {
@@ -1636,12 +2297,15 @@ export class Editor {
     this.tableToolbar.style.display = 'none';
     this.tableToolbar.style.position = 'absolute';
     this.tableToolbar.style.background = '#fff';
-    this.tableToolbar.style.border = '1px solid #ccc';
-    this.tableToolbar.style.borderRadius = '4px';
-    this.tableToolbar.style.padding = '4px';
-    this.tableToolbar.style.boxShadow = '0 2px 8px rgba(0,0,0,0.12)';
+    this.tableToolbar.style.borderRadius = '6px';
+    this.tableToolbar.style.padding = '8px';
+    this.tableToolbar.style.fontSize = '12px';
+    this.tableToolbar.style.boxShadow = '0 4px 24px rgba(0,0,0,0.13)';
     this.tableToolbar.style.zIndex = 100;
     this.tableToolbar.style.gap = '4px';
+    this.tableToolbar.style.flexWrap = 'nowrap';
+    
+    // Thêm mũi tên (mặc định hướng xuống)
     if (!this.tableToolbar.arrow) {
       const arrow = document.createElement('div');
       arrow.className = 'table-toolbar-arrow';
@@ -1656,11 +2320,24 @@ export class Editor {
       this.tableToolbar.appendChild(arrow);
       this.tableToolbar.arrow = arrow;
     }
+    
     // Xóa cũ nếu có
     if (this.tableToolbar.parentNode) this.tableToolbar.parentNode.removeChild(this.tableToolbar);
     document.body.appendChild(this.tableToolbar);
+    
+    this.createTableToolbarButtons();
 
-    // Thêm các nút vào toolbar
+    this.wrapper.appendChild(this.tableToolbar);
+  }
+
+  createTableToolbarButtons() {
+    // Xóa tất cả nút cũ (trừ arrow)
+    const arrow = this.tableToolbar.arrow;
+    this.tableToolbar.innerHTML = '';
+    if (arrow) {
+      this.tableToolbar.appendChild(arrow);
+    }
+    
     const buttons = [
       { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="14" viewBox="0 0 18 14" fill="none">
   <g clip-path="url(#clip0_23_620)">
@@ -1675,10 +2352,6 @@ export class Editor {
       { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="14" viewBox="0 0 18 14" fill="none">
   <path d="M15.3864 0.0123596H2.37934C1.21636 0.0123596 0.274414 0.964798 0.274414 2.1365V10.962C0.274414 12.1337 1.21636 13.0827 2.37934 13.0827H15.3864C16.5528 13.0827 17.4981 12.1337 17.4981 10.9586V2.13993C17.4981 0.964798 16.5528 0.0123596 15.3864 0.0123596ZM15.2776 5.48374H13.2542C13.4209 6.18265 13.4209 6.9124 13.2542 7.60789H15.2776V10.9037H10.1257C9.31642 11.1367 8.45609 11.1367 7.64676 10.9037H2.34534V7.60789H4.51488C4.34825 6.9124 4.34825 6.18265 4.51488 5.48374H2.34534V2.19132H7.66037C8.46289 1.96178 9.31302 1.96178 10.1155 2.19132H15.2776V5.48374Z" fill="#454545"/>
   <path d="M12.2715 5.48376C12.1083 4.9493 11.8158 4.44567 11.3942 4.02084C10.9521 3.57546 10.4284 3.27396 9.86732 3.11294C9.18041 2.9108 8.4425 2.92793 7.75899 3.15748C7.25231 3.32535 6.77624 3.61657 6.37497 4.02084C5.95331 4.44567 5.66086 4.9493 5.49764 5.48376C5.28 6.17239 5.28 6.91927 5.49424 7.6079C5.65746 8.14579 5.95331 8.65284 6.37497 9.07767C6.79664 9.5025 7.25231 9.77316 7.75899 9.94103C8.4425 10.1706 9.18041 10.1877 9.86732 9.98557C10.4284 9.82455 10.9521 9.52306 11.3942 9.07767C11.8362 8.63229 12.1117 8.14579 12.2749 7.6079C12.4891 6.91927 12.4891 6.17239 12.2715 5.48376ZM10.3774 7.59077C10.3774 7.59077 10.3876 7.60105 10.391 7.6079C10.5032 7.73467 10.4964 7.92995 10.3774 8.05329C10.2516 8.18005 10.0441 8.18005 9.91833 8.05329L9.86732 8.0019L8.88457 7.01177L7.8508 8.05329C7.8236 8.0807 7.793 8.10468 7.75899 8.11838C7.63997 8.1732 7.49375 8.15264 7.39173 8.05329C7.27271 7.92995 7.26591 7.73467 7.37813 7.6079C7.38153 7.60105 7.38493 7.59762 7.39173 7.59077L8.42549 6.54926L7.39173 5.50774C7.39173 5.50774 7.37813 5.49404 7.37133 5.48376C7.26591 5.357 7.27271 5.16514 7.39173 5.04523C7.49375 4.94587 7.63997 4.92531 7.75899 4.98013C7.793 4.99384 7.8236 5.01782 7.8508 5.04523L8.88457 6.08674L9.86732 5.09662L9.91833 5.04523C10.0441 4.91846 10.2516 4.91846 10.3774 5.04523C10.4964 5.16514 10.5032 5.357 10.3978 5.48376C10.391 5.49404 10.3842 5.50089 10.3774 5.50774L9.34364 6.54926L10.3774 7.59077Z" fill="#454545"/>
-</svg>`, title: 'Thêm dòng dưới', cmd: 'addRowBelow' },
-      { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="16" viewBox="0 0 18 16" fill="none">
-  <path d="M15.6134 2.02472H13.216C13.3691 2.47353 13.4541 2.9566 13.4541 3.4568C13.4541 3.71033 13.4337 3.96043 13.3895 4.20368H15.6508V7.49953H10.7847C10.2678 7.71537 9.70328 7.83528 9.10819 7.83528C8.5131 7.83528 7.94861 7.71537 7.43173 7.49953H2.71859V4.20368H4.82692C4.78271 3.96043 4.76231 3.71033 4.76231 3.4568C4.76231 2.9566 4.84732 2.47353 5.00035 2.02472H2.60637C1.43999 2.02472 0.498047 2.97716 0.498047 4.15229V12.9709C0.498047 14.146 1.43999 15.0951 2.60637 15.0951H15.6134C16.7764 15.0951 17.7217 14.146 17.7217 12.9743V4.14886C17.7217 2.97716 16.7764 2.02472 15.6134 2.02472ZM8.12884 12.9161H2.71859V9.62367H8.12884V12.9161ZM15.6508 12.9161H10.2372V9.62367H15.6508V12.9161Z" fill="#454545"/>
-  <path d="M12.2335 2.02479C11.6962 0.832527 10.4992 0 9.1118 0C7.72438 0 6.52739 0.832527 5.99011 2.02479C5.78948 2.4599 5.68066 2.94639 5.68066 3.45687C5.68066 3.71383 5.70787 3.96393 5.76228 4.20375C6.02752 5.4337 6.94566 6.41697 8.13245 6.77328C8.44189 6.86578 8.77174 6.91717 9.1118 6.91717C9.50626 6.91717 9.88712 6.84865 10.2408 6.72531C11.3527 6.33474 12.2063 5.38231 12.4613 4.20375C12.5157 3.96393 12.5429 3.71383 12.5429 3.45687C12.5429 2.94639 12.4341 2.4599 12.2335 2.02479ZM10.8393 3.77549H9.42465V5.1973C9.42465 5.37203 9.28522 5.5125 9.1118 5.5125C8.93837 5.5125 8.79895 5.37203 8.79895 5.1973V3.77549H7.38433C7.2109 3.77549 7.07148 3.6316 7.07148 3.45687C7.07148 3.28214 7.2109 3.14168 7.38433 3.14168H8.79895V1.71987C8.79895 1.54514 8.93837 1.40125 9.1118 1.40125C9.28522 1.40125 9.42465 1.54514 9.42465 1.71987V3.14168H10.8393C11.0127 3.14168 11.1521 3.28214 11.1521 3.45687C11.1521 3.6316 11.0127 3.77549 10.8393 3.77549Z" fill="#454545"/>
 </svg>`, title: 'Thêm cột trái', cmd: 'addColLeft' },
       { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="16" viewBox="0 0 18 16" fill="none">
   <path d="M2.83001 13.0703H5.22738C5.07436 12.6215 4.98935 12.1385 4.98935 11.6383C4.98935 11.3847 5.00975 11.1346 5.05396 10.8914H2.79261V7.59554H7.65876C8.17564 7.3797 8.74013 7.25979 9.33522 7.25979C9.93032 7.25979 10.4948 7.3797 11.0117 7.59554H15.7248V10.8914H13.6165C13.6607 11.1346 13.6811 11.3847 13.6811 11.6383C13.6811 12.1385 13.5961 12.6215 13.4431 13.0703H15.837C17.0034 13.0703 17.9454 12.1179 17.9454 10.9428V2.12416C17.9454 0.949028 17.0034 1.52588e-05 15.837 1.52588e-05H2.83001C1.66703 1.52588e-05 0.72168 0.949028 0.72168 2.12073V10.9462C0.72168 12.1179 1.66703 13.0703 2.83001 13.0703ZM10.3146 2.17898H15.7248V5.4714H10.3146V2.17898ZM2.79261 2.17898H8.20625V5.4714H2.79261V2.17898Z" fill="#454545"/>
@@ -1704,30 +2377,234 @@ export class Editor {
     ];
 
     buttons.forEach(btn => {
-      const button = document.createElement('button');
-      button.innerHTML = btn.icon;
-      button.title = btn.title;
-      button.style.display = 'flex';
-      button.style.alignItems = 'center';
-      button.style.justifyContent = 'center';
-      button.style.padding = '4px 8px';
-      button.style.borderRadius = '4px';
-      button.style.setProperty('border', 'none', 'important');
-
-
-
-
-
-      button.style.background = '#fff';
-      button.style.cursor = 'pointer';
-      button.onclick = e => {
-        e.preventDefault();
-        this.handleTableCommand(btn.cmd);
-      };
+      const button = this.createTableToolbarButton(btn.cmd, btn.icon, btn.title);
       this.tableToolbar.appendChild(button);
     });
+  }
 
-    this.wrapper.appendChild(this.tableToolbar);
+  createTableToolbarButton(cmd, icon, title) {
+    const button = document.createElement('button');
+    button.innerHTML = icon;
+    button.title = title;
+    button.style.display = 'flex';
+    button.style.alignItems = 'center';
+    button.style.justifyContent = 'center';
+    button.style.padding = '4px 8px';
+    button.style.borderRadius = '4px';
+    button.style.setProperty('border', 'none', 'important');
+    button.style.background = '#fff';
+    button.style.cursor = 'pointer';
+    button.onclick = e => {
+      e.preventDefault();
+      this.handleTableCommand(cmd);
+    };
+    return button;
+  }
+
+  createSplitTableToolbar(buttons, splitIndex) {
+    // Tạo toolbar cho phần đầu
+    const firstPart = buttons.slice(0, splitIndex);
+    const secondPart = buttons.slice(splitIndex);
+    
+    // Tạo toolbar trên
+    this.tableToolbar.style.flexDirection = 'column';
+    this.tableToolbar.style.gap = '4px';
+    
+    const topRow = document.createElement('div');
+    topRow.style.display = 'flex';
+    topRow.style.gap = '4px';
+    topRow.style.alignItems = 'center';
+    
+    const bottomRow = document.createElement('div');
+    bottomRow.style.display = 'flex';
+    bottomRow.style.gap = '4px';
+    bottomRow.style.alignItems = 'center';
+    
+    // Tạo nút cho hàng trên
+    firstPart.forEach(btn => {
+      const button = this.createTableToolbarButton(btn.cmd, btn.icon, btn.title);
+      topRow.appendChild(button);
+    });
+    
+    // Tạo nút cho hàng dưới
+    secondPart.forEach(btn => {
+      const button = this.createTableToolbarButton(btn.cmd, btn.icon, btn.title);
+      bottomRow.appendChild(button);
+    });
+    
+    this.tableToolbar.appendChild(topRow);
+    this.tableToolbar.appendChild(bottomRow);
+  }
+
+  showTableToolbar(table) {
+    if (!this.tableToolbar || !table) return;
+    
+    // Lấy thông tin về editor-area
+    const editorArea = this.editor;
+    const editorRect = editorArea.getBoundingClientRect();
+    const tableRect = table.getBoundingClientRect();
+    
+    // Reset toolbar style về mặc định
+    this.tableToolbar.style.flexDirection = 'row';
+    this.tableToolbar.style.gap = '4px';
+    
+    // Tạo lại nút toolbar bình thường
+    this.createTableToolbarButtons();
+    // const editorArea = this.editor;
+    //   const editorRect = editorArea.getBoundingClientRect();
+    
+    // Tính toán kích thước toolbar
+    this.tableToolbar.style.display = 'flex';
+    this.tableToolbar.style.opacity = '0';
+    this.tableToolbar.style.visibility = 'hidden';
+    const toolbarRect = this.tableToolbar.getBoundingClientRect();
+    const toolbarWidth = toolbarRect.width;
+    const toolbarHeight = toolbarRect.height;
+    this.tableToolbar.style.visibility = 'visible';
+
+    
+    
+    // Tính toán vị trí mặc định (phía trên, căn giữa bảng)
+    let left = editorRect.right - toolbarWidth - editorRect.left - 20;
+    let top = tableRect.top - toolbarHeight - 55;
+    let arrowLeft = '50%';
+    let arrowDirection = 'down'; // mũi tên hướng xuống
+    
+    // Trường hợp 1: Vượt quá lề trái
+    // if (left < editorRect.left) {
+    //   left = editorRect.left + 10; // Đặt toolbar bên trong editor-area
+    //   arrowLeft = '10%'; // Mũi tên ở 10%
+    // }
+    
+    // Trường hợp 2: Vượt quá lề phải  
+    if (left + toolbarWidth > editorRect.right) {
+      left = editorRect.right - toolbarWidth - editorRect.left - 20; // Đặt toolbar bên trong editor-area
+      arrowLeft = '90%'; // Mũi tên ở 90%
+    }
+
+    // Trường hợp 3: Vượt quá lề trên
+    if (top < editorRect.top + window.scrollY) {
+      top = tableRect.bottom - 16; // Hiển thị phía dưới
+      arrowDirection = 'up'; // Mũi tên hướng lên
+    }
+    
+    // Trường hợp 4: Toolbar quá rộng so với editor-area
+    if (toolbarWidth > editorRect.width - 20) {
+      // Chia làm 2 hàng
+      const buttons = [
+        { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="14" viewBox="0 0 18 14" fill="none">
+  <g clip-path="url(#clip0_23_620)">
+    <path d="M17.2744 10.9348V2.16365C17.2744 0.994844 16.3413 0.0475311 15.1901 0.0475311H2.35536C1.20413 0.0475311 0.274414 0.991437 0.274414 2.16024V10.9382C0.274414 12.1036 1.20413 13.0509 2.35536 13.0509H15.1935C16.3447 13.0509 17.2744 12.1036 17.2744 10.9382V10.9348ZM2.31844 7.60218H7.66178V10.8803H2.31844V7.60218ZM15.0827 10.8803H9.74273V7.60218H15.0827V10.8803ZM15.0827 5.48947H9.74273V2.21477H15.0827V5.48947ZM2.31844 2.21477H7.66178V5.48947H2.31844V2.21477Z" fill="#454545"/>
+  </g>
+  <defs>
+    <clipPath id="clip0_23_620">
+      <rect width="17" height="13" fill="white" transform="translate(0.274414 0.0475311)"/>
+    </clipPath>
+  </defs>
+</svg>`, title: 'Thêm dòng trên', cmd: 'addRowAbove' },
+        { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="14" viewBox="0 0 18 14" fill="none">
+  <g clip-path="url(#clip0_23_631)">
+    <path d="M17.2744 10.9348V2.16365C17.2744 0.994844 16.3413 0.0475311 15.1901 0.0475311H2.35536C1.20413 0.0475311 0.274414 0.991437 0.274414 2.16024V10.9382C0.274414 12.1036 1.20413 13.0509 2.35536 13.0509H15.1935C16.3447 13.0509 17.2744 12.1036 17.2744 10.9382V10.9348ZM2.31844 7.60218H7.66178V10.8803H2.31844V7.60218ZM15.0827 10.8803H9.74273V7.60218H15.0827V10.8803ZM15.0827 5.48947H9.74273V2.21477H15.0827V5.48947ZM2.31844 2.21477H7.66178V5.48947H2.31844V2.21477Z" fill="#454545"/>
+  </g>
+  <defs>
+    <clipPath id="clip0_23_631">
+      <rect width="17" height="13" fill="white" transform="translate(0.274414 0.0475311)"/>
+    </clipPath>
+  </defs>
+</svg>`, title: 'Thêm dòng dưới', cmd: 'addRowBelow' },
+        { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="14" viewBox="0 0 18 14" fill="none">
+  <g clip-path="url(#clip0_23_642)">
+    <path d="M10.9348 0.274414H2.16365C0.994844 0.274414 0.0475311 1.20756 0.0475311 2.35879H13.0509C13.0509 1.20756 12.1036 0.274414 10.9382 0.274414H10.9348ZM7.60218 15.0827V9.74273H10.8803V15.0827H7.60218ZM10.8803 2.31844V7.66178H7.60218V2.31844H10.8803ZM5.48947 2.31844V7.66178H2.21477V2.31844H5.48947ZM2.21477 9.74273H5.48947V15.0827H2.21477V9.74273Z" fill="#454545"/>
+  </g>
+  <defs>
+    <clipPath id="clip0_23_642">
+      <rect width="17" height="13" fill="white" transform="translate(0.0475311 0.274414)"/>
+    </clipPath>
+  </defs>
+</svg>`, title: 'Thêm cột trái', cmd: 'addColLeft' },
+        { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="14" viewBox="0 0 18 14" fill="none">
+  <g clip-path="url(#clip0_23_653)">
+    <path d="M10.9348 0.274414H2.16365C0.994844 0.274414 0.0475311 1.20756 0.0475311 2.35879H13.0509C13.0509 1.20756 12.1036 0.274414 10.9382 0.274414H10.9348ZM7.60218 15.0827V9.74273H10.8803V15.0827H7.60218ZM10.8803 2.31844V7.66178H7.60218V2.31844H10.8803ZM5.48947 2.31844V7.66178H2.21477V2.31844H5.48947ZM2.21477 9.74273H5.48947V15.0827H2.21477V9.74273Z" fill="#454545"/>
+  </g>
+  <defs>
+    <clipPath id="clip0_23_653">
+      <rect width="17" height="13" fill="white" transform="translate(0.0475311 0.274414)"/>
+    </clipPath>
+  </defs>
+</svg>`, title: 'Thêm cột phải', cmd: 'addColRight' },
+        { icon: '<i class="fas fa-minus"></i>', title: 'Xóa dòng', cmd: 'deleteRow' },
+        { icon: '<i class="fas fa-minus"></i>', title: 'Xóa cột', cmd: 'deleteCol' },
+        { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="19" height="14" viewBox="0 0 19 14" fill="none">
+  <path d="M16.5185 0.0123596H3.51142C2.34844 0.0123596 1.40649 0.964798 1.40649 2.1365V2.69495C2.18522 2.27012 3.06596 2.10224 3.92289 2.19132H8.89106V5.48374H7.69069C7.86412 6.17923 7.86412 6.9124 7.69069 7.60789H8.89106V10.9037H3.89228C3.04215 10.986 2.17501 10.8181 1.40649 10.3967V10.962C1.40649 12.1337 2.34844 13.0827 3.51142 13.0827H16.5185C17.6848 13.0827 18.6302 12.1303 18.6302 10.9586V2.13993C18.6302 0.964798 17.6848 0.0123596 16.5185 0.0123596ZM16.4096 10.9037H10.9994V7.60789H16.4096V10.9037ZM16.4096 5.48374H10.9994V2.19132H16.4096V5.48374Z" fill="#454545"/>
+  <path d="M6.74518 5.48377C6.58195 4.97671 6.30312 4.50049 5.90185 4.09965C5.23195 3.42472 4.35801 3.08554 3.47727 3.08554C2.74616 3.08554 2.01504 3.31851 1.40634 3.78788C1.28052 3.88038 1.16151 3.98659 1.04929 4.09965C-0.290519 5.44951 -0.290519 7.64217 1.04929 8.99203C1.16151 9.10509 1.28052 9.2113 1.40634 9.3038C2.01504 9.77317 2.74616 10.0061 3.47727 10.0061C4.35801 10.0061 5.23195 9.66696 5.90185 8.99203C6.30312 8.59119 6.58195 8.11496 6.74518 7.60791C6.96281 6.91928 6.96281 6.1724 6.74518 5.48377ZM4.9191 7.55309C4.9191 7.55309 4.9497 7.58736 4.9633 7.60791C5.03812 7.72782 5.02451 7.89227 4.9191 7.99848C4.79668 8.12182 4.59605 8.12182 4.47363 7.99848L4.08596 7.60791L3.47727 6.99465L2.47752 7.99848C2.3551 8.12182 2.15787 8.12182 2.03205 7.99848C1.90963 7.87514 1.90963 7.67643 2.03205 7.55309L3.0318 6.54584L2.03205 5.53858C1.90963 5.41525 1.90963 5.21654 2.03205 5.0932C2.15787 4.96986 2.3551 4.96986 2.47752 5.0932L3.47727 6.09703L4.47363 5.0932C4.59605 4.96986 4.79668 4.96986 4.9191 5.0932C5.02451 5.19941 5.03812 5.36386 4.9633 5.48377C4.9497 5.50432 4.9361 5.52145 4.9191 5.53858L3.91934 6.54584L4.9191 7.55309Z" fill="#454545"/>
+</svg>`, title: 'Merge cells', cmd: 'mergeCells' },
+        { icon: `<svg xmlns="http://www.w3.org/2000/svg" width="19" height="14" viewBox="0 0 19 14" fill="none">
+  <path d="M16.5185 0.0123596H3.51142C2.34844 0.0123596 1.40649 0.964798 1.40649 2.1365V2.69495C2.18522 2.27012 3.06596 2.10224 3.92289 2.19132H8.89106V5.48374H7.69069C7.86412 6.17923 7.86412 6.9124 7.69069 7.60789H8.89106V10.9037H3.89228C3.04215 10.986 2.17501 10.8181 1.40649 10.3967V10.962C1.40649 12.1337 2.34844 13.0827 3.51142 13.0827H16.5185C17.6848 13.0827 18.6302 12.1303 18.6302 10.9586V2.13993C18.6302 0.964798 17.6848 0.0123596 16.5185 0.0123596ZM16.4096 10.9037H10.9994V7.60789H16.4096V10.9037ZM16.4096 5.48374H10.9994V2.19132H16.4096V5.48374Z" fill="#454545"/>
+  <path d="M6.74518 5.48377C6.58195 4.97671 6.30312 4.50049 5.90185 4.09965C5.23195 3.42472 4.35801 3.08554 3.47727 3.08554C2.74616 3.08554 2.01504 3.31851 1.40634 3.78788C1.28052 3.88038 1.16151 3.98659 1.04929 4.09965C-0.290519 5.44951 -0.290519 7.64217 1.04929 8.99203C1.16151 9.10509 1.28052 9.2113 1.40634 9.3038C2.01504 9.77317 2.74616 10.0061 3.47727 10.0061C4.35801 10.0061 5.23195 9.66696 5.90185 8.99203C6.30312 8.59119 6.58195 8.11496 6.74518 7.60791C6.96281 6.91928 6.96281 6.1724 6.74518 5.48377ZM4.9191 7.55309C4.9191 7.55309 4.9497 7.58736 4.9633 7.60791C5.03812 7.72782 5.02451 7.89227 4.9191 7.99848C4.79668 8.12182 4.59605 8.12182 4.47363 7.99848L4.08596 7.60791L3.47727 6.99465L2.47752 7.99848C2.3551 8.12182 2.15787 8.12182 2.03205 7.99848C1.90963 7.87514 1.90963 7.67643 2.03205 7.55309L3.0318 6.54584L2.03205 5.53858C1.90963 5.41525 1.90963 5.21654 2.03205 5.0932C2.15787 4.96986 2.3551 4.96986 2.47752 5.0932L3.47727 6.09703L4.47363 5.0932C4.59605 4.96986 4.79668 4.96986 4.9191 5.0932C5.02451 5.19941 5.03812 5.36386 4.9633 5.48377C4.9497 5.50432 4.9361 5.52145 4.9191 5.53858L3.91934 6.54584L4.9191 7.55309Z" fill="#454545"/>
+</svg>`, title: 'Split cells', cmd: 'splitCells' },
+        { icon: '<i class="fas fa-times"></i>', title: 'Xóa bảng', cmd: 'deleteTable' }
+      ];
+      
+      const splitIndex = Math.ceil(buttons.length / 2);
+      
+      // Xóa nội dung cũ
+      const arrow = this.tableToolbar.arrow;
+      this.tableToolbar.innerHTML = '';
+      if (arrow) {
+        this.tableToolbar.appendChild(arrow);
+      }
+      
+      this.createSplitTableToolbar(buttons, splitIndex);
+      
+      // Tính lại kích thước sau khi chia
+      const newToolbarRect = this.tableToolbar.getBoundingClientRect();
+      const newToolbarHeight = newToolbarRect.height;
+      
+      // Cập nhật vị trí với chiều cao mới
+      if (arrowDirection === 'down') {
+        top = tableRect.top + window.scrollY - newToolbarHeight - 10;
+      } else {
+        top = tableRect.bottom + window.scrollY + 10;
+      }
+      
+      // Đảm bảo toolbar nằm trong editor-area
+      //left = Math.max(editorRect.left + 10, Math.min(left, editorRect.right - newToolbarRect.width - 10));
+    }
+    
+    // Cập nhật vị trí mũi tên
+    if (this.tableToolbar.arrow) {
+      this.tableToolbar.arrow.style.left = arrowLeft;
+      
+      if (arrowDirection === 'up') {
+        // Mũi tên hướng lên
+        this.tableToolbar.arrow.style.bottom = 'auto';
+        this.tableToolbar.arrow.style.top = '-8px';
+        this.tableToolbar.arrow.style.borderTop = 'none';
+        this.tableToolbar.arrow.style.borderBottom = '8px solid #fff';
+        this.tableToolbar.arrow.style.borderLeft = '6px solid transparent';
+        this.tableToolbar.arrow.style.borderRight = '6px solid transparent';
+      } else {
+        // Mũi tên hướng xuống (mặc định)
+        this.tableToolbar.arrow.style.top = 'auto';
+        this.tableToolbar.arrow.style.bottom = '-8px';
+        this.tableToolbar.arrow.style.borderBottom = 'none';
+        this.tableToolbar.arrow.style.borderTop = '8px solid #fff';
+        this.tableToolbar.arrow.style.borderLeft = '6px solid transparent';
+        this.tableToolbar.arrow.style.borderRight = '6px solid transparent';
+      }
+    }
+    
+    // Áp dụng vị trí cuối cùng
+    this.tableToolbar.style.left = left + 'px';
+    this.tableToolbar.style.top = top + 'px';
+    this.tableToolbar.style.opacity = '1';
+  }
+
+  hideTableToolbar() {
+    if (this.tableToolbar) {
+      this.tableToolbar.style.display = 'none';
+      this.tableToolbar.style.opacity = '0';
+    }
   }
 
   insertTable(rows, cols) {
@@ -1928,7 +2805,7 @@ export class Editor {
     const formatCommands = ['bold', 'italic', 'underline', 'strikeThrough', 'superscript', 'subscript'];
     
     formatCommands.forEach(cmd => {
-      if (this.toolbarBtns[cmd]) {
+      if (this.toolbarBtns[cmd] && !this.toolbarBtns[cmd].classList.contains('more-options-btn')) {
         try {
           const isActive = document.queryCommandState(cmd);
           this.toolbarBtns[cmd]._setActive(isActive);
@@ -2675,11 +3552,8 @@ export class Editor {
         this.selectedTable = table;
         this.selectedCell = e.target.closest('td,th');
         
-        // Hiển thị toolbar phía trên và căn giữa bảng
-        const rect = table.getBoundingClientRect();
-        this.tableToolbar.style.display = 'flex';
-        this.tableToolbar.style.top = (window.scrollY + rect.top - this.tableToolbar.offsetHeight - 55) + 'px';
-        this.tableToolbar.style.left = (window.scrollX + rect.left + rect.width/2 - this.tableToolbar.offsetWidth/2 - 300) + 'px';
+        // Hiển thị toolbar với logic 4 trường hợp
+        this.showTableToolbar(table);
         this.addTableResizeHandles(table);
       } else {
         // Ẩn toolbar nếu click ra ngoài bảng
@@ -2804,6 +3678,15 @@ export class Editor {
         }, 10);
       }
     });
+
+    // Thêm sự kiện con lăn chuột để tắt các toolbar
+    this.editor.addEventListener('wheel', () => {
+      // Tắt block-toolbar
+      this.hideBlockToolbar();
+      
+      // Tắt table-toolbar
+      this.hideTableToolbar();
+    });
   }
 
   updateStatusbar() {
@@ -2908,10 +3791,13 @@ export class Editor {
 
       // Reset all buttons first
       Object.values(this.toolbarBtns).forEach(btn => {
-        if (btn.tagName === 'BUTTON' || btn.classList.contains('toolbar-btn')) {
+        if (btn && (btn.tagName === 'BUTTON' || btn.classList.contains('toolbar-btn')) && typeof btn._setActive === 'function') {
           btn._setActive(false);
         }
       });
+
+      // Duy trì trạng thái more-options-btn
+      this.updateMoreOptionsButtonState();
 
       // Get the current block element at cursor position
       const currentBlock = this.getBlockElementAtCaret();
@@ -3201,7 +4087,7 @@ export class Editor {
       
       fileInput = document.createElement('input');
       fileInput.type = 'file';
-      fileInput.style.width = '100%';
+      fileInput.style.width = '90%';
       
       // Nếu là import options, thiết lập chấp nhận các loại file tương ứng
       if (showImportOptions) {
@@ -3216,7 +4102,7 @@ export class Editor {
       
       if (file) {
         filePreview = document.createElement('img');
-        filePreview.style.maxWidth = '100%';
+        filePreview.style.maxWidth = '80%';
         filePreview.style.maxHeight = '120px';
         filePreview.style.marginTop = '8px';
         filePreview.style.display = 'none';
@@ -3405,7 +4291,7 @@ export class Editor {
   insertImageWithStyle(url) {
     const img = document.createElement('img');
     img.src = url;
-    img.style.maxWidth = '100%';
+    img.style.maxWidth = '80%';
     img.style.height = 'auto';
     img.style.display = 'block';
     img.setAttribute('data-resizable', 'true');
@@ -4353,6 +5239,9 @@ export class Editor {
       this.colorPicker.remove();
       this.colorPicker = null;
     }
+
+    // Close all dropdowns first
+    this.closeAllDropdowns();
     // Danh sách màu phổ biến
     const palette = [
       '#000000', '#333333', '#666666', '#999999', '#cccccc', '#eeeeee',
@@ -4612,17 +5501,6 @@ export class Editor {
     this.colorPicker = paletteDiv;
     // Lưu selection để áp dụng màu đúng vùng chọn
     this.savedColorSelection = this.saveSelection();
-    // Đóng palette khi click ra ngoài
-    setTimeout(() => {
-      const closePalette = (e) => {
-        if (!paletteDiv.contains(e.target) && e.target !== btn) {
-          paletteDiv.remove();
-          this.colorPicker = null;
-          document.removeEventListener('mousedown', closePalette);
-        }
-      };
-      document.addEventListener('mousedown', closePalette);
-    }, 10);
   }
   
 
@@ -4650,7 +5528,9 @@ export class Editor {
     this.blockToolbar.style.width = 'auto';
     this.blockToolbar.style.height = 'auto';
     this.blockToolbar.style.overflow = 'visible';
-    // Thêm mũi tên bên dưới
+    this.blockToolbar.style.flexWrap = 'nowrap';
+    
+    // Thêm mũi tên (mặc định hướng xuống)
     if (!this.blockToolbar.arrow) {
       const arrow = document.createElement('div');
       arrow.className = 'block-toolbar-arrow';
@@ -4666,11 +5546,22 @@ export class Editor {
       this.blockToolbar.appendChild(arrow);
       this.blockToolbar.arrow = arrow;
     }
+    
     // Xóa cũ nếu có
     if (this.blockToolbar.parentNode) this.blockToolbar.parentNode.removeChild(this.blockToolbar);
     document.body.appendChild(this.blockToolbar);
-    // Thêm các nút
+    
+    this.createBlockToolbarButtons();
+  }
+
+  createBlockToolbarButtons() {
+    // Xóa tất cả nút cũ (trừ arrow)
+    const arrow = this.blockToolbar.arrow;
     this.blockToolbar.innerHTML = '';
+    if (arrow) {
+      this.blockToolbar.appendChild(arrow);
+    }
+    
     const features = this.options.blockToolbarFeatures;
     const icons = {
       bold: '<i class="fas fa-bold"></i>',
@@ -4680,6 +5571,7 @@ export class Editor {
       code: '<i class="fas fa-code"></i>',
       fontFamily: '<i class="fas fa-font"></i>'
     };
+    
     features.forEach(f => {
       const btn = document.createElement('button');
       btn.innerHTML = icons[f] || f;
@@ -4710,10 +5602,81 @@ export class Editor {
       };
       this.blockToolbar.appendChild(btn);
     });
-    // Đảm bảo arrow luôn là phần tử đầu tiên
-    if (this.blockToolbar.arrow) {
-      this.blockToolbar.insertBefore(this.blockToolbar.arrow, this.blockToolbar.firstChild);
-    }
+  }
+
+  createSplitToolbar(features, splitIndex) {
+    // Tạo toolbar cho phần đầu
+    const firstPart = features.slice(0, splitIndex);
+    const secondPart = features.slice(splitIndex);
+    
+    // Tạo toolbar trên
+    this.blockToolbar.style.flexDirection = 'column';
+    this.blockToolbar.style.gap = '8px';
+    
+    const topRow = document.createElement('div');
+    topRow.style.display = 'flex';
+    topRow.style.gap = '28px';
+    topRow.style.alignItems = 'center';
+    
+    const bottomRow = document.createElement('div');
+    bottomRow.style.display = 'flex';
+    bottomRow.style.gap = '28px';
+    bottomRow.style.alignItems = 'center';
+    
+    const icons = {
+      bold: '<i class="fas fa-bold"></i>',
+      italic: '<i class="fas fa-italic"></i>',
+      underline: '<i class="fas fa-underline"></i>',
+      strikeThrough: '<i class="fas fa-strikethrough"></i>',
+      code: '<i class="fas fa-code"></i>',
+      fontFamily: '<i class="fas fa-font"></i>'
+    };
+    
+    // Tạo nút cho hàng trên
+    firstPart.forEach(f => {
+      const btn = this.createToolbarButton(f, icons[f] || f);
+      topRow.appendChild(btn);
+    });
+    
+    // Tạo nút cho hàng dưới
+    secondPart.forEach(f => {
+      const btn = this.createToolbarButton(f, icons[f] || f);
+      bottomRow.appendChild(btn);
+    });
+    
+    this.blockToolbar.appendChild(topRow);
+    this.blockToolbar.appendChild(bottomRow);
+  }
+
+  createToolbarButton(feature, icon) {
+    const btn = document.createElement('button');
+    btn.innerHTML = icon;
+    btn.title = feature.charAt(0).toUpperCase() + feature.slice(1);
+    btn.style.background = '#fff';
+    btn.style.border = 'none';
+    btn.style.borderRadius = '8px';
+    btn.style.height = '14px';
+    btn.style.display = 'flex';
+    btn.style.alignItems = 'center';
+    btn.style.justifyContent = 'center';
+    btn.style.fontSize = '14px';
+    btn.style.color = '#374151';
+    btn.style.cursor = 'pointer';
+    btn.style.transition = 'all 0.18s';
+    btn.onmouseover = () => {
+      btn.style.background = '#f4f6fa';
+      btn.style.color = '#1976d2';
+    };
+    btn.onmouseout = () => {
+      btn.style.background = '#fff';
+      btn.style.color = '#374151';
+    };
+    btn.onclick = e => {
+      e.preventDefault();
+      this.handleBlockToolbarAction(feature);
+      this.hideBlockToolbar();
+    };
+    return btn;
   }
 
   showBlockToolbar(rect) {
@@ -4724,21 +5687,117 @@ export class Editor {
       clearTimeout(this.blockToolbarTimeout);
     }
     
-    // Delay 0.7s trước khi hiện toolbar
+    // Delay 0.5s trước khi hiện toolbar
     this.blockToolbarTimeout = setTimeout(() => {
-      // Tính toán vị trí hiển thị ở phía trên
-      const toolbarHeight = 50; // Chiều cao ước tính của toolbar
-      const topPosition = rect.top + window.scrollY - toolbarHeight - 30; // Hiển thị phía trên với khoảng cách 15px
+      // Lấy thông tin về editor-area
+      const editorArea = this.editor;
+      const editorRect = editorArea.getBoundingClientRect();
       
-      this.blockToolbar.style.left = rect.left-195 + 'px';
-      this.blockToolbar.style.top = topPosition + 'px';
+      // Reset toolbar style về mặc định
+      this.blockToolbar.style.flexDirection = 'row';
+      this.blockToolbar.style.gap = '28px';
+      
+      // Tạo lại nút toolbar bình thường
+      this.createBlockToolbarButtons();
+      
+      // Tính toán kích thước toolbar
       this.blockToolbar.style.display = 'flex';
+      this.blockToolbar.style.opacity = '0';
+      this.blockToolbar.style.visibility = 'hidden';
+      const toolbarRect = this.blockToolbar.getBoundingClientRect();
+      const toolbarWidth = toolbarRect.width;
+      const toolbarHeight = toolbarRect.height;
+      this.blockToolbar.style.visibility = 'visible';
+      
+      // Tính toán vị trí mặc định (phía trên)
+      let left = rect.left - 160;
+      let top = rect.top + window.scrollY - toolbarHeight - 10;
+      let arrowLeft = '50%';
+      let arrowDirection = 'down'; // mũi tên hướng xuống
+      
+      // Trường hợp 1: Vượt quá lề trái
+      if (left < editorRect.left) {
+        left =  rect.left -30; // Đặt toolbar bên trong editor-area
+        arrowLeft = '10%'; // Mũi tên ở 10%
+      }
+      
+      // Trường hợp 2: Vượt quá lề phải  
+      if (left + toolbarWidth > editorRect.right) {
+        left = editorRect.right + (rect.left - editorRect.right) - toolbarWidth + 30; // Đặt toolbar bên trong editor-area
+        arrowLeft = '90%'; // Mũi tên ở 90%
+      }
+      
+      // Trường hợp 3: Vượt quá lề trên
+      if (top < editorRect.top + window.scrollY) {
+        top = rect.top + window.scrollY+toolbarHeight + 10; // Hiển thị phía dưới
+        arrowDirection = 'up'; // Mũi tên hướng lên
+      }
+      
+      // Trường hợp 4: Toolbar quá rộng so với editor-area
+      if (toolbarWidth > editorRect.width - 20) {
+        // Chia làm 2 hàng
+        const features = this.options.blockToolbarFeatures;
+        const splitIndex = Math.ceil(features.length / 2);
+        
+        // Xóa nội dung cũ
+        const arrow = this.blockToolbar.arrow;
+        this.blockToolbar.innerHTML = '';
+        if (arrow) {
+          this.blockToolbar.appendChild(arrow);
+        }
+        
+        this.createSplitToolbar(features, splitIndex);
+        
+        // Tính lại kích thước sau khi chia
+        const newToolbarRect = this.blockToolbar.getBoundingClientRect();
+        const newToolbarHeight = newToolbarRect.height;
+        
+        // Cập nhật vị trí với chiều cao mới
+        if (arrowDirection === 'down') {
+          top = rect.top + window.scrollY - newToolbarHeight - 10;
+        } else {
+          top = rect.bottom + window.scrollY + 10;
+        }
+        
+        // Đảm bảo toolbar nằm trong editor-area
+        left = Math.max(editorRect.left + 10, Math.min(left, editorRect.right - newToolbarRect.width - 10));
+      }
+      console.log("rect.left",rect.left);
+      console.log("editorRect.right",editorRect.right);
+      console.log("editorRect.left",editorRect.left);
+      
+      // Cập nhật vị trí mũi tên
+      if (this.blockToolbar.arrow) {
+        this.blockToolbar.arrow.style.left = arrowLeft;
+        
+        if (arrowDirection === 'up') {
+          // Mũi tên hướng lên
+          this.blockToolbar.arrow.style.bottom = 'auto';
+          this.blockToolbar.arrow.style.top = '-8px';
+          this.blockToolbar.arrow.style.borderTop = 'none';
+          this.blockToolbar.arrow.style.borderBottom = '8px solid #fff';
+          this.blockToolbar.arrow.style.borderLeft = '6px solid transparent';
+          this.blockToolbar.arrow.style.borderRight = '6px solid transparent';
+        } else {
+          // Mũi tên hướng xuống (mặc định)
+          this.blockToolbar.arrow.style.top = 'auto';
+          this.blockToolbar.arrow.style.bottom = '-8px';
+          this.blockToolbar.arrow.style.borderBottom = 'none';
+          this.blockToolbar.arrow.style.borderTop = '8px solid #fff';
+          this.blockToolbar.arrow.style.borderLeft = '6px solid transparent';
+          this.blockToolbar.arrow.style.borderRight = '6px solid transparent';
+        }
+      }
+      
+      // Áp dụng vị trí cuối cùng
+      this.blockToolbar.style.left = left + 'px';
+      this.blockToolbar.style.top = top + 'px';
       
       setTimeout(() => {
         this.blockToolbar.style.opacity = '1';
         this.blockToolbar.style.pointerEvents = 'auto';
       }, 10);
-    }, 500); // Delay 0.55s
+    }, 500); // Delay 0.5s
   }
 
   hideBlockToolbar() {
@@ -5160,27 +6219,51 @@ export class Editor {
     else if (tagName === 'PRE') label = 'Code Block';
     else if (tagName === 'BLOCKQUOTE') label = 'Quote';
     
-    // Cập nhật text mà vẫn giữ dropdown icon
+    // Kiểm tra nếu con trỏ không nằm trong editor-area thì không làm gì
+    const editorArea = document.querySelector('.editor-area'); // hoặc this.editorArea nếu có
+    const selection = window.getSelection();
+    if (!selection.rangeCount || !editorArea.contains(selection.getRangeAt(0).startContainer)) {
+      return;
+    }
+
+    // ✅ Cập nhật text mà vẫn giữ dropdown icon
     const textNode = this.headingSelector.firstChild;
     if (textNode && textNode.nodeType === Node.TEXT_NODE) {
       textNode.textContent = label;
     } else {
       // Tạo lại nội dung button với dropdown icon
       this.headingSelector.innerHTML = label;
+
       const dropdownIcon = document.createElement('span');
       dropdownIcon.innerHTML = '▼';
       dropdownIcon.style.fontSize = '10px';
       dropdownIcon.style.opacity = '0.7';
       dropdownIcon.style.marginLeft = 'auto';
+
       this.headingSelector.appendChild(dropdownIcon);
     }
+
   }
   
   // Điều chỉnh font size
   adjustFontSize(delta) {
-    const currentSize = parseInt(this.fontSizeSelector.value) || 16;
+    const currentText = this.fontSizeSelector.textContent || '16px';
+    const currentSize = parseInt(currentText) || 16;
     const newSize = Math.max(8, Math.min(72, currentSize + delta));
-    this.fontSizeSelector.value = newSize;
+    
+    // Update button text
+    const textNode = this.fontSizeSelector.firstChild;
+    if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+      textNode.textContent = newSize + 'px';
+    } else {
+      this.fontSizeSelector.innerHTML = newSize + 'px';
+      // Re-add dropdown icon
+      const dropdownIcon = this.fontSizeSelector.querySelector('svg');
+      if (dropdownIcon) {
+        this.fontSizeSelector.appendChild(dropdownIcon);
+      }
+    }
+    
     this.setFontSize(newSize);
   }
   
@@ -5273,7 +6356,27 @@ export class Editor {
       Math.abs(curr - fontSize) < Math.abs(prev - fontSize) ? curr : prev
     );
     
-    this.fontSizeSelector.value = closestSize;
+    // Kiểm tra nếu con trỏ không nằm trong editor-area thì không thay đổi gì cả
+    const editorArea = document.querySelector('.editor-area'); // Hoặc this.editorArea nếu bạn đã lưu nó trong class
+
+    const selection = window.getSelection();
+    if (!selection.rangeCount || !editorArea.contains(selection.getRangeAt(0).startContainer)) {
+      return;
+    }
+
+    // ✅ Tiếp tục cập nhật nút font size
+    const textNode = this.fontSizeSelector.firstChild;
+    if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+      textNode.textContent = closestSize + 'px';
+    } else {
+      // Lưu lại dropdown icon (nếu có) trước khi ghi đè nội dung
+      const dropdownIcon = this.fontSizeSelector.querySelector('svg');
+      this.fontSizeSelector.innerHTML = closestSize + 'px';
+      if (dropdownIcon) {
+        this.fontSizeSelector.appendChild(dropdownIcon);
+      }
+    }
+
   }
 
   removeLineHeight() {
@@ -5474,7 +6577,26 @@ export class Editor {
     const availableLineHeights = ['1', '1.2', '1.4', '1.5', '1.6', '1.8', '2', '2.5', '3'];
     const closestLineHeight = availableLineHeights.find(lh => lh === lineHeight) || 'default';
     
-    this.lineHeightSelector.value = closestLineHeight;
+    // Kiểm tra nếu con trỏ không nằm trong editor-area thì không làm gì
+    const editorArea = document.querySelector('.editor-area'); // sửa theo context của bạn
+    const selection = window.getSelection();
+    if (!selection.rangeCount || !editorArea.contains(selection.getRangeAt(0).startContainer)) {
+      return;
+    }
+
+    // ✅ Tiếp tục cập nhật nội dung nút line height
+    const displayText = closestLineHeight === 'default' ? 'Line Height' : closestLineHeight;
+    const textNode = this.lineHeightSelector.firstChild;
+    if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+      textNode.textContent = displayText;
+    } else {
+      // Lưu icon trước khi ghi đè
+      const dropdownIcon = this.lineHeightSelector.querySelector('svg');
+      this.lineHeightSelector.innerHTML = displayText;
+      if (dropdownIcon) {
+        this.lineHeightSelector.appendChild(dropdownIcon);
+      }
+    }
   }
 
   // Áp dụng capitalization cho text được chọn
@@ -6616,6 +7738,36 @@ export class Editor {
         customBtn.style.border = isDark ? '1px solid #404040' : '1px solid #eee';
       }
     }
+
+    // Update custom insert dropdowns
+    const insertDropdowns = document.querySelectorAll('#image-dropdown, #link-dropdown, #emoji-dropdown, #video-dropdown');
+    insertDropdowns.forEach(dropdown => {
+      dropdown.style.background = isDark ? '#2a2a2a' : '#fff';
+      dropdown.style.border = isDark ? '1px solid #404040' : '1px solid #e1e1e1';
+      dropdown.style.boxShadow = isDark ? '0 4px 24px rgba(0,0,0,0.3)' : '0 4px 24px rgba(0,0,0,0.18)';
+      
+      // Update inputs in dropdown
+      const inputs = dropdown.querySelectorAll('input');
+      inputs.forEach(input => {
+        input.style.background = isDark ? '#1e1e1e' : '#fff';
+        input.style.color = isDark ? '#e0e0e0' : '#333';
+        input.style.border = isDark ? '1px solid #404040' : '1px solid #ccc';
+      });
+      
+      // Update buttons in dropdown
+      const buttons = dropdown.querySelectorAll('button');
+      buttons.forEach(btn => {
+        if (btn.textContent === 'Insert') {
+          btn.style.background = isDark ? '#0d7377' : '#007bff';
+        } else if (btn.textContent === 'Cancel') {
+          btn.style.background = isDark ? '#404040' : '#eee';
+          btn.style.color = isDark ? '#e0e0e0' : '#333';
+        } else {
+          // For emoji buttons
+          btn.style.background = 'transparent';
+        }
+      });
+    });
   }
 
   // Update inline styles in editor content for theme compatibility
@@ -6900,6 +8052,7 @@ export class Editor {
       e.stopPropagation();
       const isOpen = button.getAttribute('aria-expanded') === 'true';
       
+      // Close all dropdowns first
       this.closeAllDropdowns();
       
       if (!isOpen) {
@@ -6928,10 +8081,90 @@ export class Editor {
   }
 
   closeAllDropdowns() {
-    Object.values(this.dropdownMenus).forEach(({ button, menu }) => {
-      button.setAttribute('aria-expanded', 'false');
-      menu.classList.remove('tox-menu--visible');
-    });
+    // Close TinyMCE-style dropdowns
+    if (this.dropdownMenus) {
+      Object.values(this.dropdownMenus).forEach(({ button, menu }) => {
+        button.setAttribute('aria-expanded', 'false');
+        menu.classList.remove('tox-menu--visible');
+      });
+    }
+    
+    // Close heading dropdown
+    const headingDropdown = document.querySelector('.heading-dropdown');
+    if (headingDropdown) {
+      headingDropdown.style.display = 'none';
+    }
+    
+    // Close font size dropdown
+    const fontSizeDropdown = document.querySelector('.fontsize-dropdown');
+    if (fontSizeDropdown) {
+      fontSizeDropdown.style.display = 'none';
+    }
+    
+    // Close font dropdown
+    const fontDropdown = document.querySelector('.font-dropdown');
+    if (fontDropdown) {
+      fontDropdown.style.display = 'none';
+    }
+    
+    // Close line height dropdown
+    const lineHeightDropdown = document.querySelector('.lineheight-dropdown');
+    if (lineHeightDropdown) {
+      lineHeightDropdown.style.display = 'none';
+    }
+    
+    // Close capitalization dropdown
+    const capitalizationDropdown = document.querySelector('.capitalization-dropdown');
+    if (capitalizationDropdown) {
+      capitalizationDropdown.style.display = 'none';
+    }
+    
+    // Close text alignment dropdown
+    const alignMenu = document.querySelector('.dropdown-menu');
+    if (alignMenu) {
+      alignMenu.style.opacity = '0';
+      alignMenu.style.pointerEvents = 'none';
+      alignMenu.style.display = 'none';
+    }
+    
+    // Close list dropdown
+    if (this.listMenu) {
+      this.listMenu.style.opacity = '0';
+      this.listMenu.style.pointerEvents = 'none';
+      this.listMenu.style.display = 'none';
+    }
+
+    // Close custom insert dropdowns
+    const imageDropdown = document.getElementById('image-dropdown');
+    if (imageDropdown) {
+      imageDropdown.remove();
+    }
+
+    const linkDropdown = document.getElementById('link-dropdown');
+    if (linkDropdown) {
+      linkDropdown.remove();
+    }
+
+    const emojiDropdown = document.getElementById('emoji-dropdown');
+    if (emojiDropdown) {
+      emojiDropdown.remove();
+    }
+
+    const videoDropdown = document.getElementById('video-dropdown');
+    if (videoDropdown) {
+      videoDropdown.remove();
+    }
+
+    const importDropdown = document.getElementById('import-dropdown');
+    if (importDropdown) {
+      importDropdown.remove();
+    }
+
+    // Close color picker
+    if (this.colorPicker) {
+      this.colorPicker.remove();
+      this.colorPicker = null;
+    }
   }
 
   // Menu action methods
@@ -6944,13 +8177,7 @@ export class Editor {
 
   importDocument() {
     this.savedSelection = this.saveSelection();
-    this.showTooltip({
-      title: 'Import Document',
-      placeholder: 'Paste HTML content to import...',
-      confirmText: 'Import',
-      showImportOptions: true,
-      onSubmit: (content, fileType) => this.importContent(content, fileType)
-    });
+    this.showImportDropdown();
   }
 
   exportAsHTML() {
@@ -6968,29 +8195,332 @@ export class Editor {
 
   insertImage() {
     this.savedSelection = this.saveSelection();
-    this.showTooltip({
-      title: 'Insert Image',
-      placeholder: 'Paste image URL or select file...',
-      confirmText: 'Insert',
-      file: true,
-      onSubmit: url => this.insertImageWithStyle(url)
-    });
+    this.showImageDropdown();
   }
 
   insertLink() {
-    this.showTooltip({
-      title: 'Insert Link',
-      placeholder: 'Enter URL (https://...)',
-      confirmText: 'Insert',
-      onSubmit: url => document.execCommand('createLink', false, url)
-    });
+    this.savedSelection = this.saveSelection();
+    this.showLinkDropdown();
   }
 
   insertEmoji() {
     this.savedEmojiSelection = this.saveSelection();
-    this.showTooltip({
-      emojis: true,
-      onSubmit: emoji => {
+    this.showEmojiDropdown();
+  }
+
+  insertVideo() {
+    this.savedSelection = this.saveSelection();
+    this.showVideoDropdown();
+  }
+
+  // Dropdown methods for insert features
+  showImageDropdown() {
+    const btn = this.toolbarBtns.image;
+    if (!btn) return;
+
+    // Check if dropdown is already visible
+    const existingDropdown = document.getElementById('image-dropdown');
+    if (existingDropdown) {
+      existingDropdown.remove();
+      return;
+    }
+
+    // Close all other dropdowns first
+    this.closeAllDropdowns();
+
+    const dropdown = document.createElement('div');
+    dropdown.id = 'image-dropdown';
+    dropdown.style.position = 'fixed';
+    dropdown.style.zIndex = '99999';
+    dropdown.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#fff';
+    dropdown.style.border = this.options.theme === 'dark' ? '1px solid #404040' : '1px solid #e1e1e1';
+    dropdown.style.borderRadius = '8px';
+    dropdown.style.boxShadow = '0 4px 24px rgba(0,0,0,0.18)';
+    dropdown.style.padding = '8px';
+    dropdown.style.minWidth = '300px';
+    dropdown.style.display = 'none';
+
+    // URL input
+    const urlInput = document.createElement('input');
+    urlInput.type = 'text';
+    urlInput.placeholder = 'Paste image URL...';
+    urlInput.style.width = '90%';
+    urlInput.style.padding = '8px';
+    urlInput.style.border = this.options.theme === 'dark' ? '1px solid #404040' : '1px solid #ccc';
+    urlInput.style.borderRadius = '4px';
+    urlInput.style.marginBottom = '8px';
+    urlInput.style.background = this.options.theme === 'dark' ? '#1e1e1e' : '#fff';
+    urlInput.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#333';
+
+    // File input
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.style.width = '90%';
+    fileInput.style.marginBottom = '8px';
+
+    // Buttons
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.display = 'flex';
+    buttonContainer.style.gap = '8px';
+    buttonContainer.style.justifyContent = 'flex-end';
+
+    const insertBtn = document.createElement('button');
+    insertBtn.textContent = 'Insert';
+    insertBtn.style.padding = '6px 12px';
+    insertBtn.style.background = this.options.theme === 'dark' ? '#0d7377' : '#007bff';
+    insertBtn.style.color = '#fff';
+    insertBtn.style.border = 'none';
+    insertBtn.style.borderRadius = '4px';
+    insertBtn.style.cursor = 'pointer';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.style.padding = '6px 12px';
+    cancelBtn.style.background = this.options.theme === 'dark' ? '#404040' : '#eee';
+    cancelBtn.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#333';
+    cancelBtn.style.border = 'none';
+    cancelBtn.style.borderRadius = '4px';
+    cancelBtn.style.cursor = 'pointer';
+
+    buttonContainer.appendChild(insertBtn);
+    buttonContainer.appendChild(cancelBtn);
+
+    dropdown.appendChild(urlInput);
+    dropdown.appendChild(fileInput);
+    dropdown.appendChild(buttonContainer);
+
+    // Position dropdown below button with boundary checking
+    const rect = btn.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+    const dropdownHeight = 150; // Estimated height
+    const dropdownWidth = 300; // minWidth set above
+    
+    let top = rect.bottom + 5;
+    let left = rect.left;
+    
+    // Check if dropdown would go below viewport
+    if (top + dropdownHeight > viewportHeight) {
+      top = rect.top - dropdownHeight - 5; // Show above button
+    }
+    
+    // Check if dropdown would go beyond right edge
+    if (left + dropdownWidth > viewportWidth) {
+      left = viewportWidth - dropdownWidth - 10;
+    }
+    
+    // Ensure dropdown doesn't go beyond left edge
+    if (left < 10) {
+      left = 10;
+    }
+    
+    dropdown.style.top = top + 'px';
+    dropdown.style.left = left + 'px';
+    dropdown.style.display = 'block';
+
+    document.body.appendChild(dropdown);
+
+    // Event handlers
+    insertBtn.onclick = () => {
+      const url = urlInput.value.trim();
+      if (url) {
+        this.restoreSelection(this.savedSelection);
+        this.insertImageWithStyle(url);
+        dropdown.remove();
+      }
+    };
+
+    cancelBtn.onclick = () => dropdown.remove();
+
+    fileInput.onchange = () => {
+      if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          urlInput.value = e.target.result;
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+      }
+    };
+
+    urlInput.focus();
+  }
+
+  showLinkDropdown() {
+    const btn = this.toolbarBtns.link;
+    if (!btn) return;
+
+    // Check if dropdown is already visible
+    const existingDropdown = document.getElementById('link-dropdown');
+    if (existingDropdown) {
+      existingDropdown.remove();
+      return;
+    }
+
+    // Close all other dropdowns first
+    this.closeAllDropdowns();
+
+    const dropdown = document.createElement('div');
+    dropdown.id = 'link-dropdown';
+    dropdown.style.position = 'fixed';
+    dropdown.style.zIndex = '99999';
+    dropdown.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#fff';
+    dropdown.style.border = this.options.theme === 'dark' ? '1px solid #404040' : '1px solid #e1e1e1';
+    dropdown.style.borderRadius = '8px';
+    dropdown.style.boxShadow = '0 4px 24px rgba(0,0,0,0.18)';
+    dropdown.style.padding = '8px';
+    dropdown.style.minWidth = '300px';
+    dropdown.style.display = 'none';
+
+    // URL input
+    const urlInput = document.createElement('input');
+    urlInput.type = 'text';
+    urlInput.placeholder = 'Enter URL (https://...)';
+    urlInput.style.width = '90%';  
+    urlInput.style.padding = '8px';
+    urlInput.style.border = this.options.theme === 'dark' ? '1px solid #404040' : '1px solid #ccc';
+    urlInput.style.borderRadius = '4px';
+    urlInput.style.marginBottom = '8px';
+    urlInput.style.background = this.options.theme === 'dark' ? '#1e1e1e' : '#fff';
+    urlInput.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#333';
+
+    // Buttons
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.display = 'flex';
+    buttonContainer.style.gap = '8px';
+    buttonContainer.style.justifyContent = 'flex-end';
+
+    const insertBtn = document.createElement('button');
+    insertBtn.textContent = 'Insert';
+    insertBtn.style.padding = '6px 12px';
+    insertBtn.style.background = this.options.theme === 'dark' ? '#0d7377' : '#007bff';
+    insertBtn.style.color = '#fff';
+    insertBtn.style.border = 'none';
+    insertBtn.style.borderRadius = '4px';
+    insertBtn.style.cursor = 'pointer';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.style.padding = '6px 12px';
+    cancelBtn.style.background = this.options.theme === 'dark' ? '#404040' : '#eee';
+    cancelBtn.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#333';
+    cancelBtn.style.border = 'none';
+    cancelBtn.style.borderRadius = '4px';
+    cancelBtn.style.cursor = 'pointer';
+
+    buttonContainer.appendChild(insertBtn);
+    buttonContainer.appendChild(cancelBtn);
+
+    dropdown.appendChild(urlInput);
+    dropdown.appendChild(buttonContainer);
+
+    // Position dropdown below button with boundary checking
+    const rect = btn.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+    const dropdownHeight = 120; // Estimated height for link dropdown
+    const dropdownWidth = 300; // minWidth set above
+    
+    let top = rect.bottom + 5;
+    let left = rect.left;
+    
+    // Check if dropdown would go below viewport
+    if (top + dropdownHeight > viewportHeight) {
+      top = rect.top - dropdownHeight - 5; // Show above button
+    }
+    
+    // Check if dropdown would go beyond right edge
+    if (left + dropdownWidth > viewportWidth) {
+      left = viewportWidth - dropdownWidth - 10;
+    }
+    
+    // Ensure dropdown doesn't go beyond left edge
+    if (left < 10) {
+      left = 10;
+    }
+    
+    dropdown.style.top = top + 'px';
+    dropdown.style.left = left + 'px';
+    dropdown.style.display = 'block';
+
+    document.body.appendChild(dropdown);
+
+    // Event handlers
+    insertBtn.onclick = () => {
+      const url = urlInput.value.trim();
+      if (url) {
+        this.restoreSelection(this.savedSelection);
+        document.execCommand('createLink', false, url);
+        dropdown.remove();
+      }
+    };
+
+    cancelBtn.onclick = () => dropdown.remove();
+
+    // Enter key handler
+    urlInput.onkeydown = (e) => {
+      if (e.key === 'Enter') insertBtn.click();
+      if (e.key === 'Escape') cancelBtn.click();
+    };
+
+    urlInput.focus();
+  }
+
+  showEmojiDropdown() {
+    const btn = this.toolbarBtns.emoji;
+    if (!btn) return;
+
+    // Check if dropdown is already visible
+    const existingDropdown = document.getElementById('emoji-dropdown');
+    if (existingDropdown) {
+      existingDropdown.remove();
+      return;
+    }
+
+    // Close all other dropdowns first
+    this.closeAllDropdowns();
+
+    const dropdown = document.createElement('div');
+    dropdown.id = 'emoji-dropdown';
+    dropdown.style.position = 'fixed';
+    dropdown.style.zIndex = '99999';
+    dropdown.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#fff';
+    dropdown.style.border = this.options.theme === 'dark' ? '1px solid #404040' : '1px solid #e1e1e1';
+    dropdown.style.borderRadius = '8px';
+    dropdown.style.boxShadow = '0 4px 24px rgba(0,0,0,0.18)';
+    dropdown.style.padding = '8px';
+    dropdown.style.minWidth = '300px';
+    dropdown.style.overflowY = 'auto';
+    dropdown.style.display = 'none';
+
+    // Emoji grid
+    const emojiGrid = document.createElement('div');
+    emojiGrid.style.display = 'grid';
+    emojiGrid.style.gridTemplateColumns = 'repeat(10, 1fr)';
+    emojiGrid.style.gap = '4px';
+
+    const emojis = '😀 😃 😄 😁 😆 😅 😂 😊 😇 😉 😍 😘 😜 🤗 🤔 🤩 🤨 🥳 🥰 😎 😏 😤 😱 😭 😡 🤬 🥶 🥵 🤯 🥳 🥺 🙏 👍 👎 👏 🙌 💪 🤝 🧠 🦾 🦿 🦵 🦶 👀 👋'.split(' ');
+
+    emojis.forEach(emoji => {
+      const emojiBtn = document.createElement('button');
+      emojiBtn.textContent = emoji;
+      emojiBtn.style.fontSize = '20px';
+      emojiBtn.style.padding = '4px';
+      emojiBtn.style.border = 'none';
+      emojiBtn.style.background = 'none';
+      emojiBtn.style.cursor = 'pointer';
+      emojiBtn.style.borderRadius = '4px';
+      emojiBtn.style.transition = 'background 0.2s';
+
+      emojiBtn.onmouseover = () => {
+        emojiBtn.style.background = this.options.theme === 'dark' ? '#404040' : '#f0f0f0';
+      };
+
+      emojiBtn.onmouseout = () => {
+        emojiBtn.style.background = 'transparent';
+      };
+
+      emojiBtn.onclick = () => {
         this.restoreSelection(this.savedEmojiSelection);
         this.editor.focus();
         const sel = window.getSelection();
@@ -6999,45 +8529,385 @@ export class Editor {
         } else {
           this.editor.appendChild(document.createTextNode(emoji));
         }
-      }
+        dropdown.remove();
+      };
+
+      emojiGrid.appendChild(emojiBtn);
+      
     });
+    
+    dropdown.appendChild(emojiGrid);
+    // Thêm dòng hướng dẫn
+      const hintText = document.createElement('div');
+      hintText.innerHTML = 'Get more emojis with <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">⌘</span> <span style="color: #000;">+</span> <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">CTRL</span> <span style="color: #000;">+</span> <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">SPACE</span>';
+      hintText.style.color = '#71787C';
+      hintText.style.fontStyle = 'normal';
+      hintText.style.marginTop = '12px';
+      hintText.style.fontWeight = '400';
+      hintText.style.lineHeight = 'normal';
+      hintText.style.textAlign = 'center';
+      dropdown.appendChild(hintText);
+    // Position dropdown below button with boundary checking
+    const rect = btn.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+    const dropdownHeight = 200; // maxHeight set above
+    const dropdownWidth = 300; // minWidth set above
+    
+    let top = rect.bottom + 5;
+    let left = rect.left;
+    
+    // Check if dropdown would go below viewport
+    if (top + dropdownHeight > viewportHeight) {
+      top = rect.top - dropdownHeight - 5; // Show above button
+    }
+    
+    // Check if dropdown would go beyond right edge
+    if (left + dropdownWidth > viewportWidth) {
+      left = viewportWidth - dropdownWidth - 10;
+    }
+    
+    // Ensure dropdown doesn't go beyond left edge
+    if (left < 10) {
+      left = 10;
+    }
+    
+    dropdown.style.top = top + 'px';
+    dropdown.style.left = left + 'px';
+    dropdown.style.display = 'block';
+
+    document.body.appendChild(dropdown);
   }
 
-  insertVideo() {
-    this.savedSelection = this.saveSelection();
-    this.showTooltip({
-      title: 'Insert Video',
-      placeholder: 'Paste video URL (YouTube, Vimeo, etc.)...',
-      confirmText: 'Insert',
-      onSubmit: url => this.insertVideo(url)
+  showVideoDropdown() {
+    const btn = this.toolbarBtns.video;
+    if (!btn) return;
+
+    // Check if dropdown is already visible
+    const existingDropdown = document.getElementById('video-dropdown');
+    if (existingDropdown) {
+      existingDropdown.remove();
+      return;
+    }
+
+    // Close all other dropdowns first
+    this.closeAllDropdowns();
+
+    const dropdown = document.createElement('div');
+    dropdown.id = 'video-dropdown';
+    dropdown.style.position = 'fixed';
+    dropdown.style.zIndex = '99999';
+    dropdown.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#fff';
+    dropdown.style.border = this.options.theme === 'dark' ? '1px solid #404040' : '1px solid #e1e1e1';
+    dropdown.style.borderRadius = '8px';
+    dropdown.style.boxShadow = '0 4px 24px rgba(0,0,0,0.18)';
+    dropdown.style.padding = '12px';
+    dropdown.style.minWidth = '300px';
+    dropdown.style.display = 'none';
+
+    // URL input
+    const urlInput = document.createElement('input');
+    urlInput.type = 'text';
+    urlInput.placeholder = 'Paste video URL (YouTube, Vimeo, etc.)...';
+    urlInput.style.width = '90%';
+    urlInput.style.padding = '8px';
+    urlInput.style.border = this.options.theme === 'dark' ? '1px solid #404040' : '1px solid #ccc';
+    urlInput.style.borderRadius = '4px';
+    urlInput.style.marginBottom = '8px';
+    urlInput.style.background = this.options.theme === 'dark' ? '#1e1e1e' : '#fff';
+    urlInput.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#333';
+
+    // Buttons
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.display = 'flex';
+    buttonContainer.style.gap = '8px';
+    buttonContainer.style.justifyContent = 'flex-end';
+
+    const insertBtn = document.createElement('button');
+    insertBtn.textContent = 'Insert';
+    insertBtn.style.padding = '6px 12px';
+    insertBtn.style.background = this.options.theme === 'dark' ? '#0d7377' : '#007bff';
+    insertBtn.style.color = '#fff';
+    insertBtn.style.border = 'none';
+    insertBtn.style.borderRadius = '4px';
+    insertBtn.style.cursor = 'pointer';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.style.padding = '6px 12px';
+    cancelBtn.style.background = this.options.theme === 'dark' ? '#404040' : '#eee';
+    cancelBtn.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#333';
+    cancelBtn.style.border = 'none';
+    cancelBtn.style.borderRadius = '4px';
+    cancelBtn.style.cursor = 'pointer';
+
+    buttonContainer.appendChild(insertBtn);
+    buttonContainer.appendChild(cancelBtn);
+
+    dropdown.appendChild(urlInput);
+    dropdown.appendChild(buttonContainer);
+
+    // Position dropdown
+    const rect = btn.getBoundingClientRect();
+    dropdown.style.top = (rect.bottom + 5) + 'px';
+    dropdown.style.left = rect.left + 'px';
+    dropdown.style.display = 'block';
+
+    document.body.appendChild(dropdown);
+
+    // Event handlers
+    insertBtn.onclick = () => {
+      const url = urlInput.value.trim();
+      if (url) {
+        this.restoreSelection(this.savedSelection);
+        this.insertVideo(url);
+        dropdown.remove();
+      }
+    };
+
+    cancelBtn.onclick = () => dropdown.remove();
+
+    // Enter key handler
+    urlInput.onkeydown = (e) => {
+      if (e.key === 'Enter') insertBtn.click();
+      if (e.key === 'Escape') cancelBtn.click();
+    };
+
+    urlInput.focus();
+  }
+
+  showImportDropdown() {
+    const btn = this.toolbarBtns.import;
+    if (!btn) return;
+
+    // Check if dropdown is already visible
+    const existingDropdown = document.getElementById('import-dropdown');
+    if (existingDropdown) {
+      existingDropdown.remove();
+      return;
+    }
+
+    // Close all other dropdowns first
+    this.closeAllDropdowns();
+
+    const dropdown = document.createElement('div');
+    dropdown.id = 'import-dropdown';
+    dropdown.style.position = 'fixed';
+    dropdown.style.zIndex = '99999';
+    dropdown.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#fff';
+    dropdown.style.border = this.options.theme === 'dark' ? '1px solid #404040' : '1px solid #e1e1e1';
+    dropdown.style.borderRadius = '8px';
+    dropdown.style.boxShadow = '0 4px 24px rgba(0,0,0,0.18)';
+    dropdown.style.padding = '12px';
+    dropdown.style.minWidth = '320px';
+    dropdown.style.display = 'none';
+
+    // File type selector
+    const fileTypeContainer = document.createElement('div');
+    fileTypeContainer.style.marginBottom = '12px';
+
+    const fileTypeLabel = document.createElement('div');
+    fileTypeLabel.textContent = 'Select import type:';
+    fileTypeLabel.style.fontSize = '14px';
+    fileTypeLabel.style.fontWeight = '500';
+    fileTypeLabel.style.marginBottom = '8px';
+    fileTypeLabel.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#333';
+
+    const fileTypeButtons = document.createElement('div');
+    fileTypeButtons.style.display = 'flex';
+    fileTypeButtons.style.gap = '8px';
+    fileTypeButtons.style.flexWrap = 'wrap';
+
+    let selectedFileType = 'html';
+    const fileTypes = [
+      { id: 'html', label: 'HTML', icon: '<i class="fas fa-code"></i>' },
+      { id: 'excel', label: 'Excel', icon: '<i class="fas fa-file-excel"></i>' },
+      { id: 'pdf', label: 'PDF', icon: '<i class="fas fa-file-pdf"></i>' },
+      { id: 'doc', label: 'Word', icon: '<i class="fas fa-file-word"></i>' }
+    ];
+
+    fileTypes.forEach(type => {
+      const btn = document.createElement('button');
+      btn.innerHTML = `${type.icon} ${type.label}`;
+      btn.dataset.type = type.id;
+      btn.style.padding = '8px 12px';
+      btn.style.border = this.options.theme === 'dark' ? '1px solid #404040' : '1px solid #ddd';
+      btn.style.borderRadius = '6px';
+      btn.style.background = type.id === 'html' ? 
+        (this.options.theme === 'dark' ? '#0d7377' : '#007bff') : 
+        (this.options.theme === 'dark' ? '#2a2a2a' : '#fff');
+      btn.style.color = type.id === 'html' ? '#fff' : 
+        (this.options.theme === 'dark' ? '#e0e0e0' : '#333');
+      btn.style.cursor = 'pointer';
+      btn.style.fontSize = '14px';
+      btn.style.display = 'flex';
+      btn.style.alignItems = 'center';
+      btn.style.gap = '6px';
+      btn.style.transition = 'all 0.2s';
+
+      btn.onclick = () => {
+        selectedFileType = type.id;
+        
+        // Update button styles
+        fileTypes.forEach(ft => {
+          const button = fileTypeButtons.querySelector(`[data-type="${ft.id}"]`);
+          if (button) {
+            button.style.background = ft.id === type.id ? 
+              (this.options.theme === 'dark' ? '#0d7377' : '#007bff') : 
+              (this.options.theme === 'dark' ? '#2a2a2a' : '#fff');
+            button.style.color = ft.id === type.id ? '#fff' : 
+              (this.options.theme === 'dark' ? '#e0e0e0' : '#333');
+          }
+        });
+
+        // Update input visibility and placeholder
+        if (type.id === 'html') {
+          textInput.style.display = 'block';
+          fileInput.style.display = 'none';
+          textInput.placeholder = 'Paste HTML content to import...';
+        } else {
+          textInput.style.display = 'none';
+          fileInput.style.display = 'block';
+          fileInput.accept = type.id === 'excel' ? '.xlsx,.xls' : 
+                           type.id === 'pdf' ? '.pdf' : 
+                           type.id === 'doc' ? '.doc,.docx' : '*';
+        }
+      };
+
+      fileTypeButtons.appendChild(btn);
     });
+
+    fileTypeContainer.appendChild(fileTypeLabel);
+    fileTypeContainer.appendChild(fileTypeButtons);
+
+    // Text input (for HTML)
+    const textInput = document.createElement('textarea');
+    textInput.placeholder = 'Paste HTML content to import...';
+    textInput.style.width = '90%';
+    textInput.style.height = '80px';
+    textInput.style.padding = '8px';
+    textInput.style.border = this.options.theme === 'dark' ? '1px solid #404040' : '1px solid #ccc';
+    textInput.style.borderRadius = '4px';
+    textInput.style.marginBottom = '8px';
+    textInput.style.background = this.options.theme === 'dark' ? '#1e1e1e' : '#fff';
+    textInput.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#333';
+    textInput.style.resize = 'vertical';
+    textInput.style.fontFamily = 'monospace';
+    textInput.style.fontSize = '12px';
+
+    // File input (for other file types)
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.style.width = '90%';
+    fileInput.style.marginBottom = '8px';
+    fileInput.style.display = 'none';
+
+    // Buttons
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.display = 'flex';
+    buttonContainer.style.gap = '8px';
+    buttonContainer.style.justifyContent = 'flex-end';
+
+    const importBtn = document.createElement('button');
+    importBtn.textContent = 'Import';
+    importBtn.style.padding = '8px 16px';
+    importBtn.style.background = this.options.theme === 'dark' ? '#0d7377' : '#007bff';
+    importBtn.style.color = '#fff';
+    importBtn.style.border = 'none';
+    importBtn.style.borderRadius = '4px';
+    importBtn.style.cursor = 'pointer';
+    importBtn.style.fontWeight = '500';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.style.padding = '8px 16px';
+    cancelBtn.style.background = this.options.theme === 'dark' ? '#404040' : '#eee';
+    cancelBtn.style.color = this.options.theme === 'dark' ? '#e0e0e0' : '#333';
+    cancelBtn.style.border = 'none';
+    cancelBtn.style.borderRadius = '4px';
+    cancelBtn.style.cursor = 'pointer';
+
+    buttonContainer.appendChild(importBtn);
+    buttonContainer.appendChild(cancelBtn);
+
+    dropdown.appendChild(fileTypeContainer);
+    dropdown.appendChild(textInput);
+    dropdown.appendChild(fileInput);
+    dropdown.appendChild(buttonContainer);
+
+    // Position dropdown below button
+    const rect = btn.getBoundingClientRect();
+    dropdown.style.top = (rect.bottom + 5) + 'px';
+    dropdown.style.left = rect.left + 'px';
+    dropdown.style.display = 'block';
+
+    document.body.appendChild(dropdown);
+
+    // Event handlers
+    importBtn.onclick = () => {
+      if (selectedFileType === 'html') {
+        const content = textInput.value.trim();
+        if (content) {
+          this.restoreSelection(this.savedSelection);
+          this.importContent(content, selectedFileType);
+          dropdown.remove();
+        } else {
+          textInput.focus();
+        }
+      } else {
+        if (fileInput.files && fileInput.files[0]) {
+          const file = fileInput.files[0];
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            this.restoreSelection(this.savedSelection);
+            this.importContent(e.target.result, selectedFileType);
+            dropdown.remove();
+          };
+          reader.readAsDataURL(file);
+        } else {
+          fileInput.focus();
+        }
+      }
+    };
+
+    cancelBtn.onclick = () => dropdown.remove();
+
+    // Enter key handler for textarea
+    textInput.onkeydown = (e) => {
+      if (e.key === 'Enter' && e.ctrlKey) {
+        e.preventDefault();
+        importBtn.click();
+      }
+      if (e.key === 'Escape') {
+        cancelBtn.click();
+      }
+    };
+
+    textInput.focus();
   }
 
   // Helper methods for dropdown menu functionalities
   showFontSelector() {
-    // Focus on the font selector in toolbar
-    const fontSelect = this.wrapper.querySelector('.font-select');
-    if (fontSelect) {
-      fontSelect.focus();
-      fontSelect.click();
+    // Focus on the font selector dropdown button in toolbar
+    if (this.fontSelector) {
+      this.fontSelector.focus();
+      this.fontSelector.click();
     }
   }
 
   showFontSizeSelector() {
-    // Focus on the font size selector in toolbar
-    const fontSizeSelect = this.fontSizeSelector;
-    if (fontSizeSelect) {
-      fontSizeSelect.focus();
-      fontSizeSelect.click();
+    // Focus on the font size selector dropdown button in toolbar
+    if (this.fontSizeSelector) {
+      this.fontSizeSelector.focus();
+      this.fontSizeSelector.click();
     }
   }
 
   showLineHeightSelector() {
-    // Focus on the line height selector in toolbar
-    const lineHeightSelect = this.lineHeightSelector;
-    if (lineHeightSelect) {
-      lineHeightSelect.focus();
-      lineHeightSelect.click();
+    // Focus on the line height selector dropdown button in toolbar
+    if (this.lineHeightSelector) {
+      this.lineHeightSelector.focus();
+      this.lineHeightSelector.click();
     }
   }
 
@@ -7070,6 +8940,34 @@ export class Editor {
     // You can add zoom level display in status bar if needed
     const zoomPercentage = Math.round(this.currentZoom * 100);
     console.log(`Zoom: ${zoomPercentage}%`);
+  }
+
+  // Cleanup method to remove dynamically created elements
+  destroy() {
+    // Remove list menu from document.body if it exists
+    if (this.listMenu && this.listMenu.parentNode) {
+      this.listMenu.parentNode.removeChild(this.listMenu);
+    }
+    
+    // Clean up other dropdowns if needed
+    Object.values(this.dropdownMenus).forEach(({ menu }) => {
+      if (menu && menu.parentNode === document.body) {
+        document.body.removeChild(menu);
+      }
+    });
+
+    // Close all dropdowns and clean up global handlers
+    this.closeAllDropdowns();
+    
+    // Remove content observer
+    if (this.contentObserver) {
+      this.contentObserver.disconnect();
+    }
+    
+    // Remove main wrapper
+    if (this.wrapper && this.wrapper.parentNode) {
+      this.wrapper.parentNode.removeChild(this.wrapper);
+    }
   }
 }
 
