@@ -140,13 +140,30 @@ body {
   align-items: center;
   justify-content: space-between;
 }
+.capitalization-dropdown-item:hover{
+  background: #ECECEC !important;
+}
+.heading-dropdown-item:hover {
+  background: #ECECEC !important;
+}
+.fontsize-dropdown-item:hover {
+  background: #ECECEC !important;
+}
+.font-dropdown-item:hover {
+  background: #ECECEC !important;
+}
+.lineheight-dropdown-item:hover {
+  background: #ECECEC !important;
+}
 
 [data-theme="light"] .toolbar button.active,
 [data-theme="light"] .toolbar button:active {
   background: #CCCCCC !important;
   color: #136FDF !important;
 }
-
+#emoji-dropdown button:hover{
+  background: #ECECEC !important;
+}
 .editor-area {
   min-height: 180px;
   border-radius: 6px;
@@ -291,6 +308,7 @@ body {
   border-radius: 6px;
   box-shadow: 0 4px 16px var(--editor-shadow);
   padding: 8px;
+  gap: 12px !important;
   z-index: 300;
   display: flex;
   gap: 6px;
@@ -412,6 +430,7 @@ body {
 [data-theme="dark"] .editor-area table {
   background: #2a2a2a !important;
   border-color: #404040 !important;
+  max-width: 100% !important;
 }
 
 [data-theme="dark"] .editor-area td,
@@ -425,11 +444,14 @@ body {
   background: #404040 !important;
   color: #f0f0f0 !important;
 }
-
+.editor-area * {
+  max-width: 100% !important;
+}
 /* Light theme resets for tables */
 [data-theme="light"] .editor-area table {
   background: #ffffff !important;
   border-color: #dee2e6 !important;
+  max-width: 100% !important;
 }
 
 [data-theme="light"] .editor-area td,
@@ -525,7 +547,9 @@ body {
   font-weight: 500;
   border: none ;
 }
-
+.toolbar-btn:hover{
+  background: #ECECEC !important;
+}
 /* Dark theme button improvements */
 [data-theme="dark"] .toolbar button,
 [data-theme="dark"] .editor-toolbar button {
@@ -544,7 +568,7 @@ body {
 /* Light theme button improvements */
 [data-theme="light"] .toolbar button,
 [data-theme="light"] .editor-toolbar button {
-  background: none !important;
+  background: none ;
   color: var(--editor-btn-text) !important;
 }
 
