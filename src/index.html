@@ -7,8 +7,8 @@
 <body>
   <div id="editor-root"></div>
   <script type="module">
-    import { createEditor } from './lib/Editor.js';
-    createEditor('#editor-root', {
+    import { EditorCore } from './lib/EditorCore.js';
+    EditorCore('#editor-root', {
       toolbar: [
         'bold', 'italic', 'underline', 'strike', 'emoji', 'image', 'link', 'table', 'undo', 'redo'
       ],

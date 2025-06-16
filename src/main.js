@@ -1,7 +1,7 @@
 import './style.css';
-import { createEditor } from './lib/Editor.js';
+import { EditorCore } from './lib/EditorCore.js';
 
-createEditor('#editor-root', {
+new EditorCore('#editor-root', {
   toolbar: [
     'bold', 'italic', 'underline', 'strike', 'emoji', 'image', 'link', 'table', 'undo', 'redo'
   ],
