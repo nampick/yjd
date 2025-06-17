@@ -1,20 +1,91 @@
-// ToolbarManager.js - Quản lý toolbar và các nút bấm
+import { BlockManager } from './BlockManager.js';
+import { FormatManager } from './FormatManager.js';
+import { MediaManager } from './MediaManager.js';
+import { TagTemplateManager } from './TagTemplateManager.js';
+import { ImportExportManager } from './ImportExportManager.js';
+import { ThemeManager } from './ThemeManager.js';
+import { TableManager } from './TableManager.js';
 export class ToolbarManager {
-  constructor(editor, options = {}) {
+  constructor(editor, options = {},wrapper) {
   this.editor = editor;
   this.options = {
     theme: 'light', // hoặc 'dark' nếu muốn mặc định là dark
     ...options
   };
+  this.wrapper = wrapper;
   this.toolbarBtns = {};
+  this.formatManager = new FormatManager(editor,this);
+  this.blockManager = new BlockManager(editor,this);
+  this.mediaManager = new MediaManager(editor,this);
+  this.tagTemplateManager = new TagTemplateManager(editor,this);
+  this.importExportManager = new ImportExportManager(editor,this);
+  this.themeManager = new ThemeManager(editor,this);
+  this.tableManager = new TableManager(editor,this);
+  
 }
 
+  // Helper function to create checkmark SVG
   createCheckmarkSVG() {
-    // Create checkmark SVG logic
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '10');
+    svg.setAttribute('height', '11');
+    svg.setAttribute('viewBox', '0 0 10 11');
+    svg.setAttribute('fill', 'none');
+    svg.style.marginLeft = '8px';
+    svg.style.flexShrink = '0';
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.setAttribute('clip-path', 'url(#clip0_4_79)');
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M9.68012 2.27338C9.93724 2.52649 9.93724 2.93753 9.68012 3.19063L4.41429 8.37417C4.15717 8.62728 3.73961 8.62728 3.48249 8.37417L0.849578 5.7824C0.592458 5.5293 0.592458 5.11826 0.849578 4.86516C1.1067 4.61205 1.52426 4.61205 1.78138 4.86516L3.94942 6.99729L8.75037 2.27338C9.00749 2.02028 9.42505 2.02028 9.68217 2.27338H9.68012Z');
+    path.setAttribute('fill', 'black');
+
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const clipPath = document.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
+    clipPath.setAttribute('id', 'clip0_4_79');
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('width', '9.21519');
+    rect.setAttribute('height', '10.3671');
+    rect.setAttribute('fill', 'white');
+    rect.setAttribute('transform', 'translate(0.658203 0.139252)');
+
+    clipPath.appendChild(rect);
+    defs.appendChild(clipPath);
+    g.appendChild(path);
+    svg.appendChild(g);
+    svg.appendChild(defs);
+
+    return svg;
   }
 
+  // Helper function to update dropdown item checkmarks
   updateDropdownCheckmarks(dropdown, selectedValue, getValueFromItem) {
-    // Update dropdown checkmarks logic
+    const items = dropdown.querySelectorAll('.heading-dropdown-item, .font-dropdown-item, .fontsize-dropdown-item, .lineheight-dropdown-item, .capitalization-dropdown-item');
+    
+    items.forEach(item => {
+      // Remove existing checkmark
+      const existingCheckmark = item.querySelector('svg');
+      if (existingCheckmark) {
+        existingCheckmark.remove();
+      }
+      
+      // Get item value
+      const itemValue = getValueFromItem(item);
+      
+      // Add checkmark if this is the selected item
+      if (itemValue === selectedValue) {
+        const checkmark = this.createCheckmarkSVG();
+        item.style.display = 'flex';
+        item.style.alignItems = 'center';
+        item.style.justifyContent = 'space-between';
+        item.appendChild(checkmark);
+      } else {
+        // Reset display if no checkmark
+        item.style.display = 'block';
+        item.style.justifyContent = 'flex-start';
+      }
+    });
   }
 
   createToolbar() {
@@ -256,10 +327,9 @@ export class ToolbarManager {
         }
         
         if (this.savedHeadingSelection) {
-          this.restoreSelection(this.savedHeadingSelection);
+          this.formatManager.restoreSelection(this.savedHeadingSelection);
         }
-        console.log('Applying heading:', option.value); // Debug log
-        this.applyHeadingToSelection(option.value);
+        this.blockManager.applyHeadingToSelection(option.value);
       });
       headingDropdown.appendChild(item);
     });
@@ -277,10 +347,10 @@ export class ToolbarManager {
       // If it wasn't visible, show it
       if (!isVisible) {
         // Save selection trước khi hiển thị dropdown
-        this.savedHeadingSelection = this.saveSelection();
+        this.savedHeadingSelection = this.formatManager.saveSelection();
         
         // Get current heading to show checkmark
-        const block = this.getBlockElementAtCaret();
+        const block = this.blockManager.getBlockElementAtCaret();
         const currentHeading = block ? block.tagName.toUpperCase() : 'P';
         
         // Update checkmarks before showing dropdown
@@ -421,10 +491,10 @@ export class ToolbarManager {
         }
         
         if (this.savedFontSizeSelection) {
-          this.restoreSelection(this.savedFontSizeSelection);
+          this.formatManager.restoreSelection(this.savedFontSizeSelection);
         }
         
-        this.setFontSize(size);
+        this.formatManager.setFontSize(size);
       });
       fontSizeDropdown.appendChild(item);
     });
@@ -440,7 +510,7 @@ export class ToolbarManager {
       
       // If it wasn't visible, show it
       if (!isVisible) {
-        this.savedFontSizeSelection = this.saveSelection();
+        this.savedFontSizeSelection = this.formatManager.saveSelection();
         
         // Get current font size to show checkmark
         const currentSize = fontSizeBtn.textContent || '16px';
@@ -471,7 +541,7 @@ export class ToolbarManager {
     // Insert Table button
     const tableBtn = this.createBtn('<i class="fas fa-table"></i>', 'Insert Table', 'table');
     toolbar1.appendChild(tableBtn);
-    this.toolbarBtns.table = tableBtn;
+    this.toolbarBtns['table'] = tableBtn;
 
 
     // Align Justify button
@@ -778,7 +848,7 @@ export class ToolbarManager {
         listMenu.style.pointerEvents = 'none';
         
         // Focus back to editor
-        this.editor.focus();
+        this.editor.editor.focus();
       });
       
       // Store button reference for status updates (avoid duplicates)
@@ -999,7 +1069,7 @@ export class ToolbarManager {
         }
         
         if (this.savedFontSelection) {
-          this.restoreSelection(this.savedFontSelection);
+          this.formatManager.restoreSelection(this.savedFontSelection);
         }
         
         if (font.value === 'default') {
@@ -1022,7 +1092,7 @@ export class ToolbarManager {
       
       // If it wasn't visible, show it
       if (!isVisible) {
-        this.savedFontSelection = this.saveSelection();
+        this.savedFontSelection = this.formatManager.saveSelection();
         
         // Get current font to show checkmark
         const currentFont = fontBtn.textContent || 'Default';
@@ -1170,13 +1240,13 @@ export class ToolbarManager {
         }
         
         if (this.savedLineHeightSelection) {
-          this.restoreSelection(this.savedLineHeightSelection);
+          this.formatManager.restoreSelection(this.savedLineHeightSelection);
         }
         
         if (lineHeight.value === 'default') {
-          this.removeLineHeight();
+          this.formatManager.removeLineHeight();
         } else {
-          this.applyLineHeight(lineHeight.value);
+          this.formatManager.applyLineHeight(lineHeight.value);
         }
       });
       lineHeightDropdown.appendChild(item);
@@ -1193,7 +1263,7 @@ export class ToolbarManager {
       
       // If it wasn't visible, show it
       if (!isVisible) {
-        this.savedLineHeightSelection = this.saveSelection();
+        this.savedLineHeightSelection = this.formatManager.saveSelection();
         
         // Get current line height to show checkmark
         const currentLineHeight = lineHeightBtn.textContent || 'Line Height';
@@ -1328,7 +1398,7 @@ export class ToolbarManager {
         });
         
         if (this.savedCapitalizationSelection) {
-          this.restoreSelection(this.savedCapitalizationSelection);
+          this.formatManager.restoreSelection(this.savedCapitalizationSelection);
         }
         
         if (option.value === 'default') {
@@ -1336,7 +1406,7 @@ export class ToolbarManager {
           return;
         }
         
-        this.applyCapitalization(option.value);
+        this.formatManager.applyCapitalization(option.value);
         
         // Reset button text after applying
         setTimeout(() => {
@@ -1363,7 +1433,7 @@ export class ToolbarManager {
       
       // If it wasn't visible, show it
       if (!isVisible) {
-        this.savedCapitalizationSelection = this.saveSelection();
+        this.savedCapitalizationSelection = this.formatManager.saveSelection();
         
         // Get current capitalization to show checkmark (default to first option)
         const currentCapitalization = 'Capitalization';
@@ -1425,12 +1495,13 @@ export class ToolbarManager {
 
     // Thêm nút View Source
     const viewSourceBtn = this.createBtn('<i class="fas fa-code"></i>', 'View Source', 'viewSource');
-    viewSourceBtn.onclick = () => this.toggleSourceView();
+    this.toolbarBtns['viewSource'] = viewSourceBtn;
+    viewSourceBtn.onclick = () => this.formatManager.toggleSourceView();
     toolbar2.appendChild(viewSourceBtn);
 
     // Theme toggle button
     const themeBtn = document.createElement('button');
-    themeBtn.className = 'editor-btn theme-toggle';
+    themeBtn.className = 'toolbar-btn';
     themeBtn.innerHTML = this.options.theme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
     themeBtn.title = this.options.theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme';
     themeBtn.style.padding = '8px 12px';
@@ -1441,7 +1512,7 @@ export class ToolbarManager {
     themeBtn.style.fontSize = '14px';
 
     themeBtn.onclick = () => {
-      this.toggleTheme();
+      this.themeManager.toggleTheme();
     };
 
     themeBtn.onmouseover = () => {
@@ -1453,7 +1524,6 @@ export class ToolbarManager {
     };
 
     toolbar2.appendChild(themeBtn);
-    this.themeToggleBtn = themeBtn;
 
     // Store toolbar references
     this.toolbar1 = toolbar1;
@@ -1497,16 +1567,106 @@ export class ToolbarManager {
     return toolbarContainer;
   }
 
+  // Add method to toggle toolbar2 visibility
   toggleToolbar2() {
-    // Toggle second toolbar logic
+    const isOpening = this.toolbar2.style.display === 'none' || this.toolbar2.style.display === '';
+
+    this.toolbar2.style.display = isOpening ? 'flex' : 'none';
+    this.toolbarSeparator.style.display = isOpening ? 'block' : 'none';
+
+    // Cập nhật trạng thái active cho more-options-btn
+    this.updateMoreOptionsButtonState();
+
+    // Thêm dòng phân cách nếu mở
+    if (isOpening) {
+      setTimeout(() => this.addToolbar2RowSeparators(), 10);
+    }
   }
 
+  // Method để duy trì trạng thái active của more-options-btn
   updateMoreOptionsButtonState() {
-    // Update more options button state logic
+    const moreOptionsBtn = this.toolbarBtns.moreOptions;
+    if (moreOptionsBtn) {
+      const isToolbar2Visible = this.toolbar2.style.display === 'flex';
+      if (isToolbar2Visible) {
+        moreOptionsBtn.classList.add('active');
+      } else {
+        moreOptionsBtn.classList.remove('active');
+      }
+    }
   }
 
   addToolbar2RowSeparators() {
-    // Add toolbar row separators logic
+    if (!this.toolbar2 || this.toolbar2.style.display === 'none') return;
+    
+    // Remove existing separators
+    const existingSeparators = this.toolbar2.querySelectorAll('.toolbar-row-separator');
+    existingSeparators.forEach(sep => sep.remove());
+    
+    // Wait for layout to complete
+    setTimeout(() => {
+      const children = Array.from(this.toolbar2.children);
+      if (children.length === 0) return;
+      
+      let currentRowY = null;
+      let rowElements = [];
+      const rows = [];
+      
+      // Group elements by row based on their Y position
+      children.forEach(child => {
+        if (child.classList.contains('toolbar-row-separator')) return; // Skip separators
+        
+        const rect = child.getBoundingClientRect();
+        const childY = Math.round(rect.top + rect.height / 2); // Use center point for better accuracy with alignItems: center
+        
+        if (currentRowY === null || Math.abs(childY - currentRowY) > 10) {
+          // New row detected (increased tolerance for center alignment)
+          if (rowElements.length > 0) {
+            rows.push([...rowElements]);
+          }
+          rowElements = [child];
+          currentRowY = childY;
+        } else {
+          // Same row
+          rowElements.push(child);
+        }
+      });
+      
+      // Add the last row
+      if (rowElements.length > 0) {
+        rows.push(rowElements);
+      }
+      
+      // Add separators between rows (not after the last row)
+      for (let i = 0; i < rows.length - 1; i++) {
+        const currentRow = rows[i];
+        const nextRow = rows[i + 1];
+        
+                 if (currentRow.length > 0 && nextRow.length > 0) {
+           // Calculate separator position with center alignment
+           const currentRowBottom = Math.max(...currentRow.map(el => el.getBoundingClientRect().bottom));
+           const nextRowTop = Math.min(...nextRow.map(el => el.getBoundingClientRect().top));
+           const toolbar2Rect = this.toolbar2.getBoundingClientRect();
+           
+           // Position separator exactly in the middle of the gap between rows
+           const gapMiddle = (currentRowBottom + nextRowTop) / 2;
+           const separatorTop = gapMiddle - toolbar2Rect.top;
+           
+           const separator = document.createElement('div');
+           separator.className = 'toolbar-row-separator';
+           separator.style.position = 'absolute';
+           separator.style.left = '-16px';
+           separator.style.right = '-16px';
+          separator.style.top = separatorTop + 'px';
+          separator.style.height = '1px';
+          separator.style.background = this.options.theme === 'dark' ? '#404040' : '#e5e7eb';
+          separator.style.pointerEvents = 'none';
+          separator.style.zIndex = '0';
+          
+          this.toolbar2.appendChild(separator);
+        }
+      }
+    }, 50);
   }
 
   createBtn(icon, title, cmd, value = null) {
@@ -1577,7 +1737,7 @@ export class ToolbarManager {
     btn.onclick = e => {
       e.preventDefault();
       if (cmd === 'viewSource') {
-        this.toggleSourceView();
+        this.formatManager.toggleSourceView();
         return;
       }
       if (cmd === 'textColor' || cmd === 'bgColor') {
@@ -1586,60 +1746,60 @@ export class ToolbarManager {
       }
       // Handle format commands (bold, italic, underline, strikeThrough) with custom logic
       if (['bold', 'italic', 'underline', 'strikeThrough', 'superscript', 'subscript'].includes(cmd)) {
-        this.handleFormatCommand(cmd, btn);
+        this.formatManager.handleFormatCommand(cmd, btn);
         return;
       }
       if (cmd === 'emoji') {
-        this.insertEmoji();
+        this.mediaManager.insertEmoji();
         return;
       }
       if (cmd === 'image') {
-        this.insertImage();
+        this.mediaManager.insertImage();
         return;
       }
       if (cmd === 'video') {
-        this.insertVideo();
+        this.mediaManager.insertVideo();
         return;
       }
       if (cmd === 'import') {
-        this.importDocument();
+        this.importExportManager.importDocument();
         return;
       }
       if (cmd === 'insertTags') {
-        this.savedSelection = this.saveSelection();
-        this.showTagsPopup();
+        this.savedSelection = this.formatManager.saveSelection();
+        this.tagTemplateManager.showTagsPopup();
         return;
       }
       if (cmd === 'insertTemplate') {
-        this.savedSelection = this.saveSelection();
-        this.showTemplatesPopup();
+        this.savedSelection = this.formatManager.saveSelection();
+        this.tagTemplateManager.showTemplatesPopup();
         return;
       }
       if (cmd === 'link') {
-        this.insertLink();
+        this.mediaManager.insertLink();
         return;
       }
       if (cmd === 'table') {
         const rect = this.toolbarBtns.table.getBoundingClientRect();
-        this.tablePopup.style.display = this.tablePopup.style.display === 'block' ? 'none' : 'block';
-        this.tablePopup.style.top = rect.bottom + window.scrollY + 4 - this.wrapper.getBoundingClientRect().top + 'px';
-        this.tablePopup.style.left = rect.left + window.scrollX - this.wrapper.getBoundingClientRect().left + 'px';
+        this.editor.tableManager.tablePopup.style.display = this.editor.tableManager.tablePopup.style.display === 'block' ? 'none' : 'block';
+        this.editor.tableManager.tablePopup.style.top = rect.bottom + window.scrollY + 4 - this.wrapper.getBoundingClientRect().top + 'px';
+        this.editor.tableManager.tablePopup.style.left = rect.left + window.scrollX - this.wrapper.getBoundingClientRect().left + 'px';
         return;
       }
       if (cmd === 'indent') {
-        this.applyIndentToSelection();
+        this.blockManager.applyIndentToSelection();
         return;
       }
       if (cmd === 'indentIncrease') {
-        this.applyPaddingIndentToSelection(true);
+        this.blockManager.applyPaddingIndentToSelection(true);
         return;
       }
       if (cmd === 'indentDecrease') {
-        this.applyPaddingIndentToSelection(false);
+        this.blockManager.applyPaddingIndentToSelection(false);
         return;
       }
       document.execCommand(cmd, false, value);
-      this.editor.focus();
+      this.editor.editor.focus();
     };
     return btn;
   }
@@ -1697,31 +1857,570 @@ export class ToolbarManager {
     return btn;
   }
 
-  createSeparator() {
-    // Create separator logic
-  }
-
+  // Thêm method mới để update trạng thái active của các nút format
   updateFormatButtonStates() {
-    // Update format button states logic
+    if (!this.toolbarBtns || !this.editor) return;
+    
+    // Kiểm tra xem có selection trong editor không
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount) return;
+    
+    const range = selection.getRangeAt(0);
+    if (!this.editor.editor.contains(range.commonAncestorContainer) && 
+        !this.editor.editor.contains(range.commonAncestorContainer.parentNode)) {
+      return;
+    }
+
+    // Danh sách các command cần kiểm tra
+    const formatCommands = ['bold', 'italic', 'underline', 'strikeThrough', 'superscript', 'subscript'];
+    
+    formatCommands.forEach(cmd => {
+      if (this.toolbarBtns[cmd] && !this.toolbarBtns[cmd].classList.contains('more-options-btn')) {
+        try {
+          const isActive = document.queryCommandState(cmd);
+          this.toolbarBtns[cmd]._setActive(isActive);
+        } catch (e) {
+          // Fallback: kiểm tra style computed
+          const isActive = this.checkFormatByStyle(cmd, range);
+          this.toolbarBtns[cmd]._setActive(isActive);
+        }
+      }
+    });
+
+    // Update màu cho nút text color và background color
+    this.updateColorButtonStates(range);
   }
 
   checkFormatByStyle(cmd, range) {
-    // Check format by style logic
+    const node = range.startContainer.nodeType === 3 ? 
+                  range.startContainer.parentNode : 
+                  range.startContainer;
+    
+    if (!node || !node.style) return false;
+    
+    const computedStyle = window.getComputedStyle(node);
+    
+    switch (cmd) {
+      case 'bold':
+        return computedStyle.fontWeight === 'bold' || 
+               computedStyle.fontWeight === '700' || 
+               parseInt(computedStyle.fontWeight) >= 700 ||
+               node.tagName === 'B' || node.tagName === 'STRONG';
+      case 'italic':
+        return computedStyle.fontStyle === 'italic' ||
+               node.tagName === 'I' || node.tagName === 'EM';
+      case 'underline':
+        return computedStyle.textDecoration.includes('underline') ||
+               node.tagName === 'U';
+      case 'strikeThrough':
+        return computedStyle.textDecoration.includes('line-through') ||
+               node.tagName === 'STRIKE' || node.tagName === 'S';
+      case 'superscript':
+        return computedStyle.verticalAlign === 'super' ||
+               node.tagName === 'SUP';
+      case 'subscript':
+        return computedStyle.verticalAlign === 'sub' ||
+               node.tagName === 'SUB';
+      default:
+        return false;
+    }
   }
 
+  // Method để update màu hiện tại cho nút text color và background color
   updateColorButtonStates(range) {
-    // Update color button states logic
+    if (!this.toolbarBtns || !this.editor) return;
+    
+    // Lấy range nếu không được truyền vào
+    if (!range) {
+      const selection = window.getSelection();
+      if (!selection || !selection.rangeCount) return;
+      range = selection.getRangeAt(0);
+    }
+    
+    // Lấy node hiện tại
+    const node = range.startContainer.nodeType === 3 ? 
+                  range.startContainer.parentNode : 
+                  range.startContainer;
+    
+    if (!node) return;
+    
+    // Update text color - change icon text color
+    if (this.toolbarBtns.textColor) {
+      const textColor = this.formatManager.getCurrentTextColor(node);
+      this.toolbarBtns.textColor.style.setProperty('color', textColor, 'important');
+      this.toolbarBtns.textColor._currentColor = textColor; // Store current color
+    }
+    
+    // Update background color - change icon background color
+    if (this.toolbarBtns.bgColor) {
+      const bgColor = this.formatManager.getCurrentBackgroundColor(node);
+      if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
+        this.toolbarBtns.bgColor.style.setProperty('background-color', bgColor, 'important');
+        this.toolbarBtns.bgColor.style.setProperty('border', 'none', 'important');
+        this.toolbarBtns.bgColor._currentColor = bgColor; // Store current color
+      } else {
+        this.toolbarBtns.bgColor.style.setProperty('background-color', 'transparent', 'important');
+        this.toolbarBtns.bgColor._currentColor = 'transparent'; // Store current color
+      }
+    }
   }
 
   showColorPicker(btn, type) {
-    // Show color picker logic
+    // Nếu đã có color picker thì remove
+    if (this.colorPicker) {
+      this.colorPicker.remove();
+      this.colorPicker = null;
+    }
+
+    // Close all dropdowns first
+    this.closeAllDropdowns();
+    // Danh sách màu phổ biến
+    const palette = [
+      '#000000', '#333333', '#666666', '#999999', '#cccccc', '#eeeeee',
+      '#e60000', '#ff9900', '#ffff00', '#008a00', '#0066cc', '#9933ff',
+      '#ff33cc', '#ff6600', '#ffcc00', '#33cc33', '#3366ff', '#6600cc',
+      '#ff99cc', '#ffcc99', '#ffff99', '#ccffcc', '#ccffff', '#99ccff'
+    ];
+    // Tạo popup palette
+    const paletteDiv = document.createElement('div');
+    paletteDiv.style.position = 'absolute';
+    paletteDiv.style.zIndex = 1000;
+    paletteDiv.style.left = (btn.getBoundingClientRect().left + window.scrollX) + 'px';
+    paletteDiv.style.top = (btn.getBoundingClientRect().bottom + window.scrollY + 4) + 'px';
+    paletteDiv.style.background = '#fff';
+    paletteDiv.style.border = '1px solid #ccc';
+    paletteDiv.style.borderRadius = '8px';
+    paletteDiv.style.boxShadow = '0 2px 8px rgba(0,0,0,0.12)';
+    paletteDiv.style.padding = '8px'; // Item cách box 8px
+    paletteDiv.style.display = 'grid';
+    paletteDiv.style.gridTemplateColumns = 'repeat(6, 1fr)'; // 6 cột
+    paletteDiv.style.columnGap = '4px'; // Item ngang cách nhau 4px
+    paletteDiv.style.rowGap = '6px'; // Item dọc cách nhau 6px
+    paletteDiv.style.width = 'auto';
+
+    palette.forEach(color => {
+      const colorBtn = document.createElement('button');
+      colorBtn.style.width = '24px';
+      colorBtn.style.height = '24px';
+      colorBtn.style.borderRadius = '50%'; // Hình tròn
+      colorBtn.style.background = color;
+      colorBtn.style.cursor = 'pointer';
+      colorBtn.style.setProperty('border', 'none', 'important');
+      colorBtn.style.outline = 'none';
+      colorBtn.style.padding = '0';
+      colorBtn.style.margin = '0';
+      colorBtn.title = color;
+      colorBtn.onclick = e => {
+        e.preventDefault();
+        this.formatManager.restoreSelection && this.formatManager.restoreSelection(this.savedColorSelection);
+        if (type === 'textColor') {
+          this.applyTextColor(color);
+        } else {
+          this.applyBackgroundColor(color);
+        }
+        paletteDiv.remove();
+        this.colorPicker = null;
+      };
+      colorBtn.onmouseover = () => {
+        colorBtn.style.transform = 'scale(1.1)';
+        colorBtn.style.boxShadow = '0 0 0 2px #007bff44';
+      };
+      colorBtn.onmouseout = () => {
+        colorBtn.style.transform = 'scale(1)';
+        colorBtn.style.boxShadow = 'none';
+      };
+      paletteDiv.appendChild(colorBtn);
+    });
+
+    // Đường kẻ ngang chia cắt
+    const divider = document.createElement('div');
+    //divider.style.marginTop = '8px';
+    divider.style.gridColumn = '1 / -1'; // Spanning toàn bộ 6 cột
+    divider.style.marginLeft = '-8px';
+    divider.style.marginRight = '-8px';
+    divider.style.height = '1px';
+    divider.style.background = '#eee';
+    paletteDiv.appendChild(divider);
+
+    // Container cho 4 nút tùy chọn
+    const optionsContainer = document.createElement('div');
+    //optionsContainer.style.marginTop = '8px';
+    optionsContainer.style.gridColumn = '1 / -1'; // Spanning toàn bộ 6 cột
+    optionsContainer.style.display = 'flex';
+    optionsContainer.style.gap = '4px';
+
+    // Nút no color (SVG với đường kẻ chéo)
+    const noColorBtn = document.createElement('button');
+    noColorBtn.style.width = '24px';
+    noColorBtn.style.height = '24px';
+    noColorBtn.style.border = '1px solid #eee';
+    noColorBtn.style.borderRadius = '50%'; // Hình tròn
+    noColorBtn.style.background = '#fff';
+    noColorBtn.style.cursor = 'pointer';
+    noColorBtn.style.display = 'flex';
+    noColorBtn.style.alignItems = 'center';
+    noColorBtn.style.justifyContent = 'center';
+    noColorBtn.style.padding = '0';
+    noColorBtn.style.margin = '0';
+
+    noColorBtn.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none">
+      <line x1="1.24715" y1="6.41398" x2="21.5343" y2="18.1268" stroke="#EA6666" stroke-width="0.842105"/>
+      <circle cx="11.7127" cy="11.7128" r="11.2918" transform="rotate(90 11.7127 11.7128)" stroke="#D7D7D7" stroke-width="0.842105"/>
+    </svg>
+    `;
+
+    noColorBtn.title = 'No Color';
+    noColorBtn.onmouseover = () => {
+        noColorBtn.style.transform = 'scale(1.1)';
+        noColorBtn.style.boxShadow = '0 0 0 2px #007bff44';
+      };
+      noColorBtn.onmouseout = () => {
+        noColorBtn.style.transform = 'scale(1)';
+        noColorBtn.style.boxShadow = 'none';
+      };
+    noColorBtn.onclick = e => {
+      e.preventDefault();
+      paletteDiv.remove();
+      this.formatManager.restoreSelection && this.formatManager.restoreSelection(this.savedColorSelection);
+      if (type === 'textColor') {
+        this.applyTextColor('transparent');
+      } else {
+        this.applyBackgroundColor('transparent');
+      }
+      this.colorPicker = null;
+    };
+
+    // Nút màu đen
+    const blackBtn = document.createElement('button');
+    blackBtn.style.width = '24px';
+    blackBtn.style.height = '24px';
+    blackBtn.style.border = '1px solid #eee';
+    blackBtn.style.borderRadius = '4px';
+    blackBtn.style.background = '#000000';
+    blackBtn.style.cursor = 'pointer';
+    blackBtn.title = 'Black';
+    blackBtn.style.borderRadius = '50%'; // Hình tròn
+    blackBtn.onmouseover = () => {
+        blackBtn.style.transform = 'scale(1.1)';
+        blackBtn.style.boxShadow = '0 0 0 2px #007bff44';
+      };
+      blackBtn.onmouseout = () => {
+        blackBtn.style.transform = 'scale(1)';
+        blackBtn.style.boxShadow = 'none';
+      };
+    blackBtn.onclick = e => {
+      e.preventDefault();
+      paletteDiv.remove();
+      this.formatManager.restoreSelection && this.formatManager.restoreSelection(this.savedColorSelection);
+      if (type === 'textColor') {
+        this.applyTextColor('#000000');
+      } else {
+        this.applyBackgroundColor('#000000');
+      }
+      this.colorPicker = null;
+    };
+
+    // Nút màu trắng
+    const whiteBtn = document.createElement('button');
+    whiteBtn.style.width = '24px';
+    whiteBtn.style.height = '24px';
+    whiteBtn.style.border = '1px solid #eee';
+    whiteBtn.style.borderRadius = '4px';
+    whiteBtn.style.background = '#ffffff';
+    whiteBtn.style.cursor = 'pointer';
+    whiteBtn.style.borderRadius = '50%'; // Hình tròn
+    whiteBtn.title = 'White';
+    whiteBtn.onmouseover = () => {
+        whiteBtn.style.transform = 'scale(1.1)';
+        whiteBtn.style.boxShadow = '0 0 0 2px #007bff44';
+      };
+      whiteBtn.onmouseout = () => {
+        whiteBtn.style.transform = 'scale(1)';
+        whiteBtn.style.boxShadow = 'none';
+      };
+    whiteBtn.onclick = e => {
+      e.preventDefault();
+      paletteDiv.remove();
+      this.formatManager.restoreSelection && this.formatManager.restoreSelection(this.savedColorSelection);
+      if (type === 'textColor') {
+        this.applyTextColor('#ffffff');
+      } else {
+        this.applyBackgroundColor('#ffffff');
+      }
+      this.colorPicker = null;
+    };
+
+    // Nút custom color (SVG chỉ có vòng tròn)
+    const customBtn = document.createElement('button');
+    customBtn.style.width = '24px';
+    customBtn.style.height = '24px';
+    customBtn.style.border = '1px solid #eee';
+    customBtn.style.borderRadius = '4px';
+    customBtn.style.background = '#fff';
+    customBtn.style.cursor = 'pointer';
+    customBtn.style.display = 'flex';
+    customBtn.style.alignItems = 'center';
+    customBtn.style.justifyContent = 'center';
+    customBtn.style.borderRadius = '50%'; // Hình tròn
+    customBtn.style.padding = '0';
+    customBtn.style.margin = '0';
+    customBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="17" height="16" viewBox="0 0 17 16" fill="none">
+      <g clip-path="url(#clip0_6_132)">
+        <path d="M16.07 7.7128C16.07 7.73944 16.07 7.76609 16.07 7.79273C16.0582 8.87332 15.0753 9.60753 13.9947 9.60753H11.0963C10.3118 9.60753 9.67527 10.244 9.67527 11.0286C9.67527 11.1292 9.68711 11.2269 9.70487 11.3217C9.76704 11.6237 9.89731 11.9138 10.0246 12.2069C10.2052 12.6154 10.3828 13.021 10.3828 13.4503C10.3828 14.3917 9.74336 15.2473 8.80191 15.2858C8.69829 15.2888 8.59468 15.2917 8.4881 15.2917C4.30487 15.2917 0.912109 11.899 0.912109 7.7128C0.912109 3.52661 4.30487 0.13385 8.49106 0.13385C12.6772 0.13385 16.07 3.52661 16.07 7.7128ZM4.70158 8.66017C4.70158 8.40891 4.60177 8.16794 4.42411 7.99028C4.24644 7.81261 4.00547 7.7128 3.75421 7.7128C3.50296 7.7128 3.26199 7.81261 3.08432 7.99028C2.90666 8.16794 2.80685 8.40891 2.80685 8.66017C2.80685 8.91142 2.90666 9.15239 3.08432 9.33006C3.26199 9.50772 3.50296 9.60753 3.75421 9.60753C4.00547 9.60753 4.24644 9.50772 4.42411 9.33006C4.60177 9.15239 4.70158 8.91142 4.70158 8.66017ZM4.70158 5.81806C4.95284 5.81806 5.19381 5.71825 5.37147 5.54058C5.54914 5.36292 5.64895 5.12195 5.64895 4.87069C5.64895 4.61943 5.54914 4.37847 5.37147 4.2008C5.19381 4.02314 4.95284 3.92332 4.70158 3.92332C4.45033 3.92332 4.20936 4.02314 4.03169 4.2008C3.85403 4.37847 3.75421 4.61943 3.75421 4.87069C3.75421 5.12195 3.85403 5.36292 4.03169 5.54058C4.20936 5.71825 4.45033 5.81806 4.70158 5.81806ZM9.43843 2.97596C9.43843 2.7247 9.33861 2.48373 9.16095 2.30606C8.98328 2.1284 8.74231 2.02859 8.49106 2.02859C8.2398 2.02859 7.99883 2.1284 7.82117 2.30606C7.6435 2.48373 7.54369 2.7247 7.54369 2.97596C7.54369 3.22721 7.6435 3.46818 7.82117 3.64585C7.99883 3.82351 8.2398 3.92332 8.49106 3.92332C8.74231 3.92332 8.98328 3.82351 9.16095 3.64585C9.33861 3.46818 9.43843 3.22721 9.43843 2.97596ZM12.2805 5.81806C12.5318 5.81806 12.7728 5.71825 12.9504 5.54058C13.1281 5.36292 13.2279 5.12195 13.2279 4.87069C13.2279 4.61943 13.1281 4.37847 12.9504 4.2008C12.7728 4.02314 12.5318 3.92332 12.2805 3.92332C12.0293 3.92332 11.7883 4.02314 11.6106 4.2008C11.433 4.37847 11.3332 4.61943 11.3332 4.87069C11.3332 5.12195 11.433 5.36292 11.6106 5.54058C11.7883 5.71825 12.0293 5.81806 12.2805 5.81806Z" fill="#454545"/>
+      </g>
+      <defs>
+        <clipPath id="clip0_6_132">
+          <rect width="15.1579" height="15.1579" fill="white" transform="translate(0.912109 0.13385)"/>
+        </clipPath>
+      </defs>
+    </svg>`;
+    customBtn.title = 'Custom Color';
+    customBtn.onmouseover = () => {
+        customBtn.style.transform = 'scale(1.1)';
+        customBtn.style.boxShadow = '0 0 0 2px #007bff44';
+      };
+      customBtn.onmouseout = () => {
+        customBtn.style.transform = 'scale(1)';
+        customBtn.style.boxShadow = 'none';
+      };
+    customBtn.onclick = e => {
+      e.preventDefault();
+      paletteDiv.remove();
+      // Hiện input color picker như cũ
+      const input = document.createElement('input');
+      input.type = 'color';
+      input.style.position = 'absolute';
+      input.style.zIndex = 1000;
+      input.style.left = (btn.getBoundingClientRect().left + window.scrollX) + 'px';
+      input.style.top = (btn.getBoundingClientRect().bottom + window.scrollY + 4) + 'px';
+      input.style.width = '32px';
+      input.style.height = '32px';
+      input.style.border = 'none';
+      input.style.padding = '0';
+      input.style.background = 'transparent';
+      input.style.boxShadow = '0 2px 8px rgba(0,0,0,0.12)';
+      input.onchange = (e) => {
+        const color = e.target.value;
+        this.formatManager.restoreSelection && this.formatManager.restoreSelection(this.savedColorSelection);
+        if (type === 'textColor') {
+          this.applyTextColor(color);
+        } else {
+          this.applyBackgroundColor(color);
+        }
+        input.remove();
+        this.colorPicker = null;
+      };
+      input.onblur = () => {
+        input.remove();
+        this.colorPicker = null;
+      };
+      document.body.appendChild(input);
+      input.focus();
+      this.colorPicker = input;
+      this.savedColorSelection = this.formatManager.saveSelection();
+    };
+
+    // Thêm tất cả nút vào container
+    optionsContainer.appendChild(noColorBtn);
+    optionsContainer.appendChild(blackBtn);
+    optionsContainer.appendChild(whiteBtn);
+    optionsContainer.appendChild(customBtn);
+    paletteDiv.appendChild(optionsContainer);
+
+    document.body.appendChild(paletteDiv);
+    this.colorPicker = paletteDiv;
+    // Lưu selection để áp dụng màu đúng vùng chọn
+    this.savedColorSelection = this.formatManager.saveSelection();
   }
 
   createDropdownButton(label, items) {
-    // Create dropdown button logic
+    const container = document.createElement('div');
+    container.style.position = 'relative';
+    container.style.display = 'inline-block';
+
+    // Create the button
+    const button = document.createElement('button');
+    button.className = 'tox-mbtn tox-mbtn--select';
+    button.setAttribute('aria-haspopup', 'true');
+    button.setAttribute('role', 'menuitem');
+    button.setAttribute('type', 'button');
+    button.setAttribute('tabindex', '-1');
+    button.setAttribute('data-alloy-tabstop', 'true');
+    button.setAttribute('unselectable', 'on');
+    button.setAttribute('aria-expanded', 'false');
+
+    // Button label
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'tox-mbtn__select-label';
+    labelSpan.textContent = label;
+    button.appendChild(labelSpan);
+
+    // Chevron
+    const chevronDiv = document.createElement('div');
+    chevronDiv.className = 'tox-mbtn__select-chevron';
+    chevronDiv.innerHTML = `
+      <svg width="10" height="10" focusable="false">
+        <path d="M8.7 2.2c.3-.3.8-.3 1 0 .4.4.4.9 0 1.2L5.7 7.8c-.3.3-.9.3-1.2 0L.2 3.4a.8.8 0 0 1 0-1.2c.3-.3.8-.3 1.1 0L5 6l3.7-3.8Z" fill-rule="nonzero"></path>
+      </svg>
+    `;
+    button.appendChild(chevronDiv);
+
+    // Create dropdown menu
+    const menu = document.createElement('div');
+    menu.className = 'tox-menu';
+
+    items.forEach(item => {
+      if (item.type === 'separator') {
+        const separator = document.createElement('div');
+        separator.className = 'tox-collection__item-separator';
+        menu.appendChild(separator);
+      } else {
+        const menuItem = document.createElement('div');
+        menuItem.className = 'tox-collection__item';
+        
+        if (item.icon) {
+          const iconDiv = document.createElement('div');
+          iconDiv.className = 'tox-collection__item-icon';
+          iconDiv.innerHTML = item.icon;
+          menuItem.appendChild(iconDiv);
+        }
+
+        const labelDiv = document.createElement('div');
+        labelDiv.className = 'tox-collection__item-label';
+        labelDiv.textContent = item.label;
+        menuItem.appendChild(labelDiv);
+
+        menuItem.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.closeAllDropdowns();
+          if (item.action) {
+            item.action();
+          }
+          this.editor.editor.focus();
+        });
+
+        menu.appendChild(menuItem);
+      }
+    });
+
+    // Toggle dropdown on button click
+    button.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = button.getAttribute('aria-expanded') === 'true';
+      
+      // Close all dropdowns first
+      this.closeAllDropdowns();
+      
+      if (!isOpen) {
+        button.setAttribute('aria-expanded', 'true');
+        menu.classList.add('tox-menu--visible');
+      }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!container.contains(e.target)) {
+        button.setAttribute('aria-expanded', 'false');
+        menu.classList.remove('tox-menu--visible');
+      }
+    });
+
+    container.appendChild(button);
+    container.appendChild(menu);
+
+    // Store menu reference for later cleanup
+    if (!this.dropdownMenus[label]) {
+      this.dropdownMenus[label] = { button, menu, container };
+    }
+
+    return container;
   }
 
   closeAllDropdowns() {
-    // Close all dropdowns logic
+    // Close TinyMCE-style dropdowns
+    if (this.dropdownMenus) {
+      Object.values(this.dropdownMenus).forEach(({ button, menu }) => {
+        button.setAttribute('aria-expanded', 'false');
+        menu.classList.remove('tox-menu--visible');
+      });
+    }
+    
+    // Close heading dropdown
+    const headingDropdown = document.querySelector('.heading-dropdown');
+    if (headingDropdown) {
+      headingDropdown.style.display = 'none';
+    }
+    
+    // Close font size dropdown
+    const fontSizeDropdown = document.querySelector('.fontsize-dropdown');
+    if (fontSizeDropdown) {
+      fontSizeDropdown.style.display = 'none';
+    }
+    
+    // Close font dropdown
+    const fontDropdown = document.querySelector('.font-dropdown');
+    if (fontDropdown) {
+      fontDropdown.style.display = 'none';
+    }
+    
+    // Close line height dropdown
+    const lineHeightDropdown = document.querySelector('.lineheight-dropdown');
+    if (lineHeightDropdown) {
+      lineHeightDropdown.style.display = 'none';
+    }
+    
+    // Close capitalization dropdown
+    const capitalizationDropdown = document.querySelector('.capitalization-dropdown');
+    if (capitalizationDropdown) {
+      capitalizationDropdown.style.display = 'none';
+    }
+    
+    // Close text alignment dropdown
+    const alignMenu = document.querySelector('.dropdown-menu');
+    if (alignMenu) {
+      alignMenu.style.opacity = '0';
+      alignMenu.style.pointerEvents = 'none';
+      alignMenu.style.display = 'none';
+    }
+    
+    // Close list dropdown
+    if (this.listMenu) {
+      this.listMenu.style.opacity = '0';
+      this.listMenu.style.pointerEvents = 'none';
+      this.listMenu.style.display = 'none';
+    }
+
+    // Close custom insert dropdowns
+    const imageDropdown = document.getElementById('image-dropdown');
+    if (imageDropdown) {
+      imageDropdown.remove();
+    }
+
+    const linkDropdown = document.getElementById('link-dropdown');
+    if (linkDropdown) {
+      linkDropdown.remove();
+    }
+
+    const emojiDropdown = document.getElementById('emoji-dropdown');
+    if (emojiDropdown) {
+      emojiDropdown.remove();
+    }
+
+    const videoDropdown = document.getElementById('video-dropdown');
+    if (videoDropdown) {
+      videoDropdown.remove();
+    }
+
+    const importDropdown = document.getElementById('import-dropdown');
+    if (importDropdown) {
+      importDropdown.remove();
+    }
+
+    // Close color picker
+    if (this.colorPicker) {
+      this.colorPicker.remove();
+      this.colorPicker = null;
+    }
   }
 } 

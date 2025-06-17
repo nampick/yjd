@@ -4,15 +4,28 @@ export class SelectorManager {
     this.editor = editor;
   }
 
+  // Helper methods for dropdown menu functionalities
   showFontSelector() {
-    // Show font selector logic
+    // Focus on the font selector dropdown button in toolbar
+    if (this.fontSelector) {
+      this.fontSelector.focus();
+      this.fontSelector.click();
+    }
   }
 
   showFontSizeSelector() {
-    // Show font size selector logic
+    // Focus on the font size selector dropdown button in toolbar
+    if (this.fontSizeSelector) {
+      this.fontSizeSelector.focus();
+      this.fontSizeSelector.click();
+    }
   }
 
   showLineHeightSelector() {
-    // Show line height selector logic
+    // Focus on the line height selector dropdown button in toolbar
+    if (this.lineHeightSelector) {
+      this.lineHeightSelector.focus();
+      this.lineHeightSelector.click();
+    }
   }
 } 

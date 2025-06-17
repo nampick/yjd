@@ -132,15 +132,15 @@ export class EditorCore {
     this.blockToolbarTimeout = null; // Timeout cho block toolbar
     
     // Initialize managers
-    this.toolbarManager = new ToolbarManager(this, this.options);
-    this.tableManager = new TableManager(this);
-    this.formatManager = new FormatManager(this);
-    this.blockManager = new BlockManager(this);
-    this.mediaManager = new MediaManager(this);
-    this.importExportManager = new ImportExportManager(this);
-    this.themeManager = new ThemeManager(this);
-    this.tagTemplateManager = new TagTemplateManager(this);
-    this.selectorManager = new SelectorManager(this);
+    //this.toolbarManager = new ToolbarManager(this, this.options);
+    // this.tableManager = new TableManager(this);
+    // this.formatManager = new FormatManager(this);
+    // this.blockManager = new BlockManager(this);
+    // this.mediaManager = new MediaManager(this);
+    // this.importExportManager = new ImportExportManager(this);
+    // this.themeManager = new ThemeManager(this);
+    // this.tagTemplateManager = new TagTemplateManager(this);
+    // this.selectorManager = new SelectorManager(this);
     
     this.init();
   }
@@ -165,14 +165,8 @@ export class EditorCore {
     this.wrapper.style.flexDirection = 'column';
     this.wrapper.style.boxSizing = 'border-box';
 
-    // Toolbar
-    this.toolbar = this.toolbarManager.createToolbar();
-    this.wrapper.appendChild(this.toolbar);
 
-    // Table popup và các phần tử liên quan (nếu bật table)
-    if (this.options.features.table) {
-      this.tableManager.createTableUI();
-    }
+    
 
     // Editor area
     this.editor = document.createElement('div');
@@ -193,6 +187,29 @@ export class EditorCore {
     this.editor.setAttribute('placeholder', this.options.placeholder);
     this.editor.innerHTML = this.defaultContent;
     this.wrapper.appendChild(this.editor);
+    // ✅ tạo toolbar sau khi editor sẵn sàng
+    this.toolbarManager = new ToolbarManager(this, this.options,this.wrapper);
+    this.tableManager = new TableManager(this);
+    this.formatManager = new FormatManager(this);
+    this.blockManager = new BlockManager(this);
+    this.mediaManager = new MediaManager(this);
+    this.importExportManager = new ImportExportManager(this);
+    this.themeManager = new ThemeManager(this);
+    this.tagTemplateManager = new TagTemplateManager(this);
+    this.selectorManager = new SelectorManager(this);
+
+    this.toolbar = this.toolbarManager.createToolbar();
+    this.wrapper.insertBefore(this.toolbar, this.editor); // hoặc append nếu bạn muốn ở dưới
+
+    // Thêm block toolbar
+    this.blockManager.createBlockToolbar();
+
+
+    // Table popup và các phần tử liên quan (nếu bật table)
+    if (this.options.features.table) {
+      this.tableManager.createTableUI();
+    }
+
 
     // Statusbar
     if (this.options.features.wordCount || this.options.features.breadcrumb) {
@@ -250,8 +267,7 @@ export class EditorCore {
       setTimeout(() => this.toolbarManager.addToolbar2RowSeparators && this.toolbarManager.addToolbar2RowSeparators(), 100);
     });
 
-    // Thêm block toolbar
-    this.blockManager.createBlockToolbar && this.blockManager.createBlockToolbar();
+    
 
     // Apply initial theme
     this.themeManager.applyTheme && this.themeManager.applyTheme();
@@ -314,7 +330,7 @@ export class EditorCore {
       
       // Update theme for new content
       if (shouldUpdate) {
-        setTimeout(() => this.themeManager.updateEditorContentTheme && this.themeManager.updateEditorContentTheme(), 100);
+        setTimeout(() => this.themeManager.updateEditorContentTheme(), 100);
       }
     });
     
@@ -337,7 +353,7 @@ export class EditorCore {
 
       // If clicked outside all dropdowns and toolbar buttons, close all dropdowns
       if (!clickedInsideDropdown && !clickedInsideToolbarButton && !clickedInsideColorPicker) {
-        this.toolbarManager.closeAllDropdowns && this.toolbarManager.closeAllDropdowns();
+        this.toolbarManager.closeAllDropdowns();
       }
     });
   }
@@ -354,12 +370,12 @@ export class EditorCore {
   bindEvents() {
     this.editor.addEventListener('input', () => {
       this.updateStatusbar();
-      this.blockManager.updateIndentButtonState && this.blockManager.updateIndentButtonState();
-      this.blockManager.updateHeadingSelector && this.blockManager.updateHeadingSelector();
-      this.formatManager.updateFontSizeDisplay && this.formatManager.updateFontSizeDisplay();
-      this.formatManager.updateLineHeightDisplay && this.formatManager.updateLineHeightDisplay();
-      this.toolbarManager.updateFormatButtonStates && this.toolbarManager.updateFormatButtonStates();
-      this.toolbarManager.updateColorButtonStates && this.toolbarManager.updateColorButtonStates();
+      this.blockManager.updateIndentButtonState();
+      this.blockManager.updateHeadingSelector();
+      this.formatManager.updateFontSizeDisplay();
+      this.formatManager.updateLineHeightDisplay();
+      this.toolbarManager.updateFormatButtonStates(); // Thêm cập nhật trạng thái nút format
+      this.toolbarManager.updateColorButtonStates(); // Thêm cập nhật màu sắc
       
       // Kiểm tra nếu editor trống thì tạo thẻ div và p
       if (this.editor.innerHTML === '' || this.editor.innerHTML === '<br>') {
@@ -390,12 +406,13 @@ export class EditorCore {
         // Debounce để tránh gọi quá nhiều lần
         clearTimeout(this.selectionTimeout);
         this.selectionTimeout = setTimeout(() => {
-          this.blockManager.updateIndentButtonState && this.blockManager.updateIndentButtonState();
-          this.blockManager.updateHeadingSelector && this.blockManager.updateHeadingSelector();
-          this.formatManager.updateFontSizeDisplay && this.formatManager.updateFontSizeDisplay();
-          this.formatManager.updateLineHeightDisplay && this.formatManager.updateLineHeightDisplay();
-          this.toolbarManager.updateFormatButtonStates && this.toolbarManager.updateFormatButtonStates();
-          this.toolbarManager.updateColorButtonStates && this.toolbarManager.updateColorButtonStates();
+          //this.updateStatusbar(); // Thêm để cập nhật breadcrumb khi di chuyển cursor
+          this.toolbarManager.blockManager.updateIndentButtonState();
+          this.toolbarManager.blockManager.updateHeadingSelector();
+          this.toolbarManager.formatManager.updateFontSizeDisplay();
+          this.toolbarManager.formatManager.updateLineHeightDisplay();
+          this.toolbarManager.updateFormatButtonStates(); // Thêm cập nhật trạng thái nút format
+          this.toolbarManager.updateColorButtonStates(); // Thêm cập nhật màu sắc
         }, 1);
       }
     });
@@ -403,8 +420,8 @@ export class EditorCore {
     // Thêm event listeners cho mouse và keyboard để cập nhật trạng thái ngay lập tức
     this.editor.addEventListener('mouseup', () => {
       setTimeout(() => {
-        this.toolbarManager.updateFormatButtonStates && this.toolbarManager.updateFormatButtonStates();
-        this.toolbarManager.updateColorButtonStates && this.toolbarManager.updateColorButtonStates();
+        this.toolbarManager.updateFormatButtonStates();
+        this.toolbarManager.updateColorButtonStates();
       }, 10);
     });
 
@@ -412,11 +429,551 @@ export class EditorCore {
       // Chỉ cập nhật khi không phải là các phím điều hướng
       if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'].includes(e.key)) {
         setTimeout(() => {
-          this.toolbarManager.updateFormatButtonStates && this.toolbarManager.updateFormatButtonStates();
-          this.toolbarManager.updateColorButtonStates && this.toolbarManager.updateColorButtonStates();
+          this.toolbarManager.updateFormatButtonStates();
+          this.toolbarManager.updateColorButtonStates();
         }, 10);
       }
     });
+
+    this.editor.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        checkCaretPosition();
+        e.preventDefault();
+        const sel = window.getSelection();
+        if (sel.rangeCount > 0) {
+          const range = sel.getRangeAt(0);
+          const node = range.startContainer;
+          let block = node.nodeType === 3 ? node.parentNode : node;
+          
+          // Tìm thẻ block cha gần nhất (h1-h6, p, pre)
+          while (block && block !== this.editor && !['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'P', 'PRE'].includes(block.nodeName)) {
+            block = block.parentNode;
+          }
+
+          // Nếu đang ở trong text node
+          if (node.nodeType === 3) {
+            const text = node.textContent;
+            const offset = range.startOffset;
+            const tagName = block.nodeName;
+            
+            // Nếu là thẻ h1-h6, p, pre
+            if (['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'P', 'PRE'].includes(tagName)) {
+              // Nếu con trỏ ở cuối text
+              if (offset === text.length) {
+                // Tạo thẻ p mới
+                const newP = document.createElement('p');
+                newP.innerHTML = '<br>';
+                block.parentNode.insertBefore(newP, block.nextSibling);
+                
+                // Đặt con trỏ vào thẻ p mới
+                const newRange = document.createRange();
+                newRange.setStart(newP, 0);
+                newRange.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(newRange);
+              } else {
+                // Tách text thành 2 phần
+                const beforeText = text.substring(0, offset);
+                const afterText = text.substring(offset);
+  
+                // Tạo bản sao của thẻ hiện tại để giữ nguyên style và cấu trúc HTML
+                function isStopTag(el) {
+                  if (!el) return false;
+                  const tag = el.tagName.toLowerCase();
+                  return tag === 'p' || /^h[1-6]$/.test(tag) || tag === 'pre';
+                }
+
+                function getSiblings(element) {
+                  let anhemtruoc = [];
+                  let anhemsau = [];
+
+                  // Lấy parent của element
+                  const parent = element.parentElement;
+                  if (!parent) return { anhemtruoc, anhemsau };
+                  
+                  // Lấy tất cả các node con của parent (bao gồm cả text node và element node)
+                  const allSiblings = Array.from(parent.childNodes);
+                  
+                  // Tìm vị trí của element trong danh sách
+                  const elementIndex = allSiblings.indexOf(element);
+                  
+                  if (elementIndex === -1) return { anhemtruoc, anhemsau };
+                  
+                  // Tất cả node trước element
+                  for (let i = 0; i < elementIndex; i++) {
+                    const sibling = allSiblings[i];
+                    // Chỉ thêm vào nếu là element node hoặc là text node có nội dung
+                    if (sibling.nodeType === 1 || (sibling.nodeType === 3 && sibling.textContent.trim() !== '')) {
+                      anhemtruoc.push(sibling);
+                    }
+                  }
+                  
+                  // Tất cả node sau element
+                  for (let i = elementIndex + 1; i < allSiblings.length; i++) {
+                    const sibling = allSiblings[i];
+                    // Chỉ thêm vào nếu là element node hoặc là text node có nội dung
+                    if (sibling.nodeType === 1 || (sibling.nodeType === 3 && sibling.textContent.trim() !== '')) {
+                      anhemsau.push(sibling);
+                    }
+                  }
+
+                  return { anhemtruoc, anhemsau };
+                }
+                /**
+                 * Trả về mảng các object theo thứ tự cấp cha:
+                 * [
+                 *   { cha: HTMLElement, anhemtruoc: [HTMLElements], anhemsau: [HTMLElements] },
+                 *   { cha: HTMLElement, anhemtruoc: [...], anhemsau: [...] },
+                 *   ...
+                 * ]
+                 */
+                function getParentAndSiblingData(element) {
+                  let current = element;
+                  const result = [];
+
+                  while (current && !isStopTag(current)) {
+                    const parent = current.parentElement;
+                    if (!parent) break;
+
+                    const { anhemtruoc, anhemsau } = getSiblings(current);
+
+                    result.push({
+                      cha: parent,
+                      anhemtruoc,
+                      anhemsau,
+                    });
+
+                    current = parent;
+                  }
+
+                  return result;
+                }
+                function cloneWithSiblings(beforeText, afterText, data, offsetElement) {
+                  if (!data.length) return { ele1: null, ele2: null };
+                  
+                  // Bắt đầu từ cấp thấp nhất (gần offsetElement nhất)
+                  let ele1 = null;
+                  let ele2 = null;
+
+                  for (let i = data.length - 1; i >= 0; i--) {
+                    const { cha, anhemtruoc, anhemsau } = data[i];
+
+                    const chax = cha.cloneNode(false); // clone cha (không clone con)
+
+                    const newEle1 = chax.cloneNode(false);
+                    const newEle2 = chax.cloneNode(false);
+
+                    // Thêm anh em trước vào ele1
+                    anhemtruoc.forEach(el => {
+                      newEle1.appendChild(el.cloneNode(true));
+                    });
+
+                    // ele1 xử lý trước, luôn thêm ele1 ở cuối (sau anh em trước)
+                    if (ele1) {
+                      newEle1.appendChild(ele1);
+                    } else {
+                      // Đây là cấp gần offsetElement nhất — xử lý trước/afterText
+                      // Clone offsetElement giữ nguyên thuộc tính và style
+                      const left = offsetElement.cloneNode(false);
+                      
+                      // Xóa tất cả nội dung hiện tại và đặt text mới
+                      left.innerHTML = '';
+                      left.textContent = beforeText;
+                      
+                      newEle1.appendChild(left);
+                    }
+
+                    // ele2 xử lý đúng thứ tự: phần tử chính trước, anh em sau đứng sau
+                    if (ele2) {
+                      // Nếu có ele2 từ trước, thêm vào đầu tiên
+                      newEle2.appendChild(ele2);
+                    } else {
+                      // Trường hợp đầu tiên: thêm phần tử chứa afterText
+                      // Clone offsetElement giữ nguyên thuộc tính và style
+                      const right = offsetElement.cloneNode(false);
+                      
+                      // Xóa tất cả nội dung hiện tại và đặt text mới
+                      right.innerHTML = '';
+                      right.textContent = afterText;
+                      
+                      newEle2.appendChild(right);
+                    }
+                    
+                    // Thêm anh em sau vào ele2 (sau phần tử chính)
+                    anhemsau.forEach(el => {
+                      newEle2.appendChild(el.cloneNode(true));
+                    });
+
+                    ele1 = newEle1;
+                    ele2 = newEle2;
+                  }
+                  
+                  return { ele1, ele2 };
+                }
+                function replaceChaxWith(ele1, ele2, data) {
+                  if (!data.length || !ele1 || !ele2) return;
+
+                  const chax = data[0].cha;
+                  const parent = chax.parentElement;
+                  if (!parent) return;
+
+                  parent.insertBefore(ele1, chax);
+                  parent.insertBefore(ele2, chax.nextSibling); // Sau ele1
+                  parent.removeChild(chax);
+                  }
+                // --------- Sử dụng trong code của bạn ---------
+                const sel = window.getSelection();
+                if (!sel.rangeCount) return;
+
+                const range = sel.getRangeAt(0);
+                const containerNode = range.startContainer;
+
+                const offsetElement = containerNode.nodeType === 3
+                  ? containerNode.parentElement
+                  : containerNode;
+                
+                // Kiểm tra nếu offsetElement chính là thẻ block
+                const isBlockElement = ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'P', 'PRE'].includes(offsetElement.nodeName);
+                
+                if (isBlockElement) {
+                  // Trường hợp đơn giản khi offsetElement là thẻ block
+                  const newBlock1 = document.createElement(offsetElement.nodeName);
+                  const newBlock2 = document.createElement(offsetElement.nodeName);
+                  
+                  // Sao chép style và các thuộc tính khác
+                  if (offsetElement.hasAttributes()) {
+                    const attrs = offsetElement.attributes;
+                    for (let i = 0; i < attrs.length; i++) {
+                      newBlock1.setAttribute(attrs[i].name, attrs[i].value);
+                      newBlock2.setAttribute(attrs[i].name, attrs[i].value);
+                    }
+                  }
+                  
+                  // Chia nội dung
+                  const tempDiv1 = document.createElement('div');
+                  const tempDiv2 = document.createElement('div');
+                  tempDiv1.innerHTML = offsetElement.innerHTML;
+                  tempDiv2.innerHTML = offsetElement.innerHTML;
+                  
+                  // Tìm node text cần cắt
+                  const textNodes1 = [];
+                  const textNodes2 = [];
+                  
+                  function findTextNodes(node, arr) {
+                    if (node.nodeType === 3) arr.push(node);
+                    else node.childNodes.forEach(child => findTextNodes(child, arr));
+                  }
+                  
+                  findTextNodes(tempDiv1, textNodes1);
+                  findTextNodes(tempDiv2, textNodes2);
+                  
+                  if (textNodes1.length > 0 && textNodes2.length > 0) {
+                    textNodes1[0].textContent = beforeText;
+                    textNodes2[0].textContent = afterText;
+                    
+                    newBlock1.innerHTML = tempDiv1.innerHTML;
+                    newBlock2.innerHTML = tempDiv2.innerHTML;
+                    
+                    // Thay thế block gốc
+                    offsetElement.parentNode.insertBefore(newBlock1, offsetElement);
+                    offsetElement.parentNode.insertBefore(newBlock2, offsetElement.nextSibling);
+                    offsetElement.remove();
+                    
+                    // Đặt con trỏ vào đầu block thứ hai
+                    const newRange = document.createRange();
+                    const firstNode = newBlock2.firstChild;
+                    newRange.setStart(firstNode.nodeType === 3 ? firstNode : firstNode.firstChild, 0);
+                    newRange.collapse(true);
+                    sel.removeAllRanges();
+                    sel.addRange(newRange);
+                    return;
+                  }
+                }
+                
+                const data = getParentAndSiblingData(offsetElement);
+                
+                // Tạo 2 cây mới từ beforeText và afterText
+                const { ele1, ele2 } = cloneWithSiblings(beforeText, afterText, data, offsetElement);
+                // Bước 3: thay thế chax trong DOM
+                replaceChaxWith(ele1, ele2, data);
+                // Đặt con trỏ vào đầu thẻ mới
+                const newRange = document.createRange();
+                const newBlock = ele2;
+                newRange.setStart(newBlock, 0);
+                newRange.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(newRange);
+              }
+            } else {
+              // Nếu không phải thẻ h1-h6, p, pre, tạo p mới
+              const newP = document.createElement('p');
+              newP.innerHTML = '<br>';
+              block.parentNode.insertBefore(newP, block.nextSibling);
+              
+              // Đặt con trỏ vào thẻ p mới
+              const newRange = document.createRange();
+              newRange.setStart(newP, 0);
+              newRange.collapse(true);
+              sel.removeAllRanges();
+              sel.addRange(newRange);
+            }
+          } else {
+            // Nếu không phải text node, tạo p mới
+            const newP = document.createElement('p');
+            newP.innerHTML = '<br>';
+            block.parentNode.insertBefore(newP, block.nextSibling);
+            
+            // Đặt con trỏ vào thẻ p mới
+            const newRange = document.createRange();
+            newRange.setStart(newP, 0);
+            newRange.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+          }
+        }
+      } else if (e.key === 'Tab') {
+        // Xử lý khi nhấn Tab để thụt đầu dòng
+        e.preventDefault(); // Ngăn hành vi mặc định (focus sang element khác)
+        
+        // Sử dụng hàm applyIndentToSelection để hỗ trợ cả việc bôi đen nhiều block
+        this.applyIndentToSelection();
+      } else if (e.key === 'Backspace') {
+        const sel = window.getSelection();
+        if (sel.rangeCount > 0) {
+          const range = sel.getRangeAt(0);
+          const node = range.startContainer;
+          
+          // Nếu đang ở đầu một thẻ và có thẻ trước đó
+          if (range.collapsed && range.startOffset === 0) {
+            let block = node.nodeType === 3 ? node.parentNode : node;
+            
+            // Tìm thẻ block cha gần nhất
+            while (block && block !== this.editor && !['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'DIV'].includes(block.nodeName)) {
+              block = block.parentNode;
+            }
+            
+            // Nếu tìm thấy thẻ block và có thẻ trước đó
+            if (block && block.previousElementSibling) {
+              const prevBlock = block.previousElementSibling;
+              
+              // Nếu cả hai thẻ đều là heading
+              if (['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(block.nodeName) && 
+                  ['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(prevBlock.nodeName)) {
+                e.preventDefault();
+                
+                // Sao chép style từ thẻ hiện tại sang thẻ trước đó nếu thẻ trước đó không có style
+                if (block.hasAttribute('style') && !prevBlock.hasAttribute('style')) {
+                  prevBlock.setAttribute('style', block.getAttribute('style'));
+                }
+                
+                // Lấy text từ cả hai thẻ
+                const prevText = prevBlock.textContent;
+                const currentText = block.textContent;
+                
+                // Xóa nội dung cũ
+                prevBlock.textContent = '';
+                block.textContent = '';
+                
+                // Tạo text node mới với nội dung đã hợp nhất
+                const mergedText = document.createTextNode(prevText + currentText);
+                prevBlock.appendChild(mergedText);
+                
+                // Xóa thẻ hiện tại
+                block.remove();
+                
+                // Đặt con trỏ vào cuối thẻ trước đó
+                const newRange = document.createRange();
+                newRange.setStart(prevBlock.firstChild, prevBlock.firstChild.length);
+                newRange.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(newRange);
+              }
+            }
+          } else if (range.collapsed && node.nodeType === 3) {
+            // Xử lý khi xóa text trong thẻ heading
+            let block = node.parentNode;
+            while (block && block !== this.editor && !['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(block.nodeName)) {
+              block = block.parentNode;
+            }
+            
+            if (block && ['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(block.nodeName)) {
+              // Nếu đang xóa text trong thẻ heading, giữ nguyên thẻ và style
+              const text = node.textContent;
+              if (text.length > 0) {
+                node.textContent = text.substring(0, range.startOffset - 1) + text.substring(range.startOffset);
+              }
+            }
+          }
+        }
+      }
+    });
+
+    this.editor.addEventListener('keyup', () => this.updateStatusbar());
+    this.editor.addEventListener('mouseup', () => this.updateStatusbar());
+    document.addEventListener('selectionchange', () => {
+      this.updateStatusbar();
+      this.toolbarManager.blockManager.updateIndentDecreaseButtonVisibility(); // This will also update the increase button
+      this.toolbarManager.blockManager.updateIndentButtonState(); // Update indent button state
+      this.toolbarManager.blockManager.updateHeadingSelector(); // Update heading selector
+      this.formatManager.updateFontSizeDisplay(); // Update font size display
+      this.formatManager.updateLineHeightDisplay(); // Update line height display
+    });
+
+    // Lắng nghe click vào ảnh trong editor
+    this.editor.addEventListener('mousedown', e => {
+      if (e.target.tagName === 'IMG' && e.target.getAttribute('data-resizable') === 'true') {
+        this.showImgResizeHandles(e.target);
+      } else {
+        this.mediaManager.removeImgResizeHandles();
+      }
+    });
+
+    // Khi click ra ngoài editor và ngoài handle, ẩn handle
+    document.addEventListener('mousedown', e => {
+      if (!this.editor.contains(e.target) && !e.target.classList.contains('img-resize-handle')) {
+        this.mediaManager.removeImgResizeHandles();
+      }
+    });
+
+    // Lắng nghe click vào bảng
+    this.editor.addEventListener('mousedown', e => {
+      let table = e.target.closest('table');
+      if (table && this.editor.contains(table)) {
+        // Nếu click vào bảng hiện tại, không làm gì cả
+        if (this.selectedTable === table) return;
+        
+        // Nếu click vào bảng khác, cập nhật selectedTable
+        this.selectedTable = table;
+        this.selectedCell = e.target.closest('td,th');
+        
+        // Hiển thị toolbar với logic 4 trường hợp
+        this.tableManager.showTableToolbar(table);
+        this.tableManager.addTableResizeHandles(table);
+      } else {
+        // Ẩn toolbar nếu click ra ngoài bảng
+        this.tableManager.tableToolbar.style.display = 'none';
+        this.selectedTable = null;
+        this.selectedCell = null;
+        this.tableManager.removeTableResizeHandles();
+      }
+    });
+
+    // Ẩn handle khi scroll hoặc resize
+    window.addEventListener('scroll', () => {
+      this.mediaManager.removeImgResizeHandles();
+      this.tableManager.removeTableResizeHandles();
+      // Ẩn toolbar khi scroll
+      if (this.tableToolbar) {
+        this.tableManager.tableToolbar.style.display = 'none';
+      }
+    });
+    window.addEventListener('resize', () => {
+      this.mediaManager.removeImgResizeHandles();
+      this.tableManager.removeTableResizeHandles();
+      // Ẩn toolbar khi resize
+      if (this.tableToolbar) {
+        this.tableManager.tableToolbar.style.display = 'none';
+      }
+    });
+
+    // Thêm sự kiện cho block toolbar
+    this.editor.addEventListener('keyup', e => {
+      if (e.key === 'Enter') {
+        setTimeout(() => {
+          const sel = window.getSelection();
+          if (sel.rangeCount > 0) {
+            const range = sel.getRangeAt(0);
+            const node = range.startContainer;
+            let block = node.nodeType === 3 ? node.parentNode : node;
+            // Kiểm tra block là dòng trống: chỉ chứa <br> hoặc text rỗng
+            let isEmptyBlock = false;
+            if (block && (block.nodeName === 'DIV' || block.nodeName === 'P')) {
+              if (
+                block.textContent.trim() === '' ||
+                (block.childNodes.length === 1 && block.childNodes[0].nodeName === 'BR')
+              ) {
+                isEmptyBlock = true;
+              }
+            }
+            // Nếu block là editor-area và chỉ có 1 child là <br> hoặc text rỗng
+            if (!isEmptyBlock && block === this.editor) {
+              if (
+                this.editor.childNodes.length === 1 &&
+                (this.editor.firstChild.nodeName === 'BR' || this.editor.textContent.trim() === '')
+              ) {
+                isEmptyBlock = true;
+              }
+            }
+            if (isEmptyBlock && block.offsetHeight > 0) {
+              const rect = block.getBoundingClientRect();
+              this.blockManager.showBlockToolbar(rect);
+            } else {
+              this.blockManager.hideBlockToolbar();
+            }
+          }
+        }, 0);
+      } else {
+        this.blockManager.hideBlockToolbar();
+      }
+    });
+    // Ẩn toolbar khi click ra ngoài hoặc nhập nội dung
+    this.editor.addEventListener('input', () => {
+      // Luôn ẩn toolbar khi có input
+      this.blockManager.hideBlockToolbar();
+    });
+    document.addEventListener('mousedown', e => {
+      // Chỉ ẩn nếu click ra ngoài toolbar và ngoài editor-area
+      if (
+        this.blockToolbar &&
+        !this.blockToolbar.contains(e.target) &&
+        !this.editor.contains(e.target)
+      ) {
+        this.blockManager.hideBlockToolbar();
+      }
+    });
+
+    // Hiển thị toolbar khi select text
+    this.editor.addEventListener('mouseup', e => {
+      setTimeout(() => {
+        const sel = window.getSelection();
+        if (sel.rangeCount > 0 && sel.type == 'Range') {
+          const range = sel.getRangeAt(0);
+          if (!range.collapsed) {
+            const rect = range.getBoundingClientRect();
+            this.blockManager.showBlockToolbar({
+              left: rect.left + (rect.width / 2),
+              top: rect.top - 10
+            });
+          } else {
+            this.blockManager.hideBlockToolbar();
+          }
+        } else {
+          this.blockManager.hideBlockToolbar();
+        }
+      }, 0); // delay để đợi browser cập nhật selection
+    });
+
+    // Thêm support cho keyboard selection (Shift + Arrow keys)
+    this.editor.addEventListener('keyup', e => {
+      if (e.shiftKey && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+        setTimeout(() => {
+          const sel = window.getSelection();
+          if (sel.rangeCount > 0) {
+            const range = sel.getRangeAt(0);
+            if (!range.collapsed) { // Có text được select bằng keyboard
+              const rect = range.getBoundingClientRect();
+              this.blockManager.showBlockToolbar({
+                left: rect.left + (rect.width / 2),
+                top: rect.top - 10
+              });
+            } else {
+              this.blockManager.hideBlockToolbar();
+            }
+          }
+        }, 10);
+      }
+    });
+
   }
 
   updateStatusbar() {
@@ -482,121 +1039,128 @@ export class EditorCore {
       
       this.statusbarEls.wordcount.textContent = `${words} words, ${chars} chars (${charsNoSpaces} no spaces)`;
     }
-  }
 
-  saveSelection() {
-    const sel = window.getSelection();
+    // Update toolbar buttons state based on current selection or cursor position
     if (sel.rangeCount > 0) {
-      return sel.getRangeAt(0).cloneRange();
-    }
-    return null;
-  }
-
-  restoreSelection(range) {
-    if (range) {
-      const sel = window.getSelection();
-      sel.removeAllRanges();
-      sel.addRange(range);
-    }
-  }
-
-  toggleSourceView() {
-    const isSourceView = this.editor.getAttribute('contenteditable') === 'false';
-    
-    if (isSourceView) {
-      // Chuyển từ source view sang editor view
-      this.editor.innerHTML = this.sourceTextarea.value;
-      this.editor.setAttribute('contenteditable', 'true');
-      this.sourceTextarea.remove();
-      if (this.toolbarBtns && this.toolbarBtns.viewSource) {
-        this.toolbarBtns.viewSource.innerHTML = '<i class="fas fa-code"></i>';
-        this.toolbarBtns.viewSource.title = 'View Source';
-      }
-    } else {
-      // Chuyển từ editor view sang source view
-      this.sourceTextarea = document.createElement('textarea');
-      this.sourceTextarea.value = this.editor.innerHTML;
-      this.sourceTextarea.style.flex = '1';
-      this.sourceTextarea.style.minHeight = '200px';
-      this.sourceTextarea.style.height = '100%';
-      this.sourceTextarea.style.width = '100%';
-      this.sourceTextarea.style.padding = '12px';
-      this.sourceTextarea.style.fontFamily = 'inherit';
-      this.sourceTextarea.style.fontSize = '16px';
-      this.sourceTextarea.style.lineHeight = '1.7';
-      this.sourceTextarea.style.border = 'none';
-      this.sourceTextarea.style.outline = 'none';
-      this.sourceTextarea.style.background = '#fff';
-      this.sourceTextarea.style.color = '#2c3e50';
-      this.sourceTextarea.style.resize = 'none';
-      this.sourceTextarea.style.overflow = 'auto';
-      this.sourceTextarea.style.boxSizing = 'border-box';
+      const range = sel.getRangeAt(0);
       
-      this.editor.setAttribute('contenteditable', 'false');
-      this.editor.innerHTML = '';
-      this.editor.appendChild(this.sourceTextarea);
-      if (this.toolbarBtns && this.toolbarBtns.viewSource) {
-        this.toolbarBtns.viewSource.innerHTML = '<i class="fas fa-edit"></i>';
-        this.toolbarBtns.viewSource.title = 'Edit';
+      // Check text formatting
+      const formatCommands = {
+        'bold': 'bold',
+        'italic': 'italic',
+        'underline': 'underline',
+        'strikeThrough': 'strikeThrough',
+        'superscript': 'superscript',
+        'subscript': 'subscript'
+      };
+
+      // Check block formatting
+      const blockCommands = {
+        'h1': 'formatBlockH1',
+        'h2': 'formatBlockH2',
+        'blockquote': 'formatBlockBLOCKQUOTE',
+        'pre': 'formatBlockPRE'
+      };
+
+      // Check alignment
+      const alignCommands = {
+        'justifyLeft': 'justifyLeft',
+        'justifyCenter': 'justifyCenter',
+        'justifyRight': 'justifyRight',
+        'justifyFull': 'justifyFull'
+      };
+
+      // Check lists
+      const listCommands = {
+        'insertUnorderedList': 'insertUnorderedList',
+        'insertOrderedList': 'insertOrderedList'
+      };
+
+      // Reset all buttons first
+      Object.values(this.toolbarBtns).forEach(btn => {
+        if (btn && (btn.tagName === 'BUTTON' || btn.classList.contains('toolbar-btn')) && typeof btn._setActive === 'function') {
+          btn._setActive(false);
+        }
+      });
+
+      // Duy trì trạng thái more-options-btn
+      this.toolbarManager.updateMoreOptionsButtonState();
+
+      // Get the current block element at cursor position
+      const currentBlock = this.blockManager.getBlockElementAtCaret();
+      
+      // Check text formatting
+      Object.entries(formatCommands).forEach(([cmd, btnKey]) => {
+        const btn = this.toolbarBtns[btnKey];
+        if (btn && (btn.tagName === 'BUTTON' || btn.classList.contains('toolbar-btn'))) {
+          // Check if the command is active
+          const isActive = document.queryCommandState(cmd);
+          
+          // If we're in an empty paragraph, check if the parent has the style
+          if (currentBlock && currentBlock.tagName.toLowerCase() === 'p' && !currentBlock.textContent.trim()) {
+            const parentStyle = window.getComputedStyle(currentBlock);
+            if (cmd === 'bold' && parentStyle.fontWeight >= 600) {
+              btn._setActive(true);
+            } else if (cmd === 'italic' && parentStyle.fontStyle === 'italic') {
+              btn._setActive(true);
+            } else if (cmd === 'underline' && parentStyle.textDecoration.includes('underline')) {
+              btn._setActive(true);
+            } else if (cmd === 'strikeThrough' && parentStyle.textDecoration.includes('line-through')) {
+              btn._setActive(true);
+            } else {
+              btn._setActive(isActive);
+            }
+          } else {
+            btn._setActive(isActive);
+          }
+        }
+      });
+
+      // Check block formatting
+      if (currentBlock) {
+        const tagName = currentBlock.tagName.toLowerCase();
+        const btnKey = blockCommands[tagName];
+        if (btnKey) {
+          const btn = this.toolbarBtns[btnKey];
+          if (btn && (btn.tagName === 'BUTTON' || btn.classList.contains('toolbar-btn'))) {
+            btn._setActive(true);
+          }
+        }
       }
-    }
-  }
 
-  adjustEditorZoom(factor) {
-    // Get current zoom level or default to 1
-    if (!this.currentZoom) {
-      this.currentZoom = 1;
-    }
-    
-    // Apply zoom factor
-    this.currentZoom *= factor;
-    
-    // Limit zoom between 0.5x and 3x
-    this.currentZoom = Math.max(0.5, Math.min(3, this.currentZoom));
-    
-    // Apply zoom to editor
-    this.editor.style.zoom = this.currentZoom;
-    
-    // Update status if needed
-    this.updateZoomStatus();
-  }
+      // Check alignment
+      Object.entries(alignCommands).forEach(([cmd, btnKey]) => {
+        if (document.queryCommandState(cmd)) {
+          const btn = this.toolbarBtns[btnKey];
+          if (btn && (btn.tagName === 'BUTTON' || btn.classList.contains('toolbar-btn'))) {
+            btn._setActive(true);
+          }
+        }
+      });
 
-  resetEditorZoom() {
-    this.currentZoom = 1;
-    this.editor.style.zoom = '1';
-    this.updateZoomStatus();
-  }
+      // Check lists
+      Object.entries(listCommands).forEach(([cmd, btnKey]) => {
+        if (document.queryCommandState(cmd)) {
+          const btn = this.toolbarBtns[btnKey];
+          if (btn && (btn.tagName === 'BUTTON' || btn.classList.contains('toolbar-btn'))) {
+            btn._setActive(true);
+          }
+        }
+      });
 
-  updateZoomStatus() {
-    // You can add zoom level display in status bar if needed
-    const zoomPercentage = Math.round(this.currentZoom * 100);
-    console.log(`Zoom: ${zoomPercentage}%`);
-  }
-
-  destroy() {
-    // Remove list menu from document.body if it exists
-    if (this.listMenu && this.listMenu.parentNode) {
-      this.listMenu.parentNode.removeChild(this.listMenu);
-    }
-    
-    // Clean up other dropdowns if needed
-    Object.values(this.dropdownMenus).forEach(({ menu }) => {
-      if (menu && menu.parentNode === document.body) {
-        document.body.removeChild(menu);
+      // Update text alignment button icon based on current alignment
+      const alignmentBtn = this.toolbarBtns['textAlignment'];
+      if (alignmentBtn) {
+        if (document.queryCommandState('justifyLeft')) {
+          alignmentBtn.innerHTML = '<i class="fas fa-align-left"></i>';
+        } else if (document.queryCommandState('justifyCenter')) {
+          alignmentBtn.innerHTML = '<i class="fas fa-align-center"></i>';
+        } else if (document.queryCommandState('justifyRight')) {
+          alignmentBtn.innerHTML = '<i class="fas fa-align-right"></i>';
+        } else if (document.queryCommandState('justifyFull')) {
+          alignmentBtn.innerHTML = '<i class="fas fa-align-justify"></i>';
+        }
       }
-    });
-
-    // Close all dropdowns and clean up global handlers
-    this.toolbarManager.closeAllDropdowns && this.toolbarManager.closeAllDropdowns();
-    
-    // Remove content observer
-    if (this.contentObserver) {
-      this.contentObserver.disconnect();
-    }
-    
-    // Remove main wrapper
-    if (this.wrapper && this.wrapper.parentNode) {
-      this.wrapper.parentNode.removeChild(this.wrapper);
     }
   }
 } 
