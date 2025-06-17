@@ -411,6 +411,8 @@ export class EditorCore {
           this.toolbarManager.blockManager.updateHeadingSelector();
           this.toolbarManager.formatManager.updateFontSizeDisplay();
           this.toolbarManager.formatManager.updateLineHeightDisplay();
+          this.toolbarManager.formatManager.updateFontDisplay();
+          this.toolbarManager.formatManager.updateCapitalizationDisplay();
           this.toolbarManager.updateFormatButtonStates(); // Thêm cập nhật trạng thái nút format
           this.toolbarManager.updateColorButtonStates(); // Thêm cập nhật màu sắc
         }, 1);
@@ -422,6 +424,11 @@ export class EditorCore {
       setTimeout(() => {
         this.toolbarManager.updateFormatButtonStates();
         this.toolbarManager.updateColorButtonStates();
+        this.toolbarManager.formatManager.updateFontSizeDisplay();
+        this.toolbarManager.formatManager.updateLineHeightDisplay();
+        this.toolbarManager.formatManager.updateFontDisplay();
+        this.toolbarManager.formatManager.updateCapitalizationDisplay();
+        this.toolbarManager.blockManager.updateHeadingSelector();
       }, 10);
     });
 
@@ -431,6 +438,11 @@ export class EditorCore {
         setTimeout(() => {
           this.toolbarManager.updateFormatButtonStates();
           this.toolbarManager.updateColorButtonStates();
+          this.toolbarManager.formatManager.updateFontSizeDisplay();
+          this.toolbarManager.formatManager.updateLineHeightDisplay();
+          this.toolbarManager.formatManager.updateFontDisplay();
+          this.toolbarManager.formatManager.updateCapitalizationDisplay();
+          this.toolbarManager.blockManager.updateHeadingSelector();
         }, 10);
       }
     });

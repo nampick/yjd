@@ -179,7 +179,7 @@ export class ToolbarManager {
     headingDropdownWrapper.style.display = 'inline-block';
 
     // Button để mở dropdown
-    const headingBtn = this.createBtn('Paragraph');
+    const headingBtn = this.createBtn('Paragraph','Styles group');
     headingBtn.className = 'custom-select-button';
     headingBtn.style.width = '120px';
     headingBtn.style.padding = '0px 5px 0px 8px';
@@ -388,7 +388,7 @@ export class ToolbarManager {
     fontSizeDropdownWrapper.style.position = 'relative';
     fontSizeDropdownWrapper.style.display = 'inline-block';
 
-    const fontSizeBtn = this.createBtn('16px');
+    const fontSizeBtn = this.createBtn('16px','Font Size');
     fontSizeBtn.className = 'custom-select-button';
     fontSizeBtn.style.width = '80px';
     fontSizeBtn.style.padding = '0px 5px 0px 8px';
@@ -958,7 +958,7 @@ export class ToolbarManager {
     fontDropdownWrapper.style.position = 'relative';
     fontDropdownWrapper.style.display = 'inline-block';
 
-    const fontBtn = this.createBtn('Default');
+    const fontBtn = this.createBtn('Default','Font');
     fontBtn.className = 'custom-select-button';
     fontBtn.style.width = '170px';
     fontBtn.style.padding = '0px 5px 0px 8px';
@@ -1126,7 +1126,7 @@ export class ToolbarManager {
     lineHeightDropdownWrapper.style.position = 'relative';
     lineHeightDropdownWrapper.style.display = 'inline-block';
 
-    const lineHeightBtn = this.createBtn('Line Height');
+    const lineHeightBtn = this.createBtn('Line Height','Line Height');
     lineHeightBtn.className = 'custom-select-button';
     lineHeightBtn.style.width = '120px';
     lineHeightBtn.style.padding = '0px 5px 0px 8px';
@@ -1298,7 +1298,7 @@ export class ToolbarManager {
     capitalizationDropdownWrapper.style.position = 'relative';
     capitalizationDropdownWrapper.style.display = 'inline-block';
 
-    const capitalizationBtn = this.createBtn('Capitalization');
+    const capitalizationBtn = this.createBtn('Capitalization','Capitalization');
     capitalizationBtn.className = 'custom-select-button';
     capitalizationBtn.style.width = '130px';
     capitalizationBtn.style.padding = '0px 5px 0px 8px';
@@ -1672,7 +1672,7 @@ export class ToolbarManager {
   createBtn(icon, title, cmd, value = null) {
     const btn = document.createElement('button');
     btn.innerHTML = icon;
-    btn.title = title;
+    this.blockManager.attachCustomTooltip(btn, title);
     btn.classList.add('toolbar-btn');
     btn.style.borderRadius = '3px';
     btn.style.background = this.options?.theme === 'dark' ? '#2a2a2a' : '#fff';

@@ -425,7 +425,7 @@ export class FormatManager {
 
   // Cập nhật hiển thị font size
   updateFontSizeDisplay() {
-    if (!this.fontSizeSelector) return;
+    if (!this.toolbarManager?.fontSizeSelector) return;
     
     const sel = window.getSelection();
     if (!sel.rangeCount) return;
@@ -460,15 +460,15 @@ export class FormatManager {
     }
 
     // ✅ Tiếp tục cập nhật nút font size
-    const textNode = this.fontSizeSelector.firstChild;
+    const textNode = this.toolbarManager.fontSizeSelector.firstChild;
     if (textNode && textNode.nodeType === Node.TEXT_NODE) {
       textNode.textContent = closestSize + 'px';
     } else {
       // Lưu lại dropdown icon (nếu có) trước khi ghi đè nội dung
-      const dropdownIcon = this.fontSizeSelector.querySelector('svg');
-      this.fontSizeSelector.innerHTML = closestSize + 'px';
+      const dropdownIcon = this.toolbarManager.fontSizeSelector.querySelector('svg');
+      this.toolbarManager.fontSizeSelector.innerHTML = closestSize + 'px';
       if (dropdownIcon) {
-        this.fontSizeSelector.appendChild(dropdownIcon);
+        this.toolbarManager.fontSizeSelector.appendChild(dropdownIcon);
       }
     }
 
@@ -607,7 +607,7 @@ export class FormatManager {
 
   // Cập nhật hiển thị line height
   updateLineHeightDisplay() {
-    if (!this.lineHeightSelector) return;
+    if (!this.toolbarManager?.lineHeightSelector) return;
     
     const sel = window.getSelection();
     if (!sel.rangeCount) return;
@@ -648,15 +648,15 @@ export class FormatManager {
 
     // ✅ Tiếp tục cập nhật nội dung nút line height
     const displayText = closestLineHeight === 'default' ? 'Line Height' : closestLineHeight;
-    const textNode = this.lineHeightSelector.firstChild;
+    const textNode = this.toolbarManager.lineHeightSelector.firstChild;
     if (textNode && textNode.nodeType === Node.TEXT_NODE) {
       textNode.textContent = displayText;
     } else {
       // Lưu icon trước khi ghi đè
-      const dropdownIcon = this.lineHeightSelector.querySelector('svg');
-      this.lineHeightSelector.innerHTML = displayText;
+      const dropdownIcon = this.toolbarManager.lineHeightSelector.querySelector('svg');
+      this.toolbarManager.lineHeightSelector.innerHTML = displayText;
       if (dropdownIcon) {
-        this.lineHeightSelector.appendChild(dropdownIcon);
+        this.toolbarManager.lineHeightSelector.appendChild(dropdownIcon);
       }
     }
   }
@@ -791,6 +791,91 @@ export class FormatManager {
         textNode.textContent = newContent;
         remainingText = remainingText.substring(originalLength);
       });
+    }
+  }
+
+  // Cập nhật hiển thị font family
+  updateFontDisplay() {
+    
+    if (!this.toolbarManager?.fontSelector) return;
+    
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+    
+    let fontFamily = 'Default';
+    
+    // Lấy font family từ element hiện tại
+    const node = sel.anchorNode;
+    let element = node.nodeType === 3 ? node.parentElement : node;
+    
+    while (element && element !== this.editor.editor) {
+      const computedStyle = window.getComputedStyle(element);
+      if (computedStyle.fontFamily && computedStyle.fontFamily !== 'inherit') {
+        // Lấy font family đầu tiên từ danh sách fonts
+        const fontList = computedStyle.fontFamily.split(',')[0].replace(/['"]/g, '').trim();
+        
+        // Map với các fonts có sẵn
+        const availableFonts = ['Arial', 'Times New Roman', 'Courier New', 'Georgia', 'Verdana'];
+        const matchedFont = availableFonts.find(font => fontList.includes(font));
+        
+        if (matchedFont) {
+          fontFamily = matchedFont;
+          break;
+        }
+      }
+      element = element.parentElement;
+    }
+    
+    // Kiểm tra nếu con trỏ không nằm trong editor-area thì không làm gì
+    const editorArea = document.querySelector('.editor-area');
+    const selection = window.getSelection();
+    if (!selection.rangeCount || !editorArea.contains(selection.getRangeAt(0).startContainer)) {
+      return;
+    }
+
+    // Cập nhật text button font family
+    const textNode = this.toolbarManager.fontSelector.firstChild;
+    if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+      textNode.textContent = fontFamily;
+    } else {
+      // Lưu icon trước khi ghi đè
+      const dropdownIcon = this.toolbarManager.fontSelector.querySelector('svg');
+      this.toolbarManager.fontSelector.innerHTML = fontFamily;
+      if (dropdownIcon) {
+        this.toolbarManager.fontSelector.appendChild(dropdownIcon);
+      }
+    }
+  }
+
+  // Cập nhật hiển thị capitalization
+  updateCapitalizationDisplay() { 
+    if (!this.toolbarManager?.capitalizationSelector) return;
+    
+    // Capitalization không cần hiển thị trạng thái hiện tại vì nó là action button
+    // Chỉ cần đảm bảo button luôn hiển thị "Capitalization"
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+    
+    // Kiểm tra nếu con trỏ không nằm trong editor-area thì không làm gì
+    const editorArea = document.querySelector('.editor-area');
+    const selection = window.getSelection();
+    if (!selection.rangeCount || !editorArea.contains(selection.getRangeAt(0).startContainer)) {
+      return;
+    }
+
+    // Đảm bảo button luôn hiển thị "Capitalization"
+    const textNode = this.toolbarManager.capitalizationSelector.firstChild;
+    if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+      if (textNode.textContent !== 'Capitalization') {
+        textNode.textContent = 'Capitalization';
+      }
+    } else {
+      // Lưu icon trước khi ghi đè
+      const dropdownIcon = this.toolbarManager.capitalizationSelector.querySelector('svg');
+      this.toolbarManager.capitalizationSelector.innerHTML = 'Capitalization';
+      if (dropdownIcon) {
+        this.toolbarManager.capitalizationSelector.appendChild(dropdownIcon);
+      }
     }
   }
 } 

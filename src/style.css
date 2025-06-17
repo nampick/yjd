@@ -850,3 +850,26 @@ body {
 [data-theme="light"] .toolbar button[title="Background Color"]:hover {
   background-color: inherit !important;
 }
+.toolbar-container{
+  border-bottom: 1px solid #E5E7EB;
+}
+.editor-area pre{
+  padding: 10px ;
+  margin: 8px 0;
+  background-color: #f0f2f3 ;
+  border-radius: 4px;
+}
+.custom-tooltip {
+  position: absolute;
+  background: #1C1E20;
+  color: #F6F6F6;
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+  z-index: 9999;
+  display: none;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  opacity: 0;
+}

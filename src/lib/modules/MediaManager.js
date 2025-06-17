@@ -42,6 +42,7 @@ export class MediaManager {
     tooltip.style.left = '50%';
     tooltip.style.transform = 'translateX(-50%)';
     tooltip.style.background = this.options.theme === 'dark' ? '#2a2a2a' : '#fff';
+    tooltip.style.borderRadius = '10px';
     tooltip.style.border = this.options.theme === 'dark' ? '1px solid #404040' : '1px solid #ccc';
     tooltip.style.borderRadius = '10px';
     tooltip.style.boxShadow = this.options.theme === 'dark' ? '0 4px 24px rgba(0,0,0,0.3)' : '0 4px 24px rgba(0,0,0,0.18)';
@@ -247,7 +248,16 @@ export class MediaManager {
       
       // Thêm dòng hướng dẫn
       const hintText = document.createElement('div');
-      hintText.innerHTML = 'Get more emojis with <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">⌘</span> <span style="color: #000;">+</span> <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">CTRL</span> <span style="color: #000;">+</span> <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">SPACE</span>';
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      console.log(userAgent);
+
+      if (userAgent.includes("mac")) {
+        hintText.innerHTML = 'Get more emojis with <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">⌘</span> <span style="color: #000;">+</span> <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">CTRL</span> <span style="color: #000;">+</span> <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">SPACE</span>';
+      } else if (userAgent.includes("win")) {
+        hintText.innerHTML = 'Get more emojis with <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">Windows</span> <span style="color: #000;">+</span> <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">.</span>';
+      } else {
+        hintText.innerHTML = 'Get more emojis with <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">Windows</span> <span style="color: #000;">+</span> <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">.</span>';
+      }
       hintText.style.color = '#71787C';
       hintText.style.fontStyle = 'normal';
       hintText.style.marginTop = '12px';
@@ -859,7 +869,14 @@ export class MediaManager {
     dropdown.appendChild(emojiGrid);
     // Thêm dòng hướng dẫn
       const hintText = document.createElement('div');
-      hintText.innerHTML = 'Get more emojis with <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">⌘</span> <span style="color: #000;">+</span> <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">CTRL</span> <span style="color: #000;">+</span> <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">SPACE</span>';
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      if (userAgent.includes("mac")) {
+        hintText.innerHTML = 'Get more emojis with <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">⌘</span> <span style="color: #000;">+</span> <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">CTRL</span> <span style="color: #000;">+</span> <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">SPACE</span>';
+      } else if (userAgent.includes("win")) {
+        hintText.innerHTML = 'Get more emojis with <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">Windows</span> <span style="color: #000;">+</span> <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">.</span>';
+      } else {
+        hintText.innerHTML = 'Get more emojis with <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">Windows</span> <span style="color: #000;">+</span> <span style="border-radius: 2.2px; background: #EEE; padding: 2px 4px;">.</span>';
+      }
       hintText.style.color = '#71787C';
       hintText.style.fontStyle = 'normal';
       hintText.style.marginTop = '12px';

@@ -1,8 +1,16 @@
 // BlockManager.js - Quản lý block operations và indentation
 export class BlockManager {
-  constructor(editor,toolbarManager) {
+  constructor(editor, toolbarManager) {
     this.editor = editor;
     this.toolbarManager = toolbarManager;
+
+    // Tạo tooltip nếu chưa tồn tại
+    if (!this.editor.tooltip) {
+      const tooltip = document.createElement('div');
+      tooltip.className = 'custom-tooltip';
+      document.body.appendChild(tooltip);
+      this.editor.tooltip = tooltip;
+    }
   }
 
   createBlockToolbar() {
@@ -74,7 +82,7 @@ export class BlockManager {
     features.forEach(f => {
       const btn = document.createElement('button');
       btn.innerHTML = icons[f] || f;
-      btn.title = f.charAt(0).toUpperCase() + f.slice(1);
+      this.attachCustomTooltip(btn, f.charAt(0).toUpperCase() + f.slice(1));
       btn.style.background = '#fff';
       btn.style.border = 'none';
       btn.style.borderRadius = '8px';
@@ -101,7 +109,36 @@ export class BlockManager {
       this.blockToolbar.appendChild(btn);
     });
   }
+  attachCustomTooltip(element, text) {
+    const tooltip = this.editor.tooltip;
+    let showTimer;
 
+    element.addEventListener('mouseenter', () => {
+      showTimer = setTimeout(() => {
+        tooltip.innerText = text;
+        tooltip.style.display = 'block';
+        tooltip.style.opacity = '1';
+
+        const rect = element.getBoundingClientRect();
+        tooltip.style.left = `${rect.left + window.scrollX + rect.width / 2 - tooltip.offsetWidth / 2}px`;
+        tooltip.style.top = `${rect.bottom + window.scrollY + 8}px`; // 8px bên dưới phần tử
+      }, 500); // Delay 0.5s
+    });
+
+    element.addEventListener('mousemove', () => {
+      if (tooltip.style.display === 'block') {
+        const rect = element.getBoundingClientRect();
+        tooltip.style.left = `${rect.left + window.scrollX + rect.width / 2 - tooltip.offsetWidth / 2}px`;
+        tooltip.style.top = `${rect.bottom + window.scrollY + 8}px`;
+      }
+    });
+
+    element.addEventListener('mouseleave', () => {
+      clearTimeout(showTimer);
+      tooltip.style.display = 'none';
+      tooltip.style.opacity = '0';
+    });
+  }
   createSplitToolbar(features, splitIndex) {
     // Tạo toolbar cho phần đầu
     const firstPart = features.slice(0, splitIndex);
@@ -149,7 +186,7 @@ export class BlockManager {
   createToolbarButton(feature, icon) {
     const btn = document.createElement('button');
     btn.innerHTML = icon;
-    btn.title = feature.charAt(0).toUpperCase() + feature.slice(1);
+    this.attachCustomTooltip(btn, f.charAt(0).toUpperCase() + f.slice(1));
     btn.style.background = '#fff';
     btn.style.border = 'none';
     btn.style.borderRadius = '8px';
@@ -693,7 +730,8 @@ export class BlockManager {
 
   // Cập nhật trạng thái heading selector
   updateHeadingSelector() {
-    if (!this.headingSelector) return;
+  
+    if (!this.toolbarManager?.headingSelector) return;
     
     const block = this.getBlockElementAtCaret();
     if (!block) return;
@@ -718,12 +756,12 @@ export class BlockManager {
     }
 
     // ✅ Cập nhật text mà vẫn giữ dropdown icon
-    const textNode = this.headingSelector.firstChild;
+    const textNode = this.toolbarManager.headingSelector.firstChild;
     if (textNode && textNode.nodeType === Node.TEXT_NODE) {
       textNode.textContent = label;
     } else {
       // Tạo lại nội dung button với dropdown icon
-      this.headingSelector.innerHTML = label;
+      this.toolbarManager.headingSelector.innerHTML = label;
 
       const dropdownIcon = document.createElement('span');
       dropdownIcon.innerHTML = '▼';
@@ -731,7 +769,7 @@ export class BlockManager {
       dropdownIcon.style.opacity = '0.7';
       dropdownIcon.style.marginLeft = 'auto';
 
-      this.headingSelector.appendChild(dropdownIcon);
+      this.toolbarManager.headingSelector.appendChild(dropdownIcon);
     }
 
   }
