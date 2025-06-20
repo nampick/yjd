@@ -873,3 +873,43 @@ body {
   transition: opacity 0.15s ease;
   opacity: 0;
 }
+
+/* Undo/Redo button styling */
+.toolbar button.undo-btn,
+.toolbar button.redo-btn {
+  font-weight: bold;
+  font-size: 16px;
+  min-width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.toolbar button.undo-btn:disabled,
+.toolbar button.redo-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f0f0f0 !important;
+  color: #999 !important;
+}
+
+[data-theme="dark"] .toolbar button.undo-btn:disabled,
+[data-theme="dark"] .toolbar button.redo-btn:disabled {
+  background: #404040 !important;
+  color: #666 !important;
+}
+
+.toolbar button.undo-btn:not(:disabled):hover,
+.toolbar button.redo-btn:not(:disabled):hover {
+  background: #e0f0ff !important;
+  color: #1976d2 !important;
+  transform: scale(1.05);
+}
+
+[data-theme="dark"] .toolbar button.undo-btn:not(:disabled):hover,
+[data-theme="dark"] .toolbar button.redo-btn:not(:disabled):hover {
+  background: #3a4a6b !important;
+  color: #66ccff !important;
+}

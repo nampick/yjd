@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Format Selector Test</title>
+</head>
+<body>
+    <h1>Format Selector Test</h1>
+    <div id="editor"></div>
+
+    <script type="module">
+        import RichEditor from './lib/index.js';
+        
+        console.log('🔍 Starting format selector test...');
+        
+        // Create editor instance
+        const editor = RichEditor.create('#editor', {
+            toolbar: ['format', 'bold', 'italic', 'underline']
+        });
+        
+        console.log('✅ Editor created');
+        console.log('🔍 Editor registry:', editor.registry);
+        console.log('🔍 Registry items:', editor.registry.getAllItems());
+    </script>
+</body>
+</html> 

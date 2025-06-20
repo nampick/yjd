@@ -2,27 +2,65 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RichEditor Library Demo</title>
 </head>
 <body>
   <div id="editor-root"></div>
+  
+  <div style="margin-top: 20px; padding: 10px; background: #f5f5f5; border-radius: 4px;">
+    <strong>Debug Info:</strong>
+    <div id="debug-info">Loading...</div>
+  </div>
+  
   <script type="module">
-    import { EditorCore } from './lib/EditorCore.js';
-    EditorCore('#editor-root', {
-      toolbar: [
-        'bold', 'italic', 'underline', 'strike', 'emoji', 'image', 'link', 'table', 'undo', 'redo'
-      ],
-      placeholder: 'Soạn nội dung ở đây... (Configurable)',
-      theme: 'light',
-      height: 350,
-      features: {
-        emoji: true,
-        image: true,
-        table: true,
-        wordCount: true,
-        breadcrumb: true
+    // Import the new architecture
+      import RichEditor from './lib/index.js';
+      
+      const debugInfo = document.getElementById('debug-info');
+      function log(message) {
+        console.log(message);
+        debugInfo.innerHTML += `<div>${message}</div>`;
       }
-    });
+      
+      try {
+        log('🚀 Creating editor...');
+        
+        // Create editor instance with all new features
+        const editor = new RichEditor('#editor-root', {
+          toolbar: ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'color', 'background', 'link', 'image', 'align', 'table'],
+          modules: ['history', 'media', 'table'],
+          height: 300,
+          theme: 'light',
+          placeholder: '🎉 Welcome! Try all formatting options including headings and font sizes...'
+        });
+
+        log('✅ Editor created successfully');
+        
+        // Debug table module
+        setTimeout(() => {
+          const tableModule = editor.getModule('table');
+          if (tableModule) {
+            log('✅ Table module loaded');
+            log(`Table toolbar exists: ${tableModule.tableToolbar ? 'YES' : 'NO'}`);
+            log(`Grid selector exists: ${tableModule.gridSelector ? 'YES' : 'NO'}`);
+          } else {
+            log('❌ Table module NOT loaded');
+          }
+          
+          // Debug toolbar
+          const toolbarModule = editor.getModule('toolbar');
+          if (toolbarModule) {
+            log('✅ Toolbar module loaded');
+            const tableBtn = document.querySelector('.table-btn');
+            log(`Table button exists: ${tableBtn ? 'YES' : 'NO'}`);
+          }
+        }, 1000);
+
+      } catch (error) {
+        log('❌ Error: ' + error.message);
+        console.error(error);
+      }
   </script>
 </body>
 </html> 

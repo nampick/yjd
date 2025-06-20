@@ -1,7 +1,7 @@
 import './style.css';
-import { EditorCore } from './lib/EditorCore.js';
+import RichEditor from './lib/index.js';
 
-new EditorCore('#editor-root', {
+new RichEditor('#editor-root', {
   toolbar: [
     'bold', 'italic', 'underline', 'strike', 'emoji', 'image', 'link', 'table', 'undo', 'redo'
   ],
