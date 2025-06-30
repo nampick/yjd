@@ -1,209 +1,190 @@
 /**
- * Enhanced Color Picker UI Component
- * Provides color selection for text and background colors
+ * Color Picker Component - Simple color picker with popup
  */
 class ColorPicker {
   constructor(options = {}) {
     this.options = {
-      colors: [],
+      colors: [
+        '#000000', '#333333', '#666666', '#999999', '#cccccc', '#ffffff',
+        '#ff0000', '#ff6600', '#ffcc00', '#ffff00', '#99ff00', '#00ff00',
+        '#00ffcc', '#00ccff', '#0066ff', '#0000ff', '#6600ff', '#cc00ff',
+        '#ff00cc', '#ff0066', '#800000', '#ff8000', '#808000', '#008000',
+        '#008080', '#0080ff', '#004080', '#800080', '#804080', '#ff0080'
+      ],
+      customColorEnabled: true,
       onColorSelect: null,
-      position: 'bottom',
-      type: 'text', // 'text' or 'background'
       ...options
     };
     
     this.container = null;
+    this.popup = null;
     this.isVisible = false;
-    this.currentColor = null;
+    this.currentColor = '#000000';
     
-    this.init();
-  }
-
-  init() {
     this.createColorPicker();
-    this.setupEventListeners();
   }
 
   /**
-   * Create color picker DOM structure
+   * Create color picker button and popup
    */
   createColorPicker() {
+    // Create container
     this.container = document.createElement('div');
-    this.container.className = 'rich-editor-color-picker';
-    this.container.setAttribute('data-type', this.options.type);
+    this.container.className = 'color-picker-container';
     
-    // Create header
-    const header = document.createElement('div');
-    header.className = 'color-picker-header';
-    header.innerHTML = `
-      <span class="color-picker-title">
-        ${this.options.type === 'text' ? '🎨 Text Color' : '🖍️ Background Color'}
-      </span>
-      <button class="color-picker-close" type="button">×</button>
-    `;
-    this.container.appendChild(header);
-
-    // Create current color preview
-    const preview = document.createElement('div');
-    preview.className = 'color-picker-preview';
-    preview.innerHTML = `
-      <span class="preview-label">Current:</span>
-      <div class="preview-color" style="background: ${this.currentColor || (this.options.type === 'text' ? '#000000' : '#FFFF00')}"></div>
-      <span class="preview-value">${this.currentColor || (this.options.type === 'text' ? '#000000' : '#FFFF00')}</span>
-    `;
-    this.container.appendChild(preview);
-
+    // Create popup
+    this.popup = document.createElement('div');
+    this.popup.className = 'color-picker-popup';
+    this.popup.style.display = 'none';
+    
     // Create color grid
+    this.createColorGrid();
+    
+    // Create custom color input if enabled
+    if (this.options.customColorEnabled) {
+      this.createCustomColorInput();
+    }
+    
+    // Add to container
+    this.container.appendChild(this.popup);
+    
+    // Add event listeners
+    this.addEventListeners();
+  }
+
+  /**
+   * Create color grid
+   */
+  createColorGrid() {
     const grid = document.createElement('div');
     grid.className = 'color-grid';
     
-    const colors = this.options.colors.length > 0 ? this.options.colors : this.getDefaultColors();
-    colors.forEach(color => {
+    this.options.colors.forEach(color => {
       const colorButton = document.createElement('button');
-      colorButton.className = 'color-button';
       colorButton.type = 'button';
+      colorButton.className = 'color-button';
       colorButton.style.backgroundColor = color;
-      colorButton.setAttribute('data-color', color);
+      colorButton.dataset.color = color;
       colorButton.title = color;
       
-      // Add checkmark for current color
-      if (color === this.currentColor) {
-        colorButton.classList.add('selected');
-        colorButton.innerHTML = '✓';
-      }
+      colorButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.selectColor(color);
+      });
       
       grid.appendChild(colorButton);
     });
     
-    this.container.appendChild(grid);
-
-    // Create custom color section
-    const customSection = document.createElement('div');
-    customSection.className = 'custom-color-section';
-    customSection.innerHTML = `
-      <label class="custom-color-label">Custom Color:</label>
-      <input type="color" class="custom-color-input" value="${this.currentColor || '#000000'}">
-      <button type="button" class="custom-color-apply">Apply</button>
-    `;
-    this.container.appendChild(customSection);
-
-    // Create remove color section
-    if (this.options.type === 'text' || this.options.type === 'background') {
-      const removeSection = document.createElement('div');
-      removeSection.className = 'remove-color-section';
-      removeSection.innerHTML = `
-        <button type="button" class="remove-color-btn">
-          ${this.options.type === 'text' ? 'Remove Text Color' : 'Remove Background'}
-        </button>
-      `;
-      this.container.appendChild(removeSection);
-    }
-
-    // Add to document
-    document.body.appendChild(this.container);
+    this.popup.appendChild(grid);
   }
 
   /**
-   * Get default color palette based on type
+   * Create custom color input
    */
-  getDefaultColors() {
-    if (this.options.type === 'background') {
-      return [
-        '#FFFF00', '#FFE135', '#FFCC02', '#FF9500', '#FF6900', '#FF3838',
-        '#FF007F', '#E100FF', '#9500FF', '#6A00FF', '#3838FF', '#0099FF',
-        '#00BFFF', '#00FFFF', '#00FF9F', '#00FF00', '#9FFF00', '#CCFF00',
-        '#FFF2CC', '#FCE5CD', '#F4CCCC', '#D9EAD3', '#D0E0E3', '#CFE2F3',
-        '#D9D2E9', '#EAD1DC', '#FFEAA7', '#FDCB6E', '#E17055', '#00B894',
-        '#00CEC9', '#6C5CE7', '#A29BFE', '#FD79A8', '#E84393', '#2D3436'
-      ];
-    } else {
-      return [
-        '#000000', '#333333', '#666666', '#999999', '#CCCCCC', '#FFFFFF',
-        '#FF0000', '#FF6600', '#FFCC00', '#FFFF00', '#CCFF00', '#66FF00',
-        '#00FF00', '#00FF66', '#00FFCC', '#00FFFF', '#00CCFF', '#0066FF',
-        '#0000FF', '#6600FF', '#CC00FF', '#FF00FF', '#FF00CC', '#FF0066',
-        '#8B0000', '#FF4500', '#FFA500', '#FFD700', '#ADFF2F', '#32CD32',
-        '#00CED1', '#1E90FF', '#4169E1', '#8A2BE2', '#9932CC', '#DC143C'
-      ];
-    }
-  }
-
-  /**
-   * Setup event listeners
-   */
-  setupEventListeners() {
-    // Color button clicks
-    this.container.addEventListener('click', (e) => {
-      if (e.target.classList.contains('color-button')) {
-        const color = e.target.getAttribute('data-color');
-        this.selectColor(color);
-      } else if (e.target.classList.contains('color-picker-close')) {
-        this.hide();
-      } else if (e.target.classList.contains('custom-color-apply')) {
-        const customInput = this.container.querySelector('.custom-color-input');
-        this.selectColor(customInput.value);
-      } else if (e.target.classList.contains('remove-color-btn')) {
-        this.removeColor();
-      }
-    });
-
-    // Custom color input change
-    const customInput = this.container.querySelector('.custom-color-input');
-    customInput.addEventListener('input', (e) => {
-      this.updatePreview(e.target.value);
-    });
-
-    // Close on outside click
-    document.addEventListener('click', (e) => {
-      if (this.isVisible && !this.container.contains(e.target)) {
-        this.hide();
-      }
-    });
-
-    // Close on escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && this.isVisible) {
-        this.hide();
-      }
-    });
-  }
-
-  /**
-   * Show color picker at position
-   * @param {number} x - X coordinate
-   * @param {number} y - Y coordinate
-   * @param {string} currentColor - Currently selected color
-   */
-  show(x, y, currentColor = null) {
-    this.currentColor = currentColor;
-    this.updatePreview(currentColor);
-    this.updateSelectedButton(currentColor);
+  createCustomColorInput() {
+    const customContainer = document.createElement('div');
+    customContainer.className = 'custom-color-container';
     
-    this.container.style.left = x + 'px';
-    this.container.style.top = y + 'px';
-    this.container.classList.add('visible');
-    this.isVisible = true;
-
-    // Adjust position if off-screen
-    this.adjustPosition();
+    const customInput = document.createElement('input');
+    customInput.type = 'color';
+    customInput.className = 'custom-color-input';
+    customInput.value = this.currentColor;
+    
+    const customLabel = document.createElement('label');
+    customLabel.textContent = 'Custom Color';
+    customLabel.className = 'custom-color-label';
+    
+    customInput.addEventListener('change', (e) => {
+      this.selectColor(e.target.value);
+    });
+    
+    customContainer.appendChild(customLabel);
+    customContainer.appendChild(customInput);
+    this.popup.appendChild(customContainer);
   }
 
   /**
-   * Hide color picker
+   * Add event listeners
+   */
+  addEventListeners() {
+    // Close popup when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!this.container.contains(e.target)) {
+        this.hide();
+      }
+    });
+    
+    // Prevent popup from closing when clicking inside
+    this.popup.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+  }
+
+  /**
+   * Show color picker popup
+   * @param {HTMLElement} anchor - Element to position popup relative to
+   */
+  show(anchor) {
+    if (!anchor) return;
+    
+    this.isVisible = true;
+    this.popup.style.display = 'block';
+    
+    // Position popup relative to anchor
+    const anchorRect = anchor.getBoundingClientRect();
+    const popupRect = this.popup.getBoundingClientRect();
+    
+    // Position below anchor by default
+    let top = anchorRect.bottom + window.scrollY + 5;
+    let left = anchorRect.left + window.scrollX;
+    
+    // Adjust if popup would go off screen
+    if (left + popupRect.width > window.innerWidth) {
+      left = window.innerWidth - popupRect.width - 10;
+    }
+    
+    if (top + popupRect.height > window.innerHeight + window.scrollY) {
+      top = anchorRect.top + window.scrollY - popupRect.height - 5;
+    }
+    
+    this.popup.style.position = 'absolute';
+    this.popup.style.top = `${top}px`;
+    this.popup.style.left = `${left}px`;
+    this.popup.style.zIndex = '1000';
+    
+    // Add to document if not already added
+    if (!document.body.contains(this.popup)) {
+      document.body.appendChild(this.popup);
+    }
+  }
+
+  /**
+   * Hide color picker popup
    */
   hide() {
-    this.container.classList.remove('visible');
     this.isVisible = false;
+    this.popup.style.display = 'none';
   }
 
   /**
-   * Select a color
+   * Toggle color picker visibility
+   * @param {HTMLElement} anchor - Element to position popup relative to
+   */
+  toggle(anchor) {
+    if (this.isVisible) {
+      this.hide();
+    } else {
+      this.show(anchor);
+    }
+  }
+
+  /**
+   * Select color and trigger callback
    * @param {string} color - Selected color
    */
   selectColor(color) {
     this.currentColor = color;
-    this.updatePreview(color);
-    this.updateSelectedButton(color);
     
     if (this.options.onColorSelect) {
       this.options.onColorSelect(color);
@@ -213,90 +194,23 @@ class ColorPicker {
   }
 
   /**
-   * Remove color formatting
+   * Get current selected color
    */
-  removeColor() {
-    if (this.options.onColorSelect) {
-      this.options.onColorSelect(null);
-    }
-    this.hide();
-  }
-
-  /**
-   * Update color preview
-   * @param {string} color - Color to preview
-   */
-  updatePreview(color) {
-    if (!color) return;
-    
-    const previewColor = this.container.querySelector('.preview-color');
-    const previewValue = this.container.querySelector('.preview-value');
-    
-    if (previewColor && previewValue) {
-      previewColor.style.backgroundColor = color;
-      previewValue.textContent = color;
-    }
-  }
-
-  /**
-   * Update selected button in grid
-   * @param {string} color - Selected color
-   */
-  updateSelectedButton(color) {
-    // Remove previous selection
-    const prevSelected = this.container.querySelector('.color-button.selected');
-    if (prevSelected) {
-      prevSelected.classList.remove('selected');
-      prevSelected.innerHTML = '';
-    }
-
-    // Add selection to current color
-    if (color) {
-      const colorButton = this.container.querySelector(`[data-color="${color}"]`);
-      if (colorButton) {
-        colorButton.classList.add('selected');
-        colorButton.innerHTML = '✓';
-      }
-    }
-  }
-
-  /**
-   * Adjust position to stay within viewport
-   */
-  adjustPosition() {
-    const rect = this.container.getBoundingClientRect();
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    // Adjust horizontal position
-    if (rect.right > viewportWidth) {
-      this.container.style.left = (viewportWidth - rect.width - 10) + 'px';
-    }
-    if (rect.left < 0) {
-      this.container.style.left = '10px';
-    }
-
-    // Adjust vertical position
-    if (rect.bottom > viewportHeight) {
-      this.container.style.top = (viewportHeight - rect.height - 10) + 'px';
-    }
-    if (rect.top < 0) {
-      this.container.style.top = '10px';
-    }
+  getCurrentColor() {
+    return this.currentColor;
   }
 
   /**
    * Set current color
-   * @param {string} color - Color to set as current
+   * @param {string} color - Color to set
    */
   setCurrentColor(color) {
     this.currentColor = color;
-    this.updatePreview(color);
-    this.updateSelectedButton(color);
     
-    const customInput = this.container.querySelector('.custom-color-input');
+    // Update custom color input if exists
+    const customInput = this.popup.querySelector('.custom-color-input');
     if (customInput) {
-      customInput.value = color || '#000000';
+      customInput.value = color;
     }
   }
 
@@ -304,6 +218,10 @@ class ColorPicker {
    * Destroy color picker
    */
   destroy() {
+    if (this.popup && this.popup.parentNode) {
+      this.popup.parentNode.removeChild(this.popup);
+    }
+    
     if (this.container && this.container.parentNode) {
       this.container.parentNode.removeChild(this.container);
     }

@@ -12,28 +12,14 @@ import Strike from './formats/strike.js';
 import Subscript from './formats/subscript.js';
 import Superscript from './formats/superscript.js';
 import Color from './formats/color.js';
-import Background from './formats/background.js';
-import Link from './formats/link.js';
-import Image from './formats/image.js';
-import Code from './formats/code.js';
-import Align from './formats/align.js';
-import { Paragraph, Pre } from './formats/paragraph.js';
-import { Heading, H1, H2, H3, H4, H5, H6 } from './formats/heading.js';
 
 // Import modules
 import Toolbar from './modules/toolbar.js';
 import History from './modules/history.js';
-import Table from './modules/table.js';
-import Media from './modules/media.js';
 import BlockToolbar from './modules/block-toolbar.js';
-import CommandHandler from './modules/command-handler.js';
 
 // Import UI components
-import Tooltip from './ui/tooltip.js';
-import ColorPicker from './ui/picker.js';
-import TableGridSelector from './ui/table-grid-selector.js';
-import AlignSelector from './ui/align-selector.js';
-import HeadingSelector from './ui/heading-selector.js';
+import ColorPicker from './ui/color-picker.js';
 
 // Import themes
 import LightTheme from './themes/light.js';
@@ -47,37 +33,15 @@ registry.register('formats/strike', Strike, true);
 registry.register('formats/subscript', Subscript, true);
 registry.register('formats/superscript', Superscript, true);
 registry.register('formats/color', Color, true);
-registry.register('formats/background', Background, true);
-registry.register('formats/link', Link, true);
-registry.register('formats/image', Image, true);
-registry.register('formats/code', Code, true);
-registry.register('formats/align', Align, true);
-registry.register('formats/paragraph', Paragraph, true);
-registry.register('formats/pre', Pre, true);
-registry.register('formats/heading', Heading, true);
-registry.register('formats/h1', H1, true);
-registry.register('formats/h2', H2, true);
-registry.register('formats/h3', H3, true);
-registry.register('formats/h4', H4, true);
-registry.register('formats/h5', H5, true);
-registry.register('formats/h6', H6, true);
 
 // Register default modules
 registry.register('modules/toolbar', Toolbar, true);
 registry.register('modules/history', History, true);
-registry.register('modules/table', Table, true);
-registry.register('modules/media', Media, true);
 registry.register('modules/block-toolbar', BlockToolbar, true);
-registry.register('modules/command-handler', CommandHandler, true);
 
 // Register UI components
-registry.register('ui/tooltip', Tooltip, true);
-registry.register('ui/picker', ColorPicker, true);
-registry.register('ui/table-grid-selector', TableGridSelector, true);
-console.log('🔍 Registering AlignSelector...');
-registry.register('ui/align-selector', AlignSelector, true);
-console.log('✅ AlignSelector registered');
-registry.register('ui/heading-selector', HeadingSelector, true);
+registry.register('ui/color-picker', ColorPicker, true);
+
 
 // Register themes
 registry.register('themes/light', LightTheme, true);
@@ -137,41 +101,21 @@ export {
   Strike,
   Subscript,
   Superscript,
-  Color,
-  Background,
-  Link,
-  Image,
-  Code,
-  Align,
-  Paragraph,
-  Pre,
-  Heading,
-  H1,
-  H2,
-  H3,
-  H4,
-  H5,
-  H6
+  Color
 };
 
 // Export modules
 export {
   Toolbar,
   History,
-  Table,
-  Media,
-  BlockToolbar,
-  CommandHandler
+  BlockToolbar
 };
 
 // Export UI components
 export {
-  Tooltip,
-  ColorPicker,
-  TableGridSelector,
-  AlignSelector,
-  HeadingSelector
+  ColorPicker
 };
+
 
 // Export themes
 export {

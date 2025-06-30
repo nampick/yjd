@@ -24,105 +24,6 @@ export class Format {
     return node;
   }
 
-  /**
-   * Get format value from DOM node
-   * @param {HTMLElement} domNode 
-   * @returns {*}
-   */
-  static formats(domNode) {
-    return true;
-  }
-
-  /**
-   * Apply format to current selection
-   */
-  apply() {
-    const selection = window.getSelection();
-    if (!selection || !selection.rangeCount) return;
-
-    const range = selection.getRangeAt(0);
-    
-    if (range.collapsed) {
-      console.log('lay 1');
-      const result = document.execCommand(this.constructor.formatName);
-      console.log('result', result);
-      const formatNode = this.constructor.create();
-      formatNode.appendChild(document.createTextNode('\u200B')); // Zero-width space để giữ vị trí
-      range.insertNode(formatNode);
-      range.setStart(formatNode.firstChild, 1);
-      range.collapse(true);
-      selection.removeAllRanges();
-      selection.addRange(range);
-      
-    } else {
-      console.log('lay het');
-      // Has selection - wrap selected content
-      document.execCommand(this.constructor.formatName);
-    }
-  }
-
-  /**
-   * Remove format from current selection
-   */
-  remove() {
-    
-    const selection = window.getSelection();
-    if (!selection || !selection.rangeCount) return;
-
-    const range = selection.getRangeAt(0);
-
-    if (!range.collapsed) {
-      document.execCommand(this.constructor.formatName);
-      return;
-    }else{
-      // Không có vùng chọn (collapsed) - xử lý như cũ
-      const container = range.startContainer;
-      const offset = range.startOffset;
-
-      // Tìm thẻ định dạng cha (ví dụ: <strong>)
-      const formatNode = this.getFormatNode(container);
-      if (!formatNode || !formatNode.parentNode) return;
-
-      const text = formatNode.textContent;
-      const absoluteOffset = this.getOffsetWithin(formatNode, range);
-
-      // Tạo các phần: trước, ký tự \u200B, sau
-      const beforeText = text.slice(0, absoluteOffset);
-      const afterText = text.slice(absoluteOffset);
-
-      const beforeNode = formatNode.cloneNode(false);
-      beforeNode.textContent = beforeText;
-
-      const afterNode = formatNode.cloneNode(false);
-      afterNode.textContent = afterText;
-
-      const zwspNode = document.createTextNode('\u200B');
-
-      // Thay thế formatNode bằng: beforeNode, zwsp, afterNode
-      const fragment = document.createDocumentFragment();
-      if (beforeText) fragment.appendChild(beforeNode);
-      fragment.appendChild(zwspNode);
-      if (afterText) fragment.appendChild(afterNode);
-
-      formatNode.replaceWith(fragment);
-
-      // Đặt lại con trỏ ngay sau zwsp
-      const newRange = document.createRange();
-      newRange.setStartAfter(zwspNode);
-      newRange.collapse(true);
-      selection.removeAllRanges();
-      selection.addRange(newRange);
-    }
-  }
-  getFormatNode(node) {
-    while (node && node !== document.body) {
-      if (node.nodeType === 1 && (node.tagName === 'STRONG' || node.tagName === 'B' || node.tagName === 'I' || node.tagName === 'EM' || node.tagName === 'U' || node.tagName === 'INS' || node.tagName === 'DEL' || node.tagName === 'S' || node.tagName === 'STRIKE' || node.tagName === 'DEL')) {
-        return node;
-      }
-      node = node.parentNode;
-    }
-    return null;
-  }
   getOffsetWithin(container, range) {
     let offset = 0;
     const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
@@ -146,20 +47,449 @@ export class Format {
 
 /**
  * Inline Format - for formats like bold, italic, underline
+ * Handles inline formatting that wraps text within the same line/block
  */
 export class InlineFormat extends Format {
+  /**
+   * Create inline format element
+   * @param {*} value - Format value
+   * @returns {HTMLElement}
+   */
   static create(value) {
     const node = super.create(value);
     return node;
   }
+
+  /**
+   * Apply inline format to selection
+   * Wraps selected text or inserts format marker at cursor
+   * @param {*} value - Format value
+   */
+  apply(value) {
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);    
+    if (range.collapsed) {
+      // No selection - insert format marker at cursor
+      const formatNode = this.constructor.create(value);
+      formatNode.appendChild(document.createTextNode('\u200B')); // Zero-width space
+      range.insertNode(formatNode);
+      
+      // Position cursor inside the format node
+      const newRange = document.createRange();
+      newRange.setStart(formatNode.firstChild, 1);
+      newRange.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+    } else {
+      // Has selection - wrap selected content
+      const contents = range.extractContents();
+      const formatNode = this.constructor.create(value);
+      formatNode.appendChild(contents);
+      range.insertNode(formatNode);
+      
+      // Select the formatted content
+      const newRange = document.createRange();
+      newRange.selectNodeContents(formatNode);
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+    }
+  }
+
+  /**
+   * Remove inline format from selection
+   * Unwraps formatted content or removes format at cursor
+   */
+  remove() {
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    
+    if (range.collapsed) {
+      // Handle cursor position
+      this.removeAtCursor(range, selection);
+    } else {
+      // Handle selection
+      this.removeFromSelection(range, selection);
+    }
+  }
+
+  /**
+   * Remove format at cursor position
+   * @param {Range} range - Current range
+   * @param {Selection} selection - Current selection
+   */
+  removeAtCursor(range, selection) {
+    const container = range.startContainer;
+    const formatNode = this.findFormatNode(container);
+    
+    if (!formatNode || !formatNode.parentNode) return;
+
+    const text = formatNode.textContent;
+    const absoluteOffset = this.getOffsetWithin(formatNode, range);
+
+    // Split the format node at cursor position
+    const beforeText = text.slice(0, absoluteOffset);
+    const afterText = text.slice(absoluteOffset);
+    console.log(beforeText, afterText);
+    
+    const fragment = document.createDocumentFragment();
+    
+    if (beforeText) {
+      const beforeNode = formatNode.cloneNode(false);
+      beforeNode.textContent = beforeText;
+      fragment.appendChild(beforeNode);
+    }
+    
+    // Insert zero-width space as marker
+    const zwspNode = document.createTextNode('\u200B');
+    fragment.appendChild(zwspNode);
+    
+    if (afterText) {
+      const afterNode = formatNode.cloneNode(false);
+      afterNode.textContent = afterText;
+      fragment.appendChild(afterNode);
+    }
+
+    formatNode.replaceWith(fragment);
+
+    // Position cursor after the marker
+    const newRange = document.createRange();
+    newRange.setStartAfter(zwspNode);
+    newRange.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(newRange);
+  }
+
+  /**
+ * Remove format from selection
+ */
+  removeFromSelection(range, selection) {
+    document.execCommand('removeFormat');
+  }
+
+
+
+  /**
+   * Find the format node containing the given node
+   * @param {Node} node - DOM node
+   * @returns {Element|null} Format node
+   */
+  findFormatNode(node) {
+    while (node && node !== document.body) {
+      if (node.nodeType === Node.ELEMENT_NODE && 
+          node.tagName === this.constructor.tagName) {
+        return node;
+      }
+      node = node.parentNode;
+    }
+    return null;
+  }
+
+  /**
+   * Find all format nodes within a range
+   * @param {Range} range - Selection range
+   * @returns {Element[]} Array of format nodes
+   */
+  findFormatNodesInRange(range) {
+    const nodes = [];
+    const walker = document.createTreeWalker(
+      range.commonAncestorContainer,
+      NodeFilter.SHOW_ELEMENT,
+      {
+        acceptNode: (node) => {
+          if (node.tagName === this.constructor.tagName && 
+              range.intersectsNode(node)) {
+            return NodeFilter.FILTER_ACCEPT;
+          }
+          return NodeFilter.FILTER_SKIP;
+        }
+      }
+    );
+
+    let node;
+    while ((node = walker.nextNode())) {
+      nodes.push(node);
+    }
+
+    return nodes;
+  }
+
+  /**
+   * Check if inline format is active at current selection
+   * @returns {boolean}
+   */
+  isActive() {
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount) return false;
+
+    const range = selection.getRangeAt(0);
+    let node = range.startContainer;
+
+    // Find if cursor/selection is within a format node
+    while (node && node !== document.body) {
+      if (node.nodeType === Node.ELEMENT_NODE && 
+          node.tagName === this.constructor.tagName) {
+        return true;
+      }
+      node = node.parentNode;
+    }
+
+    return false;
+  }
 }
 
 /**
- * Block Format - for formats like headers, paragraphs
+ * Block Format - for formats like headers, paragraphs, alignment
+ * Handles block-level formatting that affects entire blocks/paragraphs
  */
 export class BlockFormat extends Format {
+  /**
+   * Create block format element
+   * @param {*} value - Format value
+   * @returns {HTMLElement}
+   */
   static create(value) {
     const node = super.create(value);
     return node;
+  }
+
+  /**
+   * Apply block format to selection
+   * Converts current block(s) or creates new block
+   * @param {*} value - Format value
+   */
+  apply(value) {
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    const blocks = this.getBlockElements(range);
+
+    if (blocks.length === 0) {
+      // No block found - create new one
+      this.createBlockAtCursor(range, value);
+    } else {
+      // Convert existing blocks
+      blocks.forEach(block => {
+        this.convertBlock(block, value);
+      });
+    }
+  }
+
+  /**
+   * Remove block format from selection
+   * Converts blocks back to default (paragraph) or removes formatting
+   */
+  remove() {
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    const blocks = this.getBlockElements(range);
+
+    blocks.forEach(block => {
+      this.removeBlockFormat(block);
+    });
+  }
+
+  /**
+   * Create new block at cursor position
+   * @param {Range} range - Current range
+   * @param {*} value - Format value
+   */
+  createBlockAtCursor(range, value) {
+    const blockNode = this.constructor.create(value);
+    
+    if (range.collapsed) {
+      // No selection - create empty block
+      blockNode.appendChild(document.createTextNode(''));
+      range.insertNode(blockNode);
+      
+      // Position cursor inside the block
+      const newRange = document.createRange();
+      newRange.setStart(blockNode, 0);
+      newRange.collapse(true);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+    } else {
+      // Has selection - wrap in block
+      const contents = range.extractContents();
+      blockNode.appendChild(contents);
+      range.insertNode(blockNode);
+      
+      // Select the content in the block
+      const newRange = document.createRange();
+      newRange.selectNodeContents(blockNode);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+    }
+  }
+
+  /**
+   * Convert existing block to new format
+   * @param {Element} block - Block element to convert
+   * @param {*} value - Format value
+   */
+  convertBlock(block, value) {
+    const newBlock = this.constructor.create(value);
+    
+    // Copy all child nodes
+    while (block.firstChild) {
+      newBlock.appendChild(block.firstChild);
+    }
+    
+    // Copy relevant attributes
+    if (block.className && this.shouldPreserveClass(block.className)) {
+      newBlock.className = block.className;
+    }
+    
+    // Replace the block
+    block.parentNode.replaceChild(newBlock, block);
+  }
+
+  /**
+   * Remove block format (convert to paragraph)
+   * @param {Element} block - Block element
+   */
+  removeBlockFormat(block) {
+    const paragraph = document.createElement('P');
+    
+    // Move all child nodes to paragraph
+    while (block.firstChild) {
+      paragraph.appendChild(block.firstChild);
+    }
+    
+    // Replace the block
+    block.parentNode.replaceChild(paragraph, block);
+  }
+
+  /**
+   * Get block elements in range
+   * @param {Range} range - Selection range
+   * @returns {Element[]} Array of block elements
+   */
+  getBlockElements(range) {
+    const blocks = [];
+    const startBlock = this.getBlockElement(range.startContainer);
+    const endBlock = this.getBlockElement(range.endContainer);
+
+    if (startBlock === endBlock) {
+      if (startBlock) blocks.push(startBlock);
+    } else {
+      // Handle multiple blocks
+      let current = startBlock;
+      while (current && current !== endBlock) {
+        if (this.isBlockElement(current)) {
+          blocks.push(current);
+        }
+        current = this.getNextBlockElement(current);
+      }
+      if (endBlock && this.isBlockElement(endBlock)) {
+        blocks.push(endBlock);
+      }
+    }
+
+    return blocks.filter((block, index, self) => 
+      self.indexOf(block) === index // Remove duplicates
+    );
+  }
+
+  /**
+   * Get block element containing node
+   * @param {Node} node - DOM node
+   * @returns {Element|null} Block element
+   */
+  getBlockElement(node) {
+    while (node && node.nodeType !== Node.ELEMENT_NODE) {
+      node = node.parentNode;
+    }
+
+    while (node && node !== document.body) {
+      if (this.isBlockElement(node)) {
+        return node;
+      }
+      node = node.parentNode;
+    }
+
+    return null;
+  }
+
+  /**
+   * Check if element is a block element
+   * @param {Element} element - DOM element
+   * @returns {boolean}
+   */
+  isBlockElement(element) {
+    if (!element || element.nodeType !== Node.ELEMENT_NODE) return false;
+    
+    const blockTags = [
+      'P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 
+      'BLOCKQUOTE', 'PRE', 'UL', 'OL', 'LI', 'SECTION', 'ARTICLE'
+    ];
+    return blockTags.includes(element.tagName.toUpperCase());
+  }
+
+  /**
+   * Get next block element
+   * @param {Element} element - Current element
+   * @returns {Element|null} Next block element
+   */
+  getNextBlockElement(element) {
+    let next = element.nextElementSibling;
+    while (next) {
+      if (this.isBlockElement(next)) {
+        return next;
+      }
+      next = next.nextElementSibling;
+    }
+    return null;
+  }
+
+  /**
+   * Check if block format is active at current selection
+   * @param {*} value - Optional specific value to check
+   * @returns {boolean}
+   */
+  isActive(value = null) {
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount) return false;
+
+    const range = selection.getRangeAt(0);
+    const block = this.getBlockElement(range.startContainer);
+    
+    if (!block) return false;
+
+    // Check if block matches our format
+    if (block.tagName === this.constructor.tagName) {
+      return value ? this.hasValue(block, value) : true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Check if block has specific value
+   * Override in subclasses for specific value checking
+   * @param {Element} block - Block element
+   * @param {*} value - Value to check
+   * @returns {boolean}
+   */
+  hasValue(block, value) {
+    return true; // Default implementation
+  }
+
+  /**
+   * Check if class should be preserved during conversion
+   * Override in subclasses for specific class handling
+   * @param {string} className - Class name
+   * @returns {boolean}
+   */
+  shouldPreserveClass(className) {
+    return false; // Default: don't preserve classes
   }
 } 

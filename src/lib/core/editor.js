@@ -129,7 +129,7 @@ export default class Editor {
    */
   loadModules() {
     // Load default modules
-    const defaultModules = ['toolbar', 'history', 'table', 'block-toolbar', 'command-handler'];
+    const defaultModules = ['toolbar', 'history', 'block-toolbar'];
     
     defaultModules.forEach(moduleName => {
       const ModuleClass = this.registry.get(`modules/${moduleName}`);
@@ -142,6 +142,11 @@ export default class Editor {
         if (moduleName === 'toolbar' && moduleInstance.getContainer) {
           const toolbarContainer = moduleInstance.getContainer();
           this.wrapper.insertBefore(toolbarContainer, this.editor);
+          
+          // Listen for toolbar events
+          moduleInstance.on('toolbar-click', (data) => {
+            this.handleToolbarClick(data);
+          });
         }
         
         console.log(`✅ Module '${moduleName}' loaded successfully`);
@@ -237,6 +242,9 @@ export default class Editor {
         module.onSelectionChange(range);
       }
     });
+    
+    // Update toolbar button states
+    this.updateToolbarButtonStates();
   }
 
   /**
@@ -350,5 +358,131 @@ export default class Editor {
     // Clear references
     this.modules.clear();
     this.formats.clear();
+  }
+
+  /**
+   * Handle toolbar button clicks
+   */
+  handleToolbarClick(data) {
+    const { command, button, value } = data;
+    
+    console.log(`Toolbar command: ${command}`, value ? `with value: ${value}` : '');
+    
+    // Handle different commands
+    switch (command) {
+      case 'bold':
+      case 'italic':  
+      case 'underline':
+      case 'strike':
+      case 'subscript':
+      case 'superscript':
+        this.toggleFormat(command);
+        break;
+      case 'color':
+        this.applyColorFormat(value || '#000000');
+        break;
+      case 'undo':
+        this.undo();
+        break;
+      case 'redo':
+        this.redo();
+        break;
+      default:
+        console.warn(`Unknown command: ${command}`);
+    }
+  }
+
+  /**
+   * Toggle format on current selection
+   */
+  toggleFormat(formatName) {
+    // Map format names to registry keys
+    const formatMap = {
+      'bold': 'bold',
+      'italic': 'italic', 
+      'underline': 'underline',
+      'strike': 'strike',
+      'subscript': 'subscript',
+      'superscript': 'superscript'
+    };
+    
+    const registryKey = formatMap[formatName];
+    if (!registryKey) {
+      console.warn(`Unknown format: ${formatName}`);
+      return;
+    }
+    
+    const FormatClass = this.registry.get(`formats/${registryKey}`);
+    if (!FormatClass) {
+      console.warn(`Format class not found: formats/${registryKey}`);
+      return;
+    }
+    
+    // Create format instance and toggle
+    const formatInstance = new FormatClass();
+    formatInstance.toggle();
+    
+    // Update button state
+    this.updateToolbarButtonStates();
+  }
+
+  /**
+   * Update toolbar button states based on current selection
+   */
+  updateToolbarButtonStates() {
+    const toolbar = this.getModule('toolbar');
+    if (!toolbar) return;
+    
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount) return;
+    
+    const formats = ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript'];
+    
+    formats.forEach(formatName => {
+      const FormatClass = this.registry.get(`formats/${formatName}`);
+      if (FormatClass) {
+        const formatInstance = new FormatClass();
+        const isActive = formatInstance.isActive();
+        toolbar.setButtonActive(formatName, isActive);
+      }
+    });
+  }
+
+  /**
+   * Undo last action
+   */
+  undo() {
+    const history = this.getModule('history');
+    if (history && typeof history.undo === 'function') {
+      history.undo();
+    } else {
+      document.execCommand('undo');
+    }
+  }
+
+  /**
+   * Redo last undone action
+   */
+  redo() {
+    const history = this.getModule('history');
+    if (history && typeof history.redo === 'function') {
+      history.redo();
+    } else {
+      document.execCommand('redo');
+    }
+  }
+
+  /**
+   * Apply color formatting to selected text
+   * @param {string} color - Color value to apply
+   */
+  applyColorFormat(color) {
+    const colorFormat = this.registry.get('formats/color');
+    if (colorFormat) {
+      const format = new colorFormat(this);
+      format.apply(color);
+    } else {
+      console.warn('Color format not found in registry');
+    }
   }
 } 

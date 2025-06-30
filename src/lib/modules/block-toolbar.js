@@ -69,10 +69,12 @@ class BlockToolbar extends Module {
    * Setup event listeners
    */
   setupEventListeners() {
-    // Listen for text selection
+    // Listen for mouseup to show toolbar after selection is complete
     if (this.options.showOnSelection) {
-      document.addEventListener('selectionchange', () => {
-        this.handleSelectionChange();
+      this.editor.editor.addEventListener('mouseup', () => {
+        setTimeout(() => {
+          this.handleSelectionChange();
+        }, 0);
       });
     }
 
@@ -102,20 +104,17 @@ class BlockToolbar extends Module {
       }
     });
 
-    // Update button states on selection change
-    this.editor.editor.addEventListener('mouseup', () => {
-      if (this.isVisible) {
-        setTimeout(() => {
-          this.updateButtonStates();
-        }, 10);
-      }
-    });
-
+    // Update button states on keyup (for keyboard selection)
     this.editor.editor.addEventListener('keyup', () => {
       if (this.isVisible) {
-        setTimeout(() => {
-          this.updateButtonStates();
-        }, 10);
+        
+        this.updateButtonStates();
+       
+      } else {
+        // Check if there's selection after keyup (like Shift+Arrow keys)
+       
+        this.handleSelectionChange();
+   
       }
     });
   }
@@ -156,10 +155,12 @@ class BlockToolbar extends Module {
     const range = selection.getRangeAt(0);
     const rect = range.getBoundingClientRect();
     const editorRect = this.editor.wrapper.getBoundingClientRect();
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
 
     this.showAt(
-      rect.left + rect.width / 2 - editorRect.left,
-      rect.top - editorRect.top - 10
+      rect.left + rect.width / 2 - editorRect.left + scrollLeft,
+      rect.top - editorRect.top + scrollTop - 10
     );
   }
 
@@ -177,12 +178,28 @@ class BlockToolbar extends Module {
       return;
     }
 
-    const rect = range.getBoundingClientRect();
+    // Get cursor position more accurately
+    let rect;
+    
+    if (range.collapsed) {
+      // For collapsed range (cursor), create a temporary span to get position
+      const span = document.createElement('span');
+      span.innerHTML = '&#8203;'; // Zero-width space
+      range.insertNode(span);
+      rect = span.getBoundingClientRect();
+      span.remove();
+    } else {
+      // For selection, use range bounds
+      rect = range.getBoundingClientRect();
+    }
+
     const editorRect = this.editor.wrapper.getBoundingClientRect();
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
 
     this.showAt(
-      rect.left - editorRect.left,
-      rect.top - editorRect.top - 10
+      rect.left - editorRect.left + scrollLeft,
+      rect.top - editorRect.top + scrollTop - 10
     );
   }
 
@@ -259,48 +276,6 @@ class BlockToolbar extends Module {
     this.editor.focus();
   }
 
-  /**
-   * Handle font command
-   */
-  handleFontCommand() {
-    const fontFamilies = [
-      'Arial',
-      'Georgia', 
-      'Times New Roman',
-      'Courier New',
-      'Verdana',
-      'Comic Sans MS'
-    ];
-
-    const currentFont = this.getCurrentFontFamily() || 'Arial';
-    const selectedFont = prompt('Enter font family:', currentFont);
-    
-    if (selectedFont && selectedFont.trim()) {
-      document.execCommand('fontName', false, selectedFont.trim());
-    }
-  }
-
-  /**
-   * Get current font family at selection
-   */
-  getCurrentFontFamily() {
-    const selection = window.getSelection();
-    if (selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      let node = range.startContainer;
-      
-      while (node && node !== this.editor.editor) {
-        if (node.nodeType === Node.ELEMENT_NODE) {
-          const style = window.getComputedStyle(node);
-          if (style.fontFamily && style.fontFamily !== 'inherit') {
-            return style.fontFamily.replace(/['"]/g, '');
-          }
-        }
-        node = node.parentNode;
-      }
-    }
-    return null;
-  }
 
   /**
    * Update button states based on current selection
