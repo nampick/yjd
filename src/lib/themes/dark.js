@@ -30,10 +30,7 @@ class DarkTheme {
 
     '.toolbar-group': {
       'display': 'flex',
-      'align-items': 'center',
-      'gap': '2px',
-      'padding': '0 4px',
-      'border-right': '1px solid #404040'
+      'align-items': 'center'
     },
 
     '.toolbar-group:last-child': {
@@ -356,10 +353,12 @@ class DarkTheme {
    */
   static apply(editor) {
     // Remove existing theme classes
-    editor.container.classList.remove('theme-light', 'theme-dark');
-    
-    // Add dark theme class
-    editor.container.classList.add('theme-dark');
+    if (editor.wrapper) {
+      editor.wrapper.classList.remove('theme-light', 'theme-dark');
+      
+      // Add dark theme class
+      editor.wrapper.classList.add('theme-dark');
+    }
 
     // Apply styles
     this.injectStyles();
@@ -370,9 +369,11 @@ class DarkTheme {
     }
 
     // Trigger theme change event
-    editor.container.dispatchEvent(new CustomEvent('theme:change', {
-      detail: { theme: 'dark' }
-    }));
+    if (editor.wrapper) {
+      editor.wrapper.dispatchEvent(new CustomEvent('theme:change', {
+        detail: { theme: 'dark' }
+      }));
+    }
   }
 
   /**

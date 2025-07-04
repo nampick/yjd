@@ -133,7 +133,6 @@ export class InlineFormat extends Format {
     // Split the format node at cursor position
     const beforeText = text.slice(0, absoluteOffset);
     const afterText = text.slice(absoluteOffset);
-    console.log(beforeText, afterText);
     
     const fragment = document.createDocumentFragment();
     

@@ -31,9 +31,7 @@ class LightTheme {
     '.toolbar-group': {
       'display': 'flex',
       'align-items': 'center',
-      'gap': '2px',
-      'padding': '0 4px',
-      'border-right': '1px solid #e1e5e9'
+  
     },
 
     '.toolbar-group:last-child': {
@@ -272,10 +270,12 @@ class LightTheme {
    */
   static apply(editor) {
     // Remove existing theme classes
-    editor.container.classList.remove('theme-light', 'theme-dark');
-    
-    // Add light theme class
-    editor.container.classList.add('theme-light');
+    if (editor.wrapper) {
+      editor.wrapper.classList.remove('theme-light', 'theme-dark');
+      
+      // Add light theme class
+      editor.wrapper.classList.add('theme-light');
+    }
 
     // Apply styles
     this.injectStyles();
@@ -286,9 +286,11 @@ class LightTheme {
     }
 
     // Trigger theme change event
-    editor.container.dispatchEvent(new CustomEvent('theme:change', {
-      detail: { theme: 'light' }
-    }));
+    if (editor.wrapper) {
+      editor.wrapper.dispatchEvent(new CustomEvent('theme:change', {
+        detail: { theme: 'light' }
+      }));
+    }
   }
 
   /**

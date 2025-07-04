@@ -29,6 +29,7 @@ export default class Editor {
     this.modules = new Map();
     this.formats = new Map();
     this.registry = registry;
+    this.events = new Map(); // Add event system
     
     // State management
     this.toolbarBtns = {};
@@ -69,6 +70,13 @@ export default class Editor {
     this.editor.className = 'rich-editor-area';
     this.editor.contentEditable = true;
     this.editor.setAttribute('placeholder', this.options.placeholder);
+    
+    // Force browser to create <p> tags instead of <div> when pressing Enter
+    try {
+      document.execCommand('defaultParagraphSeparator', false, 'p');
+    } catch (e) {
+      console.warn('Could not set defaultParagraphSeparator:', e);
+    }
     
     // Add default content
     this.editor.innerHTML = this.getDefaultContent();
@@ -129,7 +137,7 @@ export default class Editor {
    */
   loadModules() {
     // Load default modules
-    const defaultModules = ['toolbar', 'history', 'block-toolbar'];
+    const defaultModules = ['toolbar', 'history', 'block-toolbar', 'table-toolbar', 'code-view', 'theme-switcher', 'resize-handles'];
     
     defaultModules.forEach(moduleName => {
       const ModuleClass = this.registry.get(`modules/${moduleName}`);
@@ -149,9 +157,7 @@ export default class Editor {
           });
         }
         
-        console.log(`✅ Module '${moduleName}' loaded successfully`);
       } else {
-        console.warn(`❌ Module '${moduleName}' not found in registry`);
       }
     });
   }
@@ -162,7 +168,8 @@ export default class Editor {
   loadFormats() {
     // Load default formats
     const defaultFormats = [
-      'bold', 'italic', 'underline', 'strike', 
+      'bold', 'italic', 'underline', 'strike', 'subscript', 'superscript',
+      'color', 'background', 'text-align', 'link',
       'code', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 
       'paragraph', 'pre'
     ];
@@ -237,14 +244,90 @@ export default class Editor {
     const selection = window.getSelection();
     const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
     
+    // Check if selection is within rich-editor-area
+    const isInEditableArea = this.isSelectionInEditableArea(selection);
+    
+    // Update all modules with selection info
     this.modules.forEach(module => {
       if (typeof module.onSelectionChange === 'function') {
-        module.onSelectionChange(range);
+        module.onSelectionChange(range, isInEditableArea);
       }
     });
     
     // Update toolbar button states
     this.updateToolbarButtonStates();
+    
+    // Update toolbar buttons accessibility
+    this.updateToolbarAccessibility(isInEditableArea);
+    
+    // Update statusbar when selection changes
+    this.updateStatusbar();
+  }
+
+  /**
+   * Check if current selection is within the rich-editor-area
+   */
+  isSelectionInEditableArea(selection) {
+    if (!selection || selection.rangeCount === 0) {
+      return false;
+    }
+
+    const range = selection.getRangeAt(0);
+    const startContainer = range.startContainer;
+    const endContainer = range.endContainer;
+    
+    // Check if both start and end containers are within rich-editor-area
+    const startInEditor = this.isNodeInEditableArea(startContainer);
+    const endInEditor = this.isNodeInEditableArea(endContainer);
+    
+    return startInEditor && endInEditor;
+  }
+
+  /**
+   * Check if a node is within the rich-editor-area
+   */
+  isNodeInEditableArea(node) {
+    if (!node) return false;
+    
+    // Traverse up the DOM tree to find rich-editor-area
+    let currentNode = node.nodeType === Node.TEXT_NODE ? node.parentNode : node;
+    
+    while (currentNode && currentNode !== document.body) {
+      if (currentNode === this.editor || 
+          (currentNode.classList && currentNode.classList.contains('rich-editor-area'))) {
+        return true;
+      }
+      currentNode = currentNode.parentNode;
+    }
+    
+    return false;
+  }
+
+  /**
+   * Update toolbar accessibility based on selection location
+   */
+  updateToolbarAccessibility(isInEditableArea) {
+    const toolbar = this.getModule('toolbar');
+    if (!toolbar) return;
+    
+    // List of commands that should be disabled when outside editable area
+    // Note: undo/redo are NOT in this list - they should always work
+    const editingCommands = [
+      'bold', 'italic', 'underline', 'strike', 'subscript', 'superscript',
+      'color', 'background', 'link', 'table', 'heading', 'text-size', 
+      'font-family', 'line-height', 'capitalization', 'text-align', 'list',
+      'indent-increase', 'indent-decrease'
+    ];
+    
+    editingCommands.forEach(command => {
+      toolbar.setButtonDisabled(command, !isInEditableArea);
+    });
+    
+    // These commands should always be enabled regardless of selection location
+    const alwaysEnabledCommands = ['more', 'undo', 'redo', 'code-view', 'theme'];
+    alwaysEnabledCommands.forEach(command => {
+      toolbar.setButtonDisabled(command, false);
+    });
   }
 
   /**
@@ -358,6 +441,7 @@ export default class Editor {
     // Clear references
     this.modules.clear();
     this.formats.clear();
+    this.events.clear(); // Clear events
   }
 
   /**
@@ -366,9 +450,46 @@ export default class Editor {
   handleToolbarClick(data) {
     const { command, button, value } = data;
     
-    console.log(`Toolbar command: ${command}`, value ? `with value: ${value}` : '');
     
-    // Handle different commands
+    // Emit toolbar-click event for modules to listen
+    this.emit('toolbar-click', data);
+    
+    // Commands that should always work regardless of selection location
+    const alwaysAllowedCommands = ['more', 'undo', 'redo', 'code-view', 'theme'];
+    
+    if (alwaysAllowedCommands.includes(command)) {
+      // These commands can execute regardless of selection location
+      switch (command) {
+        case 'more':
+          // More command is handled by toolbar module itself
+          return;
+        case 'undo':
+          this.undo();
+          return;
+        case 'redo':
+          this.redo();
+          return;
+        case 'code-view':
+          // Code view command is handled by CodeView module itself
+          // The module listens to 'toolbar-click' events and handles it internally
+          return;
+        case 'theme':
+          // Theme command is handled by ThemeSwitcher module itself
+          // The module listens to 'toolbar-click' events and handles it internally
+          return;
+      }
+    }
+    
+    // For all other commands, check if current selection is in editable area
+    const selection = window.getSelection();
+    const isInEditableArea = this.isSelectionInEditableArea(selection);
+    
+    if (!isInEditableArea) {
+      console.warn(`Command '${command}' blocked: Selection outside editable area`);
+      return;
+    }
+    
+    // Handle formatting commands (only when selection is in editable area)
     switch (command) {
       case 'bold':
       case 'italic':  
@@ -376,16 +497,26 @@ export default class Editor {
       case 'strike':
       case 'subscript':
       case 'superscript':
-        this.toggleFormat(command);
-        break;
       case 'color':
-        this.applyColorFormat(value || '#000000');
-        break;
-      case 'undo':
-        this.undo();
-        break;
-      case 'redo':
-        this.redo();
+      case 'background':
+      case 'link':
+      case 'table':
+      case 'heading':
+      case 'text-size':
+      case 'font-family':
+      case 'line-height':
+      case 'capitalization':
+      case 'text-align':
+      case 'list':
+      case 'indent-increase':
+      case 'indent-decrease':
+      case 'emoji':
+      case 'image':
+      case 'video':
+      case 'tag':
+      case 'template':
+      case 'import':
+        this.toggleFormat(command);
         break;
       default:
         console.warn(`Unknown command: ${command}`);
@@ -403,7 +534,26 @@ export default class Editor {
       'underline': 'underline',
       'strike': 'strike',
       'subscript': 'subscript',
-      'superscript': 'superscript'
+      'superscript': 'superscript',
+      'color': 'color',
+      'background': 'background',
+      'link': 'link',
+      'table': 'table',
+      'heading': 'heading',
+      'text-size': 'text-size',
+      'font-family': 'font-family',
+      'line-height': 'line-height',
+      'capitalization': 'capitalization',
+      'text-align': 'text-align',
+      'list': 'list',
+      'indent-increase': 'indent-increase',
+      'indent-decrease': 'indent-decrease',
+      'emoji': 'emoji',
+      'image': 'image',
+      'video': 'video',
+      'tag': 'tag',
+      'template': 'template',
+      'import': 'import'
     };
     
     const registryKey = formatMap[formatName];
@@ -436,14 +586,28 @@ export default class Editor {
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount) return;
     
-    const formats = ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript'];
+    // Check if selection is in editable area
+    const isInEditableArea = this.isSelectionInEditableArea(selection);
+    
+    const formats = ['heading', 'text-size', 'font-family', 'line-height', 'capitalization', 'text-align', 'list', 'indent-increase', 'indent-decrease', 'bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'color', 'background', 'link', 'table'];
     
     formats.forEach(formatName => {
-      const FormatClass = this.registry.get(`formats/${formatName}`);
-      if (FormatClass) {
-        const formatInstance = new FormatClass();
-        const isActive = formatInstance.isActive();
-        toolbar.setButtonActive(formatName, isActive);
+      // Only check format state if selection is in editable area
+      if (isInEditableArea) {
+        const FormatClass = this.registry.get(`formats/${formatName}`);
+        if (FormatClass) {
+          const formatInstance = new FormatClass();
+          const isActive = formatInstance.isActive();
+          toolbar.setButtonActive(formatName, isActive);
+          
+          // Special handling for line-height: update button text
+          if (formatName === 'line-height' && typeof formatInstance.updateButtonText === 'function') {
+            formatInstance.updateButtonText();
+          }
+        }
+      } else {
+        // Clear active state for buttons when outside editable area
+        toolbar.setButtonActive(formatName, false);
       }
     });
   }
@@ -473,16 +637,46 @@ export default class Editor {
   }
 
   /**
-   * Apply color formatting to selected text
-   * @param {string} color - Color value to apply
+   * Add event listener
+   * @param {string} event - Event name
+   * @param {function} handler - Event handler
    */
-  applyColorFormat(color) {
-    const colorFormat = this.registry.get('formats/color');
-    if (colorFormat) {
-      const format = new colorFormat(this);
-      format.apply(color);
-    } else {
-      console.warn('Color format not found in registry');
+  on(event, handler) {
+    if (!this.events.has(event)) {
+      this.events.set(event, []);
+    }
+    this.events.get(event).push(handler);
+  }
+
+  /**
+   * Remove event listener
+   * @param {string} event - Event name
+   * @param {function} handler - Event handler
+   */
+  off(event, handler) {
+    if (this.events.has(event)) {
+      const handlers = this.events.get(event);
+      const index = handlers.indexOf(handler);
+      if (index > -1) {
+        handlers.splice(index, 1);
+      }
+    }
+  }
+
+  /**
+   * Emit event
+   * @param {string} event - Event name
+   * @param {*} data - Event data
+   */
+  emit(event, data) {
+    if (this.events.has(event)) {
+      this.events.get(event).forEach(handler => {
+        try {
+          handler(data);
+        } catch (error) {
+          console.error(`Error in event handler for ${event}:`, error);
+        }
+      });
     }
   }
 } 

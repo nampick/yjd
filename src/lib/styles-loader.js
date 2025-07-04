@@ -27,10 +27,8 @@ class StylesLoader {
       document.head.appendChild(this.styleElement);
       
       this.loaded = true;
-      console.log('✅ Rich Editor styles loaded');
       
     } catch (error) {
-      console.error('❌ Failed to load Rich Editor styles:', error);
       
       // Fallback: load minimal styles
       this.loadFallbackStyles();
@@ -96,7 +94,6 @@ class StylesLoader {
     document.head.appendChild(this.styleElement);
     
     this.loaded = true;
-    console.log('⚠️ Rich Editor fallback styles loaded');
   }
 
   /**
@@ -107,7 +104,6 @@ class StylesLoader {
       this.styleElement.parentNode.removeChild(this.styleElement);
       this.styleElement = null;
       this.loaded = false;
-      console.log('🗑️ Rich Editor styles unloaded');
     }
   }
 
@@ -142,7 +138,6 @@ class StylesLoader {
     style.textContent = css;
     document.head.appendChild(style);
     
-    console.log(`✅ Custom CSS added with id: ${id}`);
   }
 }
 

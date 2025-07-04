@@ -1,4 +1,5 @@
 import Module from '../core/module.js';
+import IconLoader from '../ui/icon-loader.js';
 
 /**
  * Block Toolbar Module - Floating toolbar hiện lên khi select text hoặc ấn Enter
@@ -22,9 +23,17 @@ class BlockToolbar extends Module {
   }
 
   init() {
+    this.preloadIcons();
     this.createBlockToolbar();
     this.setupEventListeners();
-    console.log('🔧 Block toolbar initialized');
+  }
+
+  /**
+   * Preload icons for better performance
+   */
+  async preloadIcons() {
+    const iconNames = ['bold', 'italic', 'underline', 'strike', 'code', 'heading'];
+    await IconLoader.preloadIcons(iconNames);
   }
 
   /**
@@ -34,22 +43,28 @@ class BlockToolbar extends Module {
     this.blockToolbar = document.createElement('div');
     this.blockToolbar.className = 'block-toolbar';
     
-    // Create toolbar buttons
+    // Create toolbar buttons with SVG icons
     const buttons = [
-      { cmd: 'bold', icon: '𝐁', title: 'Bold (Ctrl+B)' },
-      { cmd: 'italic', icon: '𝐼', title: 'Italic (Ctrl+I)' },
-      { cmd: 'underline', icon: '𝐔', title: 'Underline (Ctrl+U)' },
-      { cmd: 'strike', icon: '𝐒', title: 'Strikethrough' },
-      { cmd: 'code', icon: '</>', title: 'Code' },
-      { cmd: 'font', icon: 'Aa', title: 'Font Family' }
+      { cmd: 'bold', icon: 'bold', title: 'Bold (Ctrl+B)' },
+      { cmd: 'italic', icon: 'italic', title: 'Italic (Ctrl+I)' },
+      { cmd: 'underline', icon: 'underline', title: 'Underline (Ctrl+U)' },
+      { cmd: 'strike', icon: 'strike', title: 'Strikethrough' },
+      { cmd: 'code', icon: 'code', title: 'Code' },
+      { cmd: 'font', icon: 'heading', title: 'Font Family' }
     ];
 
     buttons.forEach(({ cmd, icon, title }) => {
       const button = document.createElement('button');
       button.className = 'block-toolbar-btn';
-      button.innerHTML = icon;
       button.title = title;
       button.dataset.command = cmd;
+
+      // Create icon element using IconLoader
+      const iconElement = IconLoader.createIconElement(icon, { 
+        width: '16px', 
+        height: '16px' 
+      });
+      button.appendChild(iconElement);
 
       button.addEventListener('click', (e) => {
         e.preventDefault();
@@ -62,7 +77,6 @@ class BlockToolbar extends Module {
 
     // Add to editor wrapper
     this.editor.wrapper.appendChild(this.blockToolbar);
-    console.log('🔧 Block toolbar created with buttons:', buttons.map(b => b.cmd));
   }
 
   /**
@@ -83,9 +97,8 @@ class BlockToolbar extends Module {
       this.editor.editor.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           // Show toolbar after Enter with delay
-          setTimeout(() => {
-            this.showAtCursor();
-          }, 100);
+          this.showAtCursor();
+          
         }
       });
     }
@@ -132,13 +145,17 @@ class BlockToolbar extends Module {
 
     const range = selection.getRangeAt(0);
     
-    // Check if selection is within editor
-    if (!this.editor.editor.contains(range.commonAncestorContainer)) {
+    // Check if selection is within editor (use editor's method if available)
+    const isInEditableArea = this.editor.isSelectionInEditableArea ? 
+      this.editor.isSelectionInEditableArea(selection) : 
+      this.editor.editor.contains(range.commonAncestorContainer);
+    
+    if (!isInEditableArea) {
       this.hide();
       return;
     }
 
-    // Only show if there's actual text selected
+    // Only show if there's actual text selected and it's within the editable area
     if (!range.collapsed && selection.toString().trim().length > 0) {
       this.showAtSelection(selection);
     } else {
@@ -173,8 +190,12 @@ class BlockToolbar extends Module {
 
     const range = selection.getRangeAt(0);
     
-    // Check if cursor is within editor
-    if (!this.editor.editor.contains(range.commonAncestorContainer)) {
+    // Check if cursor is within editor using editor's method
+    const isInEditableArea = this.editor.isSelectionInEditableArea ? 
+      this.editor.isSelectionInEditableArea(selection) : 
+      this.editor.editor.contains(range.commonAncestorContainer);
+    
+    if (!isInEditableArea) {
       return;
     }
 
@@ -219,7 +240,6 @@ class BlockToolbar extends Module {
     this.updateButtonStates();
     this.clearHideTimeout();
     
-    console.log('🔧 Block toolbar shown at:', { x, y });
   }
 
   /**
@@ -232,7 +252,6 @@ class BlockToolbar extends Module {
     this.isVisible = false;
     this.clearHideTimeout();
     
-    console.log('🔧 Block toolbar hidden');
   }
 
   /**
@@ -246,10 +265,20 @@ class BlockToolbar extends Module {
   }
 
   /**
-   * Handle command execution
+   * Handle command execution - only if selection is in editable area
    */
   handleCommand(command, button) {
-    console.log('👆 Block toolbar command:', command);
+
+    // Double check that we're still in editable area before executing command
+    const selection = window.getSelection();
+    const isInEditableArea = this.editor.isSelectionInEditableArea ? 
+      this.editor.isSelectionInEditableArea(selection) : true;
+    
+    if (!isInEditableArea) {
+      console.warn('Command blocked: Selection outside editable area');
+      this.hide();
+      return;
+    }
 
     // Special handling for font command
     if (command === 'font') {
@@ -275,7 +304,6 @@ class BlockToolbar extends Module {
     this.updateButtonState(command, button);
     this.editor.focus();
   }
-
 
   /**
    * Update button states based on current selection
@@ -339,7 +367,6 @@ class BlockToolbar extends Module {
     this.blockToolbar = null;
     this.isVisible = false;
     
-    console.log('🔧 Block toolbar destroyed');
   }
 }
 

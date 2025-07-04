@@ -9,13 +9,47 @@ class Bold extends InlineFormat {
   static alternativeTagNames = ['STRONG'];
 
   /**
+   * Apply bold formatting using execCommand
+   */
+  apply() {
+    try {
+      document.execCommand('bold', false, null);
+    } catch (error) {
+      console.error('Error applying bold format:', error);
+    }
+  }
+
+  /**
+   * Remove bold formatting using execCommand
+   */
+  remove() {
+    try {
+      document.execCommand('bold', false, null);
+    } catch (error) {
+      console.error('Error removing bold format:', error);
+    }
+  }
+
+  /**
    * Toggle bold formatting
    */
   toggle() {
-    if (this.isActive()) {
-      this.remove();
-    } else {
-      this.apply();
+    try {
+      document.execCommand('bold', false, null);
+    } catch (error) {
+      console.error('Error toggling bold format:', error);
+    }
+  }
+
+  /**
+   * Check if bold formatting is active using execCommand
+   */
+  isActive() {
+    try {
+      return document.queryCommandState('bold');
+    } catch (error) {
+      console.error('Error checking bold state:', error);
+      return false;
     }
   }
 

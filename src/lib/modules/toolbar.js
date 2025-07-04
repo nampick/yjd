@@ -1,5 +1,7 @@
 import Module from '../core/module.js';
 import ColorPicker from '../ui/color-picker.js';
+import IconLoader from '../ui/icon-loader.js';
+import createCustomButton from '../ui/select-button.js';
 
 /**
  * Toolbar Module - Pure UI component with dual toolbar support
@@ -9,21 +11,52 @@ import ColorPicker from '../ui/color-picker.js';
 class Toolbar extends Module {
   static DEFAULTS = {
     container: null,
-    toolbar1: ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'color', 'undo', 'redo', 'more'],
-    toolbar2: ['undo', 'redo' ]
+    toolbar1: [
+      { group: 'text-format', items: ['bold', 'italic', 'underline', 'strike'] },
+      { group: 'script', items: ['subscript', 'superscript'] },
+      { group: 'colors', items: ['color', 'background'] },
+      { group: 'link', items: ['link'] },
+      { group: 'structure', items: ['heading', 'text-size'] },
+      { group: 'table', items: ['table'] },
+      { group: 'alignment', items: ['text-align'] },
+      { group: 'actions', items: ['undo', 'redo'] },
+      { group: 'more', items: ['more'] }
+    ],
+    toolbar2: [
+      { group: 'structure', items: ['list'] },
+      { group: 'indent', items: ['indent-decrease', 'indent-increase'] },
+      { group: 'typography', items: ['font-family', 'line-height', 'capitalization'] },
+      { group: 'media', items: ['emoji', 'image', 'video'] },
+      { group: 'content', items: ['tag', 'template'] },
+      { group: 'import', items: ['import'] },
+      { group: 'actions', items: ['undo', 'redo'] },
+      { group: 'view', items: ['code-view'] },
+      { group: 'theme', items: ['theme'] }
+    ]
   };
 
   constructor(editor, options = {}) {
     super(editor, options);
     this.buttons = new Map();
     this.toolbar2Visible = false;
-    this.colorPickers = new Map();
     
     this.init();
+    this.preloadIcons();
   }
 
   init() {
     this.container = this.createToolbarContainer();
+  }
+
+  /**
+   * Preload icons for better performance
+   */
+  async preloadIcons() {
+    const iconNames = ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'color', 'background', 'align-left', 'align-center', 'align-right', 'align-justify', 'list-bullet', 'list-ordered', 'list-check', 'indent-increase', 'indent-decrease', 'emoji', 'image', 'video', 'tag', 'template', 'import', 'code-view', 'theme', 'link', 'table', 'undo', 'redo', 'more', 'dropdown'];
+    try {
+      await IconLoader.preloadIcons(iconNames);
+    } catch (error) {
+    }
   }
 
   /**
@@ -52,11 +85,22 @@ class Toolbar extends Module {
     const toolbar = document.createElement('div');
     toolbar.className = className;
 
-    // Create buttons based on toolbar config
+    // Create button groups based on toolbar config
     if (Array.isArray(toolbarItems)) {
-      toolbarItems.forEach(item => {
-        if (typeof item === 'string') {
-          this.addButton(toolbar, item);
+      toolbarItems.forEach(group => {
+        if (group && group.group && Array.isArray(group.items)) {
+          // Create group container
+          const groupContainer = document.createElement('div');
+          groupContainer.className = `toolbar-group toolbar-group-${group.group}`;
+          
+          // Add buttons to group
+          group.items.forEach(item => {
+            if (typeof item === 'string') {
+              this.addButton(groupContainer, item);
+            }
+          });
+          
+          toolbar.appendChild(groupContainer);
         }
       });
     }
@@ -73,93 +117,120 @@ class Toolbar extends Module {
       return this.addMoreButton(container);
     }
 
-    // Special handling for color button
-    if (format === 'color') {
-      return this.addColorButton(container);
+    // Custom buttons with dropdowns
+    const customButtons = {
+      'heading': { text: 'Paragraph', width: '120px', title: 'Format (Headings & Paragraphs)' },
+      'text-size': { text: 'Normal', width: '80px', title: 'Text Size' },
+      'font-family': { text: 'Arial', width: '150px', title: 'Font Family' },
+      'line-height': { text: '1.15', width: '100px', title: 'Line Height' },
+      'capitalization': { text: 'Aa', width: '130px', title: 'Text Capitalization' }
+    };
+
+    if (customButtons[format]) {
+      const config = customButtons[format];
+      const customButton = createCustomButton(config.text, { width: config.width });
+      customButton.dataset.command = format;
+      customButton.classList.add('rich-editor-toolbar-btn', `${format}-btn`);
+      customButton.title = config.title;
+      
+      customButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.emit('toolbar-click', { command: format, button: customButton });
+      });
+
+      this.buttons.set(format, customButton);
+      container.appendChild(customButton);
+      return customButton;
     }
 
+    // Icon buttons with popups
+    const iconButtons = {
+      'text-align': { icon: 'align-left', title: 'Align Left' },
+      'list': { icon: 'list-bullet', title: 'Bullet List' }
+    };
+
+    if (iconButtons[format]) {
+      const config = iconButtons[format];
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = `rich-editor-toolbar-btn ${format}-btn`;
+      button.dataset.command = format;
+      button.title = config.title;
+      
+      IconLoader.getIcon(config.icon).then(svgContent => {
+        button.innerHTML = `<span class="icon">${svgContent}</span>`;
+      }).catch(() => {
+        button.textContent = format === 'text-align' ? '≡' : '•';
+      });
+      
+      button.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.emit('toolbar-click', { command: format, button: button });
+      });
+
+      this.buttons.set(format, button);
+      container.appendChild(button);
+      return button;
+    }
+
+    // Regular icon buttons
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'rich-editor-toolbar-btn';
+    button.className = `rich-editor-toolbar-btn ${format}-btn`;
     button.dataset.command = format;
     
-    // Add icon based on format
-    const icons = {
-      'bold': '𝐁',
-      'italic': '𝐼',
-      'underline': '𝐔',
-      'strike': '𝐒',
-      'subscript': 'X₂',
-      'superscript': 'X²',
-      'color': '🎨',
-      'undo': '↶',
-      'redo': '↷',
-      'more': '⋯'
+    // Add icon
+    const iconElement = IconLoader.createIconElement(format, {
+      width: '16px',
+      height: '16px'
+    });
+    button.appendChild(iconElement);
+    
+    // Set title based on format
+    const titles = {
+      'bold': 'Bold (Ctrl+B)',
+      'italic': 'Italic (Ctrl+I)',
+      'underline': 'Underline (Ctrl+U)',
+      'strike': 'Strikethrough',
+      'subscript': 'Subscript',
+      'superscript': 'Superscript',
+      'color': 'Text Color',
+      'background': 'Background Color',
+      'link': 'Insert/Edit Link',
+      'table': 'Insert Table',
+      'undo': 'Undo (Ctrl+Z)',
+      'redo': 'Redo (Ctrl+Y)',
+      'indent-increase': 'Increase Indent',
+      'indent-decrease': 'Decrease Indent',
+      'emoji': 'Insert Emoji',
+      'image': 'Insert Image',
+      'video': 'Insert Video',
+      'tag': 'Insert Tag',
+      'template': 'Insert Template',
+      'import': 'Import Files',
+      'code-view': 'View HTML Source',
+      'theme': 'Switch Theme'
     };
     
-    button.innerHTML = icons[format] || format;
+    button.title = titles[format] || format;
     
-    // Add special classes and titles
-
-
-
-    if (format === 'subscript') {
-      button.classList.add('subscript-btn');
-      button.title = 'Subscript';
-    } else if (format === 'superscript') {
-      button.classList.add('superscript-btn');
-      button.title = 'Superscript';
-    } else if (format === 'undo') {
-      button.classList.add('undo-btn');
-      button.title = 'Undo (Ctrl+Z)';
-    } else if (format === 'redo') {
-      button.classList.add('redo-btn');
-      button.title = 'Redo (Ctrl+Y)';
-    } else if (format === 'more') {
-      button.classList.add('more-btn');
-      button.title = 'More Options';
+    // Add fallback for code-view
+    if (format === 'code-view') {
+      setTimeout(() => {
+        if (!iconElement.innerHTML.trim()) {
+          iconElement.innerHTML = '&lt;/&gt;';
+          iconElement.style.fontSize = '12px';
+          iconElement.style.fontWeight = 'bold';
+        }
+      }, 1000);
     }
     
-    // Only emit event - no logic handling
     button.addEventListener('click', (e) => {
       e.preventDefault();
       this.emit('toolbar-click', { command: format, button });
     });
 
-    // Store button reference
     this.buttons.set(format, button);
-    container.appendChild(button);
-    return button;
-  }
-
-  /**
-   * Add color button with color picker
-   */
-  addColorButton(container) {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'rich-editor-toolbar-btn color-btn';
-    button.dataset.command = 'color';
-    button.innerHTML = '🎨';
-    button.title = 'Text Color';
-    
-    // Create color picker
-    const colorPicker = new ColorPicker({
-      onColorSelect: (color) => {
-        this.emit('toolbar-click', { command: 'color', button, value: color });
-      }
-    });
-    
-    // Toggle color picker on click
-    button.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      colorPicker.toggle(button);
-    });
-
-    // Store button and color picker references
-    this.buttons.set('color', button);
-    this.colorPickers.set('color', colorPicker);
     container.appendChild(button);
     return button;
   }
@@ -172,16 +243,19 @@ class Toolbar extends Module {
     button.type = 'button';
     button.className = 'rich-editor-toolbar-btn more-btn';
     button.dataset.command = 'more';
-    button.innerHTML = '⋯';
+    
+    const iconElement = IconLoader.createIconElement('more', {
+      width: '16px',
+      height: '16px'
+    });
+    button.appendChild(iconElement);
     button.title = 'More Options';
     
-    // Toggle toolbar 2 visibility
     button.addEventListener('click', (e) => {
       e.preventDefault();
       this.toggleToolbar2();
     });
 
-    // Store button reference
     this.buttons.set('more', button);
     container.appendChild(button);
     return button;
@@ -212,6 +286,7 @@ class Toolbar extends Module {
       }
     }
   }
+
   /**
    * Get toolbar container element
    */
@@ -227,7 +302,7 @@ class Toolbar extends Module {
   }
 
   /**
-   * Set button active state (called by external modules)
+   * Set button active state
    */
   setButtonActive(command, isActive) {
     const button = this.buttons.get(command);
@@ -241,7 +316,7 @@ class Toolbar extends Module {
   }
 
   /**
-   * Set button disabled state (called by external modules)
+   * Set button disabled state
    */
   setButtonDisabled(command, isDisabled) {
     const button = this.buttons.get(command);
@@ -253,7 +328,7 @@ class Toolbar extends Module {
   }
 
   /**
-   * Update button title (called by external modules)
+   * Set button title
    */
   setButtonTitle(command, title) {
     const button = this.buttons.get(command);
@@ -270,33 +345,9 @@ class Toolbar extends Module {
   }
 
   /**
-   * Show toolbar 2
-   */
-  showToolbar2() {
-    if (!this.toolbar2Visible) {
-      this.toggleToolbar2();
-    }
-  }
-
-  /**
-   * Hide toolbar 2
-   */
-  hideToolbar2() {
-    if (this.toolbar2Visible) {
-      this.toggleToolbar2();
-    }
-  }
-
-  /**
    * Destroy toolbar
    */
   destroy() {
-    // Destroy color pickers
-    this.colorPickers.forEach(colorPicker => {
-      colorPicker.destroy();
-    });
-    this.colorPickers.clear();
-    
     if (this.container && this.container.parentNode) {
       this.container.parentNode.removeChild(this.container);
     }

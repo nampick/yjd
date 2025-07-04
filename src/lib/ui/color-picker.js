@@ -1,11 +1,13 @@
 /**
  * Color Picker Component - Simple color picker with popup
  */
+import IconLoader from './icon-loader.js';
+
 class ColorPicker {
   constructor(options = {}) {
     this.options = {
       colors: [
-        '#000000', '#333333', '#666666', '#999999', '#cccccc', '#ffffff',
+        '#000000', '#333333', '#666666', '#999999', '#cccccc', '#eeeeee',
         '#ff0000', '#ff6600', '#ffcc00', '#ffff00', '#99ff00', '#00ff00',
         '#00ffcc', '#00ccff', '#0066ff', '#0000ff', '#6600ff', '#cc00ff',
         '#ff00cc', '#ff0066', '#800000', '#ff8000', '#808000', '#008000',
@@ -16,26 +18,21 @@ class ColorPicker {
       ...options
     };
     
-    this.container = null;
     this.popup = null;
     this.isVisible = false;
     this.currentColor = '#000000';
+    this.clickOutsideHandler = null;
     
     this.createColorPicker();
   }
 
   /**
-   * Create color picker button and popup
+   * Create color picker popup
    */
   createColorPicker() {
-    // Create container
-    this.container = document.createElement('div');
-    this.container.className = 'color-picker-container';
-    
     // Create popup
     this.popup = document.createElement('div');
     this.popup.className = 'color-picker-popup';
-    this.popup.style.display = 'none';
     
     // Create color grid
     this.createColorGrid();
@@ -45,11 +42,8 @@ class ColorPicker {
       this.createCustomColorInput();
     }
     
-    // Add to container
-    this.container.appendChild(this.popup);
-    
-    // Add event listeners
-    this.addEventListeners();
+    // Add popup to body
+    document.body.appendChild(this.popup);
   }
 
   /**
@@ -86,39 +80,120 @@ class ColorPicker {
     const customContainer = document.createElement('div');
     customContainer.className = 'custom-color-container';
     
+    // No color button
+    const noColorButton = document.createElement('button');
+    noColorButton.type = 'button';
+    noColorButton.className = 'color-button no-color-button';
+    noColorButton.title = 'No Color';
+    noColorButton.style.backgroundColor = 'transparent';
+    
+    // Add icon to button
+    const noColorIcon = IconLoader.createIconElement('no-color', {
+      width: '24',
+      height: '24'
+    });
+    noColorButton.appendChild(noColorIcon);
+    
+    noColorButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.selectColor('');
+    });
+    
+    // White button
+    const whiteButton = document.createElement('button');
+    whiteButton.type = 'button';
+    whiteButton.className = 'color-button white-button';
+    whiteButton.style.backgroundColor = '#ffffff';
+    whiteButton.style.border = '1px solid #ccc';
+    whiteButton.title = 'White';
+    
+    whiteButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.selectColor('#ffffff');
+    });
+    
+    // Black button
+    const blackButton = document.createElement('button');
+    blackButton.type = 'button';
+    blackButton.className = 'color-button black-button';
+    blackButton.style.backgroundColor = '#000000';
+    blackButton.title = 'Black';
+    
+    blackButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.selectColor('#000000');
+    });
+    
+    // Custom color button with hidden input
+    const customColorButton = document.createElement('button');
+    customColorButton.type = 'button';
+    customColorButton.className = 'color-button custom-color-button';
+    customColorButton.title = 'Custom Color';
+    customColorButton.style.backgroundColor = 'transparent';
+    customColorButton.style.border = '1px solid #ccc';
+    // Add icon to button
+    const iconElement = IconLoader.createIconElement('custom-color', {
+      width: '16px',
+      height: '16px'
+    });
+    customColorButton.appendChild(iconElement);
+    
     const customInput = document.createElement('input');
     customInput.type = 'color';
     customInput.className = 'custom-color-input';
     customInput.value = this.currentColor;
+    customInput.style.display = 'none';
     
-    const customLabel = document.createElement('label');
-    customLabel.textContent = 'Custom Color';
-    customLabel.className = 'custom-color-label';
+    customColorButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      customInput.click();
+    });
     
     customInput.addEventListener('change', (e) => {
       this.selectColor(e.target.value);
     });
     
-    customContainer.appendChild(customLabel);
+    customContainer.appendChild(noColorButton);
+    customContainer.appendChild(whiteButton);
+    customContainer.appendChild(blackButton);
+    customContainer.appendChild(customColorButton);
     customContainer.appendChild(customInput);
+    
     this.popup.appendChild(customContainer);
   }
 
   /**
-   * Add event listeners
+   * Setup click outside handler
    */
-  addEventListeners() {
-    // Close popup when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!this.container.contains(e.target)) {
+  setupClickOutside() {
+    if (this.clickOutsideHandler) {
+      document.removeEventListener('click', this.clickOutsideHandler);
+    }
+    
+    this.clickOutsideHandler = (e) => {
+      if (!this.popup.contains(e.target)) {
         this.hide();
       }
-    });
+    };
     
-    // Prevent popup from closing when clicking inside
-    this.popup.addEventListener('click', (e) => {
-      e.stopPropagation();
-    });
+    // Add slight delay to avoid immediate close
+    setTimeout(() => {
+      document.addEventListener('click', this.clickOutsideHandler);
+    }, 100);
+  }
+
+  /**
+   * Remove click outside handler
+   */
+  removeClickOutside() {
+    if (this.clickOutsideHandler) {
+      document.removeEventListener('click', this.clickOutsideHandler);
+      this.clickOutsideHandler = null;
+    }
   }
 
   /**
@@ -128,55 +203,51 @@ class ColorPicker {
   show(anchor) {
     if (!anchor) return;
     
-    this.isVisible = true;
-    this.popup.style.display = 'block';
+    // Ensure popup is in DOM
+    if (!document.body.contains(this.popup)) {
+      document.body.appendChild(this.popup);
+    }
     
-    // Position popup relative to anchor
+    // Get dimensions and position
     const anchorRect = anchor.getBoundingClientRect();
-    const popupRect = this.popup.getBoundingClientRect();
+    const popupWidth = 200;
+    const popupHeight = 150;
     
-    // Position below anchor by default
     let top = anchorRect.bottom + window.scrollY + 5;
     let left = anchorRect.left + window.scrollX;
     
     // Adjust if popup would go off screen
-    if (left + popupRect.width > window.innerWidth) {
-      left = window.innerWidth - popupRect.width - 10;
+    if (left + popupWidth > window.innerWidth) {
+      left = window.innerWidth - popupWidth - 10;
     }
     
-    if (top + popupRect.height > window.innerHeight + window.scrollY) {
-      top = anchorRect.top + window.scrollY - popupRect.height - 5;
+    if (top + popupHeight > window.innerHeight + window.scrollY) {
+      top = anchorRect.top + window.scrollY - popupHeight - 5;
     }
     
-    this.popup.style.position = 'absolute';
+    // Keep popup on screen
+    if (left < 0) left = 10;
+    if (top < 0) top = 10;
+    
+    // Set position
     this.popup.style.top = `${top}px`;
     this.popup.style.left = `${left}px`;
-    this.popup.style.zIndex = '1000';
     
-    // Add to document if not already added
-    if (!document.body.contains(this.popup)) {
-      document.body.appendChild(this.popup);
-    }
+    // Show popup by adding visible class
+    this.popup.classList.add('visible');
+    this.isVisible = true;
+    
+    // Setup click outside handler
+    this.setupClickOutside();
   }
 
   /**
    * Hide color picker popup
    */
   hide() {
+    this.popup.classList.remove('visible');
     this.isVisible = false;
-    this.popup.style.display = 'none';
-  }
-
-  /**
-   * Toggle color picker visibility
-   * @param {HTMLElement} anchor - Element to position popup relative to
-   */
-  toggle(anchor) {
-    if (this.isVisible) {
-      this.hide();
-    } else {
-      this.show(anchor);
-    }
+    this.removeClickOutside();
   }
 
   /**
@@ -194,36 +265,12 @@ class ColorPicker {
   }
 
   /**
-   * Get current selected color
-   */
-  getCurrentColor() {
-    return this.currentColor;
-  }
-
-  /**
-   * Set current color
-   * @param {string} color - Color to set
-   */
-  setCurrentColor(color) {
-    this.currentColor = color;
-    
-    // Update custom color input if exists
-    const customInput = this.popup.querySelector('.custom-color-input');
-    if (customInput) {
-      customInput.value = color;
-    }
-  }
-
-  /**
    * Destroy color picker
    */
   destroy() {
+    this.removeClickOutside();
     if (this.popup && this.popup.parentNode) {
       this.popup.parentNode.removeChild(this.popup);
-    }
-    
-    if (this.container && this.container.parentNode) {
-      this.container.parentNode.removeChild(this.container);
     }
   }
 }

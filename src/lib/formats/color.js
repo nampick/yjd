@@ -1,4 +1,5 @@
 import { InlineFormat } from '../core/format.js';
+import ColorPicker from '../ui/color-picker.js';
 
 /**
  * Color Format - Handles text color formatting
@@ -7,6 +8,34 @@ class Color extends InlineFormat {
   static formatName = 'color';
   static tagName = 'SPAN';
   static attribute = 'color';
+
+  constructor() {
+    super();
+    // Create color picker instance if not exists
+    if (!Color.colorPickerInstance) {
+      Color.colorPickerInstance = new ColorPicker({
+        onColorSelect: (color) => {
+          Color.applyColorToCurrentSelection(color);
+        }
+      });
+    }
+    this.colorPicker = Color.colorPickerInstance;
+  }
+
+  /**
+   * Static method to apply color to current selection
+   */
+  static applyColorToCurrentSelection(color) {
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount || selection.isCollapsed) return;
+
+    try {
+      document.execCommand('styleWithCSS', false, true);
+      document.execCommand('foreColor', false, color);
+    } catch (error) {
+      console.error('Error applying color format:', error);
+    }
+  }
 
   /**
    * Apply color formatting with specified color value
@@ -17,16 +46,12 @@ class Color extends InlineFormat {
     if (!selection || !selection.rangeCount || selection.isCollapsed) return;
 
     try {
-        // Bật chế độ ghi CSS thay vì thẻ <font>
-        document.execCommand('styleWithCSS', false, true);
-
-        // Áp dụng màu chữ
-        document.execCommand('foreColor', false, value);
+      document.execCommand('styleWithCSS', false, true);
+      document.execCommand('foreColor', false, value);
     } catch (error) {
-        console.error('Error applying color format:', error);
+      console.error('Error applying color format:', error);
     }
-    }
-  
+  }
 
   /**
    * Remove color formatting
@@ -36,27 +61,33 @@ class Color extends InlineFormat {
     if (!selection || !selection.rangeCount || selection.isCollapsed) return;
 
     try {
-        // Xóa định dạng văn bản khỏi vùng chọn
-        document.execCommand('removeFormat');
-
-        // Ngoài ra, nếu cần xóa cả màu chữ:
-        document.execCommand('styleWithCSS', false, true);
-        document.execCommand('foreColor', false, '#000000'); // Hoặc màu mặc định khác
+      document.execCommand('removeFormat');
+      document.execCommand('styleWithCSS', false, true);
+      document.execCommand('foreColor', false, '#000000');
     } catch (error) {
-        console.error('Error removing formatting:', error);
+      console.error('Error removing formatting:', error);
     }
-    }
+  }
 
   /**
-   * Toggle color formatting
-   * @param {string} value - Color value
+   * Toggle color formatting - shows/hides color picker
    */
-  toggle(value = '#000000') {
-    if (this.isActive()) {
-      this.remove();
+  toggle() {
+    if (this.colorPicker.isVisible) {
+      this.colorPicker.hide();
     } else {
-      this.apply(value);
+      this.showColorPicker();
     }
+  }
+
+  /**
+   * Show color picker positioned relative to color button on toolbar
+   */
+  showColorPicker() {
+    const colorButton = document.querySelector('.rich-editor-toolbar-btn.color-btn');
+    if (!colorButton) return;
+    
+    this.colorPicker.show(colorButton);
   }
 
   /**
@@ -69,13 +100,9 @@ class Color extends InlineFormat {
     const range = selection.getRangeAt(0);
     
     try {
-      // Check if selection contains colored text
       const container = range.commonAncestorContainer;
-      
-      // Check if current node or parent has color styling
       let currentNode = container;
       
-      // Traverse up to find colored spans
       while (currentNode && currentNode !== document.body) {
         if (currentNode.nodeType === Node.ELEMENT_NODE) {
           const element = currentNode;
@@ -86,7 +113,6 @@ class Color extends InlineFormat {
         currentNode = currentNode.parentNode;
       }
       
-      // Check if selection contains any colored spans
       if (container.nodeType === Node.ELEMENT_NODE) {
         const spans = container.querySelectorAll('span[style*="color"]');
         for (let span of spans) {
