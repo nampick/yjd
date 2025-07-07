@@ -13,54 +13,27 @@
     <div id="debug-info">Loading...</div>
   </div>
   
-  <script type="module">
-    // Import the new architecture
-      import RichEditor from './lib/index.js';
-      
-      const debugInfo = document.getElementById('debug-info');
-      function log(message) {
-        console.log(message);
+  <script type="module" src="./main.js"></script>
+  
+  <script>
+    // Simple debug logging
+    const debugInfo = document.getElementById('debug-info');
+    function log(message) {
+      console.log(message);
+      if (debugInfo) {
         debugInfo.innerHTML += `<div>${message}</div>`;
       }
-      
-      try {
-        log('🚀 Creating editor...');
-        
-        // Create editor instance with all new features
-        const editor = new RichEditor('#editor-root', {
-          toolbar: ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'color', 'background', 'link', 'image', 'align', 'table'],
-          modules: ['history', 'media', 'table'],
-          height: 300,
-          theme: 'light',
-          placeholder: '🎉 Welcome! Try all formatting options including headings and font sizes...'
-        });
-
-        log('✅ Editor created successfully');
-        
-        // Debug table module
-        setTimeout(() => {
-          const tableModule = editor.getModule('table');
-          if (tableModule) {
-            log('✅ Table module loaded');
-            log(`Table toolbar exists: ${tableModule.tableToolbar ? 'YES' : 'NO'}`);
-            log(`Grid selector exists: ${tableModule.gridSelector ? 'YES' : 'NO'}`);
-          } else {
-            log('❌ Table module NOT loaded');
-          }
-          
-          // Debug toolbar
-          const toolbarModule = editor.getModule('toolbar');
-          if (toolbarModule) {
-            log('✅ Toolbar module loaded');
-            const tableBtn = document.querySelector('.table-btn');
-            log(`Table button exists: ${tableBtn ? 'YES' : 'NO'}`);
-          }
-        }, 1000);
-
-      } catch (error) {
-        log('❌ Error: ' + error.message);
-        console.error(error);
-      }
+    }
+    
+    // Listen for errors
+    window.addEventListener('error', (e) => {
+      log('❌ Error: ' + e.message);
+    });
+    
+    // Log when page loads
+    window.addEventListener('load', () => {
+      log('✅ Page loaded successfully');
+    });
   </script>
 </body>
 </html> 

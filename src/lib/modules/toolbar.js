@@ -25,7 +25,9 @@ class Toolbar extends Module {
     toolbar2: [
       { group: 'structure', items: ['list'] },
       { group: 'indent', items: ['indent-decrease', 'indent-increase'] },
-      { group: 'typography', items: ['font-family', 'line-height', 'capitalization'] },
+      { group: 'font-family', items: ['font-family'] },
+      { group: 'line-height', items: ['line-height'] },
+      { group: 'capitalization', items: ['capitalization'] },
       { group: 'media', items: ['emoji', 'image', 'video'] },
       { group: 'content', items: ['tag', 'template'] },
       { group: 'import', items: ['import'] },
