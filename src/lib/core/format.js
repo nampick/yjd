@@ -227,10 +227,27 @@ export class InlineFormat extends Format {
     const range = selection.getRangeAt(0);
     let node = range.startContainer;
 
-    // Find if cursor/selection is within a format node
+    const tagName = this.constructor.tagName;
+    const altTags = this.constructor.alternativeTagNames || [];
+    const formatName = this.constructor.formatName;
+
+    // Đặc biệt với một số lệnh hỗ trợ execCommand
+    const commandSupported = ['bold', 'italic', 'underline'];
+    if (commandSupported.includes(formatName?.toLowerCase())) {
+      try {
+        return document.queryCommandState(formatName);
+      } catch (e) {
+        // fallback nếu execCommand không được hỗ trợ
+      }
+    }
+
+    // Kiểm tra DOM tag
     while (node && node !== document.body) {
-      if (node.nodeType === Node.ELEMENT_NODE && 
-          node.tagName === this.constructor.tagName) {
+      if (
+        node.nodeType === Node.ELEMENT_NODE &&
+        (node.tagName === tagName ||
+        altTags.includes(node.tagName))
+      ) {
         return true;
       }
       node = node.parentNode;
@@ -238,6 +255,7 @@ export class InlineFormat extends Format {
 
     return false;
   }
+
 }
 
 /**

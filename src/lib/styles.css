@@ -121,6 +121,17 @@
 }
 .rich-editor-toolbar-btn.active{
   background: #CCCCCC !important;
+  color: #136FDF !important;
+}
+
+.rich-editor-toolbar-btn.active svg,
+.rich-editor-toolbar-btn.active .icon svg {
+  fill: #136FDF !important;
+}
+
+.rich-editor-toolbar-btn.active svg path,
+.rich-editor-toolbar-btn.active .icon svg path {
+  fill: #136FDF !important;
 }
 
 /*block toolbar*/
@@ -144,14 +155,29 @@
   border-radius:4px;
   padding:4px;
   background:transparent;
+  cursor:pointer;
   font-size:14px;
   font-weight:500;
   align-items:center;
   justify-content:center;
   display:inline-flex;
 }
+.block-toolbar-btn:hover{
+  background:#EEEEEE;
+}
 .block-toolbar-btn.active{
   background:#CCCCCC;
+  color: #136FDF !important;
+}
+
+.block-toolbar-btn.active svg,
+.block-toolbar-btn.active .icon svg {
+  fill: #136FDF !important;
+}
+
+.block-toolbar-btn.active svg path,
+.block-toolbar-btn.active .icon svg path {
+  fill: #136FDF !important;
 }
 /* === COLOR PICKER === */
 .color-picker-popup {
@@ -178,9 +204,7 @@
   padding: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   z-index: 1000;
-  min-width: 200px;
-  max-width: 250px;
-  max-height: 300px;
+  max-height: 200px;
   overflow-y: auto;
 }
 
@@ -192,6 +216,21 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+.text-size-select-popup{
+  width: 80px;
+}
+.heading-select-popup{
+  width: 190px;
+}
+.capitalization-select-popup{
+  width: 150px;
+}
+.font-family-select-popup{
+  width: 190px;
+}
+.line-height-select-popup{
+  width: 80px;
 }
 
 .custom-select-item-button {
@@ -549,6 +588,7 @@
 .table-toolbar-btn:active {
   background: #e5e7eb;
   border-color: #9ca3af;
+  color: #136FDF !important;
 }
 
 /* Responsive table toolbar */
@@ -1565,7 +1605,7 @@
 }
 
 .rich-editor-toolbar-btn.code-view-btn.active svg {
-  stroke: white;
+  fill: white;
 }
 
 /* Code view indicator */
@@ -1784,11 +1824,11 @@
 }
 
 .rich-editor-toolbar-btn.theme-btn.dark-theme svg {
-  stroke: #e0e0e0;
+  fill: #e0e0e0;
 }
 
 .rich-editor-toolbar-btn.theme-btn.dark-theme:hover svg {
-  stroke: #ffffff;
+  fill: #ffffff;
 }
 
 /* Theme indicator */
@@ -1814,6 +1854,14 @@
   border-color: transparent;
 }
 
+.theme-dark .rich-editor-toolbar-btn svg {
+  fill: #b0b0b0;
+}
+
+.theme-dark .rich-editor-toolbar-btn svg path {
+  fill: #b0b0b0;
+}
+
 .theme-dark .rich-editor-toolbar-btn:hover {
   background-color: #404040;
   border-color: #606060;
@@ -1826,13 +1874,30 @@
   border-color: #0d7377;
 }
 
-.theme-dark .rich-editor-toolbar-btn svg {
-  stroke: #b0b0b0;
-}
 
 .theme-dark .rich-editor-toolbar-btn:hover svg,
 .theme-dark .rich-editor-toolbar-btn.active svg {
-  stroke: #ffffff;
+  fill: #ffffff !important;
+}
+
+.theme-dark .rich-editor-toolbar-btn.active svg path {
+  fill: #ffffff !important;
+}
+
+.theme-dark .block-toolbar-btn.active svg {
+  fill: #ffffff !important;
+}
+
+.theme-dark .block-toolbar-btn.active svg path {
+  fill: #ffffff !important;
+}
+
+.theme-dark .block-toolbar-btn svg {
+  fill: #b0b0b0;
+}
+
+.theme-dark .block-toolbar-btn svg path {
+  fill: #b0b0b0;
 }
 
 /* Theme-specific editor area styling */

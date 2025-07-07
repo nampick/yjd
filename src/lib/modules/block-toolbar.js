@@ -70,8 +70,12 @@ class BlockToolbar extends Module {
             setTimeout(() => this.showAtCursorAfterEnter(), 10);
           });
         }
+        else{
+          this.hide();
+        }
       });
     }
+
     document.addEventListener('mousedown', (e) => {
       if (!e.target.closest('.block-toolbar') && !e.target.closest('.rich-editor-area')) {
         this.hide();
@@ -285,8 +289,8 @@ class BlockToolbar extends Module {
     let isActive = false;
     if (command === 'font') {
       isActive = false;
-    } else if (command === 'code') {
-      const formatClass = this.editor.registry.get('formats/code');
+    } else if (command === 'code' || command === 'strike') {
+      const formatClass = this.editor.registry.get(`formats/${command}`);
       if (formatClass) {
         const format = new formatClass();
         isActive = format.isActive();
