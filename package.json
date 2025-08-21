@@ -1,20 +1,26 @@
 {
   "name": "yjdtest",
-  "version": "1.0.7",
+  "version": "1.2.0",
   "description": "Thu test build npm lib yjd",
   "license": "ISC",
   "author": "",
   "type": "module",
-  "main": "lib/index.js",
+  "main": "dist/rich-editor.min.js",
+  "module": "lib/index.js",
   "types": "index.d.ts",
   "files": [
     "lib",
     "assets",
+    "dist",
     "index.js",
     "index.d.ts"
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rollup -c"
+  },
+  "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.4",
+    "rollup": "^4.46.3"
   }
 }
