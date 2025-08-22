@@ -36,19 +36,16 @@ export default {
       exclude: []
     }),
     postcss({
-      extract: true,
+      extract: false,
       minimize: true,
-      inject: false
+      inject: true,
+      modules: false
     }),
     copy({
       targets: [
         {
           src: 'src/assets/icon/*',
           dest: 'dist/assets/icon'
-        },
-        {
-          src: 'src/lib/styles.css',
-          dest: 'dist/assets'
         }
       ],
       verbose: true

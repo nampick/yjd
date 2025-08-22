@@ -2,7 +2,8 @@ import Editor from './lib/core/editor.js';
 import registry from './lib/core/registry.js';
 import Module from './lib/core/module.js';
 import { Format, InlineFormat, BlockFormat } from './lib/core/format.js';
-import StylesLoader from './lib/styles-loader.js';
+// Import CSS directly - will be bundled by postcss
+import './lib/styles.css';
 
 // Import formats
 import Bold from './lib/formats/bold.js';
@@ -105,10 +106,7 @@ registry.register('ui/custom-button', createCustomButton, true);
 
 
 
-// Load CSS styles
-StylesLoader.loadStyles().catch(error => {
-  console.warn('Could not load Rich Editor styles:', error);
-});
+// CSS is now bundled directly via import above
 
 // Main Editor class with registration system
 class RichEditor extends Editor {

@@ -1,7 +1,7 @@
 {
   "name": "testyjd-react",
   "type": "module",
-  "version": "1.2.0",
+  "version": "1.2.5",
   "description": "A powerful React rich text editor component with extensive formatting options",
   "main": "dist/index.cjs",
   "module": "dist/index.esm.js",
@@ -11,10 +11,9 @@
       "require": "./dist/index.cjs",
       "default": "./dist/index.esm.js"
     },
-    "./style": "./dist/assets/styles.css",
     "./package.json": "./package.json"
   },
-  "sideEffects": false,
+  "sideEffects": true,
   "types": "dist/index.d.ts",
   "files": [
     "dist",

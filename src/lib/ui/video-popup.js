@@ -1,6 +1,8 @@
 /**
  * Video Popup Component - Popup for inserting videos
  */
+import { appendPopup, calculatePopupPosition, setPopupPosition } from '../utils/popup-helper.js';
+
 class VideoPopup {
   constructor(options = {}) {
     this.options = {
@@ -136,7 +138,7 @@ class VideoPopup {
     content.appendChild(buttonContainer);
     
     this.popup.appendChild(content);
-    document.body.appendChild(this.popup);
+    appendPopup(this.popup);
     
     // Prevent focus loss when clicking on popup
     if (this.options.editor && typeof this.options.editor.preventFocusLoss === 'function') {
@@ -359,26 +361,12 @@ class VideoPopup {
     // Reset state when showing popup
     this.reset();
     
-    const anchorRect = anchor.getBoundingClientRect();
-    const popupWidth = 350;
-    const popupHeight = 280; // Increased height for video preview
-    
-    let top = anchorRect.bottom + window.scrollY + 5;
-    let left = anchorRect.left + window.scrollX;
-    
-    if (left + popupWidth > window.innerWidth) {
-      left = window.innerWidth - popupWidth - 10;
-    }
-    
-    if (top + popupHeight > window.innerHeight + window.scrollY) {
-      top = anchorRect.top + window.scrollY - popupHeight - 5;
-    }
-    
-    if (left < 0) left = 10;
-    if (top < 0) top = 10;
-    
-    this.popup.style.top = `${top}px`;
-    this.popup.style.left = `${left}px`;
+    // Calculate and set popup position
+    const position = calculatePopupPosition(anchor, this.popup, {
+      offsetY: 5,
+      offsetX: 0
+    });
+    setPopupPosition(this.popup, position);
     
     this.popup.classList.add('visible');
     this.isVisible = true;

@@ -1,6 +1,8 @@
 /**
  * Emoji Picker Component - Popup for selecting emojis
  */
+import { appendPopup, calculatePopupPosition, setPopupPosition } from '../utils/popup-helper.js';
+
 class EmojiPicker {
   constructor(options = {}) {
     this.options = {
@@ -67,8 +69,8 @@ class EmojiPicker {
     emojiTextMessage.innerHTML = this.getEmojiShortcutMessage();
     this.popup.appendChild(emojiTextMessage);
 
-    // Add popup to body
-    document.body.appendChild(this.popup);
+    // Add popup to container
+    appendPopup(this.popup);
   }
 
   /**
@@ -137,33 +139,15 @@ class EmojiPicker {
     
     // Ensure popup is in DOM
     if (!document.body.contains(this.popup)) {
-      document.body.appendChild(this.popup);
+      appendPopup(this.popup);
     }
     
-    // Get dimensions and position
-    const anchorRect = anchor.getBoundingClientRect();
-    const popupWidth = 320;
-    const popupHeight = 280;
-    
-    let top = anchorRect.bottom + window.scrollY + 5;
-    let left = anchorRect.left + window.scrollX;
-    
-    // Adjust if popup would go off screen
-    if (left + popupWidth > window.innerWidth) {
-      left = window.innerWidth - popupWidth - 10;
-    }
-    
-    if (top + popupHeight > window.innerHeight + window.scrollY) {
-      top = anchorRect.top + window.scrollY - popupHeight - 5;
-    }
-    
-    // Keep popup on screen
-    if (left < 0) left = 10;
-    if (top < 0) top = 10;
-    
-    // Set position
-    this.popup.style.top = `${top}px`;
-    this.popup.style.left = `${left}px`;
+    // Calculate and set popup position
+    const position = calculatePopupPosition(anchor, this.popup, {
+      offsetY: 5,
+      offsetX: 0
+    });
+    setPopupPosition(this.popup, position);
     
     // Show popup by adding visible class
     this.popup.classList.add('visible');

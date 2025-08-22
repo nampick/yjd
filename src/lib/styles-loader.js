@@ -40,7 +40,7 @@ class StylesLoader {
    */
   static loadFallbackStyles() {
     const fallbackCSS = `
-      .rich-editor-wrapper { 
+      .yjd-rich-editor { 
         position: relative; 
         background: #fff; 
         border: 1px solid #ddd; 
@@ -49,27 +49,27 @@ class StylesLoader {
         flex-direction: column; 
         font-family: system-ui, sans-serif; 
       }
-      .rich-editor-area { 
+      .yjd-rich-editor .rich-editor-area { 
         flex: 1; 
         padding: 20px; 
         outline: none; 
         min-height: 100px; 
       }
-      .rich-editor-toolbar { 
+      .yjd-rich-editor .rich-editor-toolbar { 
         display: flex; 
         gap: 4px; 
         padding: 8px; 
         border-bottom: 1px solid #ddd; 
         background: #f9f9f9; 
       }
-      .rich-editor-toolbar-btn { 
+      .yjd-rich-editor .rich-editor-toolbar-btn { 
         padding: 4px 8px; 
         border: 1px solid #ccc; 
         border-radius: 3px; 
         background: #fff; 
         cursor: pointer; 
       }
-      .table-grid-selector { 
+      .yjd-rich-editor .table-grid-selector { 
         position: absolute; 
         background: white; 
         border: 1px solid #ccc; 
@@ -79,7 +79,7 @@ class StylesLoader {
         z-index: 1000; 
         display: none; 
       }
-      .table-grid-cell { 
+      .yjd-rich-editor .table-grid-cell { 
         width: 20px; 
         height: 20px; 
         border: 1px solid #ddd; 
