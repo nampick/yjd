@@ -1,0 +1,28 @@
+{
+  "name": "testyjdvue",
+  "version": "1.0.5",
+  "private": false,
+  "main": "dist/testyjdvue.umd.js",
+  "files": [
+    "dist/*",
+    "*.js",
+    "*.css",
+    "*.json"
+  ],
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "scripts": {
+    "dev": "vue-cli-service serve",
+    "build": "vue-cli-service build --target lib --name testyjdvue --entry src/components/RichEditorComponent.vue",
+    "preview": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "vue": "^3.5.18"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^5.0.8",
+    "@vue/cli-plugin-eslint": "^5.0.8",
+    "@vue/cli-service": "^5.0.8"
+  }
+}
