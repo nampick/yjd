@@ -39,6 +39,31 @@ class Toolbar extends Module {
     super(editor, options);
     this.buttons = new Map();
     this.toolbar2Visible = false;
+    this.events = new Map(); // Add event system
+    
+    
+    // Handle toolbar configuration
+    if (Array.isArray(options.toolbar)) {
+      // If toolbar array is provided, use only those items - COMPLETELY OVERRIDE DEFAULTS
+      this.options = {
+        container: null,
+        toolbar1: [
+          { group: 'text-format', items: options.toolbar }
+        ],
+        toolbar2: []
+      };
+    } else if (options.toolbar1 || options.toolbar2) {
+      // If specific toolbar1/toolbar2 config is provided, use it - COMPLETELY OVERRIDE DEFAULTS
+      this.options = {
+        container: null,
+        toolbar1: options.toolbar1 || [],
+        toolbar2: options.toolbar2 || []
+      };
+    } else {
+      // Use full default configuration
+      this.options = { ...Toolbar.DEFAULTS, ...options };
+    }
+    
     
     this.init();
     this.preloadIcons();
@@ -362,6 +387,29 @@ class Toolbar extends Module {
   }
 
   /**
+   * Event system methods
+   */
+  on(event, callback) {
+    if (!this.events.has(event)) {
+      this.events.set(event, []);
+    }
+    this.events.get(event).push(callback);
+  }
+
+  emit(event, data) {
+    const callbacks = this.events.get(event);
+    if (callbacks) {
+      callbacks.forEach(callback => {
+        try {
+          callback(data);
+        } catch (error) {
+          console.error(`Error in toolbar event ${event}:`, error);
+        }
+      });
+    }
+  }
+
+  /**
    * Destroy toolbar
    */
   destroy() {
@@ -369,6 +417,7 @@ class Toolbar extends Module {
       this.container.parentNode.removeChild(this.container);
     }
     this.buttons.clear();
+    this.events.clear();
   }
 }
 

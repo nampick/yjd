@@ -198,7 +198,6 @@ class CodeView extends Module {
       toolbar.setButtonTitle('code-view', buttonTitle);
       
     } else {
-      console.warn('❌ Toolbar module not found');
     }
   }
 

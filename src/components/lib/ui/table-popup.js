@@ -2,6 +2,7 @@
  * Table Popup Component - Interactive table size picker
  */
 import { PopupPositioning } from '../utils/popup-positioning.js';
+import { appendPopup, calculatePopupPosition, setPopupPosition } from '../utils/popup-helper.js';
 
 class TablePopup {
   constructor(options = {}) {
@@ -38,7 +39,7 @@ class TablePopup {
     content.appendChild(this.grid);
     content.appendChild(this.sizeDisplay);
     this.popup.appendChild(content);
-    document.body.appendChild(this.popup);
+    appendPopup(this.popup);
   }
 
   createSizeDisplay() {
@@ -130,20 +131,12 @@ class TablePopup {
     this.selectedCols = 1;
     this.highlightGrid(1, 1);
     
-    // Get mobile max dimensions
-    const mobileDims = PopupPositioning.getMobileMaxDimensions();
-    
-    // Calculate optimal position using responsive positioning utility
-    const position = PopupPositioning.calculatePosition(anchor, this.popup, {
+    // Calculate and set popup position
+    const position = calculatePopupPosition(anchor, this.popup, {
       offsetY: 5,
-      preferredPosition: 'bottom-right',
-      maxWidth: mobileDims.maxWidth,
-      maxHeight: mobileDims.maxHeight
+      offsetX: 0
     });
-    
-    // Apply position
-    PopupPositioning.applyPosition(this.popup, position);
-    this.popup.style.zIndex = '1000';
+    setPopupPosition(this.popup, position);
     
     // Show popup
     this.popup.classList.add('visible');

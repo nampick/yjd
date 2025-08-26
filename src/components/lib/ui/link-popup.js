@@ -1,6 +1,8 @@
 /**
  * Link Popup Component - Simple link popup
  */
+import { appendPopup, calculatePopupPosition, setPopupPosition } from '../utils/popup-helper.js';
+
 class LinkPopup {
   constructor(options = {}) {
     this.options = {
@@ -104,7 +106,7 @@ class LinkPopup {
     content.appendChild(buttonContainer);
     
     this.popup.appendChild(content);
-    document.body.appendChild(this.popup);
+    appendPopup(this.popup);
     
     // Prevent focus loss when clicking on popup
     if (this.options.editor && typeof this.options.editor.preventFocusLoss === 'function') {
@@ -146,32 +148,12 @@ class LinkPopup {
     // Use selected text if available, otherwise use existing link text or empty
     this.textInput.value = selectedText || (existingLink ? existingLink.text : '');
     
-    // Position popup with responsive positioning
-    const anchorRect = anchor.getBoundingClientRect();
-    const popupWidth = 350; // Estimated popup width
-    const popupHeight = 200; // Estimated popup height
-    
-    let top = anchorRect.bottom + window.scrollY + 5;
-    let left = anchorRect.left + window.scrollX;
-    
-    // Check if popup would overflow right edge
-    if (left + popupWidth > window.innerWidth) {
-      left = window.innerWidth - popupWidth - 10;
-    }
-    
-    // Check if popup would overflow bottom edge
-    if (top + popupHeight > window.innerHeight + window.scrollY) {
-      top = anchorRect.top + window.scrollY - popupHeight - 5;
-    }
-    
-    // Ensure popup doesn't go off-screen
-    if (left < 0) left = 10;
-    if (top < 0) top = 10;
-    
-    this.popup.style.position = 'absolute';
-    this.popup.style.top = `${top}px`;
-    this.popup.style.left = `${left}px`;
-    this.popup.style.zIndex = '1000';
+    // Calculate and set popup position
+    const position = calculatePopupPosition(anchor, this.popup, {
+      offsetY: 5,
+      offsetX: 0
+    });
+    setPopupPosition(this.popup, position);
     
     // Show popup
     this.popup.classList.add('visible');

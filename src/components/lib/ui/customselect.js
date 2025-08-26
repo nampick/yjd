@@ -1,4 +1,5 @@
 import IconUtils from './icons.js';
+import { appendPopup, calculatePopupPosition, setPopupPosition } from '../utils/popup-helper.js';
 
 /**
  * Custom Select Component - Reusable dropdown/popup select component
@@ -33,8 +34,8 @@ class CustomSelect {
     this.popup = document.createElement('div');
     this.popup.className = `${this.options.className}-popup`;
 
-    // Add popup to body
-    document.body.appendChild(this.popup);
+    // Add popup to container
+    appendPopup(this.popup);
     
     // Initialize async
     this.init();
@@ -203,43 +204,18 @@ class CustomSelect {
     
     // Ensure popup is in DOM
     if (!document.body.contains(this.popup)) {
-      document.body.appendChild(this.popup);
+      appendPopup(this.popup);
     }
     
     // Update current selection highlight
     this.highlightCurrentItem(this.currentValue);
     
-    // Get dimensions and position
-    const anchorRect = anchor.getBoundingClientRect();
-    const popupWidth = this.options.width;
-    const popupHeight = this.options.height;
-    
-    // Calculate initial position - center horizontally on anchor
-    let top = anchorRect.bottom + window.scrollY + 5;
-    let left = anchorRect.left + window.scrollX + (anchorRect.width / 2) - (popupWidth / 2);
-    
-    // Adjust if popup would go off screen horizontally
-    if (left + popupWidth > window.innerWidth) {
-      left = window.innerWidth - popupWidth - 10;
-    }
-    if (left < 0) {
-      left = 10;
-    }
-    
-    // Adjust if popup would go off screen vertically
-    if (top + popupHeight > window.innerHeight + window.scrollY) {
-      // Show above the anchor instead
-      top = anchorRect.top + window.scrollY - popupHeight - 5;
-    }
-    
-    // Keep popup on screen
-    if (top < 0) {
-      top = 10;
-    }
-    
-    // Set position
-    this.popup.style.top = `${top}px`;
-    this.popup.style.left = `${left}px`;
+    // Calculate and set popup position
+    const position = calculatePopupPosition(anchor, this.popup, {
+      offsetY: 5,
+      offsetX: 0
+    });
+    setPopupPosition(this.popup, position);
     
     // Show popup by adding visible class
     this.popup.classList.add('visible');
@@ -270,7 +246,12 @@ class CustomSelect {
    */
   updatePosition() {
     if (this.isVisible && this.currentAnchor) {
-      this.show(this.currentAnchor);
+      // Calculate and set popup position
+      const position = calculatePopupPosition(this.currentAnchor, this.popup, {
+        offsetY: 5,
+        offsetX: 0
+      });
+      setPopupPosition(this.popup, position);
     }
   }
 

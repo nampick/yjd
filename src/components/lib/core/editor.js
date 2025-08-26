@@ -7,7 +7,6 @@ import Module from './module.js';
  */
 export default class Editor {
   static DEFAULTS = {
-    toolbar: ['bold', 'italic', 'underline', 'strike'],
     placeholder: 'Type here...',
     theme: 'light',
     height: 400,
@@ -42,7 +41,7 @@ export default class Editor {
     
     // Set as current instance
     Editor.currentInstance = this;
-    
+        
     this.init();
   }
 
@@ -64,13 +63,16 @@ export default class Editor {
   createStructure() {
     // Create wrapper
     this.wrapper = document.createElement('div');
-    this.wrapper.className = 'rich-editor-wrapper';
+    this.wrapper.className = 'yjd-rich-editor';
     
     // Apply dynamic sizing
     this.wrapper.style.width = this.options.width + 'px';
     this.wrapper.style.maxWidth = this.options.maxWidth + 'px';
     this.wrapper.style.minHeight = this.options.height + 'px';
     this.wrapper.style.maxHeight = this.options.maxHeight + 'px';
+    
+    // Set position relative for popup positioning
+    this.wrapper.style.position = 'relative';
 
     // Create editor area
     this.editor = document.createElement('div');
@@ -89,6 +91,18 @@ export default class Editor {
     this.editor.innerHTML = this.getDefaultContent();
     
     this.wrapper.appendChild(this.editor);
+
+    // Create popup container
+    this.popupContainer = document.createElement('div');
+    this.popupContainer.className = 'rich-editor-popup-container';
+    this.popupContainer.style.position = 'absolute';
+    this.popupContainer.style.top = '0';
+    this.popupContainer.style.left = '0';
+    this.popupContainer.style.width = '100%';
+    this.popupContainer.style.height = '100%';
+    this.popupContainer.style.pointerEvents = 'none';
+    this.popupContainer.style.zIndex = '1000';
+    this.wrapper.appendChild(this.popupContainer);
 
     // Create statusbar if needed
     if (this.options.features.wordCount || this.options.features.breadcrumb) {
@@ -144,13 +158,26 @@ export default class Editor {
    * Load and initialize modules
    */
   loadModules() {
-    // Load default modules
-    const defaultModules = ['toolbar', 'history', 'block-toolbar', 'table-toolbar', 'code-view', 'theme-switcher', 'resize-handles'];
+    // Determine which modules to load
+    let modulesToLoad;
     
-    defaultModules.forEach(moduleName => {
+    // Check if user provided toolbar configuration
+    const hasToolbarConfig = this.options.toolbar || this.options.toolbar1 || this.options.toolbar2;
+    
+    if (hasToolbarConfig) {
+      // User wants custom toolbar - load only basic modules
+      modulesToLoad = this.options.modules || ['toolbar', 'history'];
+    } else {
+      // No toolbar config - load full feature set
+      modulesToLoad = this.options.modules || ['toolbar', 'history', 'block-toolbar', 'table-toolbar', 'code-view', 'theme-switcher', 'resize-handles'];
+    }
+    
+    
+    modulesToLoad.forEach(moduleName => {
       const ModuleClass = this.registry.get(`modules/${moduleName}`);
       if (ModuleClass) {
-        const moduleOptions = this.options[moduleName] || this.options;
+        // For toolbar module, pass all options so it can detect toolbar config
+        const moduleOptions = moduleName === 'toolbar' ? this.options : (this.options[moduleName] || this.options);
         const moduleInstance = new ModuleClass(this, moduleOptions);
         this.modules.set(moduleName, moduleInstance);
         
@@ -174,18 +201,31 @@ export default class Editor {
    * Load and initialize formats
    */
   loadFormats() {
-    // Load default formats
-    const defaultFormats = [
-      'bold', 'italic', 'underline', 'strike', 'subscript', 'superscript',
-      'color', 'background', 'text-align', 'text-size', 'link',
-      'code', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 
-      'paragraph', 'pre'
-    ];
+    // Determine which formats to load
+    let formatsToLoad;
     
-    defaultFormats.forEach(formatName => {
+    // Check if user provided toolbar configuration
+    const hasToolbarConfig = this.options.toolbar || this.options.toolbar1 || this.options.toolbar2;
+    
+    if (hasToolbarConfig) {
+      // User wants custom toolbar - load only basic formats
+      formatsToLoad = this.options.formats || ['bold', 'italic', 'underline', 'strike'];
+    } else {
+      // No toolbar config - load full feature set
+      formatsToLoad = this.options.formats || [
+        'bold', 'italic', 'underline', 'strike', 'subscript', 'superscript',
+        'color', 'background', 'text-align', 'text-size', 'link',
+        'code', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 
+        'paragraph', 'pre'
+      ];
+    }
+    
+    
+    formatsToLoad.forEach(formatName => {
       const FormatClass = this.registry.get(`formats/${formatName}`);
       if (FormatClass) {
         this.formats.set(formatName, FormatClass);
+      } else {
       }
     });
   }
@@ -301,8 +341,17 @@ export default class Editor {
         module.onContentChange();
       }
     });
+    
+    // Get current content
+    const content = this.getContent();
+    
+    // Call onChange callback if provided
+    if (this.options.onChange && typeof this.options.onChange === 'function') {
+      this.options.onChange(content);
+    }
+    
     // Emit text-change event
-    this.emit('text-change', this.getContent());
+    this.emit('text-change', content);
   }
 
   /**
@@ -349,9 +398,12 @@ export default class Editor {
       return;
     }
     
-    // Check if the last child is a paragraph element
+    // Check if the last child is a block element that can contain text
     const lastChild = children[children.length - 1];
-    if (lastChild.tagName !== 'P') {
+    const blockTags = ['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'PRE', 'ARTICLE', 'SECTION', 'MAIN', 'ASIDE'];
+    
+    // Only add paragraph if the last child is not a block element that can contain text
+    if (!blockTags.includes(lastChild.tagName)) {
       // Add a paragraph element at the end for editing
       const paragraph = document.createElement('p');
       paragraph.innerHTML = '<br>';
@@ -754,7 +806,6 @@ export default class Editor {
     
     const FormatClass = this.registry.get(`formats/${registryKey}`);
     if (!FormatClass) {
-      console.warn(`Format class not found: formats/${registryKey}`);
       return;
     }
     
@@ -923,5 +974,22 @@ export default class Editor {
     if (editorInstance) {
       setTimeout(() => editorInstance.focus(), 0);
     }
+  }
+
+  /**
+   * Get popup container for this editor instance
+   * @returns {HTMLElement} Popup container element
+   */
+  getPopupContainer() {
+    return this.popupContainer;
+  }
+
+  /**
+   * Get popup container from current editor instance
+   * @returns {HTMLElement|null} Popup container element or null if no current instance
+   */
+  static getPopupContainer() {
+    const currentInstance = Editor.getCurrentInstance();
+    return currentInstance ? currentInstance.getPopupContainer() : null;
   }
 } 
