@@ -291,10 +291,17 @@ class BlockToolbar extends Module {
     const toolbarRect = this.blockToolbar.getBoundingClientRect();
     const toolbarContainer = this.editor.wrapper.querySelector('.rich-editor-toolbar-container');
     const toolbarRect2 = toolbarContainer ? toolbarContainer.getBoundingClientRect() : null;
-
+    
     
     let left = x - this.blockToolbar.offsetWidth/2;
-    let top = editorRect.y + y -(toolbarRect2.height) -60- editorArea.scrollTop;
+    let top = editorRect.y + y -(toolbarRect2.height) - editorArea.scrollTop - (editorRect.y + window.scrollY);
+    console.log('editorRect.y', editorRect.y);
+    console.log('y', y);
+    console.log('toolbarRect2.height', toolbarRect2.height);
+    console.log('editorArea.scrollTop', editorArea.scrollTop);
+    console.log('top', top);
+    console.log('window.scrollY', window.scrollY);
+
     let arrowLeft = '50%';
     let arrowDirection = 'down'; // mũi tên hướng xuống
     
@@ -311,8 +318,9 @@ class BlockToolbar extends Module {
     }
     
     // Trường hợp 3: Vượt quá lề trên của editor
+
     if (top < toolbarRect2.height) {
-      top = editorRect.y + y -(toolbarRect2.height) +60- editorArea.scrollTop;
+      top = editorRect.y + y -(toolbarRect2.height) - editorArea.scrollTop +100 - (editorRect.y + window.scrollY);
       arrowDirection = 'up'; // Mũi tên hướng lên
       if(top < toolbarRect2.height ){
         this.hide();

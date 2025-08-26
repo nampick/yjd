@@ -281,7 +281,6 @@ class ResizeHandles extends Module {
     const width = elementRect.width;
     const height = elementRect.height;
     const bottom = top + height;
-    console.log("top ,bottom",top ,bottom);
     this.handlesContainer.style.top = top + 'px';
     this.handlesContainer.style.left = left + 'px';
     this.handlesContainer.style.width = width + 'px';

@@ -1,6 +1,6 @@
 /**
  * Popup Helper Utility
- * Helps popups append to the rich-editor-wrapper instead of document.body
+ * Helps popups append to the yjd-rich-editor instead of document.body
  */
 import Editor from '../core/editor.js';
 

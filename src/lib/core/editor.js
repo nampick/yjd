@@ -7,7 +7,6 @@ import Module from './module.js';
  */
 export default class Editor {
   static DEFAULTS = {
-    toolbar: ['bold', 'italic', 'underline', 'strike'],
     placeholder: 'Type here...',
     theme: 'light',
     height: 400,
@@ -42,7 +41,7 @@ export default class Editor {
     
     // Set as current instance
     Editor.currentInstance = this;
-    
+        
     this.init();
   }
 
@@ -159,13 +158,26 @@ export default class Editor {
    * Load and initialize modules
    */
   loadModules() {
-    // Load default modules
-    const defaultModules = ['toolbar', 'history', 'block-toolbar', 'table-toolbar', 'code-view', 'theme-switcher', 'resize-handles'];
+    // Determine which modules to load
+    let modulesToLoad;
     
-    defaultModules.forEach(moduleName => {
+    // Check if user provided toolbar configuration
+    const hasToolbarConfig = this.options.toolbar || this.options.toolbar1 || this.options.toolbar2;
+    
+    if (hasToolbarConfig) {
+      // User wants custom toolbar - load only basic modules
+      modulesToLoad = this.options.modules || ['toolbar', 'history'];
+    } else {
+      // No toolbar config - load full feature set
+      modulesToLoad = this.options.modules || ['toolbar', 'history', 'block-toolbar', 'table-toolbar', 'code-view', 'theme-switcher', 'resize-handles'];
+    }
+    
+    
+    modulesToLoad.forEach(moduleName => {
       const ModuleClass = this.registry.get(`modules/${moduleName}`);
       if (ModuleClass) {
-        const moduleOptions = this.options[moduleName] || this.options;
+        // For toolbar module, pass all options so it can detect toolbar config
+        const moduleOptions = moduleName === 'toolbar' ? this.options : (this.options[moduleName] || this.options);
         const moduleInstance = new ModuleClass(this, moduleOptions);
         this.modules.set(moduleName, moduleInstance);
         
@@ -189,18 +201,31 @@ export default class Editor {
    * Load and initialize formats
    */
   loadFormats() {
-    // Load default formats
-    const defaultFormats = [
-      'bold', 'italic', 'underline', 'strike', 'subscript', 'superscript',
-      'color', 'background', 'text-align', 'text-size', 'link',
-      'code', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 
-      'paragraph', 'pre'
-    ];
+    // Determine which formats to load
+    let formatsToLoad;
     
-    defaultFormats.forEach(formatName => {
+    // Check if user provided toolbar configuration
+    const hasToolbarConfig = this.options.toolbar || this.options.toolbar1 || this.options.toolbar2;
+    
+    if (hasToolbarConfig) {
+      // User wants custom toolbar - load only basic formats
+      formatsToLoad = this.options.formats || ['bold', 'italic', 'underline', 'strike'];
+    } else {
+      // No toolbar config - load full feature set
+      formatsToLoad = this.options.formats || [
+        'bold', 'italic', 'underline', 'strike', 'subscript', 'superscript',
+        'color', 'background', 'text-align', 'text-size', 'link',
+        'code', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 
+        'paragraph', 'pre'
+      ];
+    }
+    
+    
+    formatsToLoad.forEach(formatName => {
       const FormatClass = this.registry.get(`formats/${formatName}`);
       if (FormatClass) {
         this.formats.set(formatName, FormatClass);
+      } else {
       }
     });
   }
@@ -316,8 +341,17 @@ export default class Editor {
         module.onContentChange();
       }
     });
+    
+    // Get current content
+    const content = this.getContent();
+    
+    // Call onChange callback if provided
+    if (this.options.onChange && typeof this.options.onChange === 'function') {
+      this.options.onChange(content);
+    }
+    
     // Emit text-change event
-    this.emit('text-change', this.getContent());
+    this.emit('text-change', content);
   }
 
   /**
@@ -769,7 +803,6 @@ export default class Editor {
     
     const FormatClass = this.registry.get(`formats/${registryKey}`);
     if (!FormatClass) {
-      console.warn(`Format class not found: formats/${registryKey}`);
       return;
     }
     

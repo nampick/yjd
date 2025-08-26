@@ -37,7 +37,6 @@ class Background extends InlineFormat {
     const backgroundButton = document.querySelector('.rich-editor-toolbar-btn.background-btn');
 
     try {
-      console.log(color);
       
       document.execCommand('styleWithCSS', false, true);
       document.execCommand('backColor', false, color);

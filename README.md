@@ -4,49 +4,70 @@ A powerful and feature-rich React text editor component with extensive formattin
 
 ## Features
 
-- 🎨 **Rich Formatting**: Bold, italic, underline, strikethrough, subscript, superscript
-- 🌈 **Colors & Styling**: Text color, background color, font family, text size, line height
-- 📝 **Text Alignment**: Left, center, right, justify alignment
-- 📋 **Lists**: Ordered and unordered lists with indentation
-- 🔗 **Links**: Insert and edit hyperlinks
-- 🖼️ **Media**: Image and video embedding
-- 📊 **Tables**: Create and edit tables with toolbar
-- 😀 **Emojis**: Built-in emoji picker
-- 🏷️ **Tags**: Custom tag system
-- 📱 **Responsive**: Mobile-friendly design
-- ⌨️ **Keyboard Shortcuts**: Full keyboard support
-- 🔄 **Undo/Redo**: History management
-- 💾 **Import/Export**: Content import and export functionality
+✨ **Rich Text Formatting**
+
+- Bold, italic, underline, strikethrough
+- Subscript and superscript
+- Text color and background color
+- Font family and text size
+- Text alignment and line height
+- Text capitalization
+
+🎯 **Advanced Features**
+
+- Multiple toolbar configurations (toolbar1, toolbar2)
+- Lists and indentation
+- Links and images
+- Tables and video embedding
+- Emoji support
+- Import/export functionality
+- Word count and breadcrumb navigation
+- Responsive design
+
+🔧 **Developer Friendly**
+
+- Simple prop-based configuration
+- Content change callbacks
+- Controlled and uncontrolled modes
+- TypeScript support
+- Modern React hooks implementation
 
 ## Installation
-
-Install the package via npm:
 
 ```bash
 npm install testyjd-react
 ```
 
-Or using yarn:
+or
 
 ```bash
 yarn add testyjd-react
 ```
 
-## Basic Usage
-
-### 1. Import the Component
+## Quick Start
 
 ```jsx
-import React from "react";
+import React, { useState } from "react";
 import ReactRichEditor from "testyjd-react";
-// Import CSS styles (required)
-import "testyjd-react/dist/assets/styles.css";
 
 function App() {
+  const [content, setContent] = useState("");
+
+  const handleTextChange = (newContent) => {
+    console.log("Content changed:", newContent);
+    setContent(newContent);
+  };
+
   return (
-    <div className="App">
-      <h1>My Rich Text Editor</h1>
-      <ReactRichEditor />
+    <div>
+      <h1>My Rich Editor</h1>
+      <ReactRichEditor
+        width="100%"
+        height="400px"
+        placeholder="Start typing your content here..."
+        content={content}
+        onChange={handleTextChange}
+      />
     </div>
   );
 }
@@ -54,140 +75,78 @@ function App() {
 export default App;
 ```
 
-### 2. Basic Implementation
+## Props
 
-```jsx
-import React, { useRef } from "react";
-import ReactRichEditor from "testyjd-react";
-import "testyjd-react/dist/assets/styles.css";
+| Prop          | Type       | Default             | Description                                   |
+| ------------- | ---------- | ------------------- | --------------------------------------------- |
+| `width`       | `string`   | `'100%'`            | Width of the editor container                 |
+| `height`      | `string`   | `'300px'`           | Height of the editor container                |
+| `placeholder` | `string`   | `'Start typing...'` | Placeholder text shown when editor is empty   |
+| `content`     | `string`   | `undefined`         | Controlled content value (HTML string)        |
+| `toolbar1`    | `array`    | `undefined`         | Custom toolbar configuration (first toolbar)  |
+| `toolbar2`    | `array`    | `undefined`         | Custom toolbar configuration (second toolbar) |
+| `onChange`    | `function` | `undefined`         | Callback fired when content changes           |
 
-function MyEditor() {
-  const editorRef = useRef(null);
+## Usage Examples
 
-  const handleSave = () => {
-    if (editorRef.current) {
-      const content = editorRef.current.getHTML();
-      console.log("Editor content:", content);
-    }
-  };
-
-  return (
-    <div>
-      <ReactRichEditor
-        ref={editorRef}
-        width="100%"
-        height="400px"
-        defaultContent="<p>Start typing here...</p>"
-      />
-      <button onClick={handleSave}>Save Content</button>
-    </div>
-  );
-}
-
-export default MyEditor;
-```
-
-## Configuration & Props
-
-### Component Props
-
-| Prop             | Type      | Default             | Description                                 |
-| ---------------- | --------- | ------------------- | ------------------------------------------- |
-| `width`          | `string`  | `'100%'`            | Width of the editor container               |
-| `height`         | `string`  | `'300px'`           | Height of the editor container              |
-| `defaultContent` | `string`  | `''`                | Initial HTML content to display             |
-| `style`          | `object`  | `{}`                | Additional CSS styles for the container     |
-| `className`      | `string`  | `''`                | CSS class name for the container            |
-| `placeholder`    | `string`  | `'Start typing...'` | Placeholder text when editor is empty       |
-| `readOnly`       | `boolean` | `false`             | Make the editor read-only                   |
-| `theme`          | `string`  | `'default'`         | Editor theme ('default', 'dark', 'minimal') |
-
-### Editor Options
-
-You can pass additional configuration options to customize the editor behavior:
+### Basic Usage
 
 ```jsx
 <ReactRichEditor
-  // Basic props
   width="800px"
   height="500px"
-  defaultContent="<h1>Welcome!</h1><p>Start editing...</p>"
-  // Editor configuration
-  toolbar={{
-    show: true,
-    items: ["bold", "italic", "underline", "color", "link", "image"],
-  }}
-  // Formatting options
-  formats={{
-    bold: true,
-    italic: true,
-    underline: true,
-    strike: true,
-    color: true,
-    background: true,
-    link: true,
-    image: true,
-    video: true,
-    table: true,
-    list: true,
-    emoji: true,
-  }}
-  // Modules configuration
-  modules={{
-    toolbar: true,
-    history: true,
-    blockToolbar: true,
-    tableToolbar: true,
-    resizeHandles: true,
-  }}
+  placeholder="Write something amazing..."
+  onChange={(content) => console.log(content)}
 />
 ```
 
-## Advanced Usage
+### Controlled Component
 
-### 1. Custom Styling
+```jsx
+const [editorContent, setEditorContent] = useState("<p>Initial content</p>");
+
+<ReactRichEditor
+  content={editorContent}
+  onChange={setEditorContent}
+  width="100%"
+  height="400px"
+/>;
+```
+
+### Custom Toolbar Configuration
 
 ```jsx
 <ReactRichEditor
-  width="100%"
-  height="600px"
-  style={{
-    border: "2px solid #007bff",
-    borderRadius: "8px",
-    backgroundColor: "#f8f9fa",
-    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-  }}
-  className="my-custom-editor"
+  toolbar1={["bold", "italic", "underline", "color"]}
+  toolbar2={["heading", "list", "link", "image"]}
+  onChange={(content) => handleContentChange(content)}
 />
 ```
 
-### 2. Event Handling
+### Full-Featured Editor
 
 ```jsx
-import React, { useRef, useState } from "react";
-import ReactRichEditor from "testyjd-react";
-
-function EditorWithEvents() {
-  const editorRef = useRef(null);
+function RichTextEditor() {
   const [content, setContent] = useState("");
 
-  const handleContentChange = () => {
-    if (editorRef.current) {
-      const newContent = editorRef.current.getHTML();
-      setContent(newContent);
-    }
+  const handleContentChange = (newContent) => {
+    setContent(newContent);
+    // Auto-save or other logic here
+    console.log("Content updated:", newContent);
   };
 
   return (
-    <div>
+    <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px" }}>
       <ReactRichEditor
-        ref={editorRef}
-        defaultContent="<p>Type something...</p>"
+        width="100%"
+        height="600px"
+        placeholder="Create your masterpiece..."
+        content={content}
         onChange={handleContentChange}
       />
 
-      <div>
-        <h3>Live Preview:</h3>
+      <div style={{ marginTop: "20px" }}>
+        <h3>Content Preview:</h3>
         <div dangerouslySetInnerHTML={{ __html: content }} />
       </div>
     </div>
@@ -195,114 +154,85 @@ function EditorWithEvents() {
 }
 ```
 
-### 3. Programmatic Control
+## Available Toolbar Options
+
+When customizing `toolbar1` or `toolbar2`, you can include any of these options:
+
+### Text Formatting
+
+- `'bold'` - Bold text
+- `'italic'` - Italic text
+- `'underline'` - Underlined text
+- `'strike'` - Strikethrough text
+- `'subscript'` - Subscript text
+- `'superscript'` - Superscript text
+
+### Colors and Styling
+
+- `'color'` - Text color
+- `'background'` - Background color
+- `'text-size'` - Font size
+- `'font-family'` - Font family
+- `'line-height'` - Line height
+- `'capitalization'` - Text capitalization
+
+### Layout and Structure
+
+- `'text-align'` - Text alignment
+- `'heading'` - Headings (H1-H6)
+- `'list'` - Ordered and unordered lists
+- `'indent'` - Text indentation
+
+### Media and Links
+
+- `'link'` - Insert links
+- `'image'` - Insert images
+- `'video'` - Insert videos
+- `'emoji'` - Emoji picker
+
+### Advanced Features
+
+- `'table'` - Insert tables
+- `'tag'` - Insert tags
+- `'import'` - Import content
+
+## Event Handling
+
+The `onChange` callback receives the updated content as an HTML string:
 
 ```jsx
-import React, { useRef } from "react";
-import ReactRichEditor from "testyjd-react";
+const handleContentChange = (content) => {
+  // content is an HTML string
+  console.log("New content:", content);
 
-function ProgrammaticEditor() {
-  const editorRef = useRef(null);
+  // You can parse or process the content as needed
+  const textOnly = content.replace(/<[^>]*>/g, ""); // Strip HTML tags
+  console.log("Text only:", textOnly);
+};
 
-  const insertText = () => {
-    if (editorRef.current) {
-      editorRef.current.insertText("Hello World!");
-    }
-  };
-
-  const formatBold = () => {
-    if (editorRef.current) {
-      editorRef.current.format("bold", true);
-    }
-  };
-
-  const getContent = () => {
-    if (editorRef.current) {
-      const html = editorRef.current.getHTML();
-      const text = editorRef.current.getText();
-      console.log("HTML:", html);
-      console.log("Text:", text);
-    }
-  };
-
-  return (
-    <div>
-      <div style={{ marginBottom: "10px" }}>
-        <button onClick={insertText}>Insert Text</button>
-        <button onClick={formatBold}>Make Bold</button>
-        <button onClick={getContent}>Get Content</button>
-      </div>
-
-      <ReactRichEditor ref={editorRef} height="300px" />
-    </div>
-  );
-}
+<ReactRichEditor onChange={handleContentChange} />;
 ```
-
-## API Reference
-
-### Editor Instance Methods
-
-When you get a reference to the editor, you can use these methods:
-
-| Method                | Parameters                 | Description                  |
-| --------------------- | -------------------------- | ---------------------------- |
-| `getHTML()`           | -                          | Get the HTML content         |
-| `getText()`           | -                          | Get the plain text content   |
-| `setHTML(html)`       | `html: string`             | Set the HTML content         |
-| `insertText(text)`    | `text: string`             | Insert text at cursor        |
-| `format(name, value)` | `name: string, value: any` | Apply formatting             |
-| `getFormat()`         | -                          | Get current format at cursor |
-| `focus()`             | -                          | Focus the editor             |
-| `blur()`              | -                          | Remove focus from editor     |
-| `enable(enabled)`     | `enabled: boolean`         | Enable/disable editor        |
-
-### Available Formats
-
-- `bold` - Bold text
-- `italic` - Italic text
-- `underline` - Underlined text
-- `strike` - Strikethrough text
-- `color` - Text color
-- `background` - Background color
-- `font-family` - Font family
-- `text-size` - Font size
-- `line-height` - Line height
-- `text-align` - Text alignment
-- `list` - Lists (ordered/unordered)
-- `indent` - Text indentation
-- `link` - Hyperlinks
-- `image` - Images
-- `video` - Videos
-- `table` - Tables
-- `emoji` - Emojis
-- `tag` - Custom tags
 
 ## Styling
 
-The editor comes with default styles, but you can customize the appearance:
+The editor comes with built-in styles, but you can customize the appearance:
 
-```css
-/* Custom editor styles */
-.my-custom-editor {
-  font-family: "Inter", sans-serif;
-}
-
-.my-custom-editor .toolbar {
-  background: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.my-custom-editor .editor-content {
-  padding: 20px;
-  min-height: 200px;
-}
-
-.my-custom-editor .editor-content p {
-  margin-bottom: 16px;
-  line-height: 1.6;
-}
+```jsx
+<ReactRichEditor
+  width="100%"
+  height="500px"
+  style={{
+    border: "2px solid #e1e5e9",
+    borderRadius: "8px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+  }}
+/>
 ```
+
+## Requirements
+
+- React 16.8.0 or higher
+- React DOM 16.8.0 or higher
 
 ## Browser Support
 
@@ -311,46 +241,30 @@ The editor comes with default styles, but you can customize the appearance:
 - Safari (latest)
 - Edge (latest)
 
-## TypeScript Support
-
-The package includes TypeScript definitions:
-
-```typescript
-import React, { useRef } from "react";
-import ReactRichEditor from "testyjd-react";
-
-interface EditorProps {
-  initialContent?: string;
-  onContentChange?: (content: string) => void;
-}
-
-const TypedEditor: React.FC<EditorProps> = ({
-  initialContent,
-  onContentChange,
-}) => {
-  const editorRef = useRef<any>(null);
-
-  return (
-    <ReactRichEditor
-      ref={editorRef}
-      defaultContent={initialContent}
-      onChange={onContentChange}
-    />
-  );
-};
-```
-
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License. See [LICENSE](LICENSE) file for details.
 
 ## Support
 
-If you encounter any issues or have questions, please file an issue on the [GitHub repository](https://github.com/nampick/richeditor/issues).
+If you encounter any issues or have questions:
+
+1. Check the [Issues](https://github.com/yourusername/react-rich-editor/issues) page
+2. Create a new issue with a detailed description
+3. Include code examples and browser information
+
+## Changelog
+
+### v1.3.7
+
+- Simplified component props
+- Improved onChange event handling
+- Enhanced toolbar customization
+- Performance optimizations
 
 ---
 

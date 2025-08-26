@@ -133,7 +133,6 @@ class Heading extends BlockFormat {
 
       // đảm bảo blocks là mảng
       const blocksArray = Array.from(blocks);
-      console.log(blocks);
       
 
       // tìm block chứa 1 node
