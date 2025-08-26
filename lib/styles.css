@@ -23,13 +23,137 @@
   font-size: 16px;
   line-height: 1.7;
   outline: none;
-  padding: 20px 40px 20px 40px;
+  padding: 20px 20px 20px 20px;
   background: #fff;
   color: #2c3e50;
   font-family: inherit;
   overflow-y: auto;
   box-sizing: border-box;
   border: none;
+}
+.yjd-rich-editor .rich-editor-area {
+  font-size: 16px;
+  line-height: 1.7;
+  font-family: inherit;
+  color: #2c3e50;
+  padding: 20px 20px;
+  box-sizing: border-box;
+}
+
+/* inline elements */
+.yjd-rich-editor .rich-editor-area b,
+.yjd-rich-editor .rich-editor-area strong {
+  font-weight: bold;
+}
+
+.yjd-rich-editor .rich-editor-area i,
+.yjd-rich-editor .rich-editor-area em {
+  font-style: italic;
+}
+
+.yjd-rich-editor .rich-editor-area u {
+  text-decoration: underline;
+}
+
+.yjd-rich-editor .rich-editor-area a {
+  color: #2563eb;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* block text */
+.yjd-rich-editor .rich-editor-area p {
+  margin: 0 0 1em;
+}
+
+/* headings */
+.yjd-rich-editor .rich-editor-area h1 {
+  font-size: 2em;
+  font-weight: bold;
+  margin: 0.67em 0;
+}
+
+.yjd-rich-editor .rich-editor-area h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin: 0.75em 0;
+}
+
+.yjd-rich-editor .rich-editor-area h3 {
+  font-size: 1.25em;
+  font-weight: bold;
+  margin: 0.83em 0;
+}
+
+.yjd-rich-editor .rich-editor-area h4 {
+  font-size: 1.1em;
+  font-weight: bold;
+  margin: 1em 0;
+}
+
+.yjd-rich-editor .rich-editor-area h5 {
+  font-size: 1em;
+  font-weight: bold;
+  margin: 1.25em 0;
+}
+
+.yjd-rich-editor .rich-editor-area h6 {
+  font-size: 0.875em;
+  font-weight: bold;
+  margin: 1.5em 0;
+  color: #555;
+}
+
+/* lists */
+.yjd-rich-editor .rich-editor-area ul,
+.yjd-rich-editor .rich-editor-area ol {
+  margin: 0 0 1em 2em;
+  padding: 0;
+}
+
+.yjd-rich-editor .rich-editor-area li {
+  margin: 0.25em 0;
+}
+
+/* code & pre */
+.yjd-rich-editor .rich-editor-area pre,
+.yjd-rich-editor .rich-editor-area code {
+  font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
+  background: #f1f2f3;
+  padding: 4px 6px;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+.yjd-rich-editor .rich-editor-area pre {
+  display: block;
+  white-space: pre;
+  margin: 1em 0;
+}
+
+.yjd-rich-editor .rich-editor-area code {
+  display: inline;
+}
+
+/* blockquote */
+.yjd-rich-editor .rich-editor-area blockquote {
+  border-left: 4px solid #d1d5db;
+  margin: 1em 0;
+  padding: 4px 12px;
+  color: #555;
+  font-style: italic;
+  background: #f9fafb;
+}
+.yjd-rich-editor .rich-editor-area sub {
+  font-size: 0.75em;
+  vertical-align: sub;
+  line-height: 1;
+}
+
+.yjd-rich-editor .rich-editor-area sup {
+  font-size: 0.75em;
+  vertical-align: super;
+  line-height: 1;
 }
 .yjd-rich-editor .rich-editor-area  a{
   cursor: pointer;

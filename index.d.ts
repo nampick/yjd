@@ -1,5 +1,41 @@
 declare module 'yjdtest' {
-  export class Editor {}
+  // Editor options interface
+  interface EditorOptions {
+    placeholder?: string;
+    theme?: string;
+    height?: number;
+    width?: number;
+    maxWidth?: number;
+    maxHeight?: number;
+    content?: string | null;
+    onChange?: (content: string) => void;
+    features?: {
+      emoji?: boolean;
+      image?: boolean;
+      table?: boolean;
+      wordCount?: boolean;
+      breadcrumb?: boolean;
+    };
+    toolbar1?: Array<{
+      group: string;
+      items: string[];
+    }>;
+    toolbar2?: Array<{
+      group: string;
+      items: string[];
+    }>;
+  }
+
+  export class Editor {
+    constructor(selector: string | Element, options?: EditorOptions);
+    on(event: string, handler: (data: any) => void): void;
+    off(event: string, handler: (data: any) => void): void;
+    emit(event: string, data: any): void;
+    getContent(): string;
+    setContent(content: string): void;
+    focus(): void;
+  }
+
   export class Module {}
   export class Format {}
   export class InlineFormat extends Format {}
@@ -9,10 +45,10 @@ declare module 'yjdtest' {
   export class RichEditor extends Editor {
     static register(path: string, definition: any, suppressWarning?: boolean): void;
     static get(path: string): any;
-    static create(selector: string | Element, options?: object): RichEditor;
+    static create(selector: string | Element, options?: EditorOptions): RichEditor;
   }
 
-  export function createEditor(selector: string | Element, options?: object): RichEditor;
+  export function createEditor(selector: string | Element, options?: EditorOptions): RichEditor;
 
   // Formats
   export const Bold: any;
