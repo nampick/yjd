@@ -30,6 +30,7 @@
   overflow-y: auto;
   box-sizing: border-box;
   border: none;
+  text-align: left;
 }
 .yjd-rich-editor .rich-editor-area {
   font-size: 16px;

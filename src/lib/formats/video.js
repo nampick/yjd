@@ -4,6 +4,7 @@ import Editor from '../core/editor.js';
 
 /**
  * Video Format - Handles video insertion
+ * Now supports multiple editor instances with separate popup instances
  */
 class Video extends InlineFormat {
   static formatName = 'video';
@@ -12,16 +13,59 @@ class Video extends InlineFormat {
 
   constructor() {
     super();
-    // Create video popup instance if not exists
-    if (!Video.videoPopupInstance) {
-      Video.videoPopupInstance = new VideoPopup({
-        onVideoInsert: (src) => {
-          Video.insertVideoAtCurrentPosition(src);
-        },
-        editor: Editor.getCurrentInstance()
-      });
+    
+    // Get current editor instance
+    const currentEditor = Editor.getCurrentInstance();
+    if (!currentEditor) {
+      console.warn('No editor instance found for Video format');
+      return;
     }
-    this.videoPopup = Video.videoPopupInstance;
+    
+    this.editorId = currentEditor.instanceId;
+    
+    // Check if this editor already has a video popup instance
+    let videoPopup = currentEditor.getPopupInstance('video');
+    
+    if (!videoPopup) {
+      // Create new video popup instance for this editor
+      videoPopup = new VideoPopup({
+        onVideoInsert: (src) => {
+          Video.insertVideoAtCurrentPosition(src, this.editorId);
+        },
+        editor: currentEditor,
+        editorId: this.editorId
+      });
+      
+      // Store popup instance in editor
+      currentEditor.setPopupInstance('video', videoPopup);
+    }
+    
+    this.videoPopup = videoPopup;
+  }
+
+  /**
+   * Create a new Video format instance for a specific editor
+   * @param {string} editorId - Editor instance ID
+   * @returns {Video} Video format instance
+   */
+  static createForEditor(editorId) {
+    const editor = Editor.getInstanceById(editorId);
+    if (!editor) {
+      console.warn('No editor instance found for ID:', editorId);
+      return null;
+    }
+    
+    // Temporarily set as current instance
+    const originalCurrent = Editor.currentInstance;
+    Editor.currentInstance = editor;
+    
+    // Create format instance
+    const format = new Video();
+    
+    // Restore original current instance
+    Editor.currentInstance = originalCurrent;
+    
+    return format;
   }
 
   /**
@@ -77,8 +121,22 @@ class Video extends InlineFormat {
   /**
    * Insert video at current cursor position
    * @param {string} src - Video source URL
+   * @param {string} editorId - Editor instance ID
    */
-  static insertVideoAtCurrentPosition(src) {
+  static insertVideoAtCurrentPosition(src, editorId = null) {
+    // Get the correct editor instance
+    let editor = null;
+    if (editorId) {
+      editor = Editor.getInstanceById(editorId);
+    } else {
+      editor = Editor.getCurrentInstance();
+    }
+    
+    if (!editor) {
+      console.warn('No editor instance found for video insertion');
+      return;
+    }
+    
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount) {
       return;
@@ -100,6 +158,11 @@ class Video extends InlineFormat {
       range.collapse(true);
       selection.removeAllRanges();
       selection.addRange(range);
+      
+      // Trigger content change event
+      if (editor && typeof editor.onContentChange === 'function') {
+        editor.onContentChange();
+      }
     } catch (error) {
       console.error('Error inserting video:', error);
     }
@@ -110,7 +173,7 @@ class Video extends InlineFormat {
    */
   apply(src) {
     if (src) {
-      Video.insertVideoAtCurrentPosition(src);
+      Video.insertVideoAtCurrentPosition(src, this.editorId);
     } else {
       this.showVideoPopup();
     }
@@ -146,8 +209,34 @@ class Video extends InlineFormat {
    * Show video popup
    */
   showVideoPopup() {
-    const videoButton = document.querySelector('.rich-editor-toolbar-btn.video-btn');
-    if (!videoButton) return;
+    // Find video button in the current editor's toolbar
+    const editor = Editor.getInstanceById(this.editorId);
+    if (!editor) return;
+    
+    const toolbar = editor.getModule('toolbar');
+    let videoButton = null;
+    
+    if (toolbar) {
+      videoButton = toolbar.getButton('video');
+    }
+    
+    // Fallback: find button by class in the current editor's toolbar
+    if (!videoButton) {
+      const toolbarContainer = toolbar?.getContainer();
+      if (toolbarContainer) {
+        videoButton = toolbarContainer.querySelector('.rich-editor-toolbar-btn.video-btn');
+      }
+    }
+    
+    // Final fallback: find any video button in the current editor's wrapper
+    if (!videoButton) {
+      videoButton = editor.wrapper.querySelector('.rich-editor-toolbar-btn.video-btn');
+    }
+    
+    if (!videoButton) {
+      console.warn('Video button not found for editor:', this.editorId);
+      return;
+    }
     
     this.videoPopup.show(videoButton);
   }

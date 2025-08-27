@@ -1,5 +1,6 @@
 import { BlockFormat } from '../core/format.js';
 import { saveBeforeFormat } from '../utils/history-helper.js';
+import Editor from '../core/editor.js';
 
 /**
  * Indent Format - Handles text indentation (increase/decrease)
@@ -73,6 +74,14 @@ class Indent extends BlockFormat {
     } catch (error) {
       console.error('Error applying indent:', error);
     }
+    
+    // Trigger content change after applying format
+    setTimeout(() => {
+      const currentEditor = Editor.getCurrentInstance();
+      if (currentEditor && typeof currentEditor.onContentChange === 'function') {
+        currentEditor.onContentChange();
+      }
+    }, 0);
   }
 
   /**

@@ -1,9 +1,11 @@
 import { BlockFormat } from '../core/format.js';
 import CustomSelect from '../ui/customselect.js';
 import { saveBeforeFormat } from '../utils/history-helper.js';
+import Editor from '../core/editor.js';
 
 /**
  * Heading Format - Handles heading and paragraph formatting
+ * Now supports multiple editor instances with separate popup instances
  */
 class Heading extends BlockFormat {
   static formatName = 'heading';
@@ -11,8 +13,21 @@ class Heading extends BlockFormat {
   
   constructor() {
     super();
-    // Create custom select instance if not exists
-    if (!Heading.selectInstance) {
+    
+    // Get current editor instance
+    const currentEditor = Editor.getCurrentInstance();
+    if (!currentEditor) {
+      console.warn('No editor instance found for Heading format');
+      return;
+    }
+    
+    this.editorId = currentEditor.instanceId;
+    
+    // Check if this editor already has a heading select instance
+    let customSelect = currentEditor.getPopupInstance('heading');
+    
+    if (!customSelect) {
+      // Create new custom select instance for this editor
       const tagMap = Heading.getTagMap();
       const items = Object.values(tagMap).map(tagData => ({
         value: tagData.tag,
@@ -20,17 +35,48 @@ class Heading extends BlockFormat {
         title: tagData.title
       }));
 
-      Heading.selectInstance = new CustomSelect({
+      customSelect = new CustomSelect({
         items: items,
         displayProperty: 'label',
         valueProperty: 'value',
         className: 'heading-select',
         onItemSelect: (value, item) => {
-          Heading.applyTagToCurrentSelection(value);
-        }
+          Heading.applyTagToCurrentSelection(value, this.editorId);
+        },
+        editor: currentEditor,
+        editorId: this.editorId
       });
+      
+      // Store popup instance in editor
+      currentEditor.setPopupInstance('heading', customSelect);
     }
-    this.customSelect = Heading.selectInstance;
+    
+    this.customSelect = customSelect;
+  }
+
+  /**
+   * Create a new Heading format instance for a specific editor
+   * @param {string} editorId - Editor instance ID
+   * @returns {Heading} Heading format instance
+   */
+  static createForEditor(editorId) {
+    const editor = Editor.getInstanceById(editorId);
+    if (!editor) {
+      console.warn('No editor instance found for ID:', editorId);
+      return null;
+    }
+    
+    // Temporarily set as current instance
+    const originalCurrent = Editor.currentInstance;
+    Editor.currentInstance = editor;
+    
+    // Create format instance
+    const format = new Heading();
+    
+    // Restore original current instance
+    Editor.currentInstance = originalCurrent;
+    
+    return format;
   }
 
   /**
@@ -64,7 +110,30 @@ class Heading extends BlockFormat {
     const currentTag = this.getCurrentTag();
     const displayName = Heading.getTagDisplayName(currentTag || 'P');
     
-    const headingButton = document.querySelector('.rich-editor-toolbar-btn.heading-btn');
+    // Find heading button in the current editor's toolbar
+    const editor = Editor.getInstanceById(this.editorId);
+    if (!editor) return;
+    
+    const toolbar = editor.getModule('toolbar');
+    let headingButton = null;
+    
+    if (toolbar) {
+      headingButton = toolbar.getButton('heading');
+    }
+    
+    // Fallback: find button by class in the current editor's toolbar
+    if (!headingButton) {
+      const toolbarContainer = toolbar?.getContainer();
+      if (toolbarContainer) {
+        headingButton = toolbarContainer.querySelector('.rich-editor-toolbar-btn.heading-btn');
+      }
+    }
+    
+    // Final fallback: find any heading button in the current editor's wrapper
+    if (!headingButton) {
+      headingButton = editor.wrapper.querySelector('.rich-editor-toolbar-btn.heading-btn');
+    }
+    
     if (headingButton && headingButton.updateText) {
       headingButton.updateText(displayName);
     } else if (headingButton) {
@@ -84,8 +153,23 @@ class Heading extends BlockFormat {
 
   /**
    * Static method to apply tag to current selection
+   * @param {string} tag - HTML tag name
+   * @param {string} editorId - Editor instance ID
    */
-  static applyTagToCurrentSelection(tag) {
+  static applyTagToCurrentSelection(tag, editorId = null) {
+    // Get the correct editor instance
+    let editor = null;
+    if (editorId) {
+      editor = Editor.getInstanceById(editorId);
+    } else {
+      editor = Editor.getCurrentInstance();
+    }
+    
+    if (!editor) {
+      console.warn('No editor instance found for heading application');
+      return;
+    }
+    
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount) return;
 
@@ -93,11 +177,20 @@ class Heading extends BlockFormat {
     saveBeforeFormat();
 
     const range = selection.getRangeAt(0);
-    const headingFormat = new Heading();
-    headingFormat.apply(tag);
+    const headingFormat = Heading.createForEditor(editorId);
+    if (headingFormat) {
+      headingFormat.apply(tag);
+      
+      // Update button text after applying
+      headingFormat.updateButtonText();
+    }
     
-    // Update button text after applying
-    headingFormat.updateButtonText();
+    // Trigger content change after applying format
+    setTimeout(() => {
+      if (editor && typeof editor.onContentChange === 'function') {
+        editor.onContentChange();
+      }
+    }, 0);
   }
 
   /**
@@ -332,8 +425,34 @@ class Heading extends BlockFormat {
    * Show custom select positioned relative to heading button on toolbar
    */
   async showTagPicker() {
-    const headingButton = document.querySelector('.rich-editor-toolbar-btn.heading-btn');
-    if (!headingButton) return;
+    // Find heading button in the current editor's toolbar
+    const editor = Editor.getInstanceById(this.editorId);
+    if (!editor) return;
+    
+    const toolbar = editor.getModule('toolbar');
+    let headingButton = null;
+    
+    if (toolbar) {
+      headingButton = toolbar.getButton('heading');
+    }
+    
+    // Fallback: find button by class in the current editor's toolbar
+    if (!headingButton) {
+      const toolbarContainer = toolbar?.getContainer();
+      if (toolbarContainer) {
+        headingButton = toolbarContainer.querySelector('.rich-editor-toolbar-btn.heading-btn');
+      }
+    }
+    
+    // Final fallback: find any heading button in the current editor's wrapper
+    if (!headingButton) {
+      headingButton = editor.wrapper.querySelector('.rich-editor-toolbar-btn.heading-btn');
+    }
+    
+    if (!headingButton) {
+      console.warn('Heading button not found for editor:', this.editorId);
+      return;
+    }
     
     // Update current selection before showing
     const currentTag = this.getCurrentTag();

@@ -2,9 +2,11 @@ import { BlockFormat } from '../core/format.js';
 import TextAlignPicker from '../ui/text-align-picker.js';
 import IconUtils from '../ui/icons.js';
 import { saveBeforeFormat } from '../utils/history-helper.js';
+import Editor from '../core/editor.js';
 
 /**
  * Text Align Format - Handles text alignment formatting
+ * Now supports multiple editor instances with separate popup instances
  */
 class TextAlign extends BlockFormat {
   static formatName = 'text-align';
@@ -13,15 +15,59 @@ class TextAlign extends BlockFormat {
 
   constructor() {
     super();
-    // Create text align picker instance if not exists
-    if (!TextAlign.alignPickerInstance) {
-      TextAlign.alignPickerInstance = new TextAlignPicker({
-        onAlignSelect: (alignment) => {
-          TextAlign.applyAlignToCurrentSelection(alignment);
-        }
-      });
+    
+    // Get current editor instance
+    const currentEditor = Editor.getCurrentInstance();
+    if (!currentEditor) {
+      console.warn('No editor instance found for TextAlign format');
+      return;
     }
-    this.alignPicker = TextAlign.alignPickerInstance;
+    
+    this.editorId = currentEditor.instanceId;
+    
+    // Check if this editor already has a text align picker instance
+    let alignPicker = currentEditor.getPopupInstance('text-align');
+    
+    if (!alignPicker) {
+      // Create new text align picker instance for this editor
+      alignPicker = new TextAlignPicker({
+        onAlignSelect: (alignment) => {
+          TextAlign.applyAlignToCurrentSelection(alignment, this.editorId);
+        },
+        editor: currentEditor,
+        editorId: this.editorId
+      });
+      
+      // Store popup instance in editor
+      currentEditor.setPopupInstance('text-align', alignPicker);
+    }
+    
+    this.alignPicker = alignPicker;
+  }
+
+  /**
+   * Create a new TextAlign format instance for a specific editor
+   * @param {string} editorId - Editor instance ID
+   * @returns {TextAlign} TextAlign format instance
+   */
+  static createForEditor(editorId) {
+    const editor = Editor.getInstanceById(editorId);
+    if (!editor) {
+      console.warn('No editor instance found for ID:', editorId);
+      return null;
+    }
+    
+    // Temporarily set as current instance
+    const originalCurrent = Editor.currentInstance;
+    Editor.currentInstance = editor;
+    
+    // Create format instance
+    const format = new TextAlign();
+    
+    // Restore original current instance
+    Editor.currentInstance = originalCurrent;
+    
+    return format;
   }
 
   /**
@@ -39,8 +85,23 @@ class TextAlign extends BlockFormat {
 
   /**
    * Static method to apply alignment to current selection or cursor position
+   * @param {string} alignment - Alignment value
+   * @param {string} editorId - Editor instance ID
    */
-  static applyAlignToCurrentSelection(alignment) {
+  static applyAlignToCurrentSelection(alignment, editorId = null) {
+    // Get the correct editor instance
+    let editor = null;
+    if (editorId) {
+      editor = Editor.getInstanceById(editorId);
+    } else {
+      editor = Editor.getCurrentInstance();
+    }
+    
+    if (!editor) {
+      console.warn('No editor instance found for text alignment application');
+      return;
+    }
+    
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount) return;
 
@@ -70,7 +131,7 @@ class TextAlign extends BlockFormat {
       }
       
       // Update toolbar button icon after applying alignment
-      TextAlign.updateToolbarButtonIcon(alignment);
+      TextAlign.updateToolbarButtonIcon(alignment, editorId);
        // Khôi phục caret
       selection.removeAllRanges();
       const newCaretRange = document.createRange();
@@ -81,6 +142,13 @@ class TextAlign extends BlockFormat {
     } catch (error) {
       console.error('Error applying text alignment:', error);
     }
+    
+    // Trigger content change after applying format
+    setTimeout(() => {
+      if (editor && typeof editor.onContentChange === 'function') {
+        editor.onContentChange();
+      }
+    }, 0);
   }
 
   /**
@@ -112,9 +180,39 @@ class TextAlign extends BlockFormat {
   /**
    * Update toolbar button icon based on alignment
    * @param {string} alignment - Current alignment
+   * @param {string} editorId - Editor instance ID
    */
-  static updateToolbarButtonIcon(alignment) {
-    const button = document.querySelector('.rich-editor-toolbar-btn.text-align-btn');
+  static updateToolbarButtonIcon(alignment, editorId = null) {
+    // Get the correct editor instance
+    let editor = null;
+    if (editorId) {
+      editor = Editor.getInstanceById(editorId);
+    } else {
+      editor = Editor.getCurrentInstance();
+    }
+    
+    if (!editor) return;
+    
+    const toolbar = editor.getModule('toolbar');
+    let button = null;
+    
+    if (toolbar) {
+      button = toolbar.getButton('text-align');
+    }
+    
+    // Fallback: find button by class in the current editor's toolbar
+    if (!button) {
+      const toolbarContainer = toolbar?.getContainer();
+      if (toolbarContainer) {
+        button = toolbarContainer.querySelector('.rich-editor-toolbar-btn.text-align-btn');
+      }
+    }
+    
+    // Final fallback: find any text-align button in the current editor's wrapper
+    if (!button) {
+      button = editor.wrapper.querySelector('.rich-editor-toolbar-btn.text-align-btn');
+    }
+    
     if (!button) return;
 
     const iconName = TextAlign.getIconNameForAlignment(alignment);
@@ -220,14 +318,14 @@ class TextAlign extends BlockFormat {
    * @param {string} value - Alignment value (left, center, right, justify)
    */
   apply(value = 'left') {
-    TextAlign.applyAlignToCurrentSelection(value);
+    TextAlign.applyAlignToCurrentSelection(value, this.editorId);
   }
 
   /**
    * Remove alignment formatting (reset to left)
    */
   remove() {
-    TextAlign.applyAlignToCurrentSelection('left');
+    TextAlign.applyAlignToCurrentSelection('left', this.editorId);
   }
 
   /**
@@ -245,8 +343,34 @@ class TextAlign extends BlockFormat {
    * Show alignment picker positioned relative to align button on toolbar
    */
   showAlignPicker() {
-    const alignButton = document.querySelector('.rich-editor-toolbar-btn.text-align-btn');
-    if (!alignButton) return;
+    // Find text-align button in the current editor's toolbar
+    const editor = Editor.getInstanceById(this.editorId);
+    if (!editor) return;
+    
+    const toolbar = editor.getModule('toolbar');
+    let alignButton = null;
+    
+    if (toolbar) {
+      alignButton = toolbar.getButton('text-align');
+    }
+    
+    // Fallback: find button by class in the current editor's toolbar
+    if (!alignButton) {
+      const toolbarContainer = toolbar?.getContainer();
+      if (toolbarContainer) {
+        alignButton = toolbarContainer.querySelector('.rich-editor-toolbar-btn.text-align-btn');
+      }
+    }
+    
+    // Final fallback: find any text-align button in the current editor's wrapper
+    if (!alignButton) {
+      alignButton = editor.wrapper.querySelector('.rich-editor-toolbar-btn.text-align-btn');
+    }
+    
+    if (!alignButton) {
+      console.warn('Text-align button not found for editor:', this.editorId);
+      return;
+    }
     
     this.alignPicker.show(alignButton);
   }
@@ -259,7 +383,7 @@ class TextAlign extends BlockFormat {
   isActive(alignment = null) {
     // Update button icon based on current alignment
     const currentAlignment = TextAlign.getCurrentAlignment();
-    TextAlign.updateToolbarButtonIcon(currentAlignment);
+    TextAlign.updateToolbarButtonIcon(currentAlignment, this.editorId);
     
     // Always return false - no active state for this button
     return false;

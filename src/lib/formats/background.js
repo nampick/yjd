@@ -5,6 +5,7 @@ import Editor from '../core/editor.js';
 
 /**
  * Background Color Format - Handles text background color formatting
+ * Now supports multiple editor instances with separate popup instances
  */
 class Background extends InlineFormat {
   static formatName = 'background';
@@ -13,40 +14,125 @@ class Background extends InlineFormat {
 
   constructor() {
     super();
-    // Initialize color picker as static instance
-    if (!Background.colorPickerInstance) {
-      Background.colorPickerInstance = new ColorPicker({
-        onColorSelect: (color) => {
-          Background.applyBackgroundToCurrentSelection(color);
-        },
-        editor: Editor.getCurrentInstance()
-      });
+    
+    // Get current editor instance
+    const currentEditor = Editor.getCurrentInstance();
+    if (!currentEditor) {
+      console.warn('No editor instance found for Background format');
+      return;
     }
-    this.colorPicker = Background.colorPickerInstance;
+    
+    this.editorId = currentEditor.instanceId;
+    
+    // Check if this editor already has a background color picker instance
+    let colorPicker = currentEditor.getPopupInstance('background');
+    
+    if (!colorPicker) {
+      // Create new color picker instance for this editor
+      colorPicker = new ColorPicker({
+        onColorSelect: (color) => {
+          Background.applyBackgroundToCurrentSelection(color, this.editorId);
+        },
+        editor: currentEditor,
+        editorId: this.editorId
+      });
+      
+      // Store popup instance in editor
+      currentEditor.setPopupInstance('background', colorPicker);
+    }
+    
+    this.colorPicker = colorPicker;
+  }
+
+  /**
+   * Create a new Background format instance for a specific editor
+   * @param {string} editorId - Editor instance ID
+   * @returns {Background} Background format instance
+   */
+  static createForEditor(editorId) {
+    const editor = Editor.getInstanceById(editorId);
+    if (!editor) {
+      console.warn('No editor instance found for ID:', editorId);
+      return null;
+    }
+    
+    // Temporarily set as current instance
+    const originalCurrent = Editor.currentInstance;
+    Editor.currentInstance = editor;
+    
+    // Create format instance
+    const format = new Background();
+    
+    // Restore original current instance
+    Editor.currentInstance = originalCurrent;
+    
+    return format;
   }
 
   /**
    * Static method to apply background color to current selection
+   * @param {string} color - Background color value
+   * @param {string} editorId - Editor instance ID
    */
-  static applyBackgroundToCurrentSelection(color) {
+  static applyBackgroundToCurrentSelection(color, editorId = null) {
+    // Get the correct editor instance
+    let editor = null;
+    if (editorId) {
+      editor = Editor.getInstanceById(editorId);
+    } else {
+      editor = Editor.getCurrentInstance();
+    }
+    
+    if (!editor) {
+      console.warn('No editor instance found for background color application');
+      return;
+    }
+    
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount || selection.isCollapsed) return;
 
     // Save state before applying format
     saveBeforeFormat();
-    const backgroundButton = document.querySelector('.rich-editor-toolbar-btn.background-btn');
+    
+    // Find background button in the current editor's toolbar
+    const toolbar = editor.getModule('toolbar');
+    let backgroundButton = null;
+    
+    if (toolbar) {
+      backgroundButton = toolbar.getButton('background');
+    }
+    
+    // Fallback: find button by class in the current editor's toolbar
+    if (!backgroundButton) {
+      const toolbarContainer = toolbar?.getContainer();
+      if (toolbarContainer) {
+        backgroundButton = toolbarContainer.querySelector('.rich-editor-toolbar-btn.background-btn');
+      }
+    }
+    
+    // Final fallback: find any background button in the current editor's wrapper
+    if (!backgroundButton) {
+      backgroundButton = editor.wrapper.querySelector('.rich-editor-toolbar-btn.background-btn');
+    }
 
     try {
-      
       document.execCommand('styleWithCSS', false, true);
       document.execCommand('backColor', false, color);
-      backgroundButton.classList.add('active');
+      if (backgroundButton) {
+        backgroundButton.classList.add('active');
+      }
     } catch (error) {
       console.error('Error applying background color format:', error);
     }
+    
+    // Trigger content change after applying format
+    setTimeout(() => {
+      if (editor && typeof editor.onContentChange === 'function') {
+        editor.onContentChange();
+      }
+    }, 0);
   }
 
- 
   /**
    * Toggle background color formatting - shows/hides color picker
    */
@@ -62,8 +148,34 @@ class Background extends InlineFormat {
    * Show color picker positioned relative to background button on toolbar
    */
   showColorPicker() {
-    const backgroundButton = document.querySelector('.rich-editor-toolbar-btn.background-btn');
-    if (!backgroundButton) return;
+    // Find background button in the current editor's toolbar
+    const editor = Editor.getInstanceById(this.editorId);
+    if (!editor) return;
+    
+    const toolbar = editor.getModule('toolbar');
+    let backgroundButton = null;
+    
+    if (toolbar) {
+      backgroundButton = toolbar.getButton('background');
+    }
+    
+    // Fallback: find button by class in the current editor's toolbar
+    if (!backgroundButton) {
+      const toolbarContainer = toolbar?.getContainer();
+      if (toolbarContainer) {
+        backgroundButton = toolbarContainer.querySelector('.rich-editor-toolbar-btn.background-btn');
+      }
+    }
+    
+    // Final fallback: find any background button in the current editor's wrapper
+    if (!backgroundButton) {
+      backgroundButton = editor.wrapper.querySelector('.rich-editor-toolbar-btn.background-btn');
+    }
+    
+    if (!backgroundButton) {
+      console.warn('Background button not found for editor:', this.editorId);
+      return;
+    }
     
     this.colorPicker.show(backgroundButton);
   }

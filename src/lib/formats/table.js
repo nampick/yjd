@@ -1,37 +1,99 @@
 import { BlockFormat } from '../core/format.js';
 import TablePopup from '../ui/table-popup.js';
+import Editor from '../core/editor.js';
 
 /**
  * Table Format - HTML table insertion
+ * Now supports multiple editor instances with separate popup instances
  */
 class Table extends BlockFormat {
   static formatName = 'table';
   static tagName = 'TABLE';
-  static savedRange = null; // Lưu vị trí con trỏ
+  static savedRanges = new Map(); // Map to store saved ranges for each editor
 
   constructor() {
     super();
-    // Create shared popup instance
-    if (!Table.tablePopup) {
-      Table.tablePopup = new TablePopup({
-        onTableSelect: (tableData) => {
-          Table.insertTable(tableData);
-        }
-      });
+    
+    // Get current editor instance
+    const currentEditor = Editor.getCurrentInstance();
+    if (!currentEditor) {
+      console.warn('No editor instance found for Table format');
+      return;
     }
-    this.tablePopup = Table.tablePopup;
+    
+    this.editorId = currentEditor.instanceId;
+    
+    // Check if this editor already has a table popup instance
+    let tablePopup = currentEditor.getPopupInstance('table');
+    
+    if (!tablePopup) {
+      // Create new table popup instance for this editor
+      tablePopup = new TablePopup({
+        onTableSelect: (tableData) => {
+          Table.insertTable(tableData, this.editorId);
+        },
+        editor: currentEditor,
+        editorId: this.editorId
+      });
+      
+      // Store popup instance in editor
+      currentEditor.setPopupInstance('table', tablePopup);
+    }
+    
+    this.tablePopup = tablePopup;
+  }
+
+  /**
+   * Create a new Table format instance for a specific editor
+   * @param {string} editorId - Editor instance ID
+   * @returns {Table} Table format instance
+   */
+  static createForEditor(editorId) {
+    const editor = Editor.getInstanceById(editorId);
+    if (!editor) {
+      console.warn('No editor instance found for ID:', editorId);
+      return null;
+    }
+    
+    // Temporarily set as current instance
+    const originalCurrent = Editor.currentInstance;
+    Editor.currentInstance = editor;
+    
+    // Create format instance
+    const format = new Table();
+    
+    // Restore original current instance
+    Editor.currentInstance = originalCurrent;
+    
+    return format;
   }
 
   /**
    * Insert table at saved cursor position
+   * @param {Object} tableData - Table data with rows and cols
+   * @param {string} editorId - Editor instance ID
    */
-  static insertTable(tableData) {
-    // Khôi phục vị trí con trỏ đã lưu
-    if (!Table.savedRange) return;
+  static insertTable(tableData, editorId = null) {
+    // Get the correct editor instance
+    let editor = null;
+    if (editorId) {
+      editor = Editor.getInstanceById(editorId);
+    } else {
+      editor = Editor.getCurrentInstance();
+    }
+    
+    if (!editor) {
+      console.warn('No editor instance found for table insertion');
+      return;
+    }
+    
+    // Get saved range for this editor
+    const savedRange = Table.savedRanges.get(editorId);
+    if (!savedRange) return;
     
     const selection = window.getSelection();
     selection.removeAllRanges();
-    selection.addRange(Table.savedRange);
+    selection.addRange(savedRange);
     
     const range = selection.getRangeAt(0);
     
@@ -56,8 +118,13 @@ class Table extends BlockFormat {
       selection.addRange(newRange);
     }
     
-    // Clear saved range
-    Table.savedRange = null;
+    // Clear saved range for this editor
+    Table.savedRanges.delete(editorId);
+    
+    // Trigger content change event
+    if (editor && typeof editor.onContentChange === 'function') {
+      editor.onContentChange();
+    }
   }
 
   /**
@@ -118,14 +185,40 @@ class Table extends BlockFormat {
    * Show table popup
    */
   showPopup() {
-    // Lưu vị trí con trỏ hiện tại
+    // Lưu vị trí con trỏ hiện tại cho editor này
     const selection = window.getSelection();
     if (selection && selection.rangeCount > 0) {
-      Table.savedRange = selection.getRangeAt(0).cloneRange();
+      Table.savedRanges.set(this.editorId, selection.getRangeAt(0).cloneRange());
     }
     
-    const tableButton = document.querySelector('.rich-editor-toolbar-btn.table-btn');
-    if (!tableButton) return;
+    // Find table button in the current editor's toolbar
+    const editor = Editor.getInstanceById(this.editorId);
+    if (!editor) return;
+    
+    const toolbar = editor.getModule('toolbar');
+    let tableButton = null;
+    
+    if (toolbar) {
+      tableButton = toolbar.getButton('table');
+    }
+    
+    // Fallback: find button by class in the current editor's toolbar
+    if (!tableButton) {
+      const toolbarContainer = toolbar?.getContainer();
+      if (toolbarContainer) {
+        tableButton = toolbarContainer.querySelector('.rich-editor-toolbar-btn.table-btn');
+      }
+    }
+    
+    // Final fallback: find any table button in the current editor's wrapper
+    if (!tableButton) {
+      tableButton = editor.wrapper.querySelector('.rich-editor-toolbar-btn.table-btn');
+    }
+    
+    if (!tableButton) {
+      console.warn('Table button not found for editor:', this.editorId);
+      return;
+    }
     
     this.tablePopup.show(tableButton);
   }
