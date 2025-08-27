@@ -6,7 +6,7 @@ const contentContainer = document.getElementById('content-container');
 
 const editor = new RichEditor('#editor-container', {
   content: 'contentContainer.innerHTML',
-  height: 300,
+  height: 500,
   width: 1000,
   theme: 'light',
   placeholder: '🎉 Welcome! Try basic formatting: Bold, Italic, Underline, Strikethrough',
@@ -27,7 +27,7 @@ const editor = new RichEditor('#editor-container', {
 });
 const editor2 = new RichEditor('#editor-container2', {
   content: 'contentContainer.innerHTML',
-  height: 300,
+  height: 440,
   width: 1000,
   theme: 'light',
   placeholder: '🎉 Welcome! Try basic formatting: Bold, Italic, Underline, Strikethrough',
