@@ -1,9 +1,11 @@
 import { InlineFormat } from '../core/format.js';
 import CustomSelect from '../ui/customselect.js';
 import { saveBeforeFormat } from '../utils/history-helper.js';
+import Editor from '../core/editor.js';
 
 /**
  * Font Family Format - Handles font family formatting
+ * Now supports multiple editor instances with separate popup instances
  */
 class FontFamily extends InlineFormat {
   static formatName = 'fontFamily';
@@ -11,8 +13,21 @@ class FontFamily extends InlineFormat {
   
   constructor() {
     super();
-    // Create custom select instance if not exists
-    if (!FontFamily.selectInstance) {
+    
+    // Get current editor instance
+    const currentEditor = Editor.getCurrentInstance();
+    if (!currentEditor) {
+      console.warn('No editor instance found for FontFamily format');
+      return;
+    }
+    
+    this.editorId = currentEditor.instanceId;
+    
+    // Check if this editor already has a font family select instance
+    let customSelect = currentEditor.getPopupInstance('font-family');
+    
+    if (!customSelect) {
+      // Create new custom select instance for this editor
       const fontMap = FontFamily.getFontMap();
       const items = Object.values(fontMap).map(fontData => ({
         value: fontData.font,
@@ -20,17 +35,83 @@ class FontFamily extends InlineFormat {
         title: fontData.title
       }));
 
-      FontFamily.selectInstance = new CustomSelect({
+      customSelect = new CustomSelect({
         items: items,
         displayProperty: 'label',
         valueProperty: 'value',
         className: 'font-family-select',
         onItemSelect: (value, item) => {
-          FontFamily.applyFontFamilyToCurrentSelection(value);
-        }
+          FontFamily.applyFontFamilyToCurrentSelection(value, this.editorId);
+        },
+        editor: currentEditor,
+        editorId: this.editorId
       });
+      
+      // Store popup instance in editor
+      currentEditor.setPopupInstance('font-family', customSelect);
     }
-    this.customSelect = FontFamily.selectInstance;
+    
+    this.customSelect = customSelect;
+    
+    // Set up event listener for selection changes
+    this.setupSelectionListener();
+  }
+
+  /**
+   * Create a new FontFamily format instance for a specific editor
+   * @param {string} editorId - Editor instance ID
+   * @returns {FontFamily} FontFamily format instance
+   */
+  static createForEditor(editorId) {
+    const editor = Editor.getInstanceById(editorId);
+    if (!editor) {
+      console.warn('No editor instance found for ID:', editorId);
+      return null;
+    }
+    
+    // Temporarily set as current instance
+    const originalCurrent = Editor.currentInstance;
+    Editor.currentInstance = editor;
+    
+    // Create format instance
+    const format = new FontFamily();
+    
+    // Restore original current instance
+    Editor.currentInstance = originalCurrent;
+    
+    return format;
+  }
+
+  /**
+   * Set up event listener for selection changes to update button text
+   */
+  setupSelectionListener() {
+    // Use a debounced function to avoid too many updates
+    let updateTimeout;
+    const debouncedUpdate = () => {
+      clearTimeout(updateTimeout);
+      updateTimeout = setTimeout(() => {
+        // Only update if selection is in this editor
+        const selection = window.getSelection();
+        if (selection && selection.rangeCount > 0) {
+          const range = selection.getRangeAt(0);
+          const editor = Editor.getInstanceById(this.editorId);
+          if (editor && (editor.editor.contains(range.startContainer) || editor.editor.isSameNode(range.startContainer))) {
+            this.updateButtonText();
+          }
+        }
+      }, 50); // 50ms delay
+    };
+
+    // Listen for selection changes
+    document.addEventListener('selectionchange', debouncedUpdate);
+    
+    // Also listen for mouseup and keyup events for immediate feedback
+    document.addEventListener('mouseup', debouncedUpdate);
+    document.addEventListener('keyup', debouncedUpdate);
+    
+    // Store the listener for cleanup
+    this.selectionListener = debouncedUpdate;
   }
 
   /**
@@ -115,7 +196,30 @@ class FontFamily extends InlineFormat {
     const currentFont = this.getCurrentFont();
     const displayName = FontFamily.getFontDisplayName(currentFont || 'Arial, sans-serif');
     
-    const fontFamilyButton = document.querySelector('.rich-editor-toolbar-btn.font-family-btn');
+    // Find font-family button in the specific editor's toolbar using editorId
+    const editor = Editor.getInstanceById(this.editorId);
+    if (!editor) return;
+    
+    const toolbar = editor.getModule('toolbar');
+    let fontFamilyButton = null;
+    
+    if (toolbar) {
+      fontFamilyButton = toolbar.getButton('font-family');
+    }
+    
+    // Fallback: find button by class in the specific editor's toolbar
+    if (!fontFamilyButton) {
+      const toolbarContainer = toolbar?.getContainer();
+      if (toolbarContainer) {
+        fontFamilyButton = toolbarContainer.querySelector('.rich-editor-toolbar-btn.font-family-btn');
+      }
+    }
+    
+    // Final fallback: find any font-family button in the specific editor's wrapper
+    if (!fontFamilyButton) {
+      fontFamilyButton = editor.wrapper.querySelector('.rich-editor-toolbar-btn.font-family-btn');
+    }
+    
     if (fontFamilyButton && fontFamilyButton.updateText) {
       fontFamilyButton.updateText(displayName);
     } else if (fontFamilyButton) {
@@ -136,8 +240,23 @@ class FontFamily extends InlineFormat {
 
   /**
    * Static method to apply font family to current selection
+   * @param {string} font - Font family value
+   * @param {string} editorId - Editor instance ID
    */
-  static applyFontFamilyToCurrentSelection(font) {
+  static applyFontFamilyToCurrentSelection(font, editorId = null) {
+    // Get the correct editor instance
+    let editor = null;
+    if (editorId) {
+      editor = Editor.getInstanceById(editorId);
+    } else {
+      editor = Editor.getCurrentInstance();
+    }
+    
+    if (!editor) {
+      console.warn('No editor instance found for font family application');
+      return;
+    }
+    
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount) return;
 
@@ -145,11 +264,20 @@ class FontFamily extends InlineFormat {
     saveBeforeFormat();
 
     const range = selection.getRangeAt(0);
-    const fontFamilyFormat = new FontFamily();
-    fontFamilyFormat.apply(font);
+    const fontFamilyFormat = FontFamily.createForEditor(editorId);
+    if (fontFamilyFormat) {
+      fontFamilyFormat.apply(font);
+      
+      // Update button text after applying
+      fontFamilyFormat.updateButtonText();
+    }
     
-    // Update button text after applying
-    fontFamilyFormat.updateButtonText();
+    // Trigger content change after applying format
+    setTimeout(() => {
+      if (editor && typeof editor.onContentChange === 'function') {
+        editor.onContentChange();
+      }
+    }, 0);
   }
 
   /**
@@ -304,7 +432,33 @@ class FontFamily extends InlineFormat {
    */
   async showFontPicker(anchorButton = null) {
     // Use provided anchor button or find the default toolbar button
-    const fontFamilyButton = anchorButton || document.querySelector('.rich-editor-toolbar-btn.font-family-btn');
+    let fontFamilyButton = anchorButton;
+    
+    if (!fontFamilyButton) {
+      // Find font-family button in the current editor's toolbar
+      const editor = Editor.getInstanceById(this.editorId);
+      if (!editor) return;
+      
+      const toolbar = editor.getModule('toolbar');
+      
+      if (toolbar) {
+        fontFamilyButton = toolbar.getButton('font-family');
+      }
+      
+      // Fallback: find button by class in the current editor's toolbar
+      if (!fontFamilyButton) {
+        const toolbarContainer = toolbar?.getContainer();
+        if (toolbarContainer) {
+          fontFamilyButton = toolbarContainer.querySelector('.rich-editor-toolbar-btn.font-family-btn');
+        }
+      }
+      
+      // Final fallback: find any font-family button in the current editor's wrapper
+      if (!fontFamilyButton) {
+        fontFamilyButton = editor.wrapper.querySelector('.rich-editor-toolbar-btn.font-family-btn');
+      }
+    }
+    
     if (!fontFamilyButton) return;
     
     // Update current selection before showing
@@ -344,6 +498,16 @@ class FontFamily extends InlineFormat {
     // If text node, get parent element
     if (currentNode.nodeType === Node.TEXT_NODE) {
       currentNode = currentNode.parentElement;
+    }
+    
+    // Get the specific editor instance
+    const editor = Editor.getInstanceById(this.editorId);
+    if (!editor) return 'Arial, sans-serif';
+    
+    // Check if the selection is within this editor
+    if (!editor.editor.contains(currentNode) && !editor.editor.isSameNode(currentNode)) {
+      // Selection is not in this editor, return default
+      return 'Arial, sans-serif';
     }
     
     // Find element with font-family style

@@ -4,25 +4,69 @@ import Editor from '../core/editor.js';
 
 /**
  * Tag Format - Handles custom tag insertion
+ * Now supports multiple editor instances with separate popup instances
  */
 class Tag extends InlineFormat {
   static formatName = 'tag';
   static tagName = 'SPAN';
   static className = 'custom-tag';
-  static savedRange = null;
+  static savedRanges = new Map(); // Map to store saved ranges for each editor
 
   constructor() {
     super();
-    // Create tag popup instance if not exists
-    if (!Tag.tagPopupInstance) {
-      Tag.tagPopupInstance = new TagPopup({
-        onTagInsert: (tagType, tagContent) => {
-          Tag.insertTagAtCurrentPosition(tagType, tagContent);
-        },
-        editor: Editor.getCurrentInstance()
-      });
+    
+    // Get current editor instance
+    const currentEditor = Editor.getCurrentInstance();
+    if (!currentEditor) {
+      console.warn('No editor instance found for Tag format');
+      return;
     }
-    this.tagPopup = Tag.tagPopupInstance;
+    
+    this.editorId = currentEditor.instanceId;
+    
+    // Check if this editor already has a tag popup instance
+    let tagPopup = currentEditor.getPopupInstance('tag');
+    
+    if (!tagPopup) {
+      // Create new tag popup instance for this editor
+      tagPopup = new TagPopup({
+        onTagInsert: (tagType, tagContent) => {
+          Tag.insertTagAtCurrentPosition(tagType, tagContent, this.editorId);
+        },
+        editor: currentEditor,
+        editorId: this.editorId
+      });
+      
+      // Store popup instance in editor
+      currentEditor.setPopupInstance('tag', tagPopup);
+    }
+    
+    this.tagPopup = tagPopup;
+  }
+
+  /**
+   * Create a new Tag format instance for a specific editor
+   * @param {string} editorId - Editor instance ID
+   * @returns {Tag} Tag format instance
+   */
+  static createForEditor(editorId) {
+    const editor = Editor.getInstanceById(editorId);
+    if (!editor) {
+      console.warn('No editor instance found for ID:', editorId);
+      return null;
+    }
+    
+    // Temporarily set as current instance
+    const originalCurrent = Editor.currentInstance;
+    Editor.currentInstance = editor;
+    
+    // Create format instance
+    const format = new Tag();
+    
+    // Restore original current instance
+    Editor.currentInstance = originalCurrent;
+    
+    return format;
   }
 
   /**
@@ -56,18 +100,33 @@ class Tag extends InlineFormat {
    * Insert tag at current cursor position
    * @param {string} tagType - Type of tag
    * @param {string} content - Tag content
+   * @param {string} editorId - Editor instance ID
    */
-  static insertTagAtCurrentPosition(tagType, content) {
+  static insertTagAtCurrentPosition(tagType, content, editorId = null) {
+    // Get the correct editor instance
+    let editor = null;
+    if (editorId) {
+      editor = Editor.getInstanceById(editorId);
+    } else {
+      editor = Editor.getCurrentInstance();
+    }
+    
+    if (!editor) {
+      console.warn('No editor instance found for tag insertion');
+      return;
+    }
+    
     // Use saved range if available, otherwise get current selection
     const selection = window.getSelection();
     if (!selection) return;
 
     try {
-      // Restore saved range if exists
-      if (Tag.savedRange) {
+      // Restore saved range if exists for this editor
+      const savedRange = Tag.savedRanges.get(editorId);
+      if (savedRange) {
         selection.removeAllRanges();
-        selection.addRange(Tag.savedRange);
-        Tag.savedRange = null;
+        selection.addRange(savedRange);
+        Tag.savedRanges.delete(editorId);
       } else if (!selection.rangeCount) {
         return;
       }
@@ -93,9 +152,13 @@ class Tag extends InlineFormat {
       selection.addRange(range);
       
       // Focus back on editor
-      const editor = Editor.getCurrentInstance();
       if (editor && editor.element) {
         editor.element.focus();
+      }
+      
+      // Trigger content change event
+      if (editor && typeof editor.onContentChange === 'function') {
+        editor.onContentChange();
       }
       
     } catch (error) {
@@ -108,12 +171,12 @@ class Tag extends InlineFormat {
    */
   apply(tagType, content) {
     if (tagType && content) {
-      Tag.insertTagAtCurrentPosition(tagType, content);
+      Tag.insertTagAtCurrentPosition(tagType, content, this.editorId);
     } else {
       // Save current selection before showing popup
       const selection = window.getSelection();
       if (selection && selection.rangeCount > 0) {
-        Tag.savedRange = selection.getRangeAt(0).cloneRange();
+        Tag.savedRanges.set(this.editorId, selection.getRangeAt(0).cloneRange());
       }
       this.showTagPopup();
     }
@@ -146,7 +209,7 @@ class Tag extends InlineFormat {
       // Save current selection before showing popup
       const selection = window.getSelection();
       if (selection && selection.rangeCount > 0) {
-        Tag.savedRange = selection.getRangeAt(0).cloneRange();
+        Tag.savedRanges.set(this.editorId, selection.getRangeAt(0).cloneRange());
       }
       this.showTagPopup();
     }
@@ -156,8 +219,34 @@ class Tag extends InlineFormat {
    * Show tag popup
    */
   showTagPopup() {
-    const tagButton = document.querySelector('.rich-editor-toolbar-btn.tag-btn');
-    if (!tagButton) return;
+    // Find tag button in the current editor's toolbar
+    const editor = Editor.getInstanceById(this.editorId);
+    if (!editor) return;
+    
+    const toolbar = editor.getModule('toolbar');
+    let tagButton = null;
+    
+    if (toolbar) {
+      tagButton = toolbar.getButton('tag');
+    }
+    
+    // Fallback: find button by class in the current editor's toolbar
+    if (!tagButton) {
+      const toolbarContainer = toolbar?.getContainer();
+      if (toolbarContainer) {
+        tagButton = toolbarContainer.querySelector('.rich-editor-toolbar-btn.tag-btn');
+      }
+    }
+    
+    // Final fallback: find any tag button in the current editor's wrapper
+    if (!tagButton) {
+      tagButton = editor.wrapper.querySelector('.rich-editor-toolbar-btn.tag-btn');
+    }
+    
+    if (!tagButton) {
+      console.warn('Tag button not found for editor:', this.editorId);
+      return;
+    }
     
     this.tagPopup.show(tagButton);
   }

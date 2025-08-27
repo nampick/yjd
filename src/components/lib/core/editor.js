@@ -25,6 +25,8 @@ export default class Editor {
 
   // Static reference to current editor instance
   static currentInstance = null;
+  // Static map to track all editor instances
+  static instances = new Map();
 
   constructor(selector, options = {}) {
     this.options = { ...Editor.DEFAULTS, ...options };
@@ -39,10 +41,25 @@ export default class Editor {
     this.statusbarEls = {};
     this.dropdownMenus = {};
     
+    // Popup management - each editor has its own popup instances
+    this.popupInstances = new Map();
+    
     // Set as current instance
     Editor.currentInstance = this;
+    
+    // Register this instance
+    const instanceId = this.generateInstanceId();
+    this.instanceId = instanceId;
+    Editor.instances.set(instanceId, this);
         
     this.init();
+  }
+
+  /**
+   * Generate unique instance ID
+   */
+  generateInstanceId() {
+    return 'editor_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
   }
 
   /**
@@ -114,12 +131,61 @@ export default class Editor {
   }
 
   /**
+   * Check if content is HTML or plain text
+   * @param {string} content - Content to check
+   * @returns {boolean} True if content appears to be HTML
+   */
+  isHtmlContent(content) {
+    if (!content || typeof content !== 'string') {
+      return false;
+    }
+    
+    // Trim whitespace for checking
+    const trimmed = content.trim();
+    
+    // Check for common HTML patterns
+    const htmlPatterns = [
+      /<[^>]+>/, // Contains HTML tags
+      /&[a-zA-Z]+;/, // Contains HTML entities
+      /&#\d+;/, // Contains numeric HTML entities
+    ];
+    
+    return htmlPatterns.some(pattern => pattern.test(trimmed));
+  }
+
+  /**
+   * Wrap plain text content in a paragraph tag
+   * @param {string} content - Content to wrap
+   * @returns {string} Wrapped content
+   */
+  wrapTextInParagraph(content) {
+    if (!content || typeof content !== 'string') {
+      return '<p><br></p>';
+    }
+    
+    const trimmed = content.trim();
+    
+    // If content is already HTML, return as is
+    if (this.isHtmlContent(trimmed)) {
+      return trimmed;
+    }
+    
+    // If content is empty, return empty paragraph
+    if (trimmed === '') {
+      return '<p><br></p>';
+    }
+    
+    // Wrap plain text in paragraph tag
+    return `<p>${trimmed}</p>`;
+  }
+
+  /**
    * Get default content for editor
    */
   getDefaultContent() {
     // If custom content is provided in options, use it
     if (this.options.content) {
-      return this.options.content;
+      return this.wrapTextInParagraph(this.options.content);
     }
     
     // Otherwise, return the default welcome content
@@ -378,7 +444,7 @@ export default class Editor {
       this.editor.focus();
     } else {
       // Check if we need to ensure there's always a paragraph element for editing
-      this.ensureParagraphForEditing();
+      //this.ensureParagraphForEditing();
     }
   }
 
@@ -635,7 +701,9 @@ export default class Editor {
    * Set editor content
    */
   setContent(html) {
-    this.editor.innerHTML = html;
+    // Wrap plain text content in paragraph tag if needed
+    const processedContent = this.wrapTextInParagraph(html);
+    this.editor.innerHTML = processedContent;
     this.onContentChange();
   }
 
@@ -661,33 +729,14 @@ export default class Editor {
   }
 
   /**
-   * Destroy editor
-   */
-  destroy() {
-    // Destroy all modules
-    this.modules.forEach(module => {
-      if (typeof module.destroy === 'function') {
-        module.destroy();
-      }
-    });
-
-    // Remove DOM elements
-    if (this.wrapper && this.wrapper.parentNode) {
-      this.wrapper.parentNode.removeChild(this.wrapper);
-    }
-
-    // Clear references
-    this.modules.clear();
-    this.formats.clear();
-    this.events.clear(); // Clear events
-  }
-
-  /**
    * Handle toolbar button clicks
    */
   handleToolbarClick(data) {
     const { command, button, value } = data;
     
+    // Set this editor as current instance for the duration of this command
+    const originalCurrent = Editor.currentInstance;
+    Editor.currentInstance = this;
     
     // Emit toolbar-click event for modules to listen
     this.emit('toolbar-click', data);
@@ -815,6 +864,16 @@ export default class Editor {
     
     // Update button state
     this.updateToolbarButtonStates();
+    
+    // Trigger content change for formats that modify content immediately
+    // (like bold, italic, underline, etc. that use execCommand)
+    const immediateFormats = ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript'];
+    if (immediateFormats.includes(formatName)) {
+      // Use setTimeout to ensure DOM changes are complete
+      setTimeout(() => {
+        this.onContentChange();
+      }, 0);
+    }
   }
 
   /**
@@ -837,13 +896,26 @@ export default class Editor {
       if (isInEditableArea) {
         const FormatClass = this.registry.get(`formats/${formatName}`);
         if (FormatClass) {
-          const formatInstance = new FormatClass();
-          const isActive = formatInstance.isActive();
-          toolbar.setButtonActive(formatName, isActive);
+          // Create format instance for this specific editor
+          let formatInstance;
+          if (FormatClass.createForEditor) {
+            formatInstance = FormatClass.createForEditor(this.instanceId);
+          } else {
+            // For formats that don't have createForEditor, temporarily set this as current instance
+            const originalCurrent = Editor.currentInstance;
+            Editor.currentInstance = this;
+            formatInstance = new FormatClass();
+            Editor.currentInstance = originalCurrent;
+          }
           
-          // Special handling for line-height: update button text
-          if (formatName === 'line-height' && typeof formatInstance.updateButtonText === 'function') {
-            formatInstance.updateButtonText();
+          if (formatInstance) {
+            const isActive = formatInstance.isActive();
+            toolbar.setButtonActive(formatName, isActive);
+            
+            // Special handling for line-height: update button text
+            if (formatName === 'line-height' && typeof formatInstance.updateButtonText === 'function') {
+              formatInstance.updateButtonText();
+            }
           }
         }
       } else {
@@ -856,7 +928,7 @@ export default class Editor {
     if (isInEditableArea) {
       const TextSizeClass = this.registry.get('formats/text-size');
       if (TextSizeClass && typeof TextSizeClass.updateButtonTextStatic === 'function') {
-        TextSizeClass.updateButtonTextStatic();
+        TextSizeClass.updateButtonTextStatic(this.instanceId);
       }
     }
   }
@@ -991,5 +1063,96 @@ export default class Editor {
   static getPopupContainer() {
     const currentInstance = Editor.getCurrentInstance();
     return currentInstance ? currentInstance.getPopupContainer() : null;
+  }
+
+  /**
+   * Get popup instance for this editor
+   * @param {string} popupType - Type of popup (e.g., 'link', 'image', 'table')
+   * @returns {Object|null} Popup instance or null if not found
+   */
+  getPopupInstance(popupType) {
+    return this.popupInstances.get(popupType);
+  }
+
+  /**
+   * Set popup instance for this editor
+   * @param {string} popupType - Type of popup
+   * @param {Object} popupInstance - Popup instance
+   */
+  setPopupInstance(popupType, popupInstance) {
+    this.popupInstances.set(popupType, popupInstance);
+  }
+
+  /**
+   * Get popup instance by editor ID and popup type
+   * @param {string} editorId - Editor instance ID
+   * @param {string} popupType - Type of popup
+   * @returns {Object|null} Popup instance or null if not found
+   */
+  static getPopupInstanceById(editorId, popupType) {
+    const editor = Editor.instances.get(editorId);
+    return editor ? editor.getPopupInstance(popupType) : null;
+  }
+
+  /**
+   * Get editor instance by ID
+   * @param {string} editorId - Editor instance ID
+   * @returns {Editor|null} Editor instance or null if not found
+   */
+  static getInstanceById(editorId) {
+    return Editor.instances.get(editorId);
+  }
+
+  /**
+   * Get all editor instances
+   * @returns {Map} Map of all editor instances
+   */
+  static getAllInstances() {
+    return Editor.instances;
+  }
+
+  /**
+   * Destroy popup instances for this editor
+   */
+  destroyPopupInstances() {
+    this.popupInstances.forEach((popupInstance, popupType) => {
+      if (popupInstance && typeof popupInstance.destroy === 'function') {
+        popupInstance.destroy();
+      }
+    });
+    this.popupInstances.clear();
+  }
+
+  /**
+   * Destroy editor
+   */
+  destroy() {
+    // Destroy all modules
+    this.modules.forEach(module => {
+      if (typeof module.destroy === 'function') {
+        module.destroy();
+      }
+    });
+
+    // Destroy popup instances
+    this.destroyPopupInstances();
+
+    // Remove DOM elements
+    if (this.wrapper && this.wrapper.parentNode) {
+      this.wrapper.parentNode.removeChild(this.wrapper);
+    }
+
+    // Clear references
+    this.modules.clear();
+    this.formats.clear();
+    this.events.clear(); // Clear events
+    
+    // Remove from instances map
+    Editor.instances.delete(this.instanceId);
+    
+    // Clear current instance if this was the current one
+    if (Editor.currentInstance === this) {
+      Editor.currentInstance = null;
+    }
   }
 } 

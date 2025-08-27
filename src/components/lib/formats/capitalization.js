@@ -1,9 +1,11 @@
 import { InlineFormat } from '../core/format.js';
 import CustomSelect from '../ui/customselect.js';
 import { saveBeforeFormat } from '../utils/history-helper.js';
+import Editor from '../core/editor.js';
 
 /**
  * Capitalization Format - Handles text capitalization
+ * Now supports multiple editor instances with separate popup instances
  */
 class Capitalization extends InlineFormat {
   static formatName = 'capitalization';
@@ -11,8 +13,21 @@ class Capitalization extends InlineFormat {
   
   constructor() {
     super();
-    // Create custom select instance if not exists
-    if (!Capitalization.selectInstance) {
+    
+    // Get current editor instance
+    const currentEditor = Editor.getCurrentInstance();
+    if (!currentEditor) {
+      console.warn('No editor instance found for Capitalization format');
+      return;
+    }
+    
+    this.editorId = currentEditor.instanceId;
+    
+    // Check if this editor already has a capitalization select instance
+    let customSelect = currentEditor.getPopupInstance('capitalization');
+    
+    if (!customSelect) {
+      // Create new custom select instance for this editor
       const capMap = Capitalization.getCapitalizationMap();
       const items = Object.values(capMap).map(capData => ({
         value: capData.style,
@@ -20,17 +35,48 @@ class Capitalization extends InlineFormat {
         title: capData.title
       }));
 
-      Capitalization.selectInstance = new CustomSelect({
+      customSelect = new CustomSelect({
         items: items,
         displayProperty: 'label',
         valueProperty: 'value',
         className: 'capitalization-select',
         onItemSelect: (value, item) => {
-          Capitalization.applyCapitalizationToCurrentSelection(value);
-        }
+          Capitalization.applyCapitalizationToCurrentSelection(value, this.editorId);
+        },
+        editor: currentEditor,
+        editorId: this.editorId
       });
+      
+      // Store popup instance in editor
+      currentEditor.setPopupInstance('capitalization', customSelect);
     }
-    this.customSelect = Capitalization.selectInstance;
+    
+    this.customSelect = customSelect;
+  }
+
+  /**
+   * Create a new Capitalization format instance for a specific editor
+   * @param {string} editorId - Editor instance ID
+   * @returns {Capitalization} Capitalization format instance
+   */
+  static createForEditor(editorId) {
+    const editor = Editor.getInstanceById(editorId);
+    if (!editor) {
+      console.warn('No editor instance found for ID:', editorId);
+      return null;
+    }
+    
+    // Temporarily set as current instance
+    const originalCurrent = Editor.currentInstance;
+    Editor.currentInstance = editor;
+    
+    // Create format instance
+    const format = new Capitalization();
+    
+    // Restore original current instance
+    Editor.currentInstance = originalCurrent;
+    
+    return format;
   }
 
   /**
@@ -78,7 +124,30 @@ class Capitalization extends InlineFormat {
     const currentCap = this.getCurrentCapitalization();
     const displayName = Capitalization.getCapitalizationDisplayName(currentCap || 'none');
     
-    const capitalizationButton = document.querySelector('.rich-editor-toolbar-btn.capitalization-btn');
+    // Find capitalization button in the current editor's toolbar
+    const editor = Editor.getInstanceById(this.editorId);
+    if (!editor) return;
+    
+    const toolbar = editor.getModule('toolbar');
+    let capitalizationButton = null;
+    
+    if (toolbar) {
+      capitalizationButton = toolbar.getButton('capitalization');
+    }
+    
+    // Fallback: find button by class in the current editor's toolbar
+    if (!capitalizationButton) {
+      const toolbarContainer = toolbar?.getContainer();
+      if (toolbarContainer) {
+        capitalizationButton = toolbarContainer.querySelector('.rich-editor-toolbar-btn.capitalization-btn');
+      }
+    }
+    
+    // Final fallback: find any capitalization button in the current editor's wrapper
+    if (!capitalizationButton) {
+      capitalizationButton = editor.wrapper.querySelector('.rich-editor-toolbar-btn.capitalization-btn');
+    }
+    
     if (capitalizationButton && capitalizationButton.updateText) {
       capitalizationButton.updateText(displayName);
     } else if (capitalizationButton) {
@@ -103,8 +172,23 @@ class Capitalization extends InlineFormat {
 
   /**
    * Static method to apply capitalization to current selection
+   * @param {string} style - Text transform value
+   * @param {string} editorId - Editor instance ID
    */
-  static applyCapitalizationToCurrentSelection(style) {
+  static applyCapitalizationToCurrentSelection(style, editorId = null) {
+    // Get the correct editor instance
+    let editor = null;
+    if (editorId) {
+      editor = Editor.getInstanceById(editorId);
+    } else {
+      editor = Editor.getCurrentInstance();
+    }
+    
+    if (!editor) {
+      console.warn('No editor instance found for capitalization application');
+      return;
+    }
+    
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount) return;
 
@@ -112,11 +196,20 @@ class Capitalization extends InlineFormat {
     saveBeforeFormat();
 
     const range = selection.getRangeAt(0);
-    const capFormat = new Capitalization();
-    capFormat.apply(style);
+    const capFormat = Capitalization.createForEditor(editorId);
+    if (capFormat) {
+      capFormat.apply(style);
+      
+      // Update button text after applying
+      capFormat.updateButtonText();
+    }
     
-    // Update button text after applying
-    capFormat.updateButtonText();
+    // Trigger content change after applying format
+    setTimeout(() => {
+      if (editor && typeof editor.onContentChange === 'function') {
+        editor.onContentChange();
+      }
+    }, 0);
   }
 
   /**
@@ -185,7 +278,7 @@ class Capitalization extends InlineFormat {
    * Apply capitalization format with specified style
    * @param {string} style - Text transform value
    */
-    apply(style = 'none') {
+  apply(style = 'none') {
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount) return;
 
@@ -225,11 +318,6 @@ class Capitalization extends InlineFormat {
 
       toRemove.forEach(el => el.remove());
     }
-
-    // if (range.collapsed) {
-      
-    //   return;
-    // }
 
     // Nếu có selection: đổi text bên trong
     const contents = range.extractContents();
@@ -334,8 +422,34 @@ class Capitalization extends InlineFormat {
    * Show custom select positioned relative to capitalization button on toolbar
    */
   async showCapitalizationPicker() {
-    const capitalizationButton = document.querySelector('.rich-editor-toolbar-btn.capitalization-btn');
-    if (!capitalizationButton) return;
+    // Find capitalization button in the current editor's toolbar
+    const editor = Editor.getInstanceById(this.editorId);
+    if (!editor) return;
+    
+    const toolbar = editor.getModule('toolbar');
+    let capitalizationButton = null;
+    
+    if (toolbar) {
+      capitalizationButton = toolbar.getButton('capitalization');
+    }
+    
+    // Fallback: find button by class in the current editor's toolbar
+    if (!capitalizationButton) {
+      const toolbarContainer = toolbar?.getContainer();
+      if (toolbarContainer) {
+        capitalizationButton = toolbarContainer.querySelector('.rich-editor-toolbar-btn.capitalization-btn');
+      }
+    }
+    
+    // Final fallback: find any capitalization button in the current editor's wrapper
+    if (!capitalizationButton) {
+      capitalizationButton = editor.wrapper.querySelector('.rich-editor-toolbar-btn.capitalization-btn');
+    }
+    
+    if (!capitalizationButton) {
+      console.warn('Capitalization button not found for editor:', this.editorId);
+      return;
+    }
     
     // Update current selection before showing
     const currentCap = this.getCurrentCapitalization();

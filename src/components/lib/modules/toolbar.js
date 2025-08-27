@@ -145,10 +145,10 @@ class Toolbar extends Module {
     // Custom buttons with dropdowns
     const customButtons = {
       'heading': { text: 'Paragraph', width: '110px', title: 'Format (Headings & Paragraphs)' },
-      'font-family': { text: 'Arial', width: '150px', title: 'Font Family' },
-      'line-height': { text: '1.15', width: '100px', title: 'Line Height' },
-      'capitalization': { text: 'Aa', width: '130px', title: 'Text Capitalization' },
-      'text-size': { text: '14px', width: '100px', title: 'Text Size' }
+      'font-family': { text: 'Font Family', width: '150px', title: 'Font Family' },
+      'line-height': { text: 'Line Height', width: '110px', title: 'Line Height' },
+      'capitalization': { text: 'Capitalization', width: '130px', title: 'Text Capitalization' },
+      'text-size': { text: 'Text Size', width: '100px', title: 'Text Size' }
     };
 
     if (customButtons[format]) {

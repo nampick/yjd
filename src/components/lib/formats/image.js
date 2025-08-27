@@ -4,6 +4,7 @@ import Editor from '../core/editor.js';
 
 /**
  * Image Format - Handles image insertion
+ * Now supports multiple editor instances with separate popup instances
  */
 class Image extends InlineFormat {
   static formatName = 'image';
@@ -12,16 +13,59 @@ class Image extends InlineFormat {
 
   constructor() {
     super();
-    // Create image popup instance if not exists
-    if (!Image.imagePopupInstance) {
-      Image.imagePopupInstance = new ImagePopup({
-        onImageInsert: (src, alt) => {
-          Image.insertImageAtCurrentPosition(src, alt);
-        },
-        editor: Editor.getCurrentInstance()
-      });
+    
+    // Get current editor instance
+    const currentEditor = Editor.getCurrentInstance();
+    if (!currentEditor) {
+      console.warn('No editor instance found for Image format');
+      return;
     }
-    this.imagePopup = Image.imagePopupInstance;
+    
+    this.editorId = currentEditor.instanceId;
+    
+    // Check if this editor already has an image popup instance
+    let imagePopup = currentEditor.getPopupInstance('image');
+    
+    if (!imagePopup) {
+      // Create new image popup instance for this editor
+      imagePopup = new ImagePopup({
+        onImageInsert: (src, alt) => {
+          Image.insertImageAtCurrentPosition(src, alt, this.editorId);
+        },
+        editor: currentEditor,
+        editorId: this.editorId
+      });
+      
+      // Store popup instance in editor
+      currentEditor.setPopupInstance('image', imagePopup);
+    }
+    
+    this.imagePopup = imagePopup;
+  }
+
+  /**
+   * Create a new Image format instance for a specific editor
+   * @param {string} editorId - Editor instance ID
+   * @returns {Image} Image format instance
+   */
+  static createForEditor(editorId) {
+    const editor = Editor.getInstanceById(editorId);
+    if (!editor) {
+      console.warn('No editor instance found for ID:', editorId);
+      return null;
+    }
+    
+    // Temporarily set as current instance
+    const originalCurrent = Editor.currentInstance;
+    Editor.currentInstance = editor;
+    
+    // Create format instance
+    const format = new Image();
+    
+    // Restore original current instance
+    Editor.currentInstance = originalCurrent;
+    
+    return format;
   }
 
   /**
@@ -45,8 +89,22 @@ class Image extends InlineFormat {
    * Insert image at current cursor position
    * @param {string} src - Image source URL
    * @param {string} alt - Alt text
+   * @param {string} editorId - Editor instance ID
    */
-  static insertImageAtCurrentPosition(src, alt = '') {
+  static insertImageAtCurrentPosition(src, alt = '', editorId = null) {
+    // Get the correct editor instance
+    let editor = null;
+    if (editorId) {
+      editor = Editor.getInstanceById(editorId);
+    } else {
+      editor = Editor.getCurrentInstance();
+    }
+    
+    if (!editor) {
+      console.warn('No editor instance found for image insertion');
+      return;
+    }
+    
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount) {
       return;
@@ -68,9 +126,22 @@ class Image extends InlineFormat {
       range.collapse(true);
       selection.removeAllRanges();
       selection.addRange(range);
+      
+      // Trigger content change event
+      if (editor && typeof editor.onContentChange === 'function') {
+        editor.onContentChange();
+      }
     } catch (error) {
       console.error('Error inserting image:', error);
     }
+    
+    // Trigger content change after applying format
+    setTimeout(() => {
+      const currentEditor = Editor.getCurrentInstance();
+      if (currentEditor && typeof currentEditor.onContentChange === 'function') {
+        currentEditor.onContentChange();
+      }
+    }, 0);
   }
 
   /**
@@ -78,7 +149,7 @@ class Image extends InlineFormat {
    */
   apply(src, alt) {
     if (src) {
-      Image.insertImageAtCurrentPosition(src, alt);
+      Image.insertImageAtCurrentPosition(src, alt, this.editorId);
     } else {
       this.showImagePopup();
     }
@@ -114,8 +185,34 @@ class Image extends InlineFormat {
    * Show image popup
    */
   showImagePopup() {
-    const imageButton = document.querySelector('.rich-editor-toolbar-btn.image-btn');
-    if (!imageButton) return;
+    // Find image button in the current editor's toolbar
+    const editor = Editor.getInstanceById(this.editorId);
+    if (!editor) return;
+    
+    const toolbar = editor.getModule('toolbar');
+    let imageButton = null;
+    
+    if (toolbar) {
+      imageButton = toolbar.getButton('image');
+    }
+    
+    // Fallback: find button by class in the current editor's toolbar
+    if (!imageButton) {
+      const toolbarContainer = toolbar?.getContainer();
+      if (toolbarContainer) {
+        imageButton = toolbarContainer.querySelector('.rich-editor-toolbar-btn.image-btn');
+      }
+    }
+    
+    // Final fallback: find any image button in the current editor's wrapper
+    if (!imageButton) {
+      imageButton = editor.wrapper.querySelector('.rich-editor-toolbar-btn.image-btn');
+    }
+    
+    if (!imageButton) {
+      console.warn('Image button not found for editor:', this.editorId);
+      return;
+    }
     
     this.imagePopup.show(imageButton);
   }

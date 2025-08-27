@@ -1,8 +1,10 @@
 import { InlineFormat } from '../core/format.js';
 import ImportPopup from '../ui/import-popup.js';
+import Editor from '../core/editor.js';
 
 /**
  * Import Format - Handles importing various file types
+ * Now supports multiple editor instances with separate popup instances
  */
 class Import extends InlineFormat {
   static formatName = 'import';
@@ -11,23 +13,81 @@ class Import extends InlineFormat {
 
   constructor() {
     super();
-    // Create import popup instance if not exists
-    if (!Import.importPopupInstance) {
-      Import.importPopupInstance = new ImportPopup({
-        onImport: (content, fileType) => {
-          Import.insertImportedContent(content, fileType);
-        }
-      });
+    
+    // Get current editor instance
+    const currentEditor = Editor.getCurrentInstance();
+    if (!currentEditor) {
+      console.warn('No editor instance found for Import format');
+      return;
     }
-    this.importPopup = Import.importPopupInstance;
+    
+    this.editorId = currentEditor.instanceId;
+    
+    // Check if this editor already has an import popup instance
+    let importPopup = currentEditor.getPopupInstance('import');
+    
+    if (!importPopup) {
+      // Create new import popup instance for this editor
+      importPopup = new ImportPopup({
+        onImport: (content, fileType) => {
+          Import.insertImportedContent(content, fileType, this.editorId);
+        },
+        editor: currentEditor,
+        editorId: this.editorId
+      });
+      
+      // Store popup instance in editor
+      currentEditor.setPopupInstance('import', importPopup);
+    }
+    
+    this.importPopup = importPopup;
+  }
+
+  /**
+   * Create a new Import format instance for a specific editor
+   * @param {string} editorId - Editor instance ID
+   * @returns {Import} Import format instance
+   */
+  static createForEditor(editorId) {
+    const editor = Editor.getInstanceById(editorId);
+    if (!editor) {
+      console.warn('No editor instance found for ID:', editorId);
+      return null;
+    }
+    
+    // Temporarily set as current instance
+    const originalCurrent = Editor.currentInstance;
+    Editor.currentInstance = editor;
+    
+    // Create format instance
+    const format = new Import();
+    
+    // Restore original current instance
+    Editor.currentInstance = originalCurrent;
+    
+    return format;
   }
 
   /**
    * Insert imported content at current cursor position
    * @param {string} content - Imported content
    * @param {string} fileType - Type of imported file
+   * @param {string} editorId - Editor instance ID
    */
-  static insertImportedContent(content, fileType) {
+  static insertImportedContent(content, fileType, editorId = null) {
+    // Get the correct editor instance
+    let editor = null;
+    if (editorId) {
+      editor = Editor.getInstanceById(editorId);
+    } else {
+      editor = Editor.getCurrentInstance();
+    }
+    
+    if (!editor) {
+      console.warn('No editor instance found for content insertion');
+      return;
+    }
+    
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount) return;
 
@@ -56,6 +116,11 @@ class Import extends InlineFormat {
       range.collapse(true);
       selection.removeAllRanges();
       selection.addRange(range);
+      
+      // Trigger content change event
+      if (editor && typeof editor.onContentChange === 'function') {
+        editor.onContentChange();
+      }
       
     } catch (error) {
       console.error('Error inserting imported content:', error);
@@ -249,8 +314,34 @@ class Import extends InlineFormat {
    * Show import popup
    */
   showImportPopup() {
-    const importButton = document.querySelector('.rich-editor-toolbar-btn.import-btn');
-    if (!importButton) return;
+    // Find import button in the current editor's toolbar
+    const editor = Editor.getInstanceById(this.editorId);
+    if (!editor) return;
+    
+    const toolbar = editor.getModule('toolbar');
+    let importButton = null;
+    
+    if (toolbar) {
+      importButton = toolbar.getButton('import');
+    }
+    
+    // Fallback: find button by class in the current editor's toolbar
+    if (!importButton) {
+      const toolbarContainer = toolbar?.getContainer();
+      if (toolbarContainer) {
+        importButton = toolbarContainer.querySelector('.rich-editor-toolbar-btn.import-btn');
+      }
+    }
+    
+    // Final fallback: find any import button in the current editor's wrapper
+    if (!importButton) {
+      importButton = editor.wrapper.querySelector('.rich-editor-toolbar-btn.import-btn');
+    }
+    
+    if (!importButton) {
+      console.warn('Import button not found for editor:', this.editorId);
+      return;
+    }
     
     this.importPopup.show(importButton);
   }

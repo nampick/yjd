@@ -1,8 +1,10 @@
 import { InlineFormat } from '../core/format.js';
 import EmojiPicker from '../ui/emoji-picker.js';
+import Editor from '../core/editor.js';
 
 /**
  * Emoji Format - Handles emoji insertion
+ * Now supports multiple editor instances with separate popup instances
  */
 class Emoji extends InlineFormat {
   static formatName = 'emoji';
@@ -11,15 +13,59 @@ class Emoji extends InlineFormat {
 
   constructor() {
     super();
-    // Create emoji picker instance if not exists
-    if (!Emoji.emojiPickerInstance) {
-      Emoji.emojiPickerInstance = new EmojiPicker({
-        onEmojiSelect: (emoji) => {
-          Emoji.insertEmojiAtCurrentPosition(emoji);
-        }
-      });
+    
+    // Get current editor instance
+    const currentEditor = Editor.getCurrentInstance();
+    if (!currentEditor) {
+      console.warn('No editor instance found for Emoji format');
+      return;
     }
-    this.emojiPicker = Emoji.emojiPickerInstance;
+    
+    this.editorId = currentEditor.instanceId;
+    
+    // Check if this editor already has an emoji picker instance
+    let emojiPicker = currentEditor.getPopupInstance('emoji');
+    
+    if (!emojiPicker) {
+      // Create new emoji picker instance for this editor
+      emojiPicker = new EmojiPicker({
+        onEmojiSelect: (emoji) => {
+          Emoji.insertEmojiAtCurrentPosition(emoji, this.editorId);
+        },
+        editor: currentEditor,
+        editorId: this.editorId
+      });
+      
+      // Store popup instance in editor
+      currentEditor.setPopupInstance('emoji', emojiPicker);
+    }
+    
+    this.emojiPicker = emojiPicker;
+  }
+
+  /**
+   * Create a new Emoji format instance for a specific editor
+   * @param {string} editorId - Editor instance ID
+   * @returns {Emoji} Emoji format instance
+   */
+  static createForEditor(editorId) {
+    const editor = Editor.getInstanceById(editorId);
+    if (!editor) {
+      console.warn('No editor instance found for ID:', editorId);
+      return null;
+    }
+    
+    // Temporarily set as current instance
+    const originalCurrent = Editor.currentInstance;
+    Editor.currentInstance = editor;
+    
+    // Create format instance
+    const format = new Emoji();
+    
+    // Restore original current instance
+    Editor.currentInstance = originalCurrent;
+    
+    return format;
   }
 
   /**
@@ -38,8 +84,22 @@ class Emoji extends InlineFormat {
   /**
    * Insert emoji at current cursor position
    * @param {string} emoji - Emoji character to insert
+   * @param {string} editorId - Editor instance ID
    */
-  static insertEmojiAtCurrentPosition(emoji) {
+  static insertEmojiAtCurrentPosition(emoji, editorId = null) {
+    // Get the correct editor instance
+    let editor = null;
+    if (editorId) {
+      editor = Editor.getInstanceById(editorId);
+    } else {
+      editor = Editor.getCurrentInstance();
+    }
+    
+    if (!editor) {
+      console.warn('No editor instance found for emoji insertion');
+      return;
+    }
+    
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount) return;
 
@@ -59,6 +119,11 @@ class Emoji extends InlineFormat {
       selection.removeAllRanges();
       selection.addRange(range);
       
+      // Trigger content change event
+      if (editor && typeof editor.onContentChange === 'function') {
+        editor.onContentChange();
+      }
+      
     } catch (error) {
       console.error('Error inserting emoji:', error);
     }
@@ -69,7 +134,7 @@ class Emoji extends InlineFormat {
    */
   apply(value) {
     if (value) {
-      Emoji.insertEmojiAtCurrentPosition(value);
+      Emoji.insertEmojiAtCurrentPosition(value, this.editorId);
     } else {
       this.showEmojiPicker();
     }
@@ -107,8 +172,34 @@ class Emoji extends InlineFormat {
    * Show emoji picker popup
    */
   showEmojiPicker() {
-    const emojiButton = document.querySelector('.rich-editor-toolbar-btn.emoji-btn');
-    if (!emojiButton) return;
+    // Find emoji button in the current editor's toolbar
+    const editor = Editor.getInstanceById(this.editorId);
+    if (!editor) return;
+    
+    const toolbar = editor.getModule('toolbar');
+    let emojiButton = null;
+    
+    if (toolbar) {
+      emojiButton = toolbar.getButton('emoji');
+    }
+    
+    // Fallback: find button by class in the current editor's toolbar
+    if (!emojiButton) {
+      const toolbarContainer = toolbar?.getContainer();
+      if (toolbarContainer) {
+        emojiButton = toolbarContainer.querySelector('.rich-editor-toolbar-btn.emoji-btn');
+      }
+    }
+    
+    // Final fallback: find any emoji button in the current editor's wrapper
+    if (!emojiButton) {
+      emojiButton = editor.wrapper.querySelector('.rich-editor-toolbar-btn.emoji-btn');
+    }
+    
+    if (!emojiButton) {
+      console.warn('Emoji button not found for editor:', this.editorId);
+      return;
+    }
     
     this.emojiPicker.show(emojiButton);
   }

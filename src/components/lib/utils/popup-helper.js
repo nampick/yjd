@@ -1,18 +1,28 @@
 /**
  * Popup Helper Utility
  * Helps popups append to the yjd-rich-editor instead of document.body
+ * Now supports multiple editor instances with separate popup containers
  */
 import Editor from '../core/editor.js';
 
 /**
  * Get the appropriate container for popups
+ * @param {string} editorId - Optional editor instance ID
  * @returns {HTMLElement} Container element for popups
  */
-export function getPopupContainer() {
-  // Try to get popup container from current editor instance
-  const popupContainer = Editor.getPopupContainer();
-  if (popupContainer) {
-    return popupContainer;
+export function getPopupContainer(editorId = null) {
+  let editor;
+  
+  if (editorId) {
+    // Get specific editor instance
+    editor = Editor.getInstanceById(editorId);
+  } else {
+    // Try to get current editor instance
+    editor = Editor.getCurrentInstance();
+  }
+  
+  if (editor) {
+    return editor.getPopupContainer();
   }
   
   // Fallback to document.body if no editor instance
@@ -22,9 +32,10 @@ export function getPopupContainer() {
 /**
  * Append popup to the appropriate container
  * @param {HTMLElement} popup - Popup element to append
+ * @param {string} editorId - Optional editor instance ID
  */
-export function appendPopup(popup) {
-  const container = getPopupContainer();
+export function appendPopup(popup, editorId = null) {
+  const container = getPopupContainer(editorId);
   
   // Remove from current parent if exists
   if (popup.parentNode) {

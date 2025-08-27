@@ -13,16 +13,33 @@ class Color extends InlineFormat {
 
   constructor() {
     super();
-    // Create color picker instance if not exists
-    if (!Color.colorPickerInstance) {
-      Color.colorPickerInstance = new ColorPicker({
+    
+    // Get current editor instance
+    const currentEditor = Editor.getCurrentInstance();
+    if (!currentEditor) {
+      console.warn('No editor instance found for Color format');
+      return;
+    }
+    
+    this.editorId = currentEditor.instanceId;
+    
+    // Check if this editor already has a color picker instance
+    let colorPicker = currentEditor.getPopupInstance('color');
+    
+    if (!colorPicker) {
+      // Create new color picker instance for this editor
+      colorPicker = new ColorPicker({
         onColorSelect: (color) => {
           Color.applyColorToCurrentSelection(color);
         },
         editor: Editor.getCurrentInstance()
       });
+      
+      // Store popup instance in editor
+      currentEditor.setPopupInstance('color', colorPicker);
     }
-    this.colorPicker = Color.colorPickerInstance;
+    
+    this.colorPicker = colorPicker;
   }
 
   /**
@@ -51,6 +68,14 @@ class Color extends InlineFormat {
     } catch (error) {
       console.error('Error applying color format:', error);
     }
+    
+    // Trigger content change after applying format
+    setTimeout(() => {
+      const currentEditor = Editor.getCurrentInstance();
+      if (currentEditor && typeof currentEditor.onContentChange === 'function') {
+        currentEditor.onContentChange();
+      }
+    }, 0);
   }
 
   /**
@@ -68,10 +93,32 @@ class Color extends InlineFormat {
    * Show color picker positioned relative to color button on toolbar
    */
   showColorPicker() {
-    const colorButton = document.querySelector('.rich-editor-toolbar-btn.color-btn');
-    if (!colorButton) 
-    {
-      
+    // Find color button in the current editor's toolbar
+    const editor = Editor.getInstanceById(this.editorId);
+    if (!editor) return;
+    
+    const toolbar = editor.getModule('toolbar');
+    let colorButton = null;
+    
+    if (toolbar) {
+      colorButton = toolbar.getButton('color');
+    }
+    
+    // Fallback: find button by class in the current editor's toolbar
+    if (!colorButton) {
+      const toolbarContainer = toolbar?.getContainer();
+      if (toolbarContainer) {
+        colorButton = toolbarContainer.querySelector('.rich-editor-toolbar-btn.color-btn');
+      }
+    }
+    
+    // Final fallback: find any color button in the current editor's wrapper
+    if (!colorButton) {
+      colorButton = editor.wrapper.querySelector('.rich-editor-toolbar-btn.color-btn');
+    }
+    
+    if (!colorButton) {
+      console.warn('Color button not found for editor:', this.editorId);
       return;
     }
     
