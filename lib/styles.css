@@ -16,6 +16,43 @@
   flex-direction: column;
   box-sizing: border-box;
 }
+@layer base {
+  .yjd-rich-editor .toolbar-container button,
+  .yjd-rich-editor .toolbar-container input,
+  .yjd-rich-editor .toolbar-container select,
+  .yjd-rich-editor .toolbar-container optgroup,
+  .yjd-rich-editor .toolbar-container textarea,
+  .yjd-rich-editor .toolbar-container ::file-selector-button {
+    font: normal 500 14px/1.4 "Inter", Arial, sans-serif !important;
+    letter-spacing: normal !important;
+    font-feature-settings: normal !important;
+    font-variation-settings: normal !important;
+  }
+    /* Ensure emoji button font size is applied with high specificity */
+    .yjd-rich-editor .emoji-picker-popup .emoji-button,
+    .yjd-rich-editor .emoji-picker-popup button.emoji-button {
+      font-size: 20px !important;
+    }
+}
+@layer base {
+
+  .yjd-rich-editor .rich-editor-popup-container button,
+  .yjd-rich-editor .rich-editor-popup-container input,
+  .yjd-rich-editor .rich-editor-popup-container select,
+  .yjd-rich-editor .rich-editor-popup-container optgroup,
+  .yjd-rich-editor .rich-editor-popup-container textarea,
+  .yjd-rich-editor .rich-editor-popup-container ::file-selector-button {
+    font: normal 500 14px/1.4 "Inter", Arial, sans-serif !important;
+    letter-spacing: normal !important;
+    font-feature-settings: normal !important;
+    font-variation-settings: normal !important;
+  }
+    /* Ensure emoji button font size is applied with high specificity */
+    .yjd-rich-editor .emoji-picker-popup .emoji-button,
+    .yjd-rich-editor .emoji-picker-popup button.emoji-button {
+      font-size: 20px !important;
+    }
+}
 
 .yjd-rich-editor .rich-editor-area {
   flex: 1 1 auto;
@@ -31,7 +68,28 @@
   box-sizing: border-box;
   border: none;
   text-align: left;
+  position: relative;
 }
+
+/* Placeholder styles for contentEditable */
+.yjd-rich-editor .rich-editor-area[data-placeholder]:before {
+  content: attr(data-placeholder);
+  color: #9ca3af;
+  pointer-events: none;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-style: italic;
+  display: none;
+  z-index: 1;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.yjd-rich-editor .rich-editor-area[data-placeholder].placeholder-visible:before {
+  display: block;
+}
+
 .yjd-rich-editor .rich-editor-area {
   font-size: 16px;
   line-height: 1.7;
@@ -411,6 +469,12 @@
   padding: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   z-index: 1000;
+  /* Prevent focus and click on popup container */
+  pointer-events: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .yjd-rich-editor .color-picker-popup.visible{
@@ -429,6 +493,12 @@
   z-index: 1002;
   max-height: 200px;
   overflow-y: auto;
+  /* Prevent focus and click on popup container */
+  pointer-events: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .yjd-rich-editor .custom-select-popup.visible, .yjd-rich-editor .heading-select-popup.visible, .yjd-rich-editor .font-family-select-popup.visible, .yjd-rich-editor .line-height-select-popup.visible, .yjd-rich-editor .capitalization-select-popup.visible, .yjd-rich-editor .text-size-select-popup.visible {
@@ -485,6 +555,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  /* Allow interaction with select item buttons */
+  pointer-events: auto;
 }
 
 .yjd-rich-editor .custom-select-item-button:hover {
@@ -527,6 +599,8 @@
   transition: all 0.2s ease;
   padding: 0;
   margin: 0;
+  /* Allow interaction with color buttons */
+  pointer-events: auto;
 }
 
 .yjd-rich-editor .color-button:hover {
@@ -591,9 +665,14 @@
   flex: 1 1 auto;
   min-width: 0;
   max-width: 100%;
+  max-height: 37px;
   border-radius: 10px;
   border: 1px solid #E1E1E1;
   box-sizing: border-box;
+  color: #252424 !important;
+  font-size: 14px;
+  /* Allow interaction with inputs */
+  pointer-events: auto;
 }
 .yjd-rich-editor .yjd-input:focus {
   outline: none;
@@ -611,6 +690,8 @@
   border-radius: 6px;
   background: #181616;
   box-shadow: 0px 1px 3.3px 0px rgba(0, 0, 0, 0.04);
+  /* Allow interaction with buttons */
+  pointer-events: auto;
   color: #FFF;
   font-size: 12px;
   font-style: normal;
@@ -646,6 +727,12 @@
   box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.18);
   z-index: 1000;
   margin: 0;
+  /* Prevent focus and click on popup container */
+  pointer-events: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .yjd-rich-editor .link-popup.visible {
@@ -664,7 +751,7 @@
   gap: 4px;
 }
 .yjd-rich-editor .yjd-custom-upload-button {
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
   padding: 0;
@@ -692,20 +779,25 @@
   border-radius: 30px;
   background:  #F5F5F5;
   cursor: pointer;
+  font-size: 14px;
+  color: #252424 !important;
 }
 .yjd-rich-editor .yjd-select-input{
-  appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
+  appearance: none;
   cursor: pointer;
   padding: 10px 10px 10px 10px;
   border-radius: 10px;
   border: 1px solid #E1E1E1;
+  max-height: 37px;
   align-items: center;
   background-image: url('data:image/svg+xml;utf8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10" fill="none"%3E%3Cpath d="M4.55859 7.94141C4.80273 8.18555 5.19922 8.18555 5.44336 7.94141L9.19336 4.19141C9.4375 3.94727 9.4375 3.55078 9.19336 3.30664C8.94922 3.0625 8.55274 3.0625 8.30859 3.30664L5 6.61523L1.69141 3.30859C1.44727 3.06445 1.05078 3.06445 0.806641 3.30859C0.5625 3.55273 0.5625 3.94922 0.806641 4.19336L4.55664 7.94336L4.55859 7.94141Z" fill="%23A4A7AE" /%3E%3C/svg%3E');
   background-repeat: no-repeat;
   background-position: right 10px center;
   background-size: 10px;
+  font-size: 14px;
+  color: #252424 !important;
 }
 .yjd-rich-editor .yjd-select-input:focus {
   outline: none;
@@ -724,6 +816,12 @@
   border-radius: 6.9px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   z-index: 1000;
+  /* Prevent focus and click on popup container */
+  pointer-events: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .yjd-rich-editor .table-popup.visible {
@@ -769,6 +867,11 @@
   align-items: center;
   justify-content: center;
   font-family: 'Lato', sans-serif;
+  color: #252424 !important;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
 }
 .yjd-rich-editor .table-grid-cell {
   width: 20px;
@@ -889,6 +992,12 @@
   padding: 8px 4px 0 4px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   z-index: 1000;
+  /* Prevent focus and click on popup container */
+  pointer-events: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none; 
+  user-select: none;
 }
 
 .yjd-rich-editor .text-align-picker-popup.visible {
@@ -928,6 +1037,8 @@
   cursor: pointer;
   padding: 0;
   gap: 4px;
+  /* Allow interaction with align buttons */
+  pointer-events: auto;
 }
 
 .yjd-rich-editor .align-button:hover {
@@ -959,6 +1070,12 @@
   padding: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   z-index: 1000;
+  /* Prevent focus and click on popup container */
+  pointer-events: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .yjd-rich-editor .list-picker-popup.visible {
@@ -1079,6 +1196,12 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   display: none;
   overflow-y: auto;
+  /* Prevent focus and click on popup container */
+  pointer-events: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none; 
+  user-select: none;
 }
 
 .yjd-rich-editor .emoji-picker-popup.visible {
@@ -1110,11 +1233,13 @@
   padding: 0;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 20px !important;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background-color 0.2s ease;
+  /* Allow interaction with buttons */
+  pointer-events: auto;
 }
 
 .yjd-rich-editor .emoji-button:hover {
@@ -1137,6 +1262,12 @@
   display: none;
   margin: 0;
   box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.18);
+  /* Prevent focus and click on popup container */
+  pointer-events: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .yjd-rich-editor .image-popup.visible {
@@ -1174,6 +1305,12 @@
   display: none;
   margin: 0;
   box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.18);
+  /* Prevent focus and click on popup container */
+  pointer-events: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .yjd-rich-editor .video-popup.visible {
@@ -1218,8 +1355,25 @@
   display: none;
   margin: 0;
   box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.18);
+  /* Prevent focus and click on popup container */
+  pointer-events: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.tag-popup {
+  max-height: 80vh;
+  /* không vượt quá 80% chiều cao viewport */
+  overflow-y: auto;
+  /* chỉ cuộn khi cần */
 }
 
+.tag-suggestions-container {
+  max-height: 200px;
+  /* nếu nhiều gợi ý thì chỉ cho hiển thị tối đa 200px */
+  overflow-y: auto;
+}
 .yjd-rich-editor .tag-popup.visible {
   display: block;
 }
@@ -1279,6 +1433,12 @@
   display: none;
   width: 400px;
   max-width: 90vw;
+  /* Prevent focus and click on popup container */
+  pointer-events: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .yjd-rich-editor .import-popup.visible {
@@ -1880,6 +2040,67 @@
   pointer-events: none;
   z-index: 1005;
   overflow: visible;
+  max-height: 90%;
+    /* không vượt quá chiều cao editor */
+  overflow-y: auto;
+    /* chỉ cuộn khi nội dung vượt quá */
+}
+
+/* Allow interaction with interactive elements inside popups */
+.yjd-rich-editor .emoji-picker-popup button,
+.yjd-rich-editor .color-picker-popup button,
+.yjd-rich-editor .custom-select-popup button,
+.yjd-rich-editor .heading-select-popup button,
+.yjd-rich-editor .capitalization-select-popup button,
+.yjd-rich-editor .font-family-select-popup button,
+.yjd-rich-editor .line-height-select-popup button,
+.yjd-rich-editor .text-size-select-popup button,
+.yjd-rich-editor .link-popup button,
+.yjd-rich-editor .link-popup input,
+.yjd-rich-editor .link-popup select,
+.yjd-rich-editor .image-popup button,
+.yjd-rich-editor .image-popup input,
+.yjd-rich-editor .image-popup select,
+.yjd-rich-editor .video-popup button,
+.yjd-rich-editor .video-popup input,
+.yjd-rich-editor .video-popup select,
+.yjd-rich-editor .tag-popup button,
+.yjd-rich-editor .tag-popup input,
+.yjd-rich-editor .tag-popup select,
+.yjd-rich-editor .table-popup button,
+.yjd-rich-editor .table-popup input,
+.yjd-rich-editor .text-align-picker-popup button,
+.yjd-rich-editor .list-picker-popup button,
+.yjd-rich-editor .import-popup button,
+.yjd-rich-editor .import-popup input,
+.yjd-rich-editor .import-popup select,
+.yjd-rich-editor .yjd-button-confirm,
+.yjd-rich-editor .yjd-button-cancel,
+.yjd-rich-editor .yjd-input,
+.yjd-rich-editor .yjd-select-input,
+.yjd-rich-editor .yjd-custom-upload-button,
+.yjd-rich-editor .yjd-suggestion-button,
+.yjd-rich-editor .list-button,
+.yjd-rich-editor .table-toolbar-btn,
+.yjd-rich-editor .custom-color-input,
+.yjd-rich-editor .import-type-select,
+.yjd-rich-editor .custom-tag,
+.yjd-rich-editor .image-input-hidden,
+.yjd-rich-editor .video-input-hidden,
+.yjd-rich-editor .tag-type-select,
+.yjd-rich-editor .tag-value-input,
+.yjd-rich-editor .import-input,
+.yjd-rich-editor .import-file-input,
+.yjd-rich-editor .import-url-input,
+.yjd-rich-editor .import-text-input,
+.yjd-rich-editor .import-html-input,
+.yjd-rich-editor .import-json-input,
+.yjd-rich-editor .import-markdown-input,
+.yjd-rich-editor .import-csv-input,
+.yjd-rich-editor .import-xml-input,
+.yjd-rich-editor .import-yaml-input,
+.yjd-rich-editor .import-toml-input {
+  pointer-events: auto !important;
 }
 
 .yjd-rich-editor .rich-editor-popup-container > * {
