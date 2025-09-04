@@ -157,6 +157,7 @@ class ColorPicker {
     customColorButton.title = 'Custom Color';
     customColorButton.style.backgroundColor = 'transparent';
     customColorButton.style.border = '1px solid #ccc';
+    customColorButton.style.font = 'none !important';
     // Add icon to button
     const iconElement = IconUtils.createIconElement('custom-color', {
       width: '16px',
