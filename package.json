@@ -1,6 +1,6 @@
 {
   "name": "testyjdvue",
-  "version": "1.1.2",
+  "version": "1.1.6",
   "private": false,
   "main": "dist/testyjdvue.umd.js",
   "files": [

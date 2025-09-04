@@ -7,7 +7,7 @@ import Module from './module.js';
  */
 export default class Editor {
   static DEFAULTS = {
-    placeholder: 'Type here...',
+    placeholder: 'Start typing...',
     theme: 'light',
     height: 400,
     width: 800,
@@ -95,7 +95,7 @@ export default class Editor {
     this.editor = document.createElement('div');
     this.editor.className = 'rich-editor-area';
     this.editor.contentEditable = true;
-    this.editor.setAttribute('placeholder', this.options.placeholder);
+    this.editor.setAttribute('data-placeholder', this.options.placeholder);
     
     // Force browser to create <p> tags instead of <div> when pressing Enter
     try {
@@ -128,6 +128,9 @@ export default class Editor {
 
     // Add wrapper to root
     this.root.appendChild(this.wrapper);
+    
+    // Initialize placeholder visibility
+    this.updatePlaceholderVisibility();
   }
 
   /**
@@ -188,16 +191,8 @@ export default class Editor {
       return this.wrapTextInParagraph(this.options.content);
     }
     
-    // Otherwise, return the default welcome content
-    return `
-      <h1 style=" line-height: 1.5; text-align: center;">
-      Welcome to yjd.io
-      </h1>
-      <p style="text-align: center; line-height: 1.5;">
-          yjd.io is a free, open-source WYSIWYG editor designed for the contemporary web
-      </p>
-      <p><br></p>
-      `;
+    // Return completely empty content to show placeholder
+    return '';
   }
 
   /**
@@ -306,6 +301,9 @@ export default class Editor {
       // Check if editor is empty and create a paragraph element if needed
       this.ensureEditorHasContent();
       
+      // Update placeholder visibility
+      this.updatePlaceholderVisibility();
+      
       this.updateStatusbar();
       this.onContentChange();
     });
@@ -351,6 +349,7 @@ export default class Editor {
         // Use setTimeout to check after the deletion occurs
         setTimeout(() => {
           this.ensureEditorHasContent();
+          this.updatePlaceholderVisibility();
         }, 0);
       }
     });
@@ -360,6 +359,7 @@ export default class Editor {
       // Check content after paste operation
       setTimeout(() => {
         this.ensureEditorHasContent();
+        this.updatePlaceholderVisibility();
       }, 0);
     });
 
@@ -368,6 +368,7 @@ export default class Editor {
       // Check content after drop operation
       setTimeout(() => {
         this.ensureEditorHasContent();
+        this.updatePlaceholderVisibility();
       }, 0);
     });
 
@@ -376,6 +377,7 @@ export default class Editor {
       // Check content after cut operation
       setTimeout(() => {
         this.ensureEditorHasContent();
+        this.updatePlaceholderVisibility();
       }, 0);
     });
 
@@ -383,6 +385,7 @@ export default class Editor {
     setTimeout(() => {
       // Ensure editor has proper content structure on load
       this.ensureEditorHasContent();
+      this.updatePlaceholderVisibility();
       this.focus();
     }, 100);
 
@@ -391,6 +394,7 @@ export default class Editor {
       // Ensure there's always a paragraph element for editing when focusing
       setTimeout(() => {
         this.ensureEditorHasContent();
+        this.updatePlaceholderVisibility();
       }, 0);
     });
   }
@@ -1121,6 +1125,19 @@ export default class Editor {
       }
     });
     this.popupInstances.clear();
+  }
+
+  /**
+   * Update placeholder visibility based on editor content
+   */
+  updatePlaceholderVisibility() {
+    const hasContent = this.editor.textContent.trim().length > 0;
+    
+    if (hasContent) {
+      this.editor.classList.remove('placeholder-visible');
+    } else {
+      this.editor.classList.add('placeholder-visible');
+    }
   }
 
   /**
