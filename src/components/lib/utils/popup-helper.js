@@ -44,10 +44,9 @@ export function appendPopup(popup, editorId = null) {
   
   container.appendChild(popup);
   
-  // If appending to popup container, enable pointer events
-  if (container.classList.contains('rich-editor-popup-container')) {
-    popup.style.pointerEvents = 'auto';
-  }
+  // Note: pointer-events are now controlled by CSS rules
+  // Popup containers have pointer-events: none by default
+  // Interactive elements inside popups have pointer-events: auto
 }
 
 /**
@@ -154,12 +153,19 @@ export function calculatePopupPosition(anchor, popup, options = {}) {
     
     // Check if popup would overflow bottom of wrapper
     if (top + popupHeight > wrapperRect.height && !preferTop) {
-      top = anchorRect.top - wrapperRect.top - popupHeight - offsetY;
+      // Try to position above the anchor
+      const topPosition = anchorRect.top - wrapperRect.top - popupHeight - offsetY;
+      if (topPosition >= 0) {
+        top = topPosition;
+      } else {
+        // If still doesn't fit, try to center it vertically within the wrapper
+        top = Math.max(offsetY, (wrapperRect.height - popupHeight) / 2);
+      }
     }
     
     // Check if popup would overflow right of wrapper
     if (left + popupWidth + 5 > wrapperRect.width && !preferLeft) {
-      left = wrapperRect.width - popupWidth - offsetX -5;
+      left = wrapperRect.width - popupWidth - offsetX -15;
     }
     
     // Ensure popup doesn't go off-screen
@@ -182,7 +188,14 @@ export function calculatePopupPosition(anchor, popup, options = {}) {
     
     // Check if popup would overflow bottom edge
     if (top + popupHeight > window.innerHeight + window.scrollY && !preferTop) {
-      top = anchorRect.top + window.scrollY - popupHeight - offsetY;
+      // Try to position above the anchor
+      const topPosition = anchorRect.top + window.scrollY - popupHeight - offsetY;
+      if (topPosition >= window.scrollY) {
+        top = topPosition;
+      } else {
+        // If still doesn't fit, try to center it vertically within the viewport
+        top = Math.max(window.scrollY + offsetY, window.scrollY + (window.innerHeight - popupHeight) / 2);
+      }
     }
     
     // Ensure popup doesn't go off-screen

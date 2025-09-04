@@ -106,6 +106,33 @@ class Emoji extends InlineFormat {
     try {
       const range = selection.getRangeAt(0);
       
+      // Check if cursor is inside an existing emoji span
+      let currentNode = range.startContainer;
+      let emojiParent = null;
+      
+      // If cursor is in a text node, check its parent
+      if (currentNode.nodeType === Node.TEXT_NODE) {
+        currentNode = currentNode.parentNode;
+      }
+      
+      // Find if we're inside an emoji span
+      while (currentNode && currentNode !== editor.element) {
+        if (currentNode.classList && currentNode.classList.contains('emoji')) {
+          emojiParent = currentNode;
+          break;
+        }
+        currentNode = currentNode.parentNode;
+      }
+      
+      // If cursor is inside an emoji span, move it outside
+      if (emojiParent) {
+        // Move cursor after the emoji span
+        range.setStartAfter(emojiParent);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+      
       // Create emoji element
       const emojiElement = Emoji.create(emoji);
       
@@ -113,8 +140,15 @@ class Emoji extends InlineFormat {
       range.deleteContents();
       range.insertNode(emojiElement);
       
-      // Position cursor after the emoji
+      // Create a zero-width space character after the emoji
+      const zeroWidthSpace = document.createTextNode('\u200B'); // Zero-width space
+      
+      // Insert zero-width space after emoji
       range.setStartAfter(emojiElement);
+      range.insertNode(zeroWidthSpace);
+      
+      // Position cursor after the zero-width space
+      range.setStartAfter(zeroWidthSpace);
       range.collapse(true);
       selection.removeAllRanges();
       selection.addRange(range);
