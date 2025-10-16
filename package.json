@@ -1,9 +1,9 @@
 {
-  "name": "yjdtest",
-  "version": "1.2.3",
-  "description": "Thu test build npm lib yjd",
+  "name": "@oix1987/yjd",
+  "version": "1.0.0",
+  "description": "A powerful rich text editor with real-time content change tracking for web applications using base javascript",
   "license": "ISC",
-  "author": "",
+  "author": "Oix1987",
   "type": "module",
   "main": "dist/rich-editor.min.js",
   "module": "lib/index.js",
