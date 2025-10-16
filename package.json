@@ -1,7 +1,7 @@
 {
-  "name": "vue2-rich-editor",
-  "version": "1.0.5",
-  "description": "A rich text editor component for Vue 2",
+  "name": "@oix1987/yjd-vue2",
+  "version": "1.0.0",
+  "description": "A powerful rich text editor with real-time content change tracking for web applications using vue 2.*",
   "main": "dist/vue2-rich-editor.umd.js",
   "module": "dist/vue2-rich-editor.common.js",
   "unpkg": "dist/vue2-rich-editor.umd.js",
@@ -29,8 +29,8 @@
     "wysiwyg",
     "component"
   ],
-  "author": "Your Name",
-  "license": "MIT",
+  "author": "Oix1987",
+  "license": "ISC",
   "peerDependencies": {
     "vue": "^2.6.0"
   },

@@ -271,6 +271,18 @@ class CodeView extends Module {
   updateOriginalContent() {
     if (this.codeTextarea) {
       this.originalContent = this.codeTextarea.value;
+      
+      // Trigger content change event to call onChange callback
+      // Get the HTML content from textarea
+      const content = this.codeTextarea.value;
+      
+      // Call onChange callback if provided
+      if (this.editor.options.onChange && typeof this.editor.options.onChange === 'function') {
+        this.editor.options.onChange(content);
+      }
+      
+      // Emit text-change event
+      this.editor.emit('text-change', content);
     }
   }
 
@@ -346,7 +358,7 @@ class CodeView extends Module {
       toolbar.setButtonActive('code-view', this.isCodeView);
       
       // Update button title
-      const buttonTitle = this.isCodeView ? 'Switch to Visual Editor' : 'View HTML Source';
+      const buttonTitle = this.isCodeView ? 'Switch to Visual Editor' : 'Switch to HTML Editor';
       toolbar.setButtonTitle('code-view', buttonTitle);
       
     } else {
