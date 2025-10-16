@@ -1,6 +1,6 @@
 {
   "name": "@oix1987/yjd-vue2",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A powerful rich text editor with real-time content change tracking for web applications using vue 2.*",
   "main": "dist/vue2-rich-editor.umd.js",
   "module": "dist/vue2-rich-editor.common.js",

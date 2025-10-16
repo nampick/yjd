@@ -1,32 +1,60 @@
-# Vue 2 Rich Editor Component
+# @oix1987/yjd-vue2 - Professional Rich Text Editor
 
-A powerful and customizable rich text editor component for Vue 2 applications, built as a standalone Vue component.
+A powerful, commercial-grade rich text editor component for Vue 2 applications with real-time content change tracking and advanced formatting capabilities.
 
 ## Features
 
-- 🎨 **Rich Text Editing**: Bold, italic, underline, strikethrough, and more
-- 📝 **Text Formatting**: Font family, size, color, background color
-- 📋 **Lists & Indentation**: Bullet lists, numbered lists, and indentation controls
-- 🔗 **Links & Media**: Insert links, images, videos, and emojis
-- 📊 **Tables**: Create and edit tables with toolbar
-- 🎯 **Text Alignment**: Left, center, right, and justify alignment
-- 📏 **Line Height**: Adjust line spacing
-- 🏷️ **Tags**: Add custom tags to content
-- 📄 **Headings**: Multiple heading levels (H1-H6)
-- 🔄 **History**: Undo/redo functionality
-- 📱 **Responsive**: Works on desktop and mobile devices
-- 🎨 **Customizable**: Highly customizable toolbar and styling
+- 🎨 **Professional Rich Text Editing**: Bold, italic, underline, strikethrough, subscript, superscript
+- 📝 **Advanced Text Formatting**: Font family, size, color, background color, line height
+- 📋 **Lists & Indentation**: Bullet lists, numbered lists, and advanced indentation controls
+- 🔗 **Media Integration**: Insert links, images, videos, and emojis with custom styling
+- 📊 **Table Management**: Create and edit tables with dedicated toolbar and resize handles
+- 🎯 **Text Alignment**: Left, center, right, and justify alignment options
+- 📏 **Typography Control**: Line height adjustment and text capitalization
+- 🏷️ **Tag System**: Add and manage custom tags for content organization
+- 📄 **Heading Structure**: Multiple heading levels (H1-H6) with consistent styling
+- 🔄 **History Management**: Advanced undo/redo functionality with change tracking
+- 📱 **Responsive Design**: Optimized for desktop and mobile devices
+- 🎨 **Enterprise Customization**: Highly customizable toolbar, themes, and styling
+- ⚡ **Real-time Tracking**: Built-in content change detection and event handling
+- 🛡️ **Production Ready**: Commercial-grade stability and performance
 
 ## Installation
 
 ```bash
-npm install vue2-rich-editor
+npm install @oix1987/yjd-vue2
 ```
+
+> **Note**: This is a commercial package. Please ensure you have the appropriate license for your use case.
+
+## Pricing Plans
+
+### Basic Plan
+
+- Single project use
+- Basic support
+- Standard features
+
+### Professional Plan
+
+- Multiple projects
+- Priority support
+- Advanced customization
+- Commercial use rights
+
+### Enterprise Plan
+
+- Unlimited projects
+- Dedicated support
+- Custom implementations
+- White-label options
+
+_Contact the author for detailed pricing and licensing information._
 
 ### Option 1: Direct Import
 
 ```javascript
-import RichEditor from "vue2-rich-editor";
+import RichEditor from "@oix1987/yjd-vue2";
 
 // Use in your Vue component
 export default {
@@ -52,7 +80,7 @@ export default {
 ### Option 2: Create a Vue Component Wrapper
 
 ```javascript
-import RichEditor from "vue2-rich-editor";
+import RichEditor from "@oix1987/yjd-vue2";
 
 // Create a Vue component wrapper
 const RichEditorComponent = {
@@ -103,7 +131,7 @@ Vue.component("RichEditorComponent", RichEditorComponent);
 </template>
 
 <script>
-import RichEditor from "vue2-rich-editor";
+import RichEditor from "@oix1987/yjd-vue2";
 
 export default {
   name: "App",
@@ -157,7 +185,7 @@ export default {
 </template>
 
 <script>
-import RichEditor from "vue2-rich-editor";
+import RichEditor from "@oix1987/yjd-vue2";
 
 export default {
   data() {
@@ -226,7 +254,7 @@ Access the editor methods through the editor instance:
 </template>
 
 <script>
-import RichEditor from "vue2-rich-editor";
+import RichEditor from "@oix1987/yjd-vue2";
 
 export default {
   data() {
@@ -290,7 +318,7 @@ export default {
 </template>
 
 <script>
-import RichEditor from "vue2-rich-editor";
+import RichEditor from "@oix1987/yjd-vue2";
 
 export default {
   mounted() {
@@ -316,7 +344,7 @@ export default {
 </template>
 
 <script>
-import RichEditor from "vue2-rich-editor";
+import RichEditor from "@oix1987/yjd-vue2";
 
 export default {
   data() {
@@ -386,7 +414,7 @@ export default {
 </template>
 
 <script>
-import RichEditor from "vue2-rich-editor";
+import RichEditor from "@oix1987/yjd-vue2";
 
 export default {
   data() {
@@ -432,7 +460,7 @@ export default {
 </template>
 
 <script>
-import RichEditor from "vue2-rich-editor";
+import RichEditor from "@oix1987/yjd-vue2";
 
 export default {
   data() {
@@ -477,7 +505,7 @@ export default {
 </template>
 
 <script>
-import RichEditor from "vue2-rich-editor";
+import RichEditor from "@oix1987/yjd-vue2";
 
 export default {
   data() {
@@ -573,18 +601,46 @@ The component includes default styles, but you can customize them:
 
 The package requires the following dependencies to be available in your project:
 
-- Vue 2.x
+- Vue 2.x (^2.6.0)
 
 All other dependencies and styles are bundled within the package. CSS is automatically loaded when you import the library.
 
-## License
+## Performance
 
-MIT License
+- **Optimized Bundle**: Lightweight and fast loading
+- **Memory Efficient**: Smart content change tracking
+- **Mobile Optimized**: Touch-friendly interface
+- **Cross-browser**: Tested on all major browsers
 
-## Contributing
+## Commercial License
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+This is a commercial product. Please contact the author for licensing information and pricing.
 
-## Support
+**Author**: Oix1987  
+**Package**: @oix1987/yjd-vue2  
+**Version**: 1.0.1
 
-If you encounter any issues or have questions, please open an issue on the project repository.
+## Enterprise Support
+
+For enterprise support, custom implementations, or licensing inquiries, please contact:
+
+- **Email**: [Contact Information]
+- **Repository**: https://github.com/nampick/richeditor
+- **Documentation**: Available in the repository
+
+## Technical Support
+
+If you encounter any issues or have technical questions:
+
+1. Check the documentation in this README
+2. Review the example implementations
+3. Open an issue on the project repository
+4. Contact the author for commercial support
+
+## Roadmap
+
+- [ ] Vue 3 compatibility
+- [ ] Additional theme options
+- [ ] Plugin system for custom formats
+- [ ] Advanced collaboration features
+- [ ] Mobile-optimized toolbar
