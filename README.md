@@ -1,61 +1,77 @@
-# Rich Editor Vue Component
+# YJD Vue3 Rich Editor
 
-A powerful and customizable rich text editor component for Vue 3 applications. This component provides a comprehensive WYSIWYG editing experience with extensive formatting options, toolbar customization, and seamless Vue integration.
+A powerful and professional rich text editor component for Vue 3 applications with real-time content change tracking. Built for modern web applications requiring advanced text editing capabilities.
 
-## Features
+## 🚀 Features
 
 - 🎨 **Rich Text Formatting**: Bold, italic, underline, strikethrough, subscript, superscript
-- 🌈 **Color & Styling**: Text color, background color, font family, text size, line height
-- 📝 **Text Structure**: Headings (H1-H6), text alignment, lists, indentation
-- 🔗 **Media & Links**: Links, images, videos, tables, emojis
-- 🛠 **Toolbar Customization**: Configurable toolbar with custom button groups
-- 📱 **Responsive Design**: Modern, clean UI that works on all devices
-- ⚡ **Vue 3 Integration**: Full Vue 3 composition API support with reactive content
-- 🎯 **Event Handling**: Real-time content change detection and custom callbacks
-- 🔄 **History Management**: Undo/redo functionality
+- 🌈 **Advanced Styling**: Text color, background color, font family, text size, line height
+- 📝 **Document Structure**: Headings (H1-H6), text alignment, lists, indentation
+- 🔗 **Media Integration**: Links, images, videos, tables, emojis
+- 🛠 **Customizable Toolbars**: Dual toolbar system with flexible configuration
+- 📱 **Responsive Design**: Modern, professional UI that works on all devices
+- ⚡ **Vue 3 Optimized**: Full Vue 3 composition API support with reactive content
+- 🎯 **Real-time Tracking**: Advanced content change detection and custom callbacks
+- 🔄 **History Management**: Complete undo/redo functionality
 - 📊 **Code View**: Toggle between WYSIWYG and HTML source code view
+- 🎭 **Theme Support**: Multiple themes and customization options
 
-## Installation
+## 📦 Installation
 
 ```bash
-npm install testyjdvue
+npm install @oix1987/yjd-vue3
 ```
 
-## Quick Start
+## 🔧 Quick Start
 
 ```vue
 <template>
   <div>
-    <RichEditorComponent
+    <YjdRichEditor
       v-model:content="content"
       @update:content="handleContentChange"
       @ready="handleEditorReady"
       :height="500"
       :width="800"
-      placeholder="Start typing..."
-      :toolbar1="['bold', 'italic', 'underline', 'strike']"
-      :toolbar2="['color', 'background', 'text-size', 'link']"
+      placeholder="Start creating amazing content..."
+      :toolbar1="toolbar1"
+      :toolbar2="toolbar2"
     />
   </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
-import RichEditorComponent from "testyjdvue";
+import YjdRichEditor from "@oix1987/yjd-vue3";
 
-const content = ref("<p>Welcome to Rich Editor!</p>");
+const content = ref("<p>Welcome to YJD Rich Editor!</p>");
+
+// Professional toolbar configuration
+const toolbar1 = [
+  { group: "text-format", items: ["bold", "italic", "underline", "strike"] },
+  { group: "more", items: ["more"] },
+];
+
+const toolbar2 = [
+  { group: "colors", items: ["color", "background"] },
+  { group: "structure", items: ["text-size", "link"] },
+];
 
 const handleContentChange = (newContent) => {
   console.log("Content changed:", newContent);
+  // Your business logic here
 };
 
 const handleEditorReady = (editor) => {
   console.log("Editor ready:", editor);
+  // Initialize your application logic
 };
 </script>
 ```
 
-## Props
+## 📋 API Reference
+
+### Props
 
 | Prop          | Type     | Default          | Description                                         |
 | ------------- | -------- | ---------------- | --------------------------------------------------- |
@@ -67,41 +83,35 @@ const handleEditorReady = (editor) => {
 | `toolbar1`    | Array    | `null`           | Custom toolbar configuration for first toolbar row  |
 | `toolbar2`    | Array    | `null`           | Custom toolbar configuration for second toolbar row |
 
-## Toolbar Configuration
+### Events
 
-You can customize the toolbar by passing arrays with group structures:
+| Event            | Payload  | Description                              |
+| ---------------- | -------- | ---------------------------------------- |
+| `update:content` | `string` | Emitted when editor content changes      |
+| `ready`          | `editor` | Emitted when editor is fully initialized |
+
+## 🎛️ Toolbar Configuration
+
+### Professional Group Structure
 
 ```vue
-<template>
-  <RichEditorComponent :toolbar1="toolbar1" :toolbar2="toolbar2" />
-</template>
-
 <script setup>
-// Proper toolbar configuration with groups
+// Advanced toolbar configuration
 const toolbar1 = [
   { group: "text-format", items: ["bold", "italic", "underline", "strike"] },
+  { group: "script", items: ["subscript", "superscript"] },
   { group: "more", items: ["more"] },
 ];
 
 const toolbar2 = [
   { group: "colors", items: ["color", "background"] },
   { group: "structure", items: ["heading", "text-align"] },
+  { group: "media", items: ["link", "image", "table"] },
 ];
 </script>
 ```
 
-### Simple Array Format (Legacy Support)
-
-For backward compatibility, you can still use simple arrays:
-
-```vue
-<RichEditorComponent
-  :toolbar1="['bold', 'italic', 'underline', 'strike']"
-  :toolbar2="['color', 'background', 'heading', 'text-align']"
-/>
-```
-
-### Available Toolbar Buttons
+### Available Toolbar Items
 
 **Text Formatting:**
 
@@ -114,7 +124,7 @@ For backward compatibility, you can still use simple arrays:
 - `font-family`, `text-size`, `line-height`
 - `capitalization`
 
-**Structure & Layout:**
+**Document Structure:**
 
 - `heading`, `text-align`, `list`
 - `indent-increase`, `indent-decrease`
@@ -124,24 +134,18 @@ For backward compatibility, you can still use simple arrays:
 - `link`, `image`, `video`, `table`
 - `emoji`
 
-**Tools:**
+**Tools & Actions:**
 
 - `undo`, `redo`, `code-view`
+- `more` (expands toolbar options)
 
-## Events
+## 🔧 Advanced Usage
 
-| Event            | Payload  | Description                              |
-| ---------------- | -------- | ---------------------------------------- |
-| `update:content` | `string` | Emitted when editor content changes      |
-| `ready`          | `editor` | Emitted when editor is fully initialized |
-
-## Methods
-
-Access editor methods through the component reference:
+### Component Methods
 
 ```vue
 <template>
-  <RichEditorComponent ref="editorRef" />
+  <YjdRichEditor ref="editorRef" />
 </template>
 
 <script setup>
@@ -150,12 +154,12 @@ import { ref } from "vue";
 const editorRef = ref(null);
 
 // Get current content
-const getContent = () => {
+const getCurrentContent = () => {
   return editorRef.value.getContent();
 };
 
-// Set new content
-const setContent = (htmlContent) => {
+// Set new content programmatically
+const setEditorContent = (htmlContent) => {
   editorRef.value.setContent(htmlContent);
 };
 
@@ -164,9 +168,39 @@ const focusEditor = () => {
   editorRef.value.focus();
 };
 
-// Get editor instance
-const getEditor = () => {
+// Access the core editor instance
+const getEditorInstance = () => {
   return editorRef.value.getEditor();
+};
+</script>
+```
+
+### Real-time Content Tracking
+
+```vue
+<script setup>
+const handleContentChange = (content) => {
+  // Real-time content tracking
+  console.log("Content length:", content.length);
+
+  // Auto-save functionality
+  if (content.length > 0) {
+    autoSave(content);
+  }
+
+  // Content validation
+  validateContent(content);
+};
+
+const autoSave = (content) => {
+  // Implement your auto-save logic
+  localStorage.setItem("draft", content);
+};
+
+const validateContent = (content) => {
+  // Implement content validation
+  const wordCount = content.replace(/<[^>]*>/g, "").split(/\s+/).length;
+  console.log("Word count:", wordCount);
 };
 </script>
 ```
@@ -176,37 +210,85 @@ const getEditor = () => {
 ### Project Setup
 
 ```bash
+# Clone the repository
+git clone https://github.com/oix1987/yjd-vue3.git
+
+# Install dependencies
 npm install
-```
 
-### Development Server
-
-```bash
+# Start development server
 npm run dev
 ```
 
-### Build for Production
+### Build Commands
 
 ```bash
+# Build library for production
 npm run build
+
+# Build demo application
+npm run build:demo
+
+# Run linter
+npm run lint
 ```
 
-## Browser Support
+## 🌐 Browser Support
 
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
+- ✅ Chrome (latest)
+- ✅ Firefox (latest)
+- ✅ Safari (latest)
+- ✅ Edge (latest)
+- ✅ Mobile browsers (iOS Safari, Chrome Mobile)
 
-## Requirements
+## 📋 Requirements
 
-- Vue 3.x
-- Node.js ^20.19.0 || >=22.12.0
+- **Vue.js**: 3.0.0 or higher
+- **Node.js**: ^20.19.0 || >=22.12.0
+- **Modern Browser**: ES6+ support required
 
-## License
+## 📄 License
 
-MIT License
+ISC License - see the [LICENSE](LICENSE) file for details.
 
-## Contributing
+## 👨‍💻 Author
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+**Oix1987**
+
+- Professional Vue.js Developer
+- Rich Text Editor Specialist
+
+## 🤝 Commercial Support
+
+This is a commercial-grade component suitable for:
+
+- ✅ Enterprise applications
+- ✅ Content management systems
+- ✅ E-learning platforms
+- ✅ Documentation tools
+- ✅ Blog and publishing platforms
+
+For commercial support, custom features, or enterprise licensing, please contact the author.
+
+## 🚀 Why Choose YJD Vue3 Rich Editor?
+
+- **Production Ready**: Battle-tested in real-world applications
+- **Performance Optimized**: Efficient rendering and memory management
+- **Highly Customizable**: Extensive configuration options
+- **Professional Support**: Commercial-grade documentation and support
+- **Regular Updates**: Continuous improvement and feature additions
+- **Vue 3 Native**: Built specifically for Vue 3 ecosystem
+
+## 📈 Changelog
+
+### v1.0.1
+
+- Initial commercial release
+- Full Vue 3 support
+- Advanced toolbar configuration
+- Real-time content tracking
+- Professional UI/UX
+
+---
+
+**Made with ❤️ for the Vue.js community**
