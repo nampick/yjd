@@ -1,8 +1,8 @@
 {
-  "name": "testyjd-react",
+  "name": "@oix1987/yjd-react",
   "type": "module",
-  "version": "1.5.5",
-  "description": "A powerful React rich text editor component with extensive formatting options",
+  "version": "1.0.0",
+  "description": "A powerful React rich text editor component with extensive formatting options for using React",
   "main": "dist/index.cjs",
   "module": "dist/index.esm.js",
   "exports": {
@@ -34,8 +34,8 @@
     "formatting",
     "toolbar"
   ],
-  "author": "Your Name",
-  "license": "MIT",
+  "author": "Oix1987",
+  "license": "ISC",
   "repository": {
     "type": "git",
     "url": "https://github.com/yourusername/react-rich-editor.git"
