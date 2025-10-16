@@ -1,7 +1,7 @@
 {
   "name": "@oix1987/yjd-react",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A powerful React rich text editor component with extensive formatting options for using React",
   "main": "dist/index.cjs",
   "module": "dist/index.esm.js",

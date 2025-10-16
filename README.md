@@ -1,6 +1,6 @@
-# React Rich Editor
+# YJD React Rich Editor
 
-A powerful and feature-rich React text editor component with extensive formatting options, built for modern web applications.
+A professional-grade React rich text editor component with extensive formatting options, built for modern web applications and commercial use.
 
 ## Features
 
@@ -15,59 +15,66 @@ A powerful and feature-rich React text editor component with extensive formattin
 
 🎯 **Advanced Features**
 
-- Multiple toolbar configurations (toolbar1, toolbar2)
-- Lists and indentation
-- Links and images
-- Tables and video embedding
-- Emoji support
-- Import/export functionality
+- Modular architecture with extensible formats
+- Lists and indentation controls
+- Links and images with popup interfaces
+- Tables with dedicated toolbar
+- Video embedding support
+- Emoji picker integration
+- Content import functionality
 - Word count and breadcrumb navigation
-- Responsive design
+- Responsive design with resize handles
 
 🔧 **Developer Friendly**
 
-- Simple prop-based configuration
-- Content change callbacks
-- Controlled and uncontrolled modes
-- TypeScript support
-- Modern React hooks implementation
+- Registry-based module system
+- Extensible format and module architecture
+- Event-driven content change callbacks
+- TypeScript support with full type definitions
+- Modern React integration with hooks
+- Customizable UI components
 
 ## Installation
 
 ```bash
-npm install testyjd-react
+npm install @oix1987/yjd-react
 ```
 
 or
 
 ```bash
-yarn add testyjd-react
+yarn add @oix1987/yjd-react
 ```
 
 ## Quick Start
 
 ```jsx
-import React, { useState } from "react";
-import ReactRichEditor from "testyjd-react";
+import React, { useState, useEffect, useRef } from "react";
+import RichEditor from "@oix1987/yjd-react";
 
 function App() {
   const [content, setContent] = useState("");
+  const editorRef = useRef(null);
 
-  const handleTextChange = (newContent) => {
-    console.log("Content changed:", newContent);
-    setContent(newContent);
-  };
+  useEffect(() => {
+    if (editorRef.current) {
+      const editor = RichEditor.create(editorRef.current, {
+        placeholder: "Start typing your content here...",
+        height: 400,
+        width: "100%",
+        content: content,
+        onChange: (newContent) => {
+          console.log("Content changed:", newContent);
+          setContent(newContent);
+        },
+      });
+    }
+  }, []);
 
   return (
     <div>
       <h1>My Rich Editor</h1>
-      <ReactRichEditor
-        width="100%"
-        height="400px"
-        placeholder="Start typing your content here..."
-        content={content}
-        onChange={handleTextChange}
-      />
+      <div ref={editorRef}></div>
     </div>
   );
 }
@@ -75,59 +82,125 @@ function App() {
 export default App;
 ```
 
-## Props
+## Configuration Options
 
-| Prop          | Type       | Default             | Description                                   |
-| ------------- | ---------- | ------------------- | --------------------------------------------- |
-| `width`       | `string`   | `'100%'`            | Width of the editor container                 |
-| `height`      | `string`   | `'300px'`           | Height of the editor container                |
-| `placeholder` | `string`   | `'Start typing...'` | Placeholder text shown when editor is empty   |
-| `content`     | `string`   | `undefined`         | Controlled content value (HTML string)        |
-| `toolbar1`    | `array`    | `undefined`         | Custom toolbar configuration (first toolbar)  |
-| `toolbar2`    | `array`    | `undefined`         | Custom toolbar configuration (second toolbar) |
-| `onChange`    | `function` | `undefined`         | Callback fired when content changes           |
+| Option        | Type       | Default             | Description                                 |
+| ------------- | ---------- | ------------------- | ------------------------------------------- |
+| `width`       | `string`   | `800`               | Width of the editor container               |
+| `height`      | `number`   | `400`               | Height of the editor container              |
+| `placeholder` | `string`   | `'Start typing...'` | Placeholder text shown when editor is empty |
+| `content`     | `string`   | `null`              | Initial content value (HTML string)         |
+| `theme`       | `string`   | `'light'`           | Editor theme (light/dark)                   |
+| `maxWidth`    | `number`   | `1200`              | Maximum width of the editor                 |
+| `maxHeight`   | `number`   | `800`               | Maximum height of the editor                |
+| `features`    | `object`   | See below           | Feature configuration object                |
+| `onChange`    | `function` | `undefined`         | Callback fired when content changes         |
+
+### Features Configuration
+
+```javascript
+features: {
+  emoji: true,        // Enable emoji picker
+  image: true,        // Enable image insertion
+  table: true,        // Enable table functionality
+  wordCount: true,    // Show word count
+  breadcrumb: true    // Show breadcrumb navigation
+}
+```
 
 ## Usage Examples
 
 ### Basic Usage
 
 ```jsx
-<ReactRichEditor
-  width="800px"
-  height="500px"
-  placeholder="Write something amazing..."
-  onChange={(content) => console.log(content)}
-/>
+import RichEditor from "@oix1987/yjd-react";
+import { useRef, useEffect } from "react";
+
+function MyEditor() {
+  const editorRef = useRef(null);
+
+  useEffect(() => {
+    if (editorRef.current) {
+      const editor = RichEditor.create(editorRef.current, {
+        width: "800px",
+        height: 500,
+        placeholder: "Write something amazing...",
+        onChange: (content) => console.log(content),
+      });
+    }
+  }, []);
+
+  return <div ref={editorRef}></div>;
+}
 ```
 
 ### Controlled Component
 
 ```jsx
-const [editorContent, setEditorContent] = useState("<p>Initial content</p>");
+import RichEditor from "@oix1987/yjd-react";
+import { useRef, useEffect, useState } from "react";
 
-<ReactRichEditor
-  content={editorContent}
-  onChange={setEditorContent}
-  width="100%"
-  height="400px"
-/>;
+function ControlledEditor() {
+  const [editorContent, setEditorContent] = useState("<p>Initial content</p>");
+  const editorRef = useRef(null);
+
+  useEffect(() => {
+    if (editorRef.current) {
+      const editor = RichEditor.create(editorRef.current, {
+        content: editorContent,
+        onChange: setEditorContent,
+        width: "100%",
+        height: 400,
+      });
+    }
+  }, []);
+
+  return <div ref={editorRef}></div>;
+}
 ```
 
-### Custom Toolbar Configuration
+### Advanced Configuration
 
 ```jsx
-<ReactRichEditor
-  toolbar1={["bold", "italic", "underline", "color"]}
-  toolbar2={["heading", "list", "link", "image"]}
-  onChange={(content) => handleContentChange(content)}
-/>
+import RichEditor from "@oix1987/yjd-react";
+import { useRef, useEffect } from "react";
+
+function AdvancedEditor() {
+  const editorRef = useRef(null);
+
+  useEffect(() => {
+    if (editorRef.current) {
+      const editor = RichEditor.create(editorRef.current, {
+        width: "100%",
+        height: 600,
+        theme: "light",
+        maxWidth: 1200,
+        maxHeight: 800,
+        features: {
+          emoji: true,
+          image: true,
+          table: true,
+          wordCount: true,
+          breadcrumb: true,
+        },
+        onChange: (content) => handleContentChange(content),
+      });
+    }
+  }, []);
+
+  return <div ref={editorRef}></div>;
+}
 ```
 
 ### Full-Featured Editor
 
 ```jsx
+import RichEditor from "@oix1987/yjd-react";
+import { useRef, useEffect, useState } from "react";
+
 function RichTextEditor() {
   const [content, setContent] = useState("");
+  const editorRef = useRef(null);
 
   const handleContentChange = (newContent) => {
     setContent(newContent);
@@ -135,15 +208,28 @@ function RichTextEditor() {
     console.log("Content updated:", newContent);
   };
 
+  useEffect(() => {
+    if (editorRef.current) {
+      const editor = RichEditor.create(editorRef.current, {
+        width: "100%",
+        height: 600,
+        placeholder: "Create your masterpiece...",
+        content: content,
+        onChange: handleContentChange,
+        features: {
+          emoji: true,
+          image: true,
+          table: true,
+          wordCount: true,
+          breadcrumb: true,
+        },
+      });
+    }
+  }, []);
+
   return (
     <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px" }}>
-      <ReactRichEditor
-        width="100%"
-        height="600px"
-        placeholder="Create your masterpiece..."
-        content={content}
-        onChange={handleContentChange}
-      />
+      <div ref={editorRef}></div>
 
       <div style={{ marginTop: "20px" }}>
         <h3>Content Preview:</h3>
@@ -154,47 +240,56 @@ function RichTextEditor() {
 }
 ```
 
-## Available Toolbar Options
+## Available Formats and Modules
 
-When customizing `toolbar1` or `toolbar2`, you can include any of these options:
+The editor includes a comprehensive set of built-in formats and modules:
 
-### Text Formatting
+### Text Formatting Formats
 
-- `'bold'` - Bold text
-- `'italic'` - Italic text
-- `'underline'` - Underlined text
-- `'strike'` - Strikethrough text
-- `'subscript'` - Subscript text
-- `'superscript'` - Superscript text
+- **Bold** - Bold text formatting
+- **Italic** - Italic text formatting
+- **Underline** - Underlined text
+- **Strike** - Strikethrough text
+- **Subscript** - Subscript text
+- **Superscript** - Superscript text
 
-### Colors and Styling
+### Colors and Styling Formats
 
-- `'color'` - Text color
-- `'background'` - Background color
-- `'text-size'` - Font size
-- `'font-family'` - Font family
-- `'line-height'` - Line height
-- `'capitalization'` - Text capitalization
+- **Color** - Text color picker
+- **Background** - Background color picker
+- **TextSize** - Font size control
+- **FontFamily** - Font family selection
+- **LineHeight** - Line height control
+- **Capitalization** - Text capitalization options
 
-### Layout and Structure
+### Layout and Structure Formats
 
-- `'text-align'` - Text alignment
-- `'heading'` - Headings (H1-H6)
-- `'list'` - Ordered and unordered lists
-- `'indent'` - Text indentation
+- **TextAlign** - Text alignment controls
+- **Heading** - Heading levels (H1-H6)
+- **List** - Ordered and unordered lists
+- **Indent** - Text indentation controls
 
-### Media and Links
+### Media and Links Formats
 
-- `'link'` - Insert links
-- `'image'` - Insert images
-- `'video'` - Insert videos
-- `'emoji'` - Emoji picker
+- **Link** - Insert and edit links
+- **Image** - Insert and manage images
+- **Video** - Insert videos
+- **Emoji** - Emoji picker integration
 
 ### Advanced Features
 
-- `'table'` - Insert tables
-- `'tag'` - Insert tags
-- `'import'` - Import content
+- **Table** - Insert and edit tables
+- **Tag** - Insert custom tags
+- **Import** - Content import functionality
+
+### Built-in Modules
+
+- **Toolbar** - Main toolbar functionality
+- **History** - Undo/redo functionality
+- **BlockToolbar** - Block-level formatting toolbar
+- **TableToolbar** - Table-specific toolbar
+- **CodeView** - HTML code view
+- **ResizeHandles** - Editor resize functionality
 
 ## Event Handling
 
@@ -247,7 +342,15 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ## License
 
-MIT License. See [LICENSE](LICENSE) file for details.
+ISC License. See [LICENSE](LICENSE) file for details.
+
+## Commercial Licensing
+
+For commercial use, enterprise support, or custom licensing options, please contact:
+
+- **Author**: Oix1987
+- **Email**: [Contact for commercial licensing]
+- **Repository**: [GitHub Repository](https://github.com/yourusername/react-rich-editor.git)
 
 ## Support
 
@@ -256,15 +359,18 @@ If you encounter any issues or have questions:
 1. Check the [Issues](https://github.com/yourusername/react-rich-editor/issues) page
 2. Create a new issue with a detailed description
 3. Include code examples and browser information
+4. For commercial support, contact the author directly
 
 ## Changelog
 
-### v1.3.7
+### v1.0.1
 
-- Simplified component props
-- Improved onChange event handling
-- Enhanced toolbar customization
-- Performance optimizations
+- Initial release of YJD React Rich Editor
+- Modular architecture with extensible formats
+- Comprehensive formatting options
+- React integration with hooks
+- TypeScript support
+- Commercial licensing available
 
 ---
 
