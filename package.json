@@ -1,6 +1,9 @@
 {
-  "name": "testyjdvue",
-  "version": "1.1.6",
+  "name": "@oix1987/yjd-vue3",
+  "version": "1.0.0",
+  "description": "A powerful rich text editor with real-time content change tracking for web applications using base javascript",
+  "license": "ISC",
+  "author": "Oix1987",
   "private": false,
   "main": "dist/testyjdvue.umd.js",
   "files": [
