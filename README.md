@@ -44,12 +44,20 @@ const editor = new RichEditor("#editor-container", {
 ### CDN Usage
 
 ```html
-<script src="https://unpkg.com/@oix1987/yjd/dist/rich-editor.min.js"></script>
+<!-- Using jsDelivr CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@oix1987/yjd@1.0.2/dist/rich-editor.min.js"></script>
 <script>
   const editor = new RichEditor("#editor-container", {
     // configuration options
   });
 </script>
+```
+
+### Alternative CDN
+
+```html
+<!-- Using unpkg CDN -->
+<script src="https://unpkg.com/@oix1987/yjd@1.0.2/dist/rich-editor.min.js"></script>
 ```
 
 ## ⚙️ Configuration Options
