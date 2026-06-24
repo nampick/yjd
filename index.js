@@ -36,6 +36,7 @@ import History from './lib/modules/history.js';
 import BlockToolbar from './lib/modules/block-toolbar.js';
 import TableToolbar from './lib/modules/table-toolbar.js';
 import CodeView from './lib/modules/code-view.js';
+import FindReplace from './lib/modules/find-replace.js';
 
 import ResizeHandles from './lib/modules/resize-handles.js';
 
@@ -89,6 +90,7 @@ registry.register('modules/history', History, true);
 registry.register('modules/block-toolbar', BlockToolbar, true);
 registry.register('modules/table-toolbar', TableToolbar, true);
 registry.register('modules/code-view', CodeView, true);
+registry.register('modules/find-replace', FindReplace, true);
 
 registry.register('modules/resize-handles', ResizeHandles, true);
 
@@ -188,6 +190,7 @@ export {
   BlockToolbar,
   TableToolbar,
   CodeView,
+  FindReplace,
 
   ResizeHandles
 };
