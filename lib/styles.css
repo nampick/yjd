@@ -2121,3 +2121,761 @@
   position: absolute !important;
   z-index: 1001 !important;
 }
+/* =====================================================================
+   DESIGN SYSTEM v2 — "Calm writing studio"
+   A friendly, cohesive theme. Everything below is driven by tokens so
+   every surface (toolbar, popups, find/replace, tables, floating tools)
+   shares the same palette, radius, shadow and motion.
+   This block is appended last so it themes the components above.
+   ===================================================================== */
+
+.yjd-rich-editor {
+  /* Palette */
+  --rte-bg: #ffffff;
+  --rte-chrome: #fbfbfd;
+  --rte-chrome-2: #f2f2f7;
+  --rte-border: #e9e9f1;
+  --rte-border-strong: #dadae6;
+  --rte-ink: #20242f;
+  --rte-muted: #767c8e;
+  --rte-accent: #6d5efc;
+  --rte-accent-ink: #5a48ee;
+  --rte-accent-weak: #efedff;
+  --rte-accent-ring: rgba(109, 94, 252, 0.28);
+  --rte-danger: #e5484d;
+  /* Shape & depth */
+  --rte-radius: 14px;
+  --rte-radius-md: 11px;
+  --rte-radius-sm: 8px;
+  --rte-shadow-sm: 0 1px 2px rgba(20, 24, 46, 0.06);
+  --rte-shadow: 0 12px 32px -8px rgba(20, 24, 46, 0.20), 0 4px 10px -4px rgba(20, 24, 46, 0.10);
+  --rte-t: 140ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  border: 1px solid var(--rte-border) !important;
+  border-radius: var(--rte-radius) !important;
+  background: var(--rte-bg);
+  color: var(--rte-ink);
+  box-shadow: var(--rte-shadow-sm);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Use a friendly system stack everywhere (overrides the forced "Inter") */
+.yjd-rich-editor .toolbar-container button,
+.yjd-rich-editor .toolbar-container input,
+.yjd-rich-editor .toolbar-container select,
+.yjd-rich-editor .toolbar-container textarea,
+.yjd-rich-editor .rich-editor-popup-container button,
+.yjd-rich-editor .rich-editor-popup-container input,
+.yjd-rich-editor .rich-editor-popup-container select,
+.yjd-rich-editor .rich-editor-popup-container textarea {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+/* ---------- Toolbar ---------- */
+.yjd-rich-editor .rich-editor-toolbar-container {
+  background: var(--rte-chrome);
+  border-bottom: 1px solid var(--rte-border);
+}
+.yjd-rich-editor .rich-editor-toolbar-1,
+.yjd-rich-editor .rich-editor-toolbar-2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start; /* pack left; override legacy space-between */
+  column-gap: 0;
+  row-gap: 4px;
+  padding: 8px 12px;
+}
+.yjd-rich-editor .rich-editor-toolbar-2.visible {
+  border-top: 1px solid var(--rte-border);
+}
+/* Group by spacing, not dividers: tight within a group, airy between groups. */
+.yjd-rich-editor .toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  border-right: none;
+  margin: 0;
+  padding: 0;
+}
+.yjd-rich-editor .toolbar-group + .toolbar-group {
+  margin-left: 12px;
+}
+
+/* ---------- Buttons (toolbar + dropdown triggers) ---------- */
+.yjd-rich-editor .rich-editor-toolbar-btn,
+.yjd-rich-editor .custom-select-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: var(--rte-radius-sm);
+  background: transparent;
+  color: var(--rte-ink);
+  cursor: pointer;
+  box-shadow: none;
+  transition: background var(--rte-t), color var(--rte-t),
+    box-shadow var(--rte-t), border-color var(--rte-t);
+}
+.yjd-rich-editor .rich-editor-toolbar-btn:hover,
+.yjd-rich-editor .custom-select-button:hover {
+  background: var(--rte-chrome-2);
+  color: var(--rte-ink);
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.active {
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
+  border-color: transparent;
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg,
+.yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg path {
+  fill: var(--rte-accent-ink);
+  color: var(--rte-accent-ink);
+}
+.yjd-rich-editor .rich-editor-toolbar-btn:disabled,
+.yjd-rich-editor .rich-editor-toolbar-btn[disabled] {
+  opacity: 0.38 !important;
+  cursor: not-allowed !important;
+}
+.yjd-rich-editor .rich-editor-toolbar-btn:focus-visible,
+.yjd-rich-editor .custom-select-button:focus-visible {
+  outline: none;
+  border-color: var(--rte-accent);
+  box-shadow: 0 0 0 3px var(--rte-accent-ring);
+}
+
+/* ---------- Status bar ---------- */
+.yjd-rich-editor .rich-editor-statusbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 14px;
+  background: var(--rte-chrome);
+  border-top: 1px solid var(--rte-border);
+}
+.yjd-rich-editor .rich-editor-breadcrumb,
+.yjd-rich-editor .wordcount {
+  color: var(--rte-muted);
+  font-size: 12px;
+  letter-spacing: 0.01em;
+}
+
+/* ---------- Editor surface ---------- */
+.yjd-rich-editor .rich-editor-area {
+  color: var(--rte-ink);
+  font-size: 16px;
+  line-height: 1.75;
+  padding: 22px 24px;
+}
+.yjd-rich-editor .rich-editor-area a {
+  color: var(--rte-accent-ink);
+  text-decoration-color: var(--rte-accent-ring);
+  text-underline-offset: 2px;
+}
+.yjd-rich-editor .rich-editor-area[data-placeholder].placeholder-visible:before {
+  color: var(--rte-muted);
+  opacity: 0.55;
+}
+.yjd-rich-editor .rich-editor-area blockquote {
+  border-left: 3px solid var(--rte-accent);
+  background: var(--rte-accent-weak);
+  border-radius: 0 var(--rte-radius-sm) var(--rte-radius-sm) 0;
+  padding: 8px 16px;
+  color: var(--rte-ink);
+  margin: 12px 0;
+}
+.yjd-rich-editor .rich-editor-area code {
+  background: var(--rte-chrome-2);
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 0.9em;
+}
+.yjd-rich-editor .rich-editor-area pre {
+  background: #20242f;
+  color: #ececf5;
+  border-radius: var(--rte-radius-md);
+  padding: 14px 16px;
+  border: none;
+}
+.yjd-rich-editor .rich-editor-area pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+/* ---------- Popups (shared shell) ---------- */
+.yjd-rich-editor .color-picker-popup,
+.yjd-rich-editor .custom-select-popup,
+.yjd-rich-editor .heading-select-popup,
+.yjd-rich-editor .capitalization-select-popup,
+.yjd-rich-editor .font-family-select-popup,
+.yjd-rich-editor .line-height-select-popup,
+.yjd-rich-editor .text-size-select-popup,
+.yjd-rich-editor .link-popup,
+.yjd-rich-editor .image-popup,
+.yjd-rich-editor .video-popup,
+.yjd-rich-editor .tag-popup,
+.yjd-rich-editor .import-popup,
+.yjd-rich-editor .table-popup,
+.yjd-rich-editor .text-align-picker-popup,
+.yjd-rich-editor .emoji-picker-popup {
+  background: var(--rte-bg);
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-md);
+  box-shadow: var(--rte-shadow);
+}
+
+/* Dropdown list items */
+.yjd-rich-editor .custom-select-item-button {
+  border-radius: var(--rte-radius-sm);
+  color: var(--rte-ink);
+  transition: background var(--rte-t), color var(--rte-t);
+}
+.yjd-rich-editor .custom-select-item-button:hover {
+  background: var(--rte-chrome-2);
+}
+.yjd-rich-editor .custom-select-item-button.current {
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
+}
+.yjd-rich-editor .custom-select-item-button.current .item-checkmark {
+  color: var(--rte-accent-ink);
+}
+
+/* ---------- Forms inside popups ---------- */
+.yjd-rich-editor .yjd-input,
+.yjd-rich-editor .yjd-select-input {
+  border: 1px solid var(--rte-border-strong);
+  border-radius: var(--rte-radius-sm);
+  color: var(--rte-ink);
+  transition: border-color var(--rte-t), box-shadow var(--rte-t);
+}
+.yjd-rich-editor .yjd-input:focus,
+.yjd-rich-editor .yjd-select-input:focus {
+  outline: none;
+  border-color: var(--rte-accent);
+  box-shadow: 0 0 0 3px var(--rte-accent-ring);
+}
+.yjd-rich-editor .yjd-input-title {
+  color: var(--rte-ink);
+  font-weight: 600;
+}
+.yjd-rich-editor .yjd-input-label {
+  color: var(--rte-muted);
+}
+.yjd-rich-editor .yjd-button-confirm {
+  background: var(--rte-accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--rte-radius-sm);
+  transition: background var(--rte-t);
+}
+.yjd-rich-editor .yjd-button-confirm:hover {
+  background: var(--rte-accent-ink);
+}
+.yjd-rich-editor .yjd-button-cancel {
+  background: var(--rte-chrome-2);
+  color: var(--rte-ink);
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-sm);
+  transition: background var(--rte-t);
+}
+.yjd-rich-editor .yjd-button-cancel:hover {
+  background: #e9e9f2;
+}
+.yjd-rich-editor .yjd-custom-upload-button {
+  border-radius: var(--rte-radius-sm);
+  border: 1px dashed var(--rte-border-strong);
+  color: var(--rte-accent-ink);
+  background: var(--rte-accent-weak);
+  transition: background var(--rte-t), border-color var(--rte-t);
+}
+.yjd-rich-editor .yjd-custom-upload-button:hover {
+  border-color: var(--rte-accent);
+}
+
+/* ---------- Floating toolbars (block + table) ---------- */
+.yjd-rich-editor .block-toolbar-container,
+.yjd-rich-editor .table-toolbar-container {
+  background: var(--rte-bg);
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-md);
+  box-shadow: var(--rte-shadow);
+  padding: 4px;
+  gap: 2px;
+}
+.yjd-rich-editor .block-toolbar-btn,
+.yjd-rich-editor .table-toolbar-btn {
+  border: 1px solid transparent;
+  border-radius: var(--rte-radius-sm);
+  background: transparent;
+  color: var(--rte-ink);
+  transition: background var(--rte-t), color var(--rte-t);
+}
+.yjd-rich-editor .block-toolbar-btn:hover,
+.yjd-rich-editor .table-toolbar-btn:hover {
+  background: var(--rte-chrome-2);
+}
+.yjd-rich-editor .block-toolbar-btn.active {
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
+}
+.yjd-rich-editor .block-toolbar-btn.active .icon svg,
+.yjd-rich-editor .block-toolbar-btn.active .icon svg path {
+  fill: var(--rte-accent-ink);
+}
+
+/* ---------- Tables ---------- */
+.yjd-rich-editor .rich-editor-table td {
+  border: 1px solid var(--rte-border-strong) !important;
+}
+.yjd-rich-editor .rich-editor-table td:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--rte-accent);
+  background: var(--rte-accent-weak);
+}
+.yjd-rich-editor .table-grid-cell.highlighted {
+  background: var(--rte-accent);
+  border-color: var(--rte-accent);
+}
+
+/* ---------- Resize handles ---------- */
+.yjd-rich-editor .resize-handle {
+  background: var(--rte-accent) !important;
+  border: 2px solid #fff !important;
+  border-radius: 50% !important;
+  box-shadow: var(--rte-shadow-sm) !important;
+}
+
+/* ---------- Find & Replace panel ---------- */
+.yjd-rich-editor .yjd-find-replace {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1100;
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  background: var(--rte-bg);
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-md);
+  box-shadow: var(--rte-shadow);
+  font: 13px/1.4 system-ui, -apple-system, sans-serif;
+  max-width: calc(100% - 20px);
+}
+.yjd-rich-editor .yjd-find-replace.open {
+  display: flex;
+}
+.yjd-rich-editor .yjd-find-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.yjd-rich-editor .yjd-find-input {
+  flex: 1 1 auto;
+  min-width: 150px;
+  height: 30px;
+  padding: 0 9px;
+  border: 1px solid var(--rte-border-strong);
+  border-radius: var(--rte-radius-sm);
+  color: var(--rte-ink);
+  background: var(--rte-bg);
+  transition: border-color var(--rte-t), box-shadow var(--rte-t);
+}
+.yjd-rich-editor .yjd-find-input:focus {
+  outline: none;
+  border-color: var(--rte-accent);
+  box-shadow: 0 0 0 3px var(--rte-accent-ring);
+}
+.yjd-rich-editor .yjd-find-count {
+  min-width: 46px;
+  text-align: center;
+  color: var(--rte-muted);
+  font-variant-numeric: tabular-nums;
+}
+.yjd-rich-editor .yjd-find-btn {
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-sm);
+  background: var(--rte-chrome);
+  color: var(--rte-ink);
+  cursor: pointer;
+  transition: background var(--rte-t), color var(--rte-t), border-color var(--rte-t),
+    box-shadow var(--rte-t);
+}
+.yjd-rich-editor .yjd-find-btn:hover {
+  background: var(--rte-chrome-2);
+}
+.yjd-rich-editor .yjd-find-btn:focus-visible {
+  outline: none;
+  border-color: var(--rte-accent);
+  box-shadow: 0 0 0 3px var(--rte-accent-ring);
+}
+.yjd-rich-editor .yjd-find-icon {
+  width: 30px;
+  padding: 0;
+  font-size: 15px;
+  line-height: 1;
+}
+.yjd-rich-editor .yjd-find-toggle.active {
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
+  border-color: transparent;
+}
+.yjd-rich-editor .yjd-find-replace .yjd-find-btn.yjd-find-close:hover {
+  background: #fdecec;
+  color: var(--rte-danger);
+  border-color: #f6caca;
+}
+.yjd-rich-editor .yjd-find-replace-input {
+  flex: 1 1 auto;
+}
+.yjd-rich-editor .yjd-find-row .yjd-find-btn:not(.yjd-find-icon) {
+  flex: 0 0 auto;
+}
+
+/* Match highlights */
+.yjd-rich-editor mark.yjd-find-hit {
+  background: #fff1b8;
+  color: inherit;
+  border-radius: 3px;
+}
+.yjd-rich-editor mark.yjd-find-hit.active {
+  background: var(--rte-accent);
+  color: #fff;
+}
+
+/* ---------- Accessibility: respect reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .yjd-rich-editor * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* =====================================================================
+   DESIGN SYSTEM v2.1 — minimal & light refinements
+   Icon unification, friendlier popovers, lighter inputs & buttons.
+   ===================================================================== */
+
+/* ---------- Icons: one size, one color ---------- */
+/* Convert the hard-coded greys to currentColor so every icon follows the
+   button's text colour (and the accent on active). Outline icons (stroke)
+   and the deliberately-coloured "no colour" swatch are left untouched. */
+.yjd-rich-editor .icon svg [fill="#454545"],
+.yjd-rich-editor .icon svg [fill="#231F20"],
+.yjd-rich-editor .icon svg [fill="#010101"],
+.yjd-rich-editor .icon svg[fill="#454545"],
+.yjd-rich-editor .block-toolbar-btn svg [fill="#454545"],
+.yjd-rich-editor .table-toolbar-btn svg [fill="#454545"] {
+  fill: currentColor;
+}
+
+/* Consistent icon footprint — equal height, centered, never distorted. */
+.yjd-rich-editor .rich-editor-toolbar-btn .icon,
+.yjd-rich-editor .block-toolbar-btn .icon,
+.yjd-rich-editor .table-toolbar-btn .icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: inherit;
+}
+.yjd-rich-editor .rich-editor-toolbar-btn .icon svg,
+.yjd-rich-editor .block-toolbar-btn .icon svg,
+.yjd-rich-editor .table-toolbar-btn .icon svg {
+  width: auto !important;
+  height: 16px !important;
+  max-width: 18px;
+  display: block;
+}
+
+/* Default icon colour = quiet ink; active = accent (overrides legacy blue). */
+.yjd-rich-editor .rich-editor-toolbar-btn .icon svg,
+.yjd-rich-editor .rich-editor-toolbar-btn .icon svg path {
+  fill: currentColor;
+}
+.yjd-rich-editor .rich-editor-toolbar-btn { color: #4b5060; }
+.yjd-rich-editor .rich-editor-toolbar-btn:hover { color: var(--rte-ink); }
+.yjd-rich-editor .rich-editor-toolbar-btn.active,
+.yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg,
+.yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg path,
+.yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg [fill] {
+  color: var(--rte-accent-ink) !important;
+  fill: var(--rte-accent-ink) !important;
+}
+
+/* ---------- Toolbar: lighter weight ---------- */
+.yjd-rich-editor .rich-editor-toolbar-btn,
+.yjd-rich-editor .custom-select-button {
+  box-shadow: none;
+}
+.yjd-rich-editor .custom-select-button {
+  border-color: var(--rte-border);
+  background: var(--rte-bg);
+  color: var(--rte-ink);
+  font-weight: 500;
+}
+.yjd-rich-editor .custom-select-button:hover {
+  border-color: var(--rte-border-strong);
+  background: var(--rte-bg);
+}
+.yjd-rich-editor .dropdown-icon { color: var(--rte-muted); }
+
+/* ---------- Popovers: friendly & airy ---------- */
+.yjd-rich-editor .color-picker-popup,
+.yjd-rich-editor .custom-select-popup,
+.yjd-rich-editor .heading-select-popup,
+.yjd-rich-editor .capitalization-select-popup,
+.yjd-rich-editor .font-family-select-popup,
+.yjd-rich-editor .line-height-select-popup,
+.yjd-rich-editor .text-size-select-popup,
+.yjd-rich-editor .link-popup,
+.yjd-rich-editor .image-popup,
+.yjd-rich-editor .video-popup,
+.yjd-rich-editor .tag-popup,
+.yjd-rich-editor .import-popup,
+.yjd-rich-editor .table-popup,
+.yjd-rich-editor .text-align-picker-popup,
+.yjd-rich-editor .emoji-picker-popup {
+  border-color: var(--rte-border);
+  border-radius: var(--rte-radius-md);
+  box-shadow: 0 10px 30px -10px rgba(20, 24, 46, 0.18), 0 2px 6px -2px rgba(20, 24, 46, 0.08);
+}
+
+/* roomier dropdown lists */
+.yjd-rich-editor .custom-select-popup,
+.yjd-rich-editor .heading-select-popup,
+.yjd-rich-editor .capitalization-select-popup,
+.yjd-rich-editor .font-family-select-popup,
+.yjd-rich-editor .line-height-select-popup,
+.yjd-rich-editor .text-size-select-popup {
+  padding: 6px;
+}
+.yjd-rich-editor .custom-select-item-button {
+  padding: 8px 10px;
+}
+
+/* gentle entrance for popovers (respects reduced motion below) */
+.yjd-rich-editor .color-picker-popup.visible,
+.yjd-rich-editor .custom-select-popup.visible,
+.yjd-rich-editor .heading-select-popup.visible,
+.yjd-rich-editor .font-family-select-popup.visible,
+.yjd-rich-editor .line-height-select-popup.visible,
+.yjd-rich-editor .capitalization-select-popup.visible,
+.yjd-rich-editor .text-size-select-popup.visible,
+.yjd-rich-editor .link-popup.visible,
+.yjd-rich-editor .image-popup.visible,
+.yjd-rich-editor .video-popup.visible,
+.yjd-rich-editor .tag-popup.visible,
+.yjd-rich-editor .table-popup.visible,
+.yjd-rich-editor .text-align-picker-popup.visible,
+.yjd-rich-editor .yjd-find-replace.open {
+  animation: rte-pop-in 90ms ease-out;
+}
+@keyframes rte-pop-in {
+  from { opacity: 0; transform: translateY(-2px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---------- Inputs: minimal & light ---------- */
+.yjd-rich-editor .yjd-input,
+.yjd-rich-editor .yjd-select-input,
+.yjd-rich-editor .yjd-find-input {
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-sm);
+  background: var(--rte-bg);
+  color: var(--rte-ink);
+  font-size: 14px;
+}
+.yjd-rich-editor .yjd-input::placeholder,
+.yjd-rich-editor .yjd-select-input::placeholder,
+.yjd-rich-editor .yjd-find-input::placeholder {
+  color: var(--rte-muted);
+  opacity: 0.7;
+}
+.yjd-rich-editor .yjd-input:focus,
+.yjd-rich-editor .yjd-select-input:focus,
+.yjd-rich-editor .yjd-find-input:focus {
+  border-color: var(--rte-accent);
+  box-shadow: 0 0 0 3px var(--rte-accent-ring);
+}
+
+/* ---------- Buttons: minimal & light ---------- */
+.yjd-rich-editor .yjd-button-confirm,
+.yjd-rich-editor .yjd-button-cancel,
+.yjd-rich-editor .yjd-find-btn {
+  height: 36px;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: var(--rte-radius-sm);
+  box-shadow: none;
+  transition: background var(--rte-t), color var(--rte-t), border-color var(--rte-t);
+}
+.yjd-rich-editor .yjd-button-confirm {
+  background: var(--rte-accent);
+  border: 1px solid var(--rte-accent);
+  color: #fff;
+}
+.yjd-rich-editor .yjd-button-confirm:hover {
+  background: var(--rte-accent-ink);
+  border-color: var(--rte-accent-ink);
+}
+/* Cancel & secondary find buttons → quiet, text-like */
+.yjd-rich-editor .yjd-button-cancel {
+  background: transparent;
+  border: 1px solid var(--rte-border);
+  color: var(--rte-muted);
+}
+.yjd-rich-editor .yjd-button-cancel:hover {
+  background: var(--rte-chrome-2);
+  color: var(--rte-ink);
+}
+.yjd-rich-editor .yjd-find-btn:not(.yjd-find-icon) {
+  background: transparent;
+  border: 1px solid var(--rte-border);
+  color: var(--rte-ink);
+}
+.yjd-rich-editor .yjd-find-btn:not(.yjd-find-icon):hover {
+  background: var(--rte-chrome-2);
+}
+.yjd-rich-editor .yjd-find-btn.yjd-find-icon {
+  height: 32px;
+  width: 32px;
+  color: var(--rte-muted);
+  background: transparent;
+  border: 1px solid transparent;
+}
+.yjd-rich-editor .yjd-find-btn.yjd-find-icon:hover {
+  background: var(--rte-chrome-2);
+  color: var(--rte-ink);
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .yjd-rich-editor .color-picker-popup.visible,
+  .yjd-rich-editor [class*="select-popup"].visible,
+  .yjd-rich-editor [class$="-popup"].visible,
+  .yjd-rich-editor .yjd-find-replace.open {
+    animation: none !important;
+  }
+}
+
+/* =====================================================================
+   DESIGN SYSTEM v2.2 — outline icon set rendering
+   Icons are now stroke-based (Lucide-style). Render them as outlines and
+   neutralise the legacy fill-based rules above.
+   ===================================================================== */
+.yjd-rich-editor .icon svg {
+  width: auto !important;
+  height: 16px !important;
+  max-width: 20px;
+  display: block;
+  fill: none !important;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  overflow: visible;
+}
+/* outline paths never fill */
+.yjd-rich-editor .icon svg path,
+.yjd-rich-editor .icon svg line,
+.yjd-rich-editor .icon svg polyline,
+.yjd-rich-editor .icon svg rect {
+  fill: none !important;
+  stroke: currentColor;
+}
+/* solid accents (dots) keep their fill, no stroke */
+.yjd-rich-editor .icon svg [fill="currentColor"] {
+  fill: currentColor !important;
+  stroke: none !important;
+}
+
+/* quiet default colour, accent on active */
+.yjd-rich-editor .rich-editor-toolbar-btn .icon svg { color: #565b6b; }
+.yjd-rich-editor .rich-editor-toolbar-btn:hover .icon svg { color: var(--rte-ink); }
+.yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg,
+.yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg path,
+.yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg line,
+.yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg polyline,
+.yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg rect {
+  color: var(--rte-accent-ink) !important;
+  stroke: var(--rte-accent-ink) !important;
+  fill: none !important;
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg [fill="currentColor"] {
+  fill: var(--rte-accent-ink) !important;
+  stroke: none !important;
+}
+.yjd-rich-editor .block-toolbar-btn.active .icon svg,
+.yjd-rich-editor .block-toolbar-btn.active .icon svg path {
+  stroke: var(--rte-accent-ink) !important;
+  fill: none !important;
+}
+
+/* =====================================================================
+   DESIGN SYSTEM v2.4 — sync the list-picker popover with the others
+   ===================================================================== */
+.yjd-rich-editor .list-picker-popup {
+  background: var(--rte-bg);
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-md);
+  box-shadow: var(--rte-shadow);
+  padding: 6px;
+}
+.yjd-rich-editor .list-picker-popup.visible {
+  animation: rte-pop-in 90ms ease-out;
+}
+.yjd-rich-editor .list-button-container {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.yjd-rich-editor .list-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--rte-radius-sm);
+  background: transparent;
+  color: #565b6b;
+  cursor: pointer;
+  transition: background var(--rte-t), color var(--rte-t);
+}
+.yjd-rich-editor .list-button:hover {
+  background: var(--rte-chrome-2);
+  color: var(--rte-ink);
+}
+.yjd-rich-editor .list-button.active {
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
+}
+.yjd-rich-editor .list-button svg {
+  width: auto !important;
+  height: 16px !important;
+  max-width: 20px;
+  fill: none !important;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.yjd-rich-editor .list-button svg [fill="currentColor"] {
+  fill: currentColor !important;
+  stroke: none !important;
+}
