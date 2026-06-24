@@ -121,22 +121,23 @@ editor.off("text-change", handler);
 | `on(event, handler)`  | Add event listener       | `event: string, handler: function` | `void`   |
 | `off(event, handler)` | Remove event listener    | `event: string, handler: function` | `void`   |
 
-## 💼 Commercial License
-
-This is a commercial product. For licensing information and pricing, please contact:
+## 📦 Project Info
 
 - **Author**: Oix1987
-- **License**: ISC (Commercial)
-- **Version**: 1.0.1
+- **License**: ISC
+- **Version**: 1.0.2
 
 ## 📄 License
 
-Copyright (c) 2024 Oix1987. All rights reserved.
+Copyright (c) 2024 Oix1987
 
-This software is licensed under the ISC License. Commercial use requires a valid license.
+This software is released under the **ISC License** — a permissive open-source
+license. You are free to use, copy, modify, and distribute it, provided the
+copyright notice and this permission notice are preserved. The software is
+provided "as is", without warranty of any kind.
 
 ## 🆘 Support
 
-For technical support, feature requests, or licensing inquiries, please contact the author.
+For technical support or feature requests, please contact the author or open an issue.
 
 See `index.html` and `main.js` for a complete working example that demonstrates the `onChange` functionality with real-time output display.

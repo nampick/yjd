@@ -17,10 +17,13 @@
   "files": [
     "dist",
     "index.d.ts",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test test/*.test.js",
+    "generate:css": "node scripts/generate-css.js",
+    "prebuild": "npm run generate:css",
     "build": "rollup -c",
     "prepublishOnly": "npm run build"
   },

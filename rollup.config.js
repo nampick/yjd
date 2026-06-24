@@ -1,26 +1,34 @@
 import terser from '@rollup/plugin-terser';
 
-export default {
-  input: 'index.js',
-  output: [
-    {
+const terserPlugin = terser({
+  compress: {
+    drop_console: true,
+    drop_debugger: true
+  }
+});
+
+export default [
+  // UMD build for <script> / CDN usage. Global `RichEditor` is the class itself,
+  // so `new RichEditor(...)` works directly. Built from umd-entry.js.
+  {
+    input: 'umd-entry.js',
+    output: {
       file: 'dist/rich-editor.min.js',
       format: 'umd',
       name: 'RichEditor',
+      exports: 'default',
       sourcemap: true
     },
-    {
+    plugins: [terserPlugin]
+  },
+  // ESM build for bundlers / `import`. Keeps default + named exports.
+  {
+    input: 'index.js',
+    output: {
       file: 'dist/rich-editor.esm.js',
       format: 'es',
       sourcemap: true
-    }
-  ],
-  plugins: [
-    terser({
-      compress: {
-        drop_console: true,
-        drop_debugger: true
-      }
-    })
-  ]
-};
+    },
+    plugins: [terserPlugin]
+  }
+];
