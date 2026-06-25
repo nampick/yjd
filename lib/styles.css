@@ -2969,3 +2969,11 @@
 .yjd-rich-editor .rich-editor-toolbar-1 .more-btn {
   margin-left: 12px;
 }
+
+/* =====================================================================
+   DESIGN SYSTEM v2.8 — remove the triangle pointer on floating toolbars
+   ===================================================================== */
+.yjd-rich-editor .block-toolbar-arrow,
+.yjd-rich-editor .table-toolbar-arrow {
+  display: none !important;
+}
