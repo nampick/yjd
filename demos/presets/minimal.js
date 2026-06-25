@@ -4,12 +4,11 @@
  * Built from the tree-shakeable /core entry — only these features ship.
  */
 import {
-  Editor, registry, StylesLoader,
+  Editor, registry,
   Bold, Italic, Underline, Link,
   Toolbar, History
 } from '../../core.js';
 
-StylesLoader.loadStyles();
 registry.register('formats/bold', Bold);
 registry.register('formats/italic', Italic);
 registry.register('formats/underline', Underline);

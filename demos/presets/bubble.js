@@ -5,12 +5,11 @@
  * /core (tree-shaken). Note: it does NOT load the `toolbar` module.
  */
 import {
-  Editor, registry, StylesLoader,
+  Editor, registry,
   Bold, Italic, Underline, Strike, Heading, List, FontFamily,
   History, BlockToolbar, SlashMenu
 } from '../../core.js';
 
-StylesLoader.loadStyles();
 [
   ['formats/bold', Bold], ['formats/italic', Italic], ['formats/underline', Underline],
   ['formats/strike', Strike], ['formats/heading', Heading], ['formats/list', List],

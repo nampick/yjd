@@ -4,12 +4,11 @@
  * selection toolbar. Built from /core (tree-shaken).
  */
 import {
-  Editor, registry, StylesLoader,
+  Editor, registry,
   Bold, Italic, Underline, Strike, Link, Heading, List, TextAlign, FontFamily,
   Toolbar, History, SlashMenu, BlockToolbar
 } from '../../core.js';
 
-StylesLoader.loadStyles();
 [
   ['formats/bold', Bold], ['formats/italic', Italic], ['formats/underline', Underline],
   ['formats/strike', Strike], ['formats/link', Link], ['formats/heading', Heading],

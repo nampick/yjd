@@ -4,13 +4,12 @@
  * resize handles, table toolbar. Built from /core (tree-shaken).
  */
 import {
-  Editor, registry, StylesLoader,
+  Editor, registry,
   Bold, Italic, Underline, Strike, Link, Heading, List, TextAlign, FontFamily,
   Color, Background, Image, Table, IndentIncrease, IndentDecrease, TextSize,
   Toolbar, History, SlashMenu, BlockToolbar, TableToolbar, FindReplace, CodeView, ResizeHandles
 } from '../../core.js';
 
-StylesLoader.loadStyles();
 [
   ['formats/bold', Bold], ['formats/italic', Italic], ['formats/underline', Underline],
   ['formats/strike', Strike], ['formats/link', Link], ['formats/heading', Heading],

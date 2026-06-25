@@ -13,7 +13,7 @@
       "require": "./dist/rich-editor.min.js"
     },
     "./core": "./core.js",
-    "./styles.css": "./lib/styles.css",
+    "./styles.css": "./lib/styles.min.css",
     "./lib/*": "./lib/*",
     "./package.json": "./package.json"
   },

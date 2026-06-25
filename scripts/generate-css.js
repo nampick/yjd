@@ -15,15 +15,20 @@ import { minify } from 'csso';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const cssPath = join(__dirname, '..', 'lib', 'styles.css');
-const outPath = join(__dirname, '..', 'lib', 'styles.css.js');
+const jsOut = join(__dirname, '..', 'lib', 'styles.css.js');
+const minOut = join(__dirname, '..', 'lib', 'styles.min.css');
 
 const raw = readFileSync(cssPath, 'utf8');
 // Minify so the inlined CSS string isn't shipped with comments/whitespace
 // (terser only minifies JS, not the CSS inside the string literal).
 const css = minify(raw).css;
 
+// (1) JS module — used by the all-in-one build (StylesLoader injects it).
 const banner = '// AUTO-GENERATED from lib/styles.css by scripts/generate-css.js — do not edit directly.\n';
-const out = `${banner}export default ${JSON.stringify(css)};\n`;
+writeFileSync(jsOut, `${banner}export default ${JSON.stringify(css)};\n`, 'utf8');
 
-writeFileSync(outPath, out, 'utf8');
-console.log(`Generated ${outPath} — CSS minified ${raw.length} -> ${css.length} bytes`);
+// (2) Standalone minified stylesheet — for tree-shaken /core consumers who
+//     prefer to <link> the CSS once (keeps it out of the JS bundle, cached).
+writeFileSync(minOut, css, 'utf8');
+
+console.log(`Generated styles.css.js + styles.min.css — CSS minified ${raw.length} -> ${css.length} bytes`);

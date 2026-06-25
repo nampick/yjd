@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Editor presets — tree-shaking demo</title>
+  <!-- One shared stylesheet (cached, ~8 KB gzip) — kept out of the JS bundles
+       so the tree-shaken builds stay small. -->
+  <link rel="stylesheet" href="/lib/styles.min.css">
   <style>
     :root { --accent:#6d5efc; --accent-ink:#5a48ee; --border:#e9e9f1; --ink:#20242f; --muted:#767c8e; }
     body { margin:0; padding:40px 20px 80px; background:#f3f4f8; color:var(--ink);
@@ -28,39 +31,39 @@
 <body>
   <div class="wrap">
     <h1>Editor presets</h1>
-    <p class="sub">Same editor, three feature sets — each built from the tree-shakeable <code>/core</code> entry. Smaller feature set → smaller bundle.</p>
+    <p class="sub">Same editor, built from the tree-shakeable <code>/core</code> entry — only the features you register ship. The stylesheet is <strong>linked once</strong> (<code>styles.min.css</code>, ~8 KB gzip, cached) instead of bundled into each JS.</p>
 
     <table class="sizes">
-      <thead><tr><th>Preset</th><th>Features</th><th>Bundle (gzip)</th></tr></thead>
+      <thead><tr><th>Preset</th><th>Features</th><th>JS (gzip)</th></tr></thead>
       <tbody>
-        <tr><td>Minimal</td><td>bold · italic · underline · link</td><td class="size">~25 KB<span class="bar" style="width:46px"></span></td></tr>
-        <tr><td>Bubble (no toolbar)</td><td>floating selection bar + slash menu</td><td class="size">~30 KB<span class="bar" style="width:56px"></span></td></tr>
-        <tr><td>Basic</td><td>+ strike · headings · lists · align · slash menu</td><td class="size">~35 KB<span class="bar" style="width:65px"></span></td></tr>
-        <tr><td>Standard</td><td>+ colour · image · table · find · code view</td><td class="size">~47 KB<span class="bar" style="width:87px"></span></td></tr>
-        <tr><td>Full (default build)</td><td>everything</td><td class="size">~54 KB<span class="bar" style="width:100px"></span></td></tr>
+        <tr><td>Minimal</td><td>bold · italic · underline · link</td><td class="size">~16 KB<span class="bar" style="width:42px"></span></td></tr>
+        <tr><td>Bubble (no toolbar)</td><td>floating selection bar + slash menu</td><td class="size">~21 KB<span class="bar" style="width:55px"></span></td></tr>
+        <tr><td>Basic</td><td>+ strike · headings · lists · align · slash menu</td><td class="size">~25 KB<span class="bar" style="width:66px"></span></td></tr>
+        <tr><td>Standard</td><td>+ colour · image · table · find · code view</td><td class="size">~38 KB<span class="bar" style="width:100px"></span></td></tr>
+        <tr><td>Full (all-in-one, CSS inlined)</td><td>everything</td><td class="size">~54 KB</td></tr>
       </tbody>
     </table>
 
     <section>
-      <div class="head"><h2>Minimal</h2><span class="badge">~25 KB gzip</span></div>
+      <div class="head"><h2>Minimal</h2><span class="badge">~16 KB JS</span></div>
       <p class="desc">Comment / chat box.</p>
       <div id="ed-minimal"></div>
     </section>
 
     <section>
-      <div class="head"><h2>Bubble — no toolbar</h2><span class="badge">~30 KB gzip</span></div>
+      <div class="head"><h2>Bubble — no toolbar</h2><span class="badge">~21 KB JS</span></div>
       <p class="desc">No top toolbar. <b>Select some text</b> to get the floating format bar; type <code>/</code> for block types.</p>
       <div id="ed-bubble"></div>
     </section>
 
     <section>
-      <div class="head"><h2>Basic</h2><span class="badge">~35 KB gzip</span></div>
+      <div class="head"><h2>Basic</h2><span class="badge">~25 KB JS</span></div>
       <p class="desc">Blog / notes — try typing <code>/</code> for the command menu.</p>
       <div id="ed-basic"></div>
     </section>
 
     <section>
-      <div class="head"><h2>Standard</h2><span class="badge">~47 KB gzip</span></div>
+      <div class="head"><h2>Standard</h2><span class="badge">~38 KB JS</span></div>
       <p class="desc">CMS / docs — colour, image, table, find &amp; replace, code view.</p>
       <div id="ed-standard"></div>
     </section>
