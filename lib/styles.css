@@ -2914,10 +2914,12 @@
 }
 .yjd-rich-editor .align-button.active svg { color: var(--rte-accent-ink); }
 
-/* Upload affordance icon → accent (matches the dashed accent button) */
-.yjd-rich-editor .yjd-custom-upload-button svg path,
-.yjd-rich-editor .yjd-custom-upload-button svg [fill]:not([fill="none"]) {
-  fill: var(--rte-accent-ink) !important;
+/* Upload affordance icon (outline) → accent, matches the dashed accent button */
+.yjd-rich-editor .yjd-custom-upload-button svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: var(--rte-accent-ink);
 }
 
 /* keep align-picker labels on one line */
