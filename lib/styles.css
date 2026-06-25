@@ -2879,3 +2879,73 @@
   fill: currentColor !important;
   stroke: none !important;
 }
+
+/* =====================================================================
+   DESIGN SYSTEM v2.5 — table-toolbar icons
+   These buttons inject the SVG directly (no .icon wrapper), so size/stroke
+   them here too. Outline icons only carry a viewBox, so without this the SVG
+   blows up to its default size and gets clipped (icons appeared "missing").
+   ===================================================================== */
+.yjd-rich-editor .table-toolbar-btn svg {
+  width: auto !important;
+  height: 16px !important;
+  max-width: 20px;
+  display: block;
+  fill: none !important;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.yjd-rich-editor .table-toolbar-btn svg [fill="currentColor"] {
+  fill: currentColor !important;
+  stroke: none !important;
+}
+.yjd-rich-editor .table-toolbar-btn { color: #565b6b; }
+.yjd-rich-editor .table-toolbar-btn:hover { color: var(--rte-ink); }
+
+/* =====================================================================
+   DESIGN SYSTEM v2.6 — final popover consistency pass
+   ===================================================================== */
+/* Text-align picker items: match the other dropdown lists */
+.yjd-rich-editor .align-button {
+  height: auto;
+  min-height: 32px;
+  padding: 6px 10px;
+  gap: 8px;
+  border-radius: var(--rte-radius-sm);
+  background: transparent;
+  color: var(--rte-ink);
+  transition: background var(--rte-t), color var(--rte-t);
+}
+.yjd-rich-editor .align-button:hover {
+  background: var(--rte-chrome-2);
+  border-color: transparent;
+}
+.yjd-rich-editor .align-button.active {
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
+  border-color: transparent;
+}
+.yjd-rich-editor .align-button svg {
+  width: auto !important;
+  height: 16px !important;
+  color: inherit;
+  fill: none !important;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.yjd-rich-editor .align-button.active svg { color: var(--rte-accent-ink); }
+
+/* Upload affordance icon → accent (matches the dashed accent button) */
+.yjd-rich-editor .yjd-custom-upload-button svg path,
+.yjd-rich-editor .yjd-custom-upload-button svg [fill]:not([fill="none"]) {
+  fill: var(--rte-accent-ink) !important;
+}
+
+/* keep align-picker labels on one line */
+.yjd-rich-editor .text-align-picker-popup { min-width: 168px; }
+.yjd-rich-editor .align-button { white-space: nowrap; }
+.yjd-rich-editor .align-button .label-text { white-space: nowrap; }
