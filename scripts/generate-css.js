@@ -11,15 +11,19 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { minify } from 'csso';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const cssPath = join(__dirname, '..', 'lib', 'styles.css');
 const outPath = join(__dirname, '..', 'lib', 'styles.css.js');
 
-const css = readFileSync(cssPath, 'utf8');
+const raw = readFileSync(cssPath, 'utf8');
+// Minify so the inlined CSS string isn't shipped with comments/whitespace
+// (terser only minifies JS, not the CSS inside the string literal).
+const css = minify(raw).css;
 
 const banner = '// AUTO-GENERATED from lib/styles.css by scripts/generate-css.js — do not edit directly.\n';
 const out = `${banner}export default ${JSON.stringify(css)};\n`;
 
 writeFileSync(outPath, out, 'utf8');
-console.log(`Generated ${outPath} (${css.length} bytes of CSS)`);
+console.log(`Generated ${outPath} — CSS minified ${raw.length} -> ${css.length} bytes`);
