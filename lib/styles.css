@@ -2949,3 +2949,23 @@
 .yjd-rich-editor .text-align-picker-popup { min-width: 168px; }
 .yjd-rich-editor .align-button { white-space: nowrap; }
 .yjd-rich-editor .align-button .label-text { white-space: nowrap; }
+
+/* =====================================================================
+   DESIGN SYSTEM v2.7 — responsive toolbar (no wrapping; overflow -> "more")
+   ===================================================================== */
+.yjd-rich-editor .rich-editor-toolbar-1 {
+  flex-wrap: nowrap !important;
+  overflow: hidden;
+}
+.yjd-rich-editor .rich-editor-toolbar-2 {
+  flex-wrap: wrap;
+  border-top: 1px solid var(--rte-border);
+}
+.yjd-rich-editor .toolbar-group,
+.yjd-rich-editor .rich-editor-toolbar-btn,
+.yjd-rich-editor .custom-select-button {
+  flex: 0 0 auto;
+}
+.yjd-rich-editor .rich-editor-toolbar-1 .more-btn {
+  margin-left: 12px;
+}
