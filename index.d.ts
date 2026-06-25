@@ -114,6 +114,7 @@ export const BlockToolbar: any;
 export const TableToolbar: any;
 export const CodeView: any;
 export const FindReplace: any;
+export const SlashMenu: any;
 export const ResizeHandles: any;
 
 // UI components
