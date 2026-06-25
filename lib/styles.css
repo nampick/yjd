@@ -333,34 +333,9 @@
   background: #EEEEEE !important;
   cursor: pointer;
 }
-.yjd-rich-editor .rich-editor-toolbar-btn.active{
-  background: #EEEEEE !important;
-  color: #136FDF !important;
-}
-
-.yjd-rich-editor .rich-editor-toolbar-btn.active svg,
-.yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg {
-  fill: #136FDF !important;
-}
-
-.yjd-rich-editor .rich-editor-toolbar-btn.active svg path,
-.yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg path {
-  fill: #136FDF !important;
-}
-
-
-
-/* Specific icon styles for better visibility */
-.yjd-rich-editor .rich-editor-toolbar-btn.list-btn .icon svg,
-.yjd-rich-editor .rich-editor-toolbar-btn.emoji-btn .icon svg,
-.yjd-rich-editor .rich-editor-toolbar-btn.image-btn .icon svg,
-.yjd-rich-editor .rich-editor-toolbar-btn.video-btn .icon svg,
-.yjd-rich-editor .rich-editor-toolbar-btn.tag-btn .icon svg,
-.yjd-rich-editor .rich-editor-toolbar-btn.import-btn .icon svg {
-  width: 16px;
-  height: 16px;
-  fill: #454545;
-}
+/* Active toolbar-button + icon colours are owned by the design-system layer
+   (accent), and icon sizing/stroke by the outline-icon layer — the old blue
+   (#136FDF) / grey (#454545) overrides have been removed. */
 
 /*block toolbar*/
 .yjd-rich-editor .block-toolbar-btn{
