@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editor presets — tree-shaking demo</title>
+  <style>
+    :root { --accent:#6d5efc; --accent-ink:#5a48ee; --border:#e9e9f1; --ink:#20242f; --muted:#767c8e; }
+    body { margin:0; padding:40px 20px 80px; background:#f3f4f8; color:var(--ink);
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+    .wrap { max-width:880px; margin:0 auto; }
+    h1 { font-size:28px; margin:0 0 4px; }
+    .sub { color:var(--muted); margin:0 0 28px; }
+    table.sizes { width:100%; border-collapse:collapse; margin:0 0 36px; background:#fff;
+      border:1px solid var(--border); border-radius:12px; overflow:hidden; font-size:14px; }
+    table.sizes th, table.sizes td { text-align:left; padding:10px 14px; border-bottom:1px solid var(--border); }
+    table.sizes th { background:#fbfbfd; color:var(--muted); font-weight:600; }
+    table.sizes tr:last-child td { border-bottom:none; }
+    table.sizes td.size { font-variant-numeric:tabular-nums; }
+    .bar { display:inline-block; height:8px; border-radius:4px; background:var(--accent); vertical-align:middle; margin-left:8px; }
+    section { margin:0 0 40px; }
+    .head { display:flex; align-items:baseline; gap:10px; margin:0 0 10px; }
+    .head h2 { font-size:18px; margin:0; }
+    .badge { font-size:12px; font-weight:600; color:var(--accent-ink); background:#efedff; padding:3px 9px; border-radius:999px; }
+    .desc { color:var(--muted); font-size:13px; margin:0 0 12px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Editor presets</h1>
+    <p class="sub">Same editor, three feature sets — each built from the tree-shakeable <code>/core</code> entry. Smaller feature set → smaller bundle.</p>
+
+    <table class="sizes">
+      <thead><tr><th>Preset</th><th>Features</th><th>Bundle (gzip)</th></tr></thead>
+      <tbody>
+        <tr><td>Minimal</td><td>bold · italic · underline · link</td><td class="size">~25 KB<span class="bar" style="width:46px"></span></td></tr>
+        <tr><td>Basic</td><td>+ strike · headings · lists · align · slash menu</td><td class="size">~35 KB<span class="bar" style="width:65px"></span></td></tr>
+        <tr><td>Standard</td><td>+ colour · image · table · find · code view</td><td class="size">~47 KB<span class="bar" style="width:87px"></span></td></tr>
+        <tr><td>Full (default build)</td><td>everything</td><td class="size">~54 KB<span class="bar" style="width:100px"></span></td></tr>
+      </tbody>
+    </table>
+
+    <section>
+      <div class="head"><h2>Minimal</h2><span class="badge">~25 KB gzip</span></div>
+      <p class="desc">Comment / chat box.</p>
+      <div id="ed-minimal"></div>
+    </section>
+
+    <section>
+      <div class="head"><h2>Basic</h2><span class="badge">~35 KB gzip</span></div>
+      <p class="desc">Blog / notes — try typing <code>/</code> for the command menu.</p>
+      <div id="ed-basic"></div>
+    </section>
+
+    <section>
+      <div class="head"><h2>Standard</h2><span class="badge">~47 KB gzip</span></div>
+      <p class="desc">CMS / docs — colour, image, table, find &amp; replace, code view.</p>
+      <div id="ed-standard"></div>
+    </section>
+  </div>
+
+  <script type="module">
+    import { create as minimal } from '/demos/dist/minimal.js';
+    import { create as basic } from '/demos/dist/basic.js';
+    import { create as standard } from '/demos/dist/standard.js';
+    minimal('#ed-minimal', { width: 840, maxWidth: 840 });
+    basic('#ed-basic', { width: 840, maxWidth: 840, content: '<h2>A blog post</h2><p>Bold, italic, lists and headings.</p>' });
+    standard('#ed-standard', { width: 840, maxWidth: 840, content: '<h1>A document</h1><p>Full-featured writing surface.</p>' });
+  </script>
+</body>
+</html>
