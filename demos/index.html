@@ -34,6 +34,7 @@
       <thead><tr><th>Preset</th><th>Features</th><th>Bundle (gzip)</th></tr></thead>
       <tbody>
         <tr><td>Minimal</td><td>bold · italic · underline · link</td><td class="size">~25 KB<span class="bar" style="width:46px"></span></td></tr>
+        <tr><td>Bubble (no toolbar)</td><td>floating selection bar + slash menu</td><td class="size">~30 KB<span class="bar" style="width:56px"></span></td></tr>
         <tr><td>Basic</td><td>+ strike · headings · lists · align · slash menu</td><td class="size">~35 KB<span class="bar" style="width:65px"></span></td></tr>
         <tr><td>Standard</td><td>+ colour · image · table · find · code view</td><td class="size">~47 KB<span class="bar" style="width:87px"></span></td></tr>
         <tr><td>Full (default build)</td><td>everything</td><td class="size">~54 KB<span class="bar" style="width:100px"></span></td></tr>
@@ -44,6 +45,12 @@
       <div class="head"><h2>Minimal</h2><span class="badge">~25 KB gzip</span></div>
       <p class="desc">Comment / chat box.</p>
       <div id="ed-minimal"></div>
+    </section>
+
+    <section>
+      <div class="head"><h2>Bubble — no toolbar</h2><span class="badge">~30 KB gzip</span></div>
+      <p class="desc">No top toolbar. <b>Select some text</b> to get the floating format bar; type <code>/</code> for block types.</p>
+      <div id="ed-bubble"></div>
     </section>
 
     <section>
@@ -61,9 +68,11 @@
 
   <script type="module">
     import { create as minimal } from '/demos/dist/minimal.js';
+    import { create as bubble } from '/demos/dist/bubble.js';
     import { create as basic } from '/demos/dist/basic.js';
     import { create as standard } from '/demos/dist/standard.js';
     minimal('#ed-minimal', { width: 840, maxWidth: 840 });
+    bubble('#ed-bubble', { width: 840, maxWidth: 840, content: '<p>Select this sentence to see the bubble bar appear above it.</p>' });
     basic('#ed-basic', { width: 840, maxWidth: 840, content: '<h2>A blog post</h2><p>Bold, italic, lists and headings.</p>' });
     standard('#ed-standard', { width: 840, maxWidth: 840, content: '<h1>A document</h1><p>Full-featured writing surface.</p>' });
   </script>

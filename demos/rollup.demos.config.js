@@ -2,7 +2,7 @@ import terser from '@rollup/plugin-terser';
 
 // Build each preset as its own tree-shaken bundle to demonstrate the size
 // difference between feature sets (all built from the /core entry).
-const presets = ['minimal', 'basic', 'standard'];
+const presets = ['minimal', 'bubble', 'basic', 'standard'];
 
 export default presets.map((name) => ({
   input: `demos/presets/${name}.js`,
