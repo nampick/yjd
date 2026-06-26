@@ -1,143 +1,146 @@
-# @oix1987/yjd - Professional Rich Text Editor
+# yjd
 
-A powerful, commercial-grade rich text editor with real-time content change tracking for web applications. Built with vanilla JavaScript for maximum performance and compatibility.
+**Rich text, without the weight.** A dependency-free, tree-shakeable rich text editor for the web. Compose it from a `/core` entry and ship **16 KB**, not the whole library.
 
-## 🚀 Features
+🔗 **[yjd.io](https://yjd.io)** · [Live playground](https://yjd.io/demos/) · [Docs](https://yjd.io/site/docs.html)
 
-- **Rich Text Formatting**: Bold, Italic, Underline, Strikethrough, Subscript, Superscript
-- **Advanced Formatting**: Text alignment, line height, font family, text size, background colors
-- **Content Management**: Images, tables, links, lists, emojis, videos
-- **Real-time Tracking**: `onChange` callback for live content monitoring
-- **Modern UI**: Customizable toolbar with intuitive controls
-- **TypeScript Support**: Full type definitions included
-- **Lightweight**: Pure JavaScript implementation, no heavy dependencies
-- **Cross-browser**: Compatible with all modern browsers
+```js
+import RichEditor from '@oix1987/yjd';
+new RichEditor('#editor', { placeholder: 'Start writing…' });
+```
 
-## 📦 Installation
+---
+
+## Why yjd
+
+- **Tree-shakeable core** — register only the formats/modules you use; the rest is dropped.
+- **Zero runtime dependencies** — plain DOM, ESM + UMD builds.
+- **Framework-agnostic** — drop it into React, Vue, Svelte, or a static page.
+- **Responsive** — toolbar fills the width on desktop, a single swipe-row on mobile.
+- **XSS-safe paste** — sanitises pasted HTML (scripts/handlers/unsafe URLs stripped; only trusted embeds survive).
+- **Accessible** — keyboard navigable, WCAG-AA contrast (Lighthouse a11y 100).
+
+## Bundle size (gzipped JS)
+
+Every preset is built from the same `/core` entry — pick a profile, tree-shake the rest.
+
+| Preset | Includes | Size |
+|---|---|---|
+| Minimal | bold · italic · underline · link | **~16 KB** |
+| Bubble | floating bar, no toolbar + slash menu | **~21 KB** |
+| Basic | + strike · headings · lists · align | **~25 KB** |
+| Standard | + colour · image · table · find · code view | **~38 KB** |
+| Full | everything (CSS inlined) | **~54 KB** |
+
+> For comparison, Quill 2 is ~60 KB. The stylesheet (~8 KB gzip) ships once and is cached, kept out of the JS.
+
+## Install
 
 ```bash
-npm install @oix1987/yjd
+npm i @oix1987/yjd
 ```
 
-## 💻 Usage
-
-### Basic Implementation
-
-```javascript
-import RichEditor from "@oix1987/yjd";
-
-const editor = new RichEditor("#editor-container", {
-  content: "<p>Initial content</p>",
-  height: 400,
-  width: 800,
-  theme: "light",
-  placeholder: "Start typing...",
-  onChange: (content) => {
-    // Handle content changes here
-    console.log("Content changed:", content);
-    // Update your output container
-    document.getElementById("output").innerHTML = content;
-  },
-});
-```
-
-### CDN Usage
+Or via CDN (all-in-one UMD):
 
 ```html
-<!-- Using jsDelivr CDN -->
-<script src="https://cdn.jsdelivr.net/npm/@oix1987/yjd@1.0.2/dist/rich-editor.min.js"></script>
-<script>
-  const editor = new RichEditor("#editor-container", {
-    // configuration options
-  });
-</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@oix1987/yjd/lib/styles.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@oix1987/yjd"></script>
+<script> new RichEditor('#editor'); </script>
 ```
 
-### Alternative CDN
+## Quick start (all-in-one)
+
+The default build registers everything and injects its CSS:
+
+```js
+import RichEditor from '@oix1987/yjd';
+
+const editor = new RichEditor('#editor', {
+  placeholder: 'Start writing…',
+  onChange: (html) => console.log(html),
+});
+```
+
+## Tree-shakeable core
+
+For the smallest bundle, import from `@oix1987/yjd/core` (side-effect-free) and register only what you need. Link the stylesheet once.
+
+```js
+import { Editor, registry, Bold, Italic, Underline, Link, Toolbar, History }
+  from '@oix1987/yjd/core';
+
+registry.register('formats/bold', Bold);
+registry.register('formats/italic', Italic);
+registry.register('formats/underline', Underline);
+registry.register('formats/link', Link);
+registry.register('modules/toolbar', Toolbar);
+registry.register('modules/history', History);
+
+new Editor('#editor', {
+  formats: ['bold', 'italic', 'underline', 'link'],
+  modules: ['toolbar', 'history'],
+});
+```
 
 ```html
-<!-- Using unpkg CDN -->
-<script src="https://unpkg.com/@oix1987/yjd@1.0.2/dist/rich-editor.min.js"></script>
+<link rel="stylesheet" href="@oix1987/yjd/lib/styles.min.css">
 ```
 
-## ⚙️ Configuration Options
+## Options
 
-| Option        | Type     | Default        | Description                                   |
-| ------------- | -------- | -------------- | --------------------------------------------- |
-| `content`     | string   | null           | Initial content for the editor                |
-| `height`      | number   | 400            | Editor height in pixels                       |
-| `width`       | number   | 800            | Editor width in pixels                        |
-| `theme`       | string   | 'light'        | Editor theme (light/dark)                     |
-| `placeholder` | string   | 'Type here...' | Placeholder text                              |
-| `onChange`    | function | undefined      | Callback function called when content changes |
+| Option | Type | Description |
+|---|---|---|
+| `placeholder` | string | Empty-state text. |
+| `content` | string | Initial HTML. |
+| `width` / `maxWidth` | number｜string | Number = px; string (e.g. `'100%'`) = responsive. |
+| `height` / `maxHeight` | number | Editor body height in px. |
+| `onChange` | fn(html) | Called on every content change. |
+| `toolbar1` / `toolbar2` | array | Toolbar groups: `{ group, items: [] }`. |
+| `formats` / `modules` | string[] | Which registered features to activate. |
+| `features` | object | `{ wordCount, breadcrumb, … }` — toggle the status bar. |
+| `maxLength` | number | Hard character limit. |
 
-### onChange Callback
+## Formats & modules
 
-The `onChange` callback receives the current HTML content as a parameter:
+**Formats** — `bold` · `italic` · `underline` · `strike` · `subscript` · `superscript` · `color` · `background` · `link` · `heading` · `font-family` · `text-size` · `line-height` · `capitalization` · `text-align` · `list` · `indent-increase` · `indent-decrease` · `image` · `video` · `table` · `emoji` · `tag`
 
-```javascript
-onChange: (content) => {
-  // content is the HTML string of the editor content
-  console.log("New content:", content);
+**Modules** — `toolbar` · `history` · `slash-menu` · `block-toolbar` (bubble bar) · `table-toolbar` · `find-replace` · `code-view` · `resize-handles`
 
-  // Example: Update an output container
-  document.getElementById("output").innerHTML = content;
+## Methods
 
-  // Example: Send to server
-  fetch("/api/save-content", {
-    method: "POST",
-    body: JSON.stringify({ content }),
-    headers: { "Content-Type": "application/json" },
-  });
-};
+`getHTML()` · `getText()` · `insertHTML(html)` · `insertText(t)` · `clear()` · `isEmpty()` · `focus()` · `setReadOnly(bool)` · `undo()` · `redo()`
+
+## Styling
+
+Theme via CSS custom properties:
+
+```css
+.yjd-rich-editor {
+  --rte-accent: #6d5efc;   /* primary */
+  --rte-ink:    #20242f;   /* text */
+  --rte-radius: 14px;
+  --rte-border: #e9e9f1;
+}
 ```
 
-## 🎯 Events
+## Development
 
-The editor supports comprehensive event handling:
+```bash
+npm install
+npm run build        # dist/ (UMD + ESM) + bundled /core; regenerates CSS
+npm test             # unit tests (sanitize, exec-command)
+npm run build:demos  # preset demo bundles
 
-```javascript
-// Listen for text changes
-editor.on("text-change", (content) => {
-  console.log("Text changed:", content);
-});
-
-// Listen for focus events
-editor.on("focus", () => {
-  console.log("Editor focused");
-});
-
-// Remove event listener
-editor.off("text-change", handler);
+# Static site (landing + docs + playground) for Cloudflare Pages
+npm run build:pages  # build + assemble ./public
 ```
 
-## 🔧 API Methods
+### Deploy to Cloudflare Pages (yjd.io)
 
-| Method                | Description              | Parameters                         | Returns  |
-| --------------------- | ------------------------ | ---------------------------------- | -------- |
-| `getContent()`        | Get current HTML content | -                                  | `string` |
-| `setContent(content)` | Set editor content       | `content: string`                  | `void`   |
-| `focus()`             | Focus the editor         | -                                  | `void`   |
-| `on(event, handler)`  | Add event listener       | `event: string, handler: function` | `void`   |
-| `off(event, handler)` | Remove event listener    | `event: string, handler: function` | `void`   |
+- **Build command:** `npm run build:pages`
+- **Output directory:** `public`
+- Add `yjd.io` as a custom domain in the Pages project.
 
-## 📦 Project Info
+## License
 
-- **Author**: Oix1987
-- **License**: ISC
-- **Version**: 1.0.2
-
-## 📄 License
-
-Copyright (c) 2024 Oix1987
-
-This software is released under the **ISC License** — a permissive open-source
-license. You are free to use, copy, modify, and distribute it, provided the
-copyright notice and this permission notice are preserved. The software is
-provided "as is", without warranty of any kind.
-
-## 🆘 Support
-
-For technical support or feature requests, please contact the author or open an issue.
-
-See `index.html` and `main.js` for a complete working example that demonstrates the `onChange` functionality with real-time output display.
+ISC
