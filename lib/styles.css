@@ -3511,3 +3511,45 @@
 .yjd-file-ico svg { width: 15px; height: 15px; stroke: currentColor; fill: none; }
 .yjd-file-name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; max-width: 22em; }
 .yjd-file-size { color: #767c8e; font-variant-numeric: tabular-nums; }
+
+/* ── Upload loading state (v2.26) ─────────────────────────────────────────
+   Spinner shown while an image/file is uploading, plus a drop-zone highlight.
+   Scoped loosely so it works inside the editor AND in renderStatic views. */
+@keyframes yjd-spin { to { transform: rotate(360deg); } }
+.yjd-spinner {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+  border: 2px solid var(--rte-accent-weak, #d9d4ff);
+  border-top-color: var(--rte-accent, #6d5efc);
+  border-radius: 50%;
+  animation: yjd-spin 0.7s linear infinite;
+  vertical-align: middle;
+}
+@media (prefers-reduced-motion: reduce) { .yjd-spinner { animation-duration: 2s; } }
+
+/* Image upload placeholder: a labelled loading box in the content flow. */
+.yjd-upload {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  vertical-align: middle;
+  max-width: 100%;
+  padding: 10px 14px;
+  margin: 2px 0;
+  border: 1px dashed var(--rte-border-strong, #c9c5ec);
+  border-radius: 10px;
+  background: var(--rte-accent-weak, #f3f1ff);
+  color: var(--rte-muted, #5b6373);
+  font-size: 0.9em;
+  user-select: none;
+}
+.yjd-upload-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 18em; }
+
+/* Drag-and-drop target highlight (image or file dragged over the editor). */
+.rich-editor-area.yjd-drag-over {
+  outline: 2px dashed var(--rte-accent, #6d5efc);
+  outline-offset: -4px;
+  background: var(--rte-accent-weak, #f6f5ff);
+}
