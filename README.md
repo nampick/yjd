@@ -5,8 +5,8 @@
 🔗 **[yjd.io](https://yjd.io)** · [Live playground](https://yjd.io/demos/) · [Docs](https://yjd.io/site/docs.html)
 
 ```js
-import RichEditor from '@oix1987/yjd';
-new RichEditor('#editor', { placeholder: 'Start writing…' });
+import yjd from '@oix1987/yjd';
+new yjd('#editor', { placeholder: 'Start writing…' });
 ```
 
 ---
@@ -45,7 +45,7 @@ Or via CDN (all-in-one UMD):
 ```html
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@oix1987/yjd/lib/styles.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@oix1987/yjd"></script>
-<script> new RichEditor('#editor'); </script>
+<script> new yjd('#editor'); </script>
 ```
 
 ## Quick start (all-in-one)
@@ -53,12 +53,19 @@ Or via CDN (all-in-one UMD):
 The default build registers everything and injects its CSS:
 
 ```js
-import RichEditor from '@oix1987/yjd';
+import yjd from '@oix1987/yjd';   // `RichEditor` is kept as an alias
 
-const editor = new RichEditor('#editor', {
+const editor = new yjd('#editor', {
   placeholder: 'Start writing…',
   onChange: (html) => console.log(html),
 });
+```
+
+Via `<script>` (UMD) the global is `yjd` (and `window.RichEditor` still works):
+
+```html
+<script src="https://unpkg.com/@oix1987/yjd"></script>
+<script>const editor = new yjd('#editor');</script>
 ```
 
 ## Tree-shakeable core
@@ -104,11 +111,81 @@ new Editor('#editor', {
 
 **Formats** — `bold` · `italic` · `underline` · `strike` · `subscript` · `superscript` · `color` · `background` · `link` · `heading` · `font-family` · `text-size` · `line-height` · `capitalization` · `text-align` · `list` · `indent-increase` · `indent-decrease` · `image` · `video` · `table` · `emoji` · `tag`
 
-**Modules** — `toolbar` · `history` · `slash-menu` · `block-toolbar` (bubble bar) · `table-toolbar` · `find-replace` · `code-view` · `resize-handles`
+**Modules** — `toolbar` · `history` · `slash-menu` · `mention` · `block-toolbar` (bubble bar) · `table-toolbar` · `find-replace` · `code-view` · `resize-handles`
 
 ## Methods
 
 `getHTML()` · `getText()` · `insertHTML(html)` · `insertText(t)` · `clear()` · `isEmpty()` · `focus()` · `setReadOnly(bool)` · `undo()` · `redo()`
+
+## Integration API
+
+Drop yjd into an existing app — upload images to your storage, tag people, store
+content in whatever format you already use, and progressively enhance `<textarea>`s.
+
+### Export / import (HTML · JSON · Markdown)
+
+```js
+editor.getHTML();      editor.setHTML(html);
+editor.getJSON();      editor.setJSON(json);     // { type: 'doc', content: [...] }
+editor.getMarkdown();  editor.setMarkdown(md);   // mention ids survive round-trips
+```
+
+Also exported standalone: `htmlToMarkdown`, `markdownToHtml`, `domToJson`, `jsonToHtml`.
+
+### Image upload hook
+
+Provide `image.upload` to send files to your server/CDN instead of inlining base64.
+Applies to every insert path — toolbar, paste, and drag-drop. A placeholder shows
+while uploading; the `src` is swapped on success, or the image is removed on failure.
+
+```js
+new yjd('#editor', {
+  image: {
+    upload: async (file) => (await api.upload(file)).url,   // return the URL
+    accept: 'image/png,image/jpeg,image/webp',
+    maxSize: 8 * 1024 * 1024,
+  },
+});
+// events: editor.on('image:upload'|'image:uploaded'|'image:error', cb)
+```
+
+Omit `upload` to keep the base64 fallback.
+
+### @mention / #task
+
+```js
+new yjd('#editor', {
+  mention: {
+    trigger: '@',
+    source: async (q) => fetchUsers(q),         // [{ id, name, avatar_url }]
+    renderItem: (u) => `<img src="${u.avatar_url}"> ${u.name}`,
+    triggers: [{ char: '#', source: (q) => fetchTasks(q) }],   // optional extra
+  },
+});
+editor.on('mention:select', (item) => { /* … */ });
+```
+
+Inserts a token that serializes with its id:
+`<span class="mention" data-id="u_123">@Ann</span>` → Markdown `@[Ann](u_123)`.
+
+### fromTextarea
+
+Enhance an existing form field; `textarea.value` stays in sync and fires native
+`input`/`change` events, so server-side submits and validation keep working.
+
+```js
+yjd.fromTextarea('#body', { format: 'markdown' }); // or 'html' (default)
+```
+
+### renderStatic
+
+Render stored HTML into a read-only view that matches the editor exactly (sanitized,
+tagged `.yjd-content`) — no editor instance needed. Load the stylesheet on the page.
+
+```js
+import { renderStatic } from '@oix1987/yjd';
+renderStatic(post.body_html, document.querySelector('#post'));
+```
 
 ## Styling
 

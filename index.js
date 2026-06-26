@@ -3,6 +3,8 @@ import registry from './lib/core/registry.js';
 import Module from './lib/core/module.js';
 import { Format, InlineFormat, BlockFormat } from './lib/core/format.js';
 import StylesLoader from './lib/styles-loader.js';
+import { renderStatic } from './lib/static.js';
+import { htmlToMarkdown, markdownToHtml, domToJson, jsonToHtml } from './lib/serialize.js';
 
 // Import formats
 import Bold from './lib/formats/bold.js';
@@ -38,6 +40,7 @@ import TableToolbar from './lib/modules/table-toolbar.js';
 import CodeView from './lib/modules/code-view.js';
 import FindReplace from './lib/modules/find-replace.js';
 import SlashMenu from './lib/modules/slash-menu.js';
+import Mention from './lib/modules/mention.js';
 
 import ResizeHandles from './lib/modules/resize-handles.js';
 
@@ -93,6 +96,7 @@ registry.register('modules/table-toolbar', TableToolbar, true);
 registry.register('modules/code-view', CodeView, true);
 registry.register('modules/find-replace', FindReplace, true);
 registry.register('modules/slash-menu', SlashMenu, true);
+registry.register('modules/mention', Mention, true);
 
 registry.register('modules/resize-handles', ResizeHandles, true);
 
@@ -142,11 +146,67 @@ class RichEditor extends Editor {
   static create(selector, options = {}) {
     return new RichEditor(selector, options);
   }
+
+  /**
+   * Progressive-enhance a <textarea>: hide it, mount an editor in its place,
+   * and keep the textarea's value in sync so existing form submits keep working.
+   *
+   *   const ed = RichEditor.fromTextarea(document.querySelector('#body'), {
+   *     // any editor option; `format` chooses how the textarea is read/written:
+   *     format: 'html' | 'markdown',  // default 'html'
+   *   });
+   *
+   * The textarea's current value seeds the editor (parsed as HTML or Markdown
+   * per `format`). On every change the textarea is updated and a native 'input'
+   * event is dispatched, so framework bindings / validation keep firing.
+   *
+   * @param {HTMLTextAreaElement|string} textarea  Element or selector.
+   * @param {object} [options]  Editor options + optional `format`.
+   * @returns {RichEditor}
+   */
+  static fromTextarea(textarea, options = {}) {
+    const ta = typeof textarea === 'string' ? document.querySelector(textarea) : textarea;
+    if (!ta) throw new Error('RichEditor.fromTextarea: textarea not found');
+
+    const format = options.format === 'markdown' ? 'markdown' : 'html';
+    const readEditor = (ed) => (format === 'markdown' ? ed.getMarkdown() : ed.getContent());
+
+    // Mount point right after the textarea; hide the original.
+    const mount = document.createElement('div');
+    ta.after(mount);
+    ta.style.display = 'none';
+    ta.setAttribute('aria-hidden', 'true');
+
+    const initial = ta.value || '';
+    const editor = new RichEditor(mount, {
+      width: '100%',
+      ...options,
+      // Seed content from the textarea (skip if caller passed explicit content).
+      content: options.content != null ? options.content
+        : (format === 'markdown' ? markdownToHtml(initial) : initial),
+    });
+
+    const sync = () => {
+      const next = readEditor(editor);
+      if (ta.value === next) return;
+      ta.value = next;
+      ta.dispatchEvent(new Event('input', { bubbles: true }));
+      ta.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+    editor.on('change', sync);
+    sync(); // normalise the textarea to the editor's serialization up front.
+
+    editor.textarea = ta;
+    return editor;
+  }
 }
 
-// Export classes for extension
+// Export classes for extension. `yjd` is the brand-aligned name; `RichEditor`
+// is kept as an alias for backward compatibility.
 export {
   RichEditor as default,
+  RichEditor,
+  RichEditor as yjd,
   Editor,
   Module,
   Format,
@@ -194,6 +254,7 @@ export {
   CodeView,
   FindReplace,
   SlashMenu,
+  Mention,
 
   ResizeHandles
 };
@@ -212,6 +273,15 @@ export {
   TagPopup,
 
   createCustomButton
+};
+
+// Static rendering + serialization helpers
+export {
+  renderStatic,
+  htmlToMarkdown,
+  markdownToHtml,
+  domToJson,
+  jsonToHtml
 };
 
 

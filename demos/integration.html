@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>yjd — Integration features</title>
+  <meta name="description" content="Live test of yjd integration features: image upload hook, @mention, Markdown/JSON/HTML export, fromTextarea, renderStatic.">
+  <link rel="stylesheet" href="/lib/styles.min.css">
+  <style>
+    :root {
+      --violet: #6d5efc; --violet-ink: #4a3fd0; --ink: #14162e;
+      --muted: #5b6373; --line: #e7e7f0; --bg: #f6f6fb; --card: #fff;
+      --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--ink);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.5;
+    }
+    header {
+      background: var(--card); border-bottom: 1px solid var(--line);
+      padding: 18px 24px; position: sticky; top: 0; z-index: 50;
+    }
+    header h1 { margin: 0; font-size: 18px; letter-spacing: -0.01em; }
+    header h1 b { color: var(--violet); }
+    header p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+    main { max-width: 980px; margin: 0 auto; padding: 28px 20px 80px; }
+    .card {
+      background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+      padding: 22px; margin-bottom: 24px;
+    }
+    .card > h2 {
+      margin: 0 0 4px; font-size: 16px; display: flex; align-items: center; gap: 8px;
+    }
+    .card > h2 .tag {
+      font: 600 11px/1 var(--mono); color: var(--violet-ink); background: #efedff;
+      padding: 4px 7px; border-radius: 999px; letter-spacing: .02em;
+    }
+    .card > p.desc { margin: 0 0 16px; color: var(--muted); font-size: 13.5px; }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    button.act {
+      font: 500 13px Inter, sans-serif; cursor: pointer;
+      background: var(--violet); color: #fff; border: none;
+      padding: 8px 14px; border-radius: 9px;
+    }
+    button.act.ghost { background: #efedff; color: var(--violet-ink); }
+    button.act:hover { filter: brightness(1.05); }
+    pre.out {
+      background: #14162e; color: #e6e6f5; border-radius: 12px; padding: 14px 16px;
+      font: 12.5px/1.55 var(--mono); overflow: auto; max-height: 320px;
+      margin: 14px 0 0; white-space: pre-wrap; word-break: break-word;
+    }
+    pre.out:empty { display: none; }
+    textarea#ta {
+      width: 100%; min-height: 90px; border: 1px solid var(--line); border-radius: 10px;
+      padding: 10px 12px; font: 13px var(--mono); resize: vertical;
+    }
+    .mono-note { font: 12px var(--mono); color: var(--muted); }
+    .read-view { border: 1px dashed var(--line); border-radius: 12px; padding: 18px; margin-top: 14px; background: #fafafe; }
+    .split { display: grid; gap: 18px; grid-template-columns: 1fr; }
+    @media (min-width: 760px) { .split.two { grid-template-columns: 1fr 1fr; } }
+    .hl { color: var(--violet-ink); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><b>yjd</b> · Integration features</h1>
+    <p>Live test — image upload hook · @mention &amp; #task · Markdown/JSON/HTML export · fromTextarea · renderStatic</p>
+  </header>
+
+  <main>
+    <!-- 1. Editor with image upload hook + mentions -->
+    <section class="card">
+      <h2><span class="tag">P0</span> Editor — upload hook + @mention</h2>
+      <p class="desc">
+        Type <span class="hl">@</span> to tag a person, <span class="hl">#</span> to link a task.
+        Insert an image (toolbar / paste / drop) — it uploads via the <code>image.upload</code> hook
+        (simulated 800&nbsp;ms) and the placeholder is swapped for the returned URL.
+      </p>
+      <div id="editor"></div>
+      <div class="row">
+        <button class="act" id="btn-html">getHTML()</button>
+        <button class="act ghost" id="btn-json">getJSON()</button>
+        <button class="act ghost" id="btn-md">getMarkdown()</button>
+        <button class="act ghost" id="btn-render">→ renderStatic()</button>
+      </div>
+      <pre class="out" id="out"></pre>
+      <div class="read-view" id="readview" style="display:none">
+        <div class="mono-note">renderStatic() read-view (no editor instance):</div>
+        <div id="static-target"></div>
+      </div>
+    </section>
+
+    <!-- 2. Markdown / JSON round-trip -->
+    <section class="card">
+      <h2><span class="tag">P1</span> Markdown &amp; JSON round-trip</h2>
+      <p class="desc">Load content into the editor above from Markdown or JSON. Edit, then re-export — the mention ids survive the round-trip.</p>
+      <div class="row">
+        <button class="act" id="btn-setmd">setMarkdown(sample)</button>
+        <button class="act ghost" id="btn-setjson">setJSON(getJSON())</button>
+        <button class="act ghost" id="btn-roundtrip">MD round-trip check</button>
+      </div>
+      <pre class="out" id="out2"></pre>
+    </section>
+
+    <!-- 3. fromTextarea -->
+    <section class="card">
+      <h2><span class="tag">P1</span> fromTextarea — progressive enhancement</h2>
+      <p class="desc">The textarea below is enhanced into an editor. Edits sync back to <code>textarea.value</code> and fire a native <code>input</code> event (watch the mirror).</p>
+      <textarea id="ta">## Hello from a textarea
+
+This **Markdown** seeded the editor. Edit above — the textarea stays in sync.</textarea>
+      <p class="mono-note" style="margin:12px 0 4px">textarea.value (live mirror, format: markdown):</p>
+      <pre class="out" id="ta-mirror" style="max-height:160px"></pre>
+    </section>
+  </main>
+
+  <script type="module">
+    import { yjd, renderStatic } from '/dist/rich-editor.esm.js';
+
+    /* ---- fake async services ------------------------------------------- */
+    const PEOPLE = [
+      { id: 'u_ann',  name: 'Ann Pham',     avatar_url: 'https://i.pravatar.cc/56?img=5' },
+      { id: 'u_binh', name: 'Binh Tran',    avatar_url: 'https://i.pravatar.cc/56?img=12' },
+      { id: 'u_chi',  name: 'Chi Nguyen',   avatar_url: 'https://i.pravatar.cc/56?img=32' },
+      { id: 'u_dung', name: 'Dung Le',      avatar_url: 'https://i.pravatar.cc/56?img=45' },
+    ];
+    const TASKS = [
+      { id: 't_101', name: 'Ship v1.1' },
+      { id: 't_102', name: 'Fix mobile toolbar' },
+      { id: 't_103', name: 'Write docs' },
+    ];
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+    const filterBy = (list, q) =>
+      !q ? list : list.filter((x) => x.name.toLowerCase().includes(q.toLowerCase()));
+
+    /* ---- editor with both hooks ---------------------------------------- */
+    const editor = new yjd('#editor', {
+      width: '100%',
+      placeholder: 'Type @ to mention, # for a task, or insert an image…',
+      content: '<p>Hi <span class="mention" data-id="u_ann" data-trigger="@" contenteditable="false">@Ann Pham</span>, can you review <span class="mention" data-id="t_101" data-trigger="#" contenteditable="false">#Ship v1.1</span>?</p><p>Try typing @ or # here.</p>',
+      image: {
+        accept: 'image/png,image/jpeg,image/gif,image/webp',
+        maxSize: 8 * 1024 * 1024,
+        // Simulate an upload: return an object URL after a delay.
+        upload: async (file) => {
+          log('image:upload started → ' + file.name);
+          await wait(800);
+          const url = URL.createObjectURL(file);
+          log('image:upload resolved → ' + url.slice(0, 40) + '…');
+          return url;
+        },
+      },
+      mention: {
+        trigger: '@',
+        source: async (q) => { await wait(120); return filterBy(PEOPLE, q); },
+        renderItem: (i) =>
+          `<img class="yjd-mention-avatar" src="${i.avatar_url}" alt=""><span class="yjd-mention-name">${i.name}</span>`,
+        triggers: [
+          {
+            char: '#',
+            source: async (q) => { await wait(120); return filterBy(TASKS, q); },
+            renderItem: (i) => `<span class="yjd-mention-name">#${i.name}</span>`,
+          },
+        ],
+      },
+    });
+
+    editor.on('mention:select', (item) => log('mention:select → ' + JSON.stringify(item)));
+    editor.on('image:error', (e) => log('image:error → ' + (e.reason || 'unknown')));
+
+    const out = document.getElementById('out');
+    const show = (label, text) => { out.textContent = '// ' + label + '\n\n' + text; };
+    function log(msg) {
+      // lightweight event log into the console + mirror tail
+      console.log('[yjd]', msg);
+    }
+
+    document.getElementById('btn-html').onclick = () => show('getHTML()', editor.getHTML());
+    document.getElementById('btn-json').onclick = () => show('getJSON()', JSON.stringify(editor.getJSON(), null, 2));
+    document.getElementById('btn-md').onclick = () => show('getMarkdown()', editor.getMarkdown());
+    document.getElementById('btn-render').onclick = () => {
+      const rv = document.getElementById('readview');
+      rv.style.display = 'block';
+      renderStatic(editor.getHTML(), document.getElementById('static-target'));
+      show('renderStatic()', 'Rendered read-view below ↓ (sanitized + .yjd-content)');
+    };
+
+    /* ---- markdown / json round-trip ------------------------------------ */
+    const out2 = document.getElementById('out2');
+    const SAMPLE_MD = `# Release notes
+
+- **Bold** and *italic* and ~~strike~~
+- A mention: @[Chi Nguyen](u_chi) and a task #[Write docs](t_103)
+- A [link](https://yjd.io)
+
+> Quoted line
+
+\`\`\`
+code block
+\`\`\``;
+
+    document.getElementById('btn-setmd').onclick = () => {
+      editor.setMarkdown(SAMPLE_MD);
+      out2.textContent = '// setMarkdown(sample) → editor updated. getHTML():\n\n' + editor.getHTML();
+    };
+    document.getElementById('btn-setjson').onclick = () => {
+      const json = editor.getJSON();
+      editor.setJSON(json);
+      out2.textContent = '// setJSON(getJSON()) round-trip → getHTML():\n\n' + editor.getHTML();
+    };
+    document.getElementById('btn-roundtrip').onclick = () => {
+      const md1 = editor.getMarkdown();
+      editor.setMarkdown(md1);
+      const md2 = editor.getMarkdown();
+      out2.textContent = '// MD → setMarkdown → MD\n\n' +
+        'stable: ' + (md1.trim() === md2.trim()) + '\n\n--- first ---\n' + md1 + '\n--- second ---\n' + md2;
+    };
+
+    /* ---- fromTextarea --------------------------------------------------- */
+    const ta = document.getElementById('ta');
+    const mirror = document.getElementById('ta-mirror');
+    const taEditor = yjd.fromTextarea(ta, { format: 'markdown', width: '100%' });
+    const refresh = () => { mirror.textContent = ta.value; };
+    ta.addEventListener('input', refresh);
+    refresh();
+
+    // expose for manual poking in the console
+    window.__yjd = { editor, taEditor, renderStatic };
+  </script>
+</body>
+</html>

@@ -8,16 +8,18 @@ const terserPlugin = terser({
 });
 
 export default [
-  // UMD build for <script> / CDN usage. Global `RichEditor` is the class itself,
-  // so `new RichEditor(...)` works directly. Built from umd-entry.js.
+  // UMD build for <script> / CDN usage. Global `yjd` is the class itself, so
+  // `new yjd(...)` works directly. `window.RichEditor` is kept as an alias for
+  // backward compatibility. Built from umd-entry.js.
   {
     input: 'umd-entry.js',
     output: {
       file: 'dist/rich-editor.min.js',
       format: 'umd',
-      name: 'RichEditor',
+      name: 'yjd',
       exports: 'default',
-      sourcemap: true
+      sourcemap: true,
+      footer: 'typeof window!=="undefined"&&(window.RichEditor=window.RichEditor||window.yjd);'
     },
     plugins: [terserPlugin]
   },

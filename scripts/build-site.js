@@ -28,6 +28,7 @@ copyFileSync('site/index.html', join(out, 'index.html'));      // landing at roo
 copyFileSync('site/index.html', join(out, 'site/index.html'));
 copyFileSync('site/docs.html', join(out, 'site/docs.html'));
 copyFileSync('demos/index.html', join(out, 'demos/index.html'));
+copyFileSync('demos/integration.html', join(out, 'demos/integration.html'));
 
 // editor bundles (js + sourcemaps)
 for (const f of readdirSync('dist')) {

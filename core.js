@@ -61,6 +61,7 @@ export { default as TableToolbar } from './lib/modules/table-toolbar.js';
 export { default as CodeView } from './lib/modules/code-view.js';
 export { default as FindReplace } from './lib/modules/find-replace.js';
 export { default as SlashMenu } from './lib/modules/slash-menu.js';
+export { default as Mention } from './lib/modules/mention.js';
 export { default as ResizeHandles } from './lib/modules/resize-handles.js';
 
 // UI
@@ -75,3 +76,7 @@ export { default as ImagePopup } from './lib/ui/image-popup.js';
 export { default as VideoPopup } from './lib/ui/video-popup.js';
 export { default as TagPopup } from './lib/ui/tag-popup.js';
 export { default as createCustomButton } from './lib/ui/select-button.js';
+
+// Static rendering + serialization helpers
+export { renderStatic } from './lib/static.js';
+export { htmlToMarkdown, markdownToHtml, domToJson, jsonToHtml } from './lib/serialize.js';
