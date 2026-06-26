@@ -3353,3 +3353,21 @@
 .yjd-rich-editor .wordcount {
   color: #5b6373;
 }
+
+/* ── Find & Replace: icon buttons (v2.23) ─────────────────────────────────
+   Center the SVG icons (prev/next/close) in the square nav buttons. */
+.yjd-rich-editor .yjd-find-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.yjd-rich-editor .yjd-find-icon .icon,
+.yjd-rich-editor .yjd-find-icon .icon svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+.yjd-rich-editor .yjd-find-icon .icon svg {
+  stroke: currentColor;
+  fill: none;
+}
