@@ -70,19 +70,25 @@
   position: relative;
 }
 
-/* Placeholder styles for contentEditable */
+/* Placeholder styles for contentEditable.
+   Inherit the editor's padding + font so the placeholder lands exactly on the
+   content origin (where the caret/first character sits) at ANY padding/size —
+   instead of hardcoded offsets that drifted out of alignment. */
 .yjd-rich-editor .rich-editor-area[data-placeholder]:before {
   content: attr(data-placeholder);
   color: #9ca3af;
   pointer-events: none;
   position: absolute;
-  top: 20px;
-  left: 20px;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: inherit;
+  box-sizing: border-box;
+  font: inherit;
   font-style: italic;
+  line-height: inherit;
   display: none;
   z-index: 1;
-  font-size: 16px;
-  line-height: 1.7;
 }
 
 .yjd-rich-editor .rich-editor-area[data-placeholder].placeholder-visible:before {
@@ -554,6 +560,18 @@
   display: inline-flex !important;
   align-items: center ;
   justify-content: center ;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+/* The chevron SVG keeps the `dropdown-icon` class (not `.icon`), so size it
+   explicitly here — otherwise it has no dimensions and the arrow disappears. */
+.yjd-rich-editor .dropdown-icon svg{
+  width: 16px;
+  height: 16px;
+  display: block;
+  stroke: currentColor;
+  fill: none;
 }
 
 
@@ -866,20 +884,27 @@
 .yjd-rich-editor .rich-editor-table {
   border-collapse: collapse;
   width: 100%;
+  /* Never exceed the editor's content width, even mid-resize. */
+  max-width: 100%;
+  box-sizing: border-box;
   margin: 16px 0;
   font-size: 14px;
   line-height: 1.5;
   position: relative;
   display: table;
-  table-layout: auto;
+  table-layout: fixed;
 }
 
 .yjd-rich-editor .rich-editor-table td {
+  /* border-box so a cell's min-width includes its padding+border — otherwise
+     padding/borders push the table past the width set during resize. */
+  box-sizing: border-box;
   border: 1px solid #d1d5db;
   padding: 8px 12px;
   min-height: 28px;
   vertical-align: top;
   background: #fff;
+  overflow-wrap: break-word;
 }
 
 .yjd-rich-editor .rich-editor-table td:focus {
@@ -3016,3 +3041,315 @@
 .yjd-slash-hint { font-size: 12px; color: #767c8e; }
 .yjd-slash-item.active .yjd-slash-hint { color: #8b7ff0; }
 @media (prefers-reduced-motion: reduce) { .yjd-slash-menu { animation: none; } }
+
+/* ── Colour button swatch (v2.10) ─────────────────────────────────────────
+   The text-colour and background-colour buttons carry a small bar that
+   reflects the colour currently applied at the caret. */
+.yjd-rich-editor .rich-editor-toolbar-btn.color-btn,
+.yjd-rich-editor .rich-editor-toolbar-btn.background-btn {
+  position: relative;
+}
+.yjd-rich-editor .rich-editor-toolbar-btn .rte-swatch {
+  position: absolute;
+  left: 50%;
+  bottom: 5px;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--rte-ink, #20242f);
+  pointer-events: none;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+/* Background swatch defaults to a "no fill" look until a colour is chosen. */
+.yjd-rich-editor .rich-editor-toolbar-btn.background-btn .rte-swatch {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--rte-border, #e9e9f1);
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.background-btn.has-color .rte-swatch {
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+/* Nudge the icon up slightly so the swatch bar has room. */
+.yjd-rich-editor .rich-editor-toolbar-btn.color-btn .icon,
+.yjd-rich-editor .rich-editor-toolbar-btn.background-btn .icon {
+  transform: translateY(-1px);
+}
+
+/* ── Inline link popup (v2.11) ────────────────────────────────────────────
+   Compact link input anchored right at the selected text. */
+.yjd-rich-editor .link-popup.link-popup--inline {
+  width: auto;
+  min-width: 320px;
+  max-width: min(92vw, 420px);
+  padding: 10px;
+}
+.yjd-rich-editor .link-popup--inline .link-popup-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.yjd-rich-editor .link-popup--inline .link-popup-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.yjd-rich-editor .link-popup--inline .link-popup-row .yjd-input {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+.yjd-rich-editor .link-popup--inline .link-popup-apply {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding: 8px 16px;
+  margin: 0;
+}
+
+/* ── Inputs, selects & options — design polish (v2.12) ────────────────────── */
+
+/* Uniform, comfortable dropdown option rows (Heading / Font / Size / …). */
+.yjd-rich-editor .custom-select-item-button {
+  min-height: 34px;
+  padding: 6px 10px !important;
+  gap: 10px;
+  border-radius: var(--rte-radius-sm) !important;
+}
+.yjd-rich-editor .custom-select-item-button:hover {
+  background: var(--rte-accent-weak) !important;
+  color: var(--rte-accent-ink) !important;
+}
+.yjd-rich-editor .custom-select-item-button.current {
+  background: var(--rte-accent-weak) !important;
+  color: var(--rte-accent-ink) !important;
+  font-weight: 600;
+}
+/* Keep the size previews from breaking the row rhythm. */
+.yjd-rich-editor .heading-select-popup .custom-select-item-button,
+.yjd-rich-editor .font-family-select-popup .custom-select-item-button,
+.yjd-rich-editor .text-size-select-popup .custom-select-item-button {
+  line-height: 1.15;
+}
+
+/* Native <select> — make it look like the themed inputs, with a custom chevron
+   (the OS-default control was the loudest mismatch among the popups). */
+.yjd-rich-editor select,
+.yjd-rich-editor .yjd-select-input,
+.yjd-rich-editor .tag-type-select,
+.yjd-rich-editor .import-type-select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 36px 10px 12px;
+  font: 500 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--rte-ink);
+  background-color: var(--rte-bg);
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='16'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23767c8e'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='m6%209%206%206%206-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  border: 1px solid var(--rte-border-strong);
+  border-radius: var(--rte-radius-sm);
+  cursor: pointer;
+  transition: border-color var(--rte-t), box-shadow var(--rte-t);
+}
+.yjd-rich-editor select:hover,
+.yjd-rich-editor .yjd-select-input:hover,
+.yjd-rich-editor .tag-type-select:hover,
+.yjd-rich-editor .import-type-select:hover {
+  border-color: var(--rte-accent);
+}
+.yjd-rich-editor select:focus,
+.yjd-rich-editor .yjd-select-input:focus,
+.yjd-rich-editor .tag-type-select:focus,
+.yjd-rich-editor .import-type-select:focus {
+  outline: none;
+  border-color: var(--rte-accent);
+  box-shadow: 0 0 0 3px var(--rte-accent-ring);
+}
+
+/* Consistent text-input metrics across every popup. */
+.yjd-rich-editor .yjd-input,
+.yjd-rich-editor .yjd-find-input {
+  box-sizing: border-box;
+  padding: 10px 12px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Table size picker — accent (not grey) on hover, matching the highlight. */
+.yjd-rich-editor .table-grid-cell:hover {
+  background: var(--rte-accent-weak) !important;
+  border-color: var(--rte-accent) !important;
+}
+
+/* ── Toolbar layout (v2.13) ───────────────────────────────────────────────
+   Keep icon groups packed tight on the left and push only "More" to the right
+   edge. This uses the full bar width (More is flush right) WITHOUT scattering
+   big gaps between every group — which looked empty on mobile / narrow bars. */
+.yjd-rich-editor .rich-editor-toolbar-1 {
+  justify-content: flex-start !important;
+}
+.yjd-rich-editor .rich-editor-toolbar-1 .more-btn {
+  margin-left: auto !important;
+}
+
+/* ── Mobile toolbar: one horizontal-scroll row (v2.14) ────────────────────
+   Instead of wrapping every tool into a cramped multi-row "More" panel, mobile
+   shows a single row you swipe sideways — the pattern used by Google Docs,
+   Notion, etc. (The reflow JS keeps all groups in row 1 at this width.) */
+@media (max-width: 640px) {
+  .yjd-rich-editor .rich-editor-toolbar-1 {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;            /* Firefox */
+    justify-content: flex-start !important;
+    padding: 6px 8px;
+    scroll-padding: 8px;
+  }
+  .yjd-rich-editor .rich-editor-toolbar-1::-webkit-scrollbar {
+    display: none;                    /* WebKit/Blink */
+  }
+  /* The overflow row + "More" button aren't used on mobile. */
+  .yjd-rich-editor .rich-editor-toolbar-2,
+  .yjd-rich-editor .rich-editor-toolbar-1 .more-btn {
+    display: none !important;
+  }
+  /* Keep every group/button on one line and let the row scroll. */
+  .yjd-rich-editor .toolbar-group {
+    flex: 0 0 auto;
+  }
+  .yjd-rich-editor .toolbar-group + .toolbar-group {
+    margin-left: 8px;
+  }
+  .yjd-rich-editor .rich-editor-toolbar-btn,
+  .yjd-rich-editor .custom-select-button {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    flex: 0 0 auto;
+  }
+  /* Selects keep their label readable (no truncation) — the row scrolls. */
+  .yjd-rich-editor .custom-select-button {
+    max-width: none;
+  }
+}
+
+/* Toolbar buttons hidden until usable (e.g. undo/redo before any history). */
+.yjd-rich-editor .rich-editor-toolbar-btn.rte-hidden { display: none !important; }
+
+/* ── First/last block margin reset (v2.15) ────────────────────────────────
+   The first block must sit exactly at the content origin (top padding) so the
+   caret/text aligns with the placeholder — on mobile, `p { margin: .8em 0 }`
+   was pushing the first line ~13px below the placeholder. */
+.yjd-rich-editor .rich-editor-area > :first-child { margin-top: 0 !important; }
+.yjd-rich-editor .rich-editor-area > :last-child { margin-bottom: 0 !important; }
+
+/* ── Align picker: icon-only, compact row (v2.16) ─────────────────────────
+   Labels removed (tooltip carries the name) → lay the 4 alignment icons out
+   as a tight horizontal row of square buttons instead of wide list rows. */
+.yjd-rich-editor .align-button-container {
+  flex-direction: row !important;
+  width: auto !important;
+  height: auto !important;
+  gap: 4px;
+}
+.yjd-rich-editor .align-button {
+  width: 34px !important;
+  min-height: 34px !important;
+  height: 34px !important;
+  padding: 0 !important;
+  gap: 0 !important;
+  justify-content: center !important;
+}
+.yjd-rich-editor .text-align-picker-popup {
+  width: auto !important;
+}
+
+/* ── "More" overflow = one extra row, not a crammed wrap (v2.17) ───────────
+   The secondary toolbar stays hidden until "More" is pressed; when shown it's
+   a single tidy row (scrolls sideways if it ever exceeds the width) instead of
+   wrapping its groups into several stacked rows. */
+.yjd-rich-editor .rich-editor-toolbar-2 {
+  flex-wrap: nowrap !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.yjd-rich-editor .rich-editor-toolbar-2::-webkit-scrollbar { display: none; }
+.yjd-rich-editor .rich-editor-toolbar-2 .toolbar-group { flex: 0 0 auto; }
+
+/* ── Labelled selects (v2.18) ─────────────────────────────────────────────
+   A small header at the top of each dropdown + a leading icon on the trigger,
+   so it's clear what Paragraph / Font / Size / Line-height / Case control. */
+.yjd-rich-editor .custom-select-header {
+  padding: 8px 12px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--rte-muted);
+  border-bottom: 1px solid var(--rte-border);
+  margin-bottom: 4px;
+  white-space: nowrap;
+}
+.yjd-rich-editor .custom-select-button .select-lead-icon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--rte-muted);
+  margin-right: 4px;
+}
+.yjd-rich-editor .custom-select-button .select-lead-icon svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  stroke: currentColor;
+  fill: none;
+}
+
+
+/* ── Select trigger: keep value on one line (v2.20) ───────────────────────
+   Long values (e.g. "Times New Roman") must not wrap to a 2nd line and break
+   the button height — clamp to one line with an ellipsis; icon + chevron stay. */
+.yjd-rich-editor .custom-select-button {
+  white-space: nowrap;
+  overflow: hidden;
+}
+.yjd-rich-editor .custom-select-button .button-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.yjd-rich-editor .custom-select-button .select-lead-icon,
+.yjd-rich-editor .custom-select-button .dropdown-icon {
+  flex: 0 0 auto;
+}
+
+/* ── Align popover: match the other popovers (v2.21) ───────────────────────
+   It had asymmetric padding (bottom 0) + a one-off radius, so it looked out of
+   sync. Use the shared shell's symmetric padding + token radius. */
+.yjd-rich-editor .text-align-picker-popup {
+  padding: 6px !important;
+  border-radius: var(--rte-radius-md) !important;
+}
+.yjd-rich-editor .align-button-container {
+  padding: 0 !important;
+}
+
+/* ── A11y: statusbar text contrast (v2.22) ────────────────────────────────
+   --rte-muted (#767c8e) on the near-white statusbar was only 4.02:1; darken
+   the breadcrumb + word-count to meet WCAG AA (>=4.5:1). */
+.yjd-rich-editor .rich-editor-breadcrumb,
+.yjd-rich-editor .wordcount {
+  color: #5b6373;
+}
