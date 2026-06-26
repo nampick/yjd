@@ -1,6 +1,6 @@
 {
   "name": "@oix1987/yjd",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "A powerful rich text editor with real-time content change tracking for web applications using base javascript",
   "license": "ISC",
   "author": "Oix1987",
