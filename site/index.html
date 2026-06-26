@@ -191,9 +191,13 @@
       <div class="feat"><div class="ico"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg></div><h3>Responsive toolbar</h3><p>Fills the width on desktop, a single swipe-row on mobile, overflow tucked into "More".</p></div>
       <div class="feat"><div class="ico"><svg viewBox="0 0 24 24"><path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6z"/></svg></div><h3>XSS-safe paste</h3><p>Pasted HTML is sanitised — scripts, handlers and unsafe URLs stripped; only trusted embeds survive.</p></div>
       <div class="feat"><div class="ico"><svg viewBox="0 0 24 24"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg></div><h3>Full formatting</h3><p>Headings, fonts, sizes, colour, lists, tables, images, video, links, find &amp; replace, code view.</p></div>
-      <div class="feat"><div class="ico"><svg viewBox="0 0 24 24"><path d="M7 8h10"/><path d="M7 12h10"/><path d="M7 16h6"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div><h3>Framework-agnostic</h3><p>Plain DOM. Drop it into React, Vue, Svelte or a static page — it's just <span class="mono">new Editor()</span>.</p></div>
+      <div class="feat"><div class="ico"><svg viewBox="0 0 24 24"><path d="M7 8h10"/><path d="M7 12h10"/><path d="M7 16h6"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div><h3>Framework-agnostic</h3><p>Plain DOM. Drop it into React, Vue, Svelte or a static page — it's just <span class="mono">new yjd()</span>.</p></div>
+      <div class="feat"><div class="ico"><svg viewBox="0 0 24 24"><path d="M21 15l-5-5L5 21"/><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="1.6"/></svg></div><h3>Image upload hook</h3><p>Point <span class="mono">image.upload</span> at your CDN — toolbar, paste &amp; drop all upload, with a placeholder while it loads. Falls back to base64.</p></div>
+      <div class="feat"><div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M16 12v1.5a2.5 2.5 0 0 0 5 0V12a9 9 0 1 0-3.5 7.1"/></svg></div><h3>@mention &amp; #tasks</h3><p>Autocomplete people or tasks from your own async source. Tokens carry an id, so saved content knows who was tagged.</p></div>
+      <div class="feat"><div class="ico"><svg viewBox="0 0 24 24"><path d="M14 3v5h5"/><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M9 13h6M9 17h4"/></svg></div><h3>Export anywhere</h3><p>Store content as HTML, a JSON tree, or Markdown — <span class="mono">getMarkdown()</span>, <span class="mono">getJSON()</span> &amp; back. Plus <span class="mono">fromTextarea</span> and <span class="mono">renderStatic</span>.</p></div>
       <div class="feat"><div class="ico"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div><h3>Live, editable demos</h3><p>The playground lets you tweak the config and re-run — copy the exact code into your app.</p></div>
     </div>
+    <p style="text-align:center;margin-top:28px"><a href="/demos/integration.html" style="color:var(--violet-ink);font-weight:600">→ See the integration demo (upload · mention · export · fromTextarea)</a></p>
   </div></section>
 
   <!-- INSTALL -->
@@ -244,12 +248,22 @@ registry.<span class="f">register</span>(<span class="s">'modules/toolbar'</span
   </div></footer>
 
   <script type="module">
-    import RichEditor from '/dist/rich-editor.esm.js';
-    new RichEditor('#hero-editor', {
+    import yjd from '/dist/rich-editor.esm.js';
+    const PEOPLE = [
+      { id: 'u_ann', name: 'Ann Pham', avatar_url: 'https://i.pravatar.cc/48?img=5' },
+      { id: 'u_binh', name: 'Binh Tran', avatar_url: 'https://i.pravatar.cc/48?img=12' },
+      { id: 'u_chi', name: 'Chi Nguyen', avatar_url: 'https://i.pravatar.cc/48?img=32' },
+    ];
+    new yjd('#hero-editor', {
       width: '100%',
       height: 300,
-      placeholder: 'Type here — bold, colour, lists, links…',
-      content: '<h2>Hello from yjd 👋</h2><p>This is the <b>real editor</b>, running right on the page. Try <i>formatting</i> some text, make a <span style="color: #6d5efc">colourful</span> word, or a list:</p><ul><li>Tree-shakeable</li><li>Zero dependencies</li><li>Yours to compose</li></ul>'
+      placeholder: 'Type here — bold, colour, lists… or @ to mention',
+      content: '<h2>Hello from yjd 👋</h2><p>This is the <b>real editor</b>. Try <i>formatting</i>, a <span style="color: #6d5efc">colourful</span> word, or type <b>@</b> to mention <span class="mention" data-id="u_ann" data-trigger="@" contenteditable="false">@Ann Pham</span>:</p><ul><li>Tree-shakeable</li><li>Image upload hook · @mention</li><li>Export HTML · JSON · Markdown</li></ul>',
+      mention: {
+        trigger: '@',
+        source: (q) => PEOPLE.filter(p => p.name.toLowerCase().includes((q || '').toLowerCase())),
+        renderItem: (u) => `<img class="yjd-mention-avatar" src="${u.avatar_url}" alt=""><span class="yjd-mention-name">${u.name}</span>`,
+      },
     });
 
     // Animate the size bars when they scroll into view.
