@@ -22,11 +22,11 @@ export function create(selector, options = {}) {
     height: 280,
     placeholder: 'Write your post… (type / for commands)',
     toolbar1: [
-      { group: 'text-format', items: ['bold', 'italic', 'underline', 'strike'] },
+      { group: 'history', items: ['undo', 'redo'] },
       { group: 'paragraph', items: ['heading'] },
-      { group: 'list', items: ['list'] },
-      { group: 'align', items: ['text-align'] },
-      { group: 'link', items: ['link'] }
+      { group: 'text-format', items: ['bold', 'italic', 'underline', 'strike'] },
+      { group: 'link', items: ['link'] },
+      { group: 'paragraph-ops', items: ['list', 'text-align'] }
     ],
     formats: ['bold', 'italic', 'underline', 'strike', 'heading', 'list', 'text-align', 'font-family', 'link'],
     modules: ['toolbar', 'history', 'slash-menu', 'block-toolbar'],

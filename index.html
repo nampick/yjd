@@ -4,12 +4,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A lightweight, tree-shakeable vanilla-JS rich text editor — formatting, colours, links, images, tables and more.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='13' font-size='13'%3E%E2%9C%8D%EF%B8%8F%3C/text%3E%3C/svg%3E">
+    <!-- Preload the editor bundle so it fetches in parallel with main.js
+         (main.js imports it) instead of a 2-hop request waterfall. -->
+    <link rel="modulepreload" href="/dist/rich-editor.esm.js">
     <title>Rich Editor Demo</title>
+    <style>
+      /* Loading skeleton shown until the editor JS mounts (covers the
+         download/parse gap so the page doesn't look blank or janky). */
+      #editor-container { max-width: 1200px; margin: 0 auto; }
+      .rte-skeleton {
+        border: 1px solid #e9e9f1;
+        border-radius: 14px;
+        overflow: hidden;
+        background: #fff;
+      }
+      .rte-skeleton__bar {
+        height: 49px;
+        border-bottom: 1px solid #e9e9f1;
+        background: #f7f7fb;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 12px;
+      }
+      .rte-skeleton__chip {
+        width: 30px; height: 30px; border-radius: 8px;
+        background: linear-gradient(90deg,#eee 25%,#f5f5f7 37%,#eee 63%);
+        background-size: 400% 100%;
+        animation: rte-shimmer 1.2s ease infinite;
+      }
+      .rte-skeleton__chip.wide { width: 96px; }
+      .rte-skeleton__body { height: 320px; padding: 20px; }
+      .rte-skeleton__line {
+        height: 14px; border-radius: 6px; margin-bottom: 12px;
+        background: linear-gradient(90deg,#eee 25%,#f5f5f7 37%,#eee 63%);
+        background-size: 400% 100%;
+        animation: rte-shimmer 1.2s ease infinite;
+      }
+      @keyframes rte-shimmer { 0% { background-position: 100% 0 } 100% { background-position: -100% 0 } }
+      @media (prefers-reduced-motion: reduce) { .rte-skeleton__chip, .rte-skeleton__line { animation: none } }
+    </style>
 </head>
 
 <body>
-    <!-- Container forrich editor -->
-    <div id="editor-container"></div>
+    <!-- Container for rich editor -->
+    <main id="editor-container">
+        <div id="editor-loading" class="rte-skeleton" aria-hidden="true">
+            <div class="rte-skeleton__bar">
+                <span class="rte-skeleton__chip"></span>
+                <span class="rte-skeleton__chip"></span>
+                <span class="rte-skeleton__chip wide"></span>
+                <span class="rte-skeleton__chip"></span>
+                <span class="rte-skeleton__chip"></span>
+                <span class="rte-skeleton__chip"></span>
+            </div>
+            <div class="rte-skeleton__body">
+                <div class="rte-skeleton__line" style="width:70%"></div>
+                <div class="rte-skeleton__line" style="width:90%"></div>
+                <div class="rte-skeleton__line" style="width:55%"></div>
+            </div>
+        </div>
+    </main>
     <!-- Output Section -->
     <div class="section">
         <h2>📤 Output Content</h2>

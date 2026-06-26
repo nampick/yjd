@@ -28,18 +28,18 @@ export function create(selector, options = {}) {
     height: 360,
     placeholder: 'Start writing… (type / for commands)',
     toolbar1: [
+      { group: 'history', items: ['undo', 'redo'] },
+      { group: 'paragraph', items: ['heading'] },
       { group: 'text-format', items: ['bold', 'italic', 'underline', 'strike'] },
       { group: 'colors', items: ['color', 'background'] },
-      { group: 'paragraph', items: ['heading'] },
-      { group: 'text-size', items: ['text-size'] },
-      { group: 'align', items: ['text-align'] },
-      { group: 'indent', items: ['indent-increase', 'indent-decrease'] },
       { group: 'link', items: ['link'] },
+      { group: 'paragraph-ops', items: ['list', 'indent-increase', 'indent-decrease', 'text-align'] },
       { group: 'insert', items: ['image', 'table'] },
+      { group: 'font', items: ['text-size'] },
       { group: 'tools', items: ['find', 'code-view'] }
     ],
     formats: ['bold', 'italic', 'underline', 'strike', 'color', 'background', 'heading',
-      'text-size', 'text-align', 'indent-increase', 'indent-decrease', 'link', 'image', 'table'],
+      'text-size', 'text-align', 'list', 'indent-increase', 'indent-decrease', 'link', 'image', 'table'],
     modules: ['toolbar', 'history', 'slash-menu', 'block-toolbar', 'table-toolbar',
       'find-replace', 'code-view', 'resize-handles'],
     ...options

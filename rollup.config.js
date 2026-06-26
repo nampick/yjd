@@ -30,5 +30,16 @@ export default [
       sourcemap: true
     },
     plugins: [terserPlugin]
+  },
+  // Bundled tree-shakeable core (named exports, no side effects). One file so
+  // consumers of /core avoid a 50+ request ESM waterfall on first load.
+  {
+    input: 'core.js',
+    output: {
+      file: 'dist/core.esm.js',
+      format: 'es',
+      sourcemap: true
+    },
+    plugins: [terserPlugin]
   }
 ];

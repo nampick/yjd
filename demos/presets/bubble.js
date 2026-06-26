@@ -19,6 +19,10 @@ import {
 ].forEach(([k, v]) => registry.register(k, v));
 
 export function create(selector, options = {}) {
+  // Bubble is a clean, chrome-free surface: no top toolbar AND no bottom bar by
+  // default. Pass `features: { wordCount: true }` (or breadcrumb) to bring the
+  // bottom bar back — it composes with these defaults.
+  const { features, ...rest } = options;
   return new Editor(selector, {
     height: 280,
     placeholder: 'Select text to format, or type / for blocks…',
@@ -27,6 +31,8 @@ export function create(selector, options = {}) {
     formats: ['bold', 'italic', 'underline', 'strike', 'heading', 'list', 'font-family'],
     // Configure the bubble bar buttons (safe set — these don't need a popup anchor).
     'block-toolbar': { buttons: ['bold', 'italic', 'underline', 'strike', 'code', 'font-family'] },
-    ...options
+    // Hide the bottom status bar by default; allow opt-in via options.features.
+    features: { wordCount: false, breadcrumb: false, ...features },
+    ...rest
   });
 }
