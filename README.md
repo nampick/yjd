@@ -27,12 +27,16 @@ Every preset is built from the same `/core` entry — pick a profile, tree-shake
 | Preset | Includes | Size |
 |---|---|---|
 | Minimal | bold · italic · underline · link | **~16 KB** |
-| Bubble | floating bar, no toolbar + slash menu | **~21 KB** |
+| Comment box | bold · italic · link · list · image · mention + `fromTextarea` | **~26 KB** |
 | Basic | + strike · headings · lists · align | **~25 KB** |
 | Standard | + colour · image · table · find · code view | **~38 KB** |
-| Full | everything (CSS inlined) | **~54 KB** |
+| Full (all-in-one) | everything, CSS inlined | **~64 KB** |
 
-> For comparison, Quill 2 is ~60 KB. The stylesheet (~8 KB gzip) ships once and is cached, kept out of the JS.
+> All figures are measured gzip. Tree-shake from the `/core` entry to land near the
+> top of the table; the all-in-one default (`import yjd from '@oix1987/yjd'`) is the
+> ~64 KB row because it registers every format/module and inlines the CSS. For
+> comparison, Quill 2 is ~60 KB. The standalone stylesheet is ~10 KB gzip — link it
+> once (and skip `StylesLoader`) to keep it out of the JS.
 
 ## Install
 
@@ -91,6 +95,30 @@ new Editor('#editor', {
 
 ```html
 <link rel="stylesheet" href="@oix1987/yjd/lib/styles.min.css">
+```
+
+### Lightweight comment box (~26 KB)
+
+`Editor.fromTextarea`, `renderStatic` and the Markdown/JSON helpers all live in
+`/core`, so a comment box pulls only the formats/modules you register — not the
+whole editor. Link the stylesheet (don't import `StylesLoader`) to keep CSS out
+of the JS.
+
+```js
+import { Editor, registry, Bold, Italic, Link, List, Image, Mention, Toolbar, History }
+  from '@oix1987/yjd/core';
+
+[['formats/bold', Bold], ['formats/italic', Italic], ['formats/link', Link],
+ ['formats/list', List], ['formats/image', Image],
+ ['modules/mention', Mention], ['modules/toolbar', Toolbar], ['modules/history', History]]
+  .forEach(([k, v]) => registry.register(k, v));
+
+const ed = Editor.fromTextarea('#comment', {
+  format: 'markdown',
+  toolbar1: [{ group: 'insert', items: ['bold', 'italic', 'link', 'list', 'image', 'emoji'] }],
+  mention: { source: (q) => fetchUsers(q) },
+  submit: { onEnter: (html) => post(html) },
+});
 ```
 
 ## Options

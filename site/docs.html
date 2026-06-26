@@ -121,7 +121,12 @@ registry.<span class="f">register</span>(<span class="s">'modules/history'</span
   modules: [<span class="s">'toolbar'</span>, <span class="s">'history'</span>],
 });</code></pre>
       <div class="note">💡 The stylesheet stays out of the JS bundle. Link it once:
-        <code>@oix1987/yjd/lib/styles.min.css</code> (~8&nbsp;KB gzip, cached).</div>
+        <code>@oix1987/yjd/lib/styles.min.css</code> (~10&nbsp;KB gzip, cached) and skip
+        <code>StylesLoader</code> to keep CSS out of the JS.</div>
+      <div class="note">⚡ <b>Lightweight by design</b> — <code>Editor.fromTextarea</code>,
+        <code>renderStatic</code> and the Markdown/JSON helpers live in <code>/core</code>,
+        so a comment box (<code>~26&nbsp;KB</code>) pulls only what you register, not the
+        whole editor. Use <code>Editor.fromTextarea(el, opts)</code> from <code>/core</code>.</div>
 
       <h2 id="presets">Presets</h2>
       <p>Common profiles, all built from <code>/core</code>. Try and edit them live in the <a href="/demos/index.html">playground</a>.</p>
@@ -129,10 +134,10 @@ registry.<span class="f">register</span>(<span class="s">'modules/history'</span
         <thead><tr><th>Preset</th><th>Includes</th><th>JS (gzip)</th></tr></thead>
         <tbody>
           <tr><td>Minimal</td><td>bold · italic · underline · link</td><td><code>~16 KB</code></td></tr>
-          <tr><td>Bubble</td><td>floating bar, no toolbar + slash menu</td><td><code>~21 KB</code></td></tr>
+          <tr><td>Comment box</td><td>bold · italic · link · list · image · mention + <code>fromTextarea</code></td><td><code>~26 KB</code></td></tr>
           <tr><td>Basic</td><td>+ strike · headings · lists · align</td><td><code>~25 KB</code></td></tr>
           <tr><td>Standard</td><td>+ colour · image · table · find · code view</td><td><code>~38 KB</code></td></tr>
-          <tr><td>Full</td><td>everything (CSS inlined)</td><td><code>~54 KB</code></td></tr>
+          <tr><td>Full (all-in-one)</td><td>everything, CSS inlined</td><td><code>~64 KB</code></td></tr>
         </tbody>
       </table>
 

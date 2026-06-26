@@ -149,6 +149,14 @@ export interface EditorOptions {
 
 export class Editor {
   constructor(selector: string | Element, options?: EditorOptions);
+  /**
+   * Progressive-enhance a <textarea> into an editor with two-way sync + a
+   * controller (getValue/setValue/destroy). Available from `/core` too.
+   */
+  static fromTextarea(
+    textarea: HTMLTextAreaElement | string,
+    options?: EditorOptions & { format?: 'html' | 'markdown' }
+  ): TextareaEditor;
   /** The contentEditable element (public — apps may attach listeners to it). */
   editor: HTMLElement;
   on(event: string, handler: (data: any) => void): void;
@@ -200,12 +208,7 @@ export class RichEditor extends Editor {
   static register(path: string, definition: any, suppressWarning?: boolean): void;
   static get(path: string): any;
   static create(selector: string | Element, options?: EditorOptions): RichEditor;
-  /**
-   * Progressive-enhance a <textarea> into an editor with TWO-WAY sync (editor
-   * edits update textarea.value + fire native events; writing textarea.value
-   * updates the editor). The returned editor also exposes a controller:
-   * getValue()/setValue()/destroy() (destroy restores the textarea).
-   */
+  /** Inherited from Editor (returns a fully-featured RichEditor). */
   static fromTextarea(
     textarea: HTMLTextAreaElement | string,
     options?: EditorOptions & { format?: 'html' | 'markdown' }
