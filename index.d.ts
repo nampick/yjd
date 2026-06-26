@@ -45,6 +45,43 @@ export interface ImageOptions {
   maxSize?: number;
 }
 
+/** Result of a file.upload hook — a URL, or richer metadata. */
+export interface FileUploadResult {
+  url: string;
+  name?: string;
+  size?: string;
+}
+
+/** Attachment (non-image file) upload hook. Inserts a "file chip". */
+export interface FileOptions {
+  /**
+   * Upload the chosen file; resolve to a URL string or { url, name, size }.
+   * While pending a placeholder chip is shown. Omit to inline a data: URL.
+   */
+  upload?: (file: File) => string | FileUploadResult | Promise<string | FileUploadResult>;
+  /** `accept` attribute for the file picker (e.g. '.pdf,.zip,.docx'). */
+  accept?: string;
+  /** Maximum file size in bytes; larger files emit 'file:error'. */
+  maxSize?: number;
+}
+
+/** Enter-to-submit behaviour (e.g. a comment box). */
+export interface SubmitOptions {
+  /**
+   * Called when Enter is pressed and no autocomplete popup (mention/slash/emoji)
+   * is open. Receives the current HTML and the editor instance.
+   */
+  onEnter: (html: string, editor: Editor) => void;
+  /** Shift+Enter inserts a newline (default true). */
+  newlineOnShiftEnter?: boolean;
+}
+
+/**
+ * Toolbar configuration: a built-in preset, an exclusion of default items,
+ * a flat item list (single group), or full custom groups via toolbar1/toolbar2.
+ */
+export type ToolbarOption = 'full' | 'compact' | { exclude: string[] } | string[];
+
 /** A JSON document node produced by getJSON()/domToJson. */
 export interface JsonNode {
   tag?: string;
@@ -83,8 +120,16 @@ export interface EditorOptions {
   autosave?: boolean | { key?: string; debounce?: number };
   /** Image upload hook (replaces inline base64 when `upload` is provided). */
   image?: ImageOptions | boolean;
+  /** Attachment (non-image file) upload hook → inserts a file chip. */
+  file?: FileOptions;
   /** @mention / #task autocomplete. Inert until a `source` is given. */
   mention?: MentionOptions;
+  /** Enter-to-submit behaviour for comment-style editors. */
+  submit?: SubmitOptions;
+  /** Built-in preset / exclusion / flat list, instead of toolbar1/toolbar2. */
+  toolbar?: ToolbarOption;
+  /** Warn (emit 'content:overflow') when serialized HTML exceeds this many chars. */
+  maxContentSize?: number;
   features?: {
     emoji?: boolean;
     image?: boolean;
@@ -104,7 +149,10 @@ export interface EditorOptions {
 
 export class Editor {
   constructor(selector: string | Element, options?: EditorOptions);
+  /** The contentEditable element (public — apps may attach listeners to it). */
+  editor: HTMLElement;
   on(event: string, handler: (data: any) => void): void;
+  /** Remove a previously-added listener (symmetric with on()). */
   off(event: string, handler: (data: any) => void): void;
   emit(event: string, data: any): void;
   getContent(): string;
@@ -126,6 +174,12 @@ export class Editor {
   clearFormatting(): void;
   insertHorizontalRule(): void;
   insertImageFile(file: File): void;
+  /** Insert a non-image File as a file chip (uses options.file.upload). */
+  insertFileAttachment(file: File): void;
+  /** Open the native picker for a file attachment. */
+  openFileAttachmentPicker(): void;
+  /** True when a mention/slash/emoji popup that captures Enter is open. */
+  isMenuOpen(): boolean;
   setReadOnly(readOnly: boolean): void;
   isReadOnly(): boolean;
   setDirection(dir: 'ltr' | 'rtl'): void;
@@ -147,15 +201,28 @@ export class RichEditor extends Editor {
   static get(path: string): any;
   static create(selector: string | Element, options?: EditorOptions): RichEditor;
   /**
-   * Progressive-enhance a <textarea> into an editor, keeping textarea.value
-   * in sync (and dispatching native input/change events) on every edit.
+   * Progressive-enhance a <textarea> into an editor with TWO-WAY sync (editor
+   * edits update textarea.value + fire native events; writing textarea.value
+   * updates the editor). The returned editor also exposes a controller:
+   * getValue()/setValue()/destroy() (destroy restores the textarea).
    */
   static fromTextarea(
     textarea: HTMLTextAreaElement | string,
     options?: EditorOptions & { format?: 'html' | 'markdown' }
-  ): RichEditor;
+  ): TextareaEditor;
   /** The original textarea, when created via fromTextarea(). */
   textarea?: HTMLTextAreaElement;
+}
+
+/** Editor returned by fromTextarea(), with a value controller. */
+export interface TextareaEditor extends RichEditor {
+  textarea: HTMLTextAreaElement;
+  /** Current content (HTML or Markdown per the `format` option). */
+  getValue(): string;
+  /** Replace the editor content (HTML or Markdown per `format`). */
+  setValue(value: string): void;
+  /** Remove the editor and restore the textarea with its last value. */
+  destroy(): void;
 }
 
 /** Brand-aligned alias of {@link RichEditor}. */

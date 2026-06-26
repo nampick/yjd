@@ -69,9 +69,13 @@
       <strong>Integration</strong>
       <a href="#export">Export &amp; import</a>
       <a href="#upload">Image upload</a>
+      <a href="#file">File attachments</a>
+      <a href="#submit">Enter-to-submit</a>
       <a href="#mention">@mention</a>
+      <a href="#toolbar-preset">Toolbar presets</a>
       <a href="#textarea">fromTextarea</a>
       <a href="#static">renderStatic</a>
+      <a href="#events">Events</a>
       <strong>Reference</strong>
       <a href="#options">Options</a>
       <a href="#formats">Formats &amp; modules</a>
@@ -150,6 +154,24 @@ editor.<span class="f">getMarkdown</span>();  editor.<span class="f">setMarkdown
 <span class="c">// events: editor.on('image:upload' | 'image:uploaded' | 'image:error', cb)</span></code></pre>
       <div class="note">💡 Omit <code>upload</code> to keep the built-in base64 fallback.</div>
 
+      <h2 id="file">File attachments</h2>
+      <p>Like <code>image</code>, but for any file. Uploads via <code>file.upload</code> and inserts a <b>file chip</b> (icon + name + size) that serializes to a Markdown link <code>[name (size)](url)</code>. Works from the toolbar <code>file</code> button, paste, and drag-drop.</p>
+      <pre><code><span class="k">new</span> <span class="f">yjd</span>(<span class="s">'#editor'</span>, {
+  toolbar1: [{ group: <span class="s">'insert'</span>, items: [<span class="s">'image'</span>, <span class="s">'file'</span>] }],  <span class="c">// add the paperclip</span>
+  file: {
+    upload: <span class="k">async</span> (f) =&gt; ({ url: (<span class="k">await</span> api.<span class="f">upload</span>(f)).url, name: f.name }),
+    accept: <span class="s">'.pdf,.zip,.docx'</span>,
+    maxSize: 25 * 1024 * 1024,
+  },
+});
+<span class="c">// events: editor.on('file:upload' | 'file:uploaded' | 'file:error', cb)</span></code></pre>
+
+      <h2 id="submit">Enter-to-submit</h2>
+      <p>For comment boxes: <code>Enter</code> sends, <code>Shift+Enter</code> inserts a newline. When a mention/slash/emoji popup is open, Enter is left for the popup (picks the item, doesn't submit). Check the state yourself with <code>editor.isMenuOpen()</code>.</p>
+      <pre><code><span class="k">new</span> <span class="f">yjd</span>(<span class="s">'#comment'</span>, {
+  submit: { onEnter: (html, editor) =&gt; <span class="f">post</span>(html) },
+});</code></pre>
+
       <h2 id="mention">@mention &amp; #task</h2>
       <p>Type the trigger to autocomplete people or tasks from your own async source. The inserted token carries an id, so serialized content tells your server who was tagged.</p>
       <pre><code><span class="k">new</span> <span class="f">yjd</span>(<span class="s">'#editor'</span>, {
@@ -161,17 +183,39 @@ editor.<span class="f">getMarkdown</span>();  editor.<span class="f">setMarkdown
   },
 });
 editor.<span class="f">on</span>(<span class="s">'mention:select'</span>, (item) =&gt; {<span class="c">/* … */</span>});</code></pre>
-      <p>Inserts <code>&lt;span class="mention" data-id="u_123"&gt;@Ann&lt;/span&gt;</code> → Markdown <code>@[Ann](u_123)</code>.</p>
+      <p>Inserts <code>&lt;span class="mention" data-id="u_123"&gt;@Ann&lt;/span&gt;</code> → Markdown <code>@[Ann](u_123)</code>. Default rows show avatar + name; pass <code>icon</code> on a source item for special entries (e.g. “@all”). Menus are portaled to <code>&lt;body&gt;</code> but inherit the editor's <code>--rte-*</code> theme.</p>
+
+      <h2 id="toolbar-preset">Toolbar presets</h2>
+      <pre><code>toolbar: <span class="s">'full'</span>                  <span class="c">// the default set</span>
+toolbar: <span class="s">'compact'</span>               <span class="c">// bold/italic/underline · link · list · image · emoji</span>
+toolbar: { exclude: [<span class="s">'table'</span>, <span class="s">'video'</span>, <span class="s">'color'</span>] }  <span class="c">// defaults minus these</span>
+toolbar1: [{ group, items: [...] }]      <span class="c">// or full custom groups</span></code></pre>
 
       <h2 id="textarea">fromTextarea</h2>
-      <p>Progressively enhance an existing form field. The editor mounts in place, <code>textarea.value</code> stays in sync, and a native <code>input</code>/<code>change</code> event fires on every edit — so server-side submits and validation keep working.</p>
-      <pre><code><span class="f">yjd</span>.<span class="f">fromTextarea</span>(<span class="s">'#body'</span>, { format: <span class="s">'markdown'</span> }); <span class="c">// or 'html' (default)</span></code></pre>
+      <p>Progressively enhance an existing form field with <b>two-way</b> sync: editor edits update <code>textarea.value</code> (firing native <code>input</code>/<code>change</code>), and writing <code>textarea.value</code> from app code updates the editor. The returned editor carries a controller.</p>
+      <pre><code><span class="k">const</span> ed = <span class="f">yjd</span>.<span class="f">fromTextarea</span>(<span class="s">'#body'</span>, { format: <span class="s">'markdown'</span> }); <span class="c">// or 'html'</span>
+ed.<span class="f">setValue</span>(md);   <span class="c">// load content</span>
+ed.<span class="f">getValue</span>();     <span class="c">// current content (per format)</span>
+ed.<span class="f">destroy</span>();      <span class="c">// remove editor, restore textarea + last value</span></code></pre>
 
       <h2 id="static">renderStatic</h2>
       <p>Render stored HTML into a read-only view that matches the editor exactly — sanitized and tagged <code>.yjd-content</code>. No editor instance needed; just load the stylesheet on the page.</p>
       <pre><code><span class="k">import</span> { renderStatic } <span class="k">from</span> <span class="s">'@oix1987/yjd'</span>;
 
 renderStatic(post.body_html, document.<span class="f">querySelector</span>(<span class="s">'#post'</span>));</code></pre>
+
+      <h2 id="events">Events</h2>
+      <p>Subscribe with <code>editor.on(name, cb)</code> and remove with <code>editor.off(name, cb)</code>. <code>editor.editor</code> is the public contentEditable element.</p>
+      <table>
+        <thead><tr><th>Event</th><th>Payload</th></tr></thead>
+        <tbody>
+          <tr><td><code>change</code></td><td>html — fired on every content change.</td></tr>
+          <tr><td><code>image:upload</code> / <code>image:uploaded</code> / <code>image:error</code></td><td><code>{ file, url?, reason? }</code></td></tr>
+          <tr><td><code>file:upload</code> / <code>file:uploaded</code> / <code>file:error</code></td><td><code>{ file, url?, name?, size?, reason? }</code></td></tr>
+          <tr><td><code>mention:select</code></td><td>the chosen source item.</td></tr>
+          <tr><td><code>content:overflow</code></td><td><code>{ size, max }</code> — when <code>maxContentSize</code> is exceeded.</td></tr>
+        </tbody>
+      </table>
 
       <h2 id="options">Options</h2>
       <table>
@@ -186,7 +230,11 @@ renderStatic(post.body_html, document.<span class="f">querySelector</span>(<span
           <tr><td><code>formats</code> / <code>modules</code></td><td>string[]</td><td>Which registered features to activate.</td></tr>
           <tr><td><code>features</code></td><td>object</td><td><code>{ wordCount, breadcrumb, … }</code> — toggle the status bar.</td></tr>
           <tr><td><code>image</code></td><td>object</td><td><code>{ upload, accept, maxSize }</code> — upload hook (see above).</td></tr>
+          <tr><td><code>file</code></td><td>object</td><td><code>{ upload, accept, maxSize }</code> — attachment hook → file chip.</td></tr>
           <tr><td><code>mention</code></td><td>object</td><td><code>{ trigger, source, renderItem, triggers }</code> — @mention.</td></tr>
+          <tr><td><code>submit</code></td><td>object</td><td><code>{ onEnter }</code> — Enter-to-submit (see above).</td></tr>
+          <tr><td><code>toolbar</code></td><td>string｜object</td><td><code>'full'｜'compact'｜{ exclude }</code> preset, or array.</td></tr>
+          <tr><td><code>maxContentSize</code></td><td>number</td><td>Emit <code>content:overflow</code> past this many chars.</td></tr>
           <tr><td><code>maxLength</code></td><td>number</td><td>Hard character limit.</td></tr>
         </tbody>
       </table>
@@ -206,6 +254,9 @@ renderStatic(post.body_html, document.<span class="f">querySelector</span>(<span
           <tr><td><code>getJSON()</code> / <code>getMarkdown()</code></td><td>Export as JSON tree / Markdown.</td></tr>
           <tr><td><code>setHTML()</code> / <code>setJSON()</code> / <code>setMarkdown()</code></td><td>Load content in any format.</td></tr>
           <tr><td><code>insertHTML(html)</code> / <code>insertText(t)</code></td><td>Insert at the caret.</td></tr>
+          <tr><td><code>insertFileAttachment(file)</code></td><td>Insert a file chip (uses <code>file.upload</code>).</td></tr>
+          <tr><td><code>isMenuOpen()</code></td><td>True when a mention/slash/emoji popup is open.</td></tr>
+          <tr><td><code>on(name,cb)</code> / <code>off(name,cb)</code></td><td>Subscribe / unsubscribe to events.</td></tr>
           <tr><td><code>clear()</code> / <code>isEmpty()</code></td><td>Reset / check empty.</td></tr>
           <tr><td><code>focus()</code></td><td>Focus the editor.</td></tr>
           <tr><td><code>setReadOnly(bool)</code></td><td>Toggle read-only.</td></tr>

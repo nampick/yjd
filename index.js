@@ -157,8 +157,15 @@ class RichEditor extends Editor {
    *   });
    *
    * The textarea's current value seeds the editor (parsed as HTML or Markdown
-   * per `format`). On every change the textarea is updated and a native 'input'
-   * event is dispatched, so framework bindings / validation keep firing.
+   * per `format`). Binding is TWO-WAY: editor edits update textarea.value (and
+   * fire native input/change events), and writing `textarea.value = …` from app
+   * code (e.g. resetting a form) updates the editor. The returned editor also
+   * carries a small controller:
+   *
+   *   const ed = RichEditor.fromTextarea('#body', { format: 'markdown' });
+   *   ed.setValue(md);   // load new content into the editor
+   *   ed.getValue();     // current content (html or markdown per `format`)
+   *   ed.destroy();      // remove the editor, restore the textarea + last value
    *
    * @param {HTMLTextAreaElement|string} textarea  Element or selector.
    * @param {object} [options]  Editor options + optional `format`.
@@ -169,7 +176,8 @@ class RichEditor extends Editor {
     if (!ta) throw new Error('RichEditor.fromTextarea: textarea not found');
 
     const format = options.format === 'markdown' ? 'markdown' : 'html';
-    const readEditor = (ed) => (format === 'markdown' ? ed.getMarkdown() : ed.getContent());
+    const read = (ed) => (format === 'markdown' ? ed.getMarkdown() : ed.getContent());
+    const write = (ed, v) => (format === 'markdown' ? ed.setMarkdown(v || '') : ed.setHTML(v || ''));
 
     // Mount point right after the textarea; hide the original.
     const mount = document.createElement('div');
@@ -177,26 +185,60 @@ class RichEditor extends Editor {
     ta.style.display = 'none';
     ta.setAttribute('aria-hidden', 'true');
 
-    const initial = ta.value || '';
+    // Take over textarea.value so app writes flow into the editor and reads
+    // reflect it. Keep the native descriptor to restore on destroy + to set the
+    // real value (for form submission) without re-triggering our setter.
+    const nativeDesc = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value');
+    let raw = ta.value || '';
+    let syncing = false; // guards editor→textarea writes from re-entering setValue
+
+    const initial = raw;
     const editor = new RichEditor(mount, {
       width: '100%',
       ...options,
-      // Seed content from the textarea (skip if caller passed explicit content).
       content: options.content != null ? options.content
         : (format === 'markdown' ? markdownToHtml(initial) : initial),
     });
 
-    const sync = () => {
-      const next = readEditor(editor);
-      if (ta.value === next) return;
-      ta.value = next;
+    Object.defineProperty(ta, 'value', {
+      configurable: true,
+      get() { return raw; },
+      set(v) {
+        raw = v == null ? '' : String(v);
+        nativeDesc.set.call(ta, raw);   // keep the real textarea value for submits
+        if (!syncing) write(editor, raw); // app write → update editor
+      },
+    });
+
+    // editor edit → push to textarea + fire native events for app bindings.
+    const onChange = () => {
+      const next = read(editor);
+      if (raw === next) return;
+      raw = next;
+      syncing = true;
+      nativeDesc.set.call(ta, next);
       ta.dispatchEvent(new Event('input', { bubbles: true }));
       ta.dispatchEvent(new Event('change', { bubbles: true }));
+      syncing = false;
     };
-    editor.on('change', sync);
-    sync(); // normalise the textarea to the editor's serialization up front.
+    editor.on('change', onChange);
+    onChange(); // normalise textarea to the editor's serialization up front.
 
+    // Controller surface on the editor instance.
     editor.textarea = ta;
+    editor.getValue = () => read(editor);
+    editor.setValue = (v) => { write(editor, v); };
+    const baseDestroy = editor.destroy.bind(editor);
+    editor.destroy = () => {
+      const last = read(editor);
+      editor.off('change', onChange);
+      baseDestroy();
+      mount.remove();
+      delete ta.value; // restore the prototype's value accessor
+      nativeDesc.set.call(ta, last);
+      ta.style.display = '';
+      ta.removeAttribute('aria-hidden');
+    };
     return editor;
   }
 }

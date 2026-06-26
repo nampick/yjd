@@ -104,13 +104,32 @@
       <pre class="out" id="out2"></pre>
     </section>
 
-    <!-- 3. fromTextarea -->
+    <!-- 3. Comment box: submit.onEnter + toolbar preset + file chip -->
     <section class="card">
-      <h2><span class="tag">P1</span> fromTextarea — progressive enhancement</h2>
-      <p class="desc">The textarea below is enhanced into an editor. Edits sync back to <code>textarea.value</code> and fire a native <code>input</code> event (watch the mirror).</p>
+      <h2><span class="tag">P0</span> Comment box — Enter-to-send · toolbar compact · attach file</h2>
+      <p class="desc">
+        <span class="hl">Enter</span> sends, <span class="hl">Shift+Enter</span> = newline — but when the <b>@</b> popup is open,
+        Enter picks the mention instead of sending. A trimmed toolbar adds a <b>file</b> button
+        (paperclip) that uploads via <code>file.upload</code> and inserts a chip. Presets
+        <code>'compact'</code> / <code>'full'</code> / <code>{ exclude }</code> also available.
+      </p>
+      <div id="comment"></div>
+      <p class="mono-note" style="margin:12px 0 4px">Sent messages (Enter):</p>
+      <pre class="out" id="sent" style="max-height:160px"></pre>
+    </section>
+
+    <!-- 4. fromTextarea -->
+    <section class="card">
+      <h2><span class="tag">P1</span> fromTextarea — 2-way sync + controller</h2>
+      <p class="desc">The textarea is enhanced into an editor. Edits sync to <code>textarea.value</code> (native <code>input</code> fired); writing the value back updates the editor. The returned editor exposes <code>setValue()</code> / <code>getValue()</code> / <code>destroy()</code>.</p>
       <textarea id="ta">## Hello from a textarea
 
 This **Markdown** seeded the editor. Edit above — the textarea stays in sync.</textarea>
+      <div class="row">
+        <button class="act" id="ta-set">setValue(new markdown)</button>
+        <button class="act ghost" id="ta-write">textarea.value = … (app write)</button>
+        <button class="act ghost" id="ta-destroy">destroy() → restore textarea</button>
+      </div>
       <p class="mono-note" style="margin:12px 0 4px">textarea.value (live mirror, format: markdown):</p>
       <pre class="out" id="ta-mirror" style="max-height:160px"></pre>
     </section>
@@ -152,6 +171,16 @@ This **Markdown** seeded the editor. Edit above — the textarea stays in sync.<
           return url;
         },
       },
+      file: {
+        accept: '.pdf,.zip,.docx,.txt',
+        maxSize: 25 * 1024 * 1024,
+        // Simulate uploading an attachment → returns { url, name, size }.
+        upload: async (f) => {
+          log('file:upload started → ' + f.name);
+          await wait(700);
+          return { url: URL.createObjectURL(f), name: f.name, size: (f.size/1024|0) + ' KB' };
+        },
+      },
       mention: {
         trigger: '@',
         source: async (q) => { await wait(120); return filterBy(PEOPLE, q); },
@@ -169,6 +198,8 @@ This **Markdown** seeded the editor. Edit above — the textarea stays in sync.<
 
     editor.on('mention:select', (item) => log('mention:select → ' + JSON.stringify(item)));
     editor.on('image:error', (e) => log('image:error → ' + (e.reason || 'unknown')));
+    editor.on('file:uploaded', (e) => log('file:uploaded → ' + e.name));
+    editor.on('file:error', (e) => log('file:error → ' + (e.reason || 'unknown')));
 
     const out = document.getElementById('out');
     const show = (label, text) => { out.textContent = '// ' + label + '\n\n' + text; };
@@ -218,16 +249,46 @@ code block
         'stable: ' + (md1.trim() === md2.trim()) + '\n\n--- first ---\n' + md1 + '\n--- second ---\n' + md2;
     };
 
+    /* ---- comment box: submit + compact toolbar + file ------------------- */
+    const sent = document.getElementById('sent');
+    const comment = new yjd('#comment', {
+      width: '100%',
+      height: 130,
+      placeholder: 'Write a comment… Enter to send, @ to mention, 📎 to attach',
+      // A trimmed custom toolbar that includes the new `file` (paperclip) button.
+      // (Built-in presets also exist: toolbar: 'compact' | 'full' | { exclude: [...] }.)
+      toolbar1: [
+        { group: 'text-format', items: ['bold', 'italic'] },
+        { group: 'link', items: ['link'] },
+        { group: 'insert', items: ['image', 'file', 'emoji'] },
+      ],
+      mention: {
+        trigger: '@',
+        source: (q) => PEOPLE.filter(p => p.name.toLowerCase().includes((q || '').toLowerCase())),
+      },
+      file: { upload: async (f) => { await wait(500); return { url: '#', name: f.name, size: (f.size/1024|0)+' KB' }; } },
+      submit: {
+        onEnter: (html) => {
+          sent.textContent = '[' + new Date().toLocaleTimeString() + '] ' + html + '\n' + sent.textContent;
+          comment.clear();
+        },
+      },
+    });
+
     /* ---- fromTextarea --------------------------------------------------- */
     const ta = document.getElementById('ta');
     const mirror = document.getElementById('ta-mirror');
-    const taEditor = yjd.fromTextarea(ta, { format: 'markdown', width: '100%' });
+    let taEditor = yjd.fromTextarea(ta, { format: 'markdown', width: '100%' });
     const refresh = () => { mirror.textContent = ta.value; };
     ta.addEventListener('input', refresh);
     refresh();
 
+    document.getElementById('ta-set').onclick = () => { taEditor.setValue('### setValue()\n\nLoaded via the **controller**.'); refresh(); };
+    document.getElementById('ta-write').onclick = () => { ta.value = '> App wrote `textarea.value` directly — editor updated.'; refresh(); };
+    document.getElementById('ta-destroy').onclick = () => { taEditor.destroy(); refresh(); document.getElementById('ta-destroy').disabled = true; };
+
     // expose for manual poking in the console
-    window.__yjd = { editor, taEditor, renderStatic };
+    window.__yjd = { editor, comment, taEditor, renderStatic };
   </script>
 </body>
 </html>

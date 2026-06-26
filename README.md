@@ -151,6 +151,37 @@ new yjd('#editor', {
 
 Omit `upload` to keep the base64 fallback.
 
+### File attachments
+
+Like `image`, but for any file. Uploads via `file.upload` and inserts a **file chip**
+(icon + name + size) that serializes to a Markdown link `[name (size)](url)`. Works
+from the toolbar (`file` button), paste, and drag-drop.
+
+```js
+new yjd('#editor', {
+  toolbar1: [{ group: 'insert', items: ['image', 'file'] }],   // add the paperclip
+  file: {
+    upload: async (f) => ({ url: (await api.upload(f)).url, name: f.name }),
+    accept: '.pdf,.zip,.docx',
+    maxSize: 25 * 1024 * 1024,
+  },
+});
+// events: editor.on('file:upload' | 'file:uploaded' | 'file:error', cb)
+```
+
+### Enter-to-submit (comment boxes)
+
+```js
+new yjd('#comment', {
+  submit: {
+    onEnter: (html, editor) => post(html),   // Enter sends; Shift+Enter = newline
+  },
+});
+```
+
+When a mention/slash/emoji popup is open, Enter is left for the popup (it picks the
+item, doesn't submit). Check it yourself with `editor.isMenuOpen()`.
+
 ### @mention / #task
 
 ```js
@@ -167,14 +198,29 @@ editor.on('mention:select', (item) => { /* … */ });
 
 Inserts a token that serializes with its id:
 `<span class="mention" data-id="u_123">@Ann</span>` → Markdown `@[Ann](u_123)`.
+If a `source` item has no `avatar_url`, pass `icon` (inline SVG) for special entries
+like “@all”. Menus are portaled to `<body>` but inherit the editor's `--rte-*` theme.
 
-### fromTextarea
-
-Enhance an existing form field; `textarea.value` stays in sync and fires native
-`input`/`change` events, so server-side submits and validation keep working.
+### Toolbar presets
 
 ```js
-yjd.fromTextarea('#body', { format: 'markdown' }); // or 'html' (default)
+toolbar: 'full'                    // the default set
+toolbar: 'compact'                 // bold/italic/underline · link · list · image · emoji
+toolbar: { exclude: ['table','video','color'] }   // defaults minus these
+toolbar1: [{ group, items: [...] }]               // or full custom groups
+```
+
+### fromTextarea (two-way + controller)
+
+Enhance an existing form field. Binding is **two-way**: editor edits update
+`textarea.value` (firing native `input`/`change`), and `textarea.value = …` from app
+code updates the editor. The returned editor carries a controller.
+
+```js
+const ed = yjd.fromTextarea('#body', { format: 'markdown' }); // or 'html'
+ed.setValue(md);   // load content
+ed.getValue();     // current content (per format)
+ed.destroy();      // remove editor, restore textarea + last value
 ```
 
 ### renderStatic
@@ -186,6 +232,17 @@ tagged `.yjd-content`) — no editor instance needed. Load the stylesheet on the
 import { renderStatic } from '@oix1987/yjd';
 renderStatic(post.body_html, document.querySelector('#post'));
 ```
+
+### Events & API notes
+
+- **Events** (via `editor.on(name, cb)` / `editor.off(name, cb)`): `change`,
+  `image:upload` · `image:uploaded` · `image:error`, `file:upload` · `file:uploaded`
+  · `file:error`, `mention:select`, `content:overflow` (when `maxContentSize` exceeded).
+- `editor.editor` is the public contentEditable element (attach your own listeners).
+- **Markdown dialect** — GFM-ish: headings `#`–`######`, `**bold**`, `*italic*`,
+  `~~strike~~`, `` `code` ``, fenced ``` ``` ```, `>` quotes, `-`/`1.` lists,
+  pipe tables, `![alt](src)` images, `[text](url)` links, mentions `@[Name](id)` /
+  `#[Name](id)`, file chips `[name (size)](url)`.
 
 ## Styling
 

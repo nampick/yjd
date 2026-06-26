@@ -3400,10 +3400,10 @@
   max-height: 280px;
   overflow-y: auto;
   padding: 6px;
-  background: #ffffff;
-  border: 1px solid #e9e9f1;
-  border-radius: 12px;
-  box-shadow: 0 12px 32px -8px rgba(20, 24, 46, 0.20), 0 4px 10px -4px rgba(20, 24, 46, 0.10);
+  background: var(--rte-bg, #ffffff);
+  border: 1px solid var(--rte-border, #e9e9f1);
+  border-radius: var(--rte-radius-md, 12px);
+  box-shadow: var(--rte-shadow, 0 12px 32px -8px rgba(20, 24, 46, 0.20), 0 4px 10px -4px rgba(20, 24, 46, 0.10));
   font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   animation: yjd-slash-in 90ms ease-out;
 }
@@ -3418,10 +3418,10 @@
   border-radius: 8px;
   cursor: pointer;
   text-align: left;
-  color: #20242f;
+  color: var(--rte-ink, #20242f);
 }
 .yjd-mention-item:hover,
-.yjd-mention-item.active { background: #efedff; color: #5a48ee; }
+.yjd-mention-item.active { background: var(--rte-accent-weak, #efedff); color: var(--rte-accent-ink, #5a48ee); }
 .yjd-mention-avatar {
   width: 26px;
   height: 26px;
@@ -3430,6 +3430,12 @@
   flex: 0 0 auto;
   background: #f2f2f7;
 }
+.yjd-mention-ico {
+  width: 26px; height: 26px; flex: 0 0 auto;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: var(--rte-accent-weak, #efedff); color: var(--rte-accent-ink, #5a48ee);
+}
+.yjd-mention-ico svg { width: 16px; height: 16px; stroke: currentColor; fill: none; }
 .yjd-mention-name { font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (prefers-reduced-motion: reduce) { .yjd-mention-menu { animation: none; } }
 
@@ -3478,3 +3484,30 @@
 .yjd-content table td, .yjd-content table th {
   border: 1px solid #d1d5db; padding: 8px 10px; text-align: left;
 }
+
+/* ── File chip (v2.25) ────────────────────────────────────────────────────
+   The attachment token inserted by options.file.upload. Same look in the
+   editor and in renderStatic() read-views. */
+.yjd-file-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 100%;
+  vertical-align: baseline;
+  padding: 3px 10px 3px 8px;
+  margin: 0 1px;
+  border: 1px solid #e0e0ec;
+  border-radius: 8px;
+  background: #f7f7fb;
+  color: #20242f;
+  text-decoration: none;
+  font-size: 0.9em;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.yjd-file-chip:hover { border-color: #6d5efc; background: #efedff; }
+.yjd-file-chip[data-state="uploading"] { opacity: 0.6; }
+.yjd-file-ico { display: inline-flex; flex: 0 0 auto; color: #5a48ee; }
+.yjd-file-ico svg { width: 15px; height: 15px; stroke: currentColor; fill: none; }
+.yjd-file-name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; max-width: 22em; }
+.yjd-file-size { color: #767c8e; font-variant-numeric: tabular-nums; }
