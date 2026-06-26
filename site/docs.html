@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>yjd — Docs</title>
+  <meta name="description" content="Getting started and API reference for yjd, the tree-shakeable vanilla-JS rich text editor.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='4' fill='%236d5efc'/%3E%3Ctext x='8' y='12' font-family='monospace' font-size='10' font-weight='700' fill='white' text-anchor='middle'%3Ey%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --ink:#16161d;--ink-2:#3b3d49;--paper:#fff;--bg:#f4f4f8;
+      --violet:#6d5efc;--violet-ink:#5a48ee;--violet-weak:#efedff;--line:#e7e7f0;--muted:#6b6f7e;
+      --mono:"JetBrains Mono",ui-monospace,monospace;--display:"Space Grotesk",system-ui,sans-serif;--body:"Inter",system-ui,sans-serif;
+    }
+    *{box-sizing:border-box}html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.65}
+    a{color:var(--violet-ink);text-decoration:none}a:hover{text-decoration:underline}
+    code,.mono{font-family:var(--mono)}
+    .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+    header.nav{position:sticky;top:0;z-index:50;backdrop-filter:saturate(1.4) blur(10px);background:rgba(244,244,248,.85);border-bottom:1px solid var(--line)}
+    .nav-in{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .logo{display:flex;align-items:center;gap:9px;font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.02em;color:var(--ink)}
+    .logo .mark{width:28px;height:28px;border-radius:8px;background:var(--violet);color:#fff;display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:15px}
+    .logo small{color:var(--muted);font-weight:500;font-size:13px;font-family:var(--body)}
+    .nav-links{display:flex;gap:24px;font-weight:500;font-size:15px}.nav-links a{color:var(--ink)}
+
+    .layout{display:grid;grid-template-columns:220px 1fr;gap:48px;padding:40px 0 80px;align-items:start}
+    @media(max-width:840px){.layout{grid-template-columns:1fr}.toc{position:static !important;display:none}}
+    .toc{position:sticky;top:84px;font-size:14.5px}
+    .toc strong{display:block;font-family:var(--display);font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:18px 0 8px}
+    .toc a{display:block;color:var(--ink-2);padding:4px 0}.toc a:hover{color:var(--violet-ink);text-decoration:none}
+
+    .doc h1{font-family:var(--display);font-weight:700;font-size:40px;letter-spacing:-.02em;margin:0 0 6px}
+    .doc .sub{color:var(--ink-2);font-size:18px;margin:0 0 8px}
+    .doc h2{font-family:var(--display);font-weight:600;font-size:26px;letter-spacing:-.01em;margin:44px 0 12px;padding-top:8px;border-top:1px solid var(--line)}
+    .doc h3{font-family:var(--display);font-weight:600;font-size:18px;margin:26px 0 8px}
+    .doc p{color:var(--ink-2);margin:0 0 14px}
+    .doc ul{color:var(--ink-2);padding-left:20px}.doc li{margin:6px 0}
+    .doc code:not(pre code){background:var(--violet-weak);color:var(--violet-ink);padding:2px 6px;border-radius:6px;font-size:.88em}
+    pre{background:#16161d;border-radius:14px;padding:18px 20px;overflow:auto;margin:0 0 16px}
+    pre code{font-family:var(--mono);font-size:13.5px;line-height:1.7;color:#e7e7f3;white-space:pre}
+    .k{color:#c4b5fd}.s{color:#86efac}.c{color:#6b7280}.f{color:#93c5fd}
+    table{width:100%;border-collapse:collapse;margin:0 0 16px;font-size:14.5px;background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+    th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+    th{background:#fbfbfd;font-family:var(--display);font-weight:600;color:var(--muted);font-size:12.5px;text-transform:uppercase;letter-spacing:.04em}
+    tr:last-child td{border-bottom:none}
+    td code{font-family:var(--mono);font-size:13px}
+    .note{background:var(--violet-weak);border:1px solid #ddd8ff;border-radius:12px;padding:14px 16px;color:var(--ink-2);font-size:14.5px;margin:0 0 16px}
+    footer{border-top:1px solid var(--line);padding:32px 0;color:var(--muted);font-size:14px;text-align:center}
+  </style>
+</head>
+<body>
+  <header class="nav"><div class="wrap nav-in">
+    <a class="logo" href="/site/index.html"><span class="mark">y</span> yjd <small>.io</small></a>
+    <nav class="nav-links"><a href="/site/index.html">Home</a><a href="/demos/index.html">Demo</a><a href="https://github.com/nampick/richeditor">GitHub ↗</a></nav>
+  </div></header>
+
+  <div class="wrap layout">
+    <aside class="toc">
+      <strong>Guide</strong>
+      <a href="#install">Install</a>
+      <a href="#quick">Quick start</a>
+      <a href="#core">Tree-shakeable core</a>
+      <a href="#presets">Presets</a>
+      <strong>Reference</strong>
+      <a href="#options">Options</a>
+      <a href="#formats">Formats &amp; modules</a>
+      <a href="#methods">Methods</a>
+      <a href="#styles">Styling</a>
+    </aside>
+
+    <main class="doc">
+      <h1>Docs</h1>
+      <p class="sub">A dependency-free, tree-shakeable rich text editor. Compose only what you need.</p>
+
+      <h2 id="install">Install</h2>
+      <pre><code>npm i <span class="s">@oix1987/yjd</span></code></pre>
+      <p>Or use it straight from a CDN with the all-in-one UMD build:</p>
+      <pre><code><span class="c">&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@oix1987/yjd/lib/styles.min.css"&gt;</span>
+<span class="c">&lt;script src="https://cdn.jsdelivr.net/npm/@oix1987/yjd"&gt;&lt;/script&gt;</span>
+<span class="c">&lt;script&gt;</span> <span class="k">new</span> <span class="f">RichEditor</span>(<span class="s">'#editor'</span>); <span class="c">&lt;/script&gt;</span></code></pre>
+
+      <h2 id="quick">Quick start</h2>
+      <p>The all-in-one build registers everything and injects its CSS — one line to a full editor:</p>
+      <pre><code><span class="k">import</span> RichEditor <span class="k">from</span> <span class="s">'@oix1987/yjd'</span>;
+
+<span class="k">const</span> editor = <span class="k">new</span> <span class="f">RichEditor</span>(<span class="s">'#editor'</span>, {
+  placeholder: <span class="s">'Start writing…'</span>,
+  onChange: (html) =&gt; console.<span class="f">log</span>(html),
+});</code></pre>
+
+      <h2 id="core">Tree-shakeable core</h2>
+      <p>For the smallest bundle, import from <code>@oix1987/yjd/core</code> (side-effect-free) and register only the formats/modules you want. Anything you don't register is tree-shaken out.</p>
+      <pre><code><span class="k">import</span> { Editor, registry, Bold, Italic, Underline, Link,
+  Toolbar, History } <span class="k">from</span> <span class="s">'@oix1987/yjd/core'</span>;
+
+<span class="c">// register only what you use</span>
+registry.<span class="f">register</span>(<span class="s">'formats/bold'</span>, Bold);
+registry.<span class="f">register</span>(<span class="s">'formats/italic'</span>, Italic);
+registry.<span class="f">register</span>(<span class="s">'formats/underline'</span>, Underline);
+registry.<span class="f">register</span>(<span class="s">'formats/link'</span>, Link);
+registry.<span class="f">register</span>(<span class="s">'modules/toolbar'</span>, Toolbar);
+registry.<span class="f">register</span>(<span class="s">'modules/history'</span>, History);
+
+<span class="k">new</span> <span class="f">Editor</span>(<span class="s">'#editor'</span>, {
+  formats: [<span class="s">'bold'</span>, <span class="s">'italic'</span>, <span class="s">'underline'</span>, <span class="s">'link'</span>],
+  modules: [<span class="s">'toolbar'</span>, <span class="s">'history'</span>],
+});</code></pre>
+      <div class="note">💡 The stylesheet stays out of the JS bundle. Link it once:
+        <code>@oix1987/yjd/lib/styles.min.css</code> (~8&nbsp;KB gzip, cached).</div>
+
+      <h2 id="presets">Presets</h2>
+      <p>Common profiles, all built from <code>/core</code>. Try and edit them live in the <a href="/demos/index.html">playground</a>.</p>
+      <table>
+        <thead><tr><th>Preset</th><th>Includes</th><th>JS (gzip)</th></tr></thead>
+        <tbody>
+          <tr><td>Minimal</td><td>bold · italic · underline · link</td><td><code>~16 KB</code></td></tr>
+          <tr><td>Bubble</td><td>floating bar, no toolbar + slash menu</td><td><code>~21 KB</code></td></tr>
+          <tr><td>Basic</td><td>+ strike · headings · lists · align</td><td><code>~25 KB</code></td></tr>
+          <tr><td>Standard</td><td>+ colour · image · table · find · code view</td><td><code>~38 KB</code></td></tr>
+          <tr><td>Full</td><td>everything (CSS inlined)</td><td><code>~54 KB</code></td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="options">Options</h2>
+      <table>
+        <thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>placeholder</code></td><td>string</td><td>Empty-state text.</td></tr>
+          <tr><td><code>content</code></td><td>string</td><td>Initial HTML.</td></tr>
+          <tr><td><code>width</code> / <code>maxWidth</code></td><td>number｜string</td><td>Number = px; string (e.g. <code>'100%'</code>) for responsive.</td></tr>
+          <tr><td><code>height</code> / <code>maxHeight</code></td><td>number</td><td>Editor body height in px.</td></tr>
+          <tr><td><code>onChange</code></td><td>fn(html)</td><td>Called on every content change.</td></tr>
+          <tr><td><code>toolbar1</code> / <code>toolbar2</code></td><td>array</td><td>Toolbar groups, e.g. <code>{ group, items: [] }</code>.</td></tr>
+          <tr><td><code>formats</code> / <code>modules</code></td><td>string[]</td><td>Which registered features to activate.</td></tr>
+          <tr><td><code>features</code></td><td>object</td><td><code>{ wordCount, breadcrumb, … }</code> — toggle the status bar.</td></tr>
+          <tr><td><code>maxLength</code></td><td>number</td><td>Hard character limit.</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="formats">Formats &amp; modules</h2>
+      <p>Register with <code>registry.register('formats/&lt;name&gt;', Class)</code> or <code>'modules/&lt;name&gt;'</code>.</p>
+      <h3>Formats</h3>
+      <p><code>bold</code> · <code>italic</code> · <code>underline</code> · <code>strike</code> · <code>subscript</code> · <code>superscript</code> · <code>color</code> · <code>background</code> · <code>link</code> · <code>heading</code> · <code>font-family</code> · <code>text-size</code> · <code>line-height</code> · <code>capitalization</code> · <code>text-align</code> · <code>list</code> · <code>indent-increase</code> · <code>indent-decrease</code> · <code>image</code> · <code>video</code> · <code>table</code> · <code>emoji</code> · <code>tag</code></p>
+      <h3>Modules</h3>
+      <p><code>toolbar</code> · <code>history</code> · <code>slash-menu</code> · <code>block-toolbar</code> (bubble bar) · <code>table-toolbar</code> · <code>find-replace</code> · <code>code-view</code> · <code>resize-handles</code></p>
+
+      <h2 id="methods">Methods</h2>
+      <table>
+        <thead><tr><th>Method</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>getHTML()</code> / <code>getText()</code></td><td>Read current content.</td></tr>
+          <tr><td><code>insertHTML(html)</code> / <code>insertText(t)</code></td><td>Insert at the caret.</td></tr>
+          <tr><td><code>clear()</code> / <code>isEmpty()</code></td><td>Reset / check empty.</td></tr>
+          <tr><td><code>focus()</code></td><td>Focus the editor.</td></tr>
+          <tr><td><code>setReadOnly(bool)</code></td><td>Toggle read-only.</td></tr>
+          <tr><td><code>undo()</code> / <code>redo()</code></td><td>History control.</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="styles">Styling</h2>
+      <p>The look is driven by CSS custom properties — override them to theme the editor:</p>
+      <pre><code>.yjd-rich-editor {
+  <span class="k">--rte-accent</span>: #6d5efc;     <span class="c">/* primary */</span>
+  <span class="k">--rte-ink</span>: #20242f;        <span class="c">/* text */</span>
+  <span class="k">--rte-radius</span>: 14px;
+  <span class="k">--rte-border</span>: #e9e9f1;
+}</code></pre>
+      <p style="margin-top:24px"><a href="/demos/index.html">→ Open the live playground</a></p>
+    </main>
+  </div>
+
+  <footer>yjd.io · vanilla-JS rich text editor · ISC</footer>
+</body>
+</html>
