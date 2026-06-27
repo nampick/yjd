@@ -62,6 +62,7 @@ export { default as CodeView } from './lib/modules/code-view.js';
 export { default as FindReplace } from './lib/modules/find-replace.js';
 export { default as SlashMenu } from './lib/modules/slash-menu.js';
 export { default as Mention } from './lib/modules/mention.js';
+export { default as Ai } from './lib/modules/ai.js';
 export { default as ResizeHandles } from './lib/modules/resize-handles.js';
 
 // UI

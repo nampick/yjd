@@ -30,11 +30,12 @@ Every preset is built from the same `/core` entry — pick a profile, tree-shake
 | Comment box | bold · italic · link · list · image · mention + `fromTextarea` | **~26 KB** |
 | Basic | + strike · headings · lists · align | **~25 KB** |
 | Standard | + colour · image · table · find · code view | **~38 KB** |
-| Full (all-in-one) | everything, CSS inlined | **~64 KB** |
+| + AI assistant | any preset + `ai` module (BYO model, no SDK bundled) | **+~2 KB** |
+| Full (all-in-one) | everything, CSS inlined | **~66 KB** |
 
 > All figures are measured gzip. Tree-shake from the `/core` entry to land near the
 > top of the table; the all-in-one default (`import yjd from '@oix1987/yjd'`) is the
-> ~64 KB row because it registers every format/module and inlines the CSS. For
+> ~66 KB row because it registers every format/module and inlines the CSS. For
 > comparison, Quill 2 is ~60 KB. The standalone stylesheet is ~10 KB gzip — link it
 > once (and skip `StylesLoader`) to keep it out of the JS.
 
@@ -139,7 +140,7 @@ const ed = Editor.fromTextarea('#comment', {
 
 **Formats** — `bold` · `italic` · `underline` · `strike` · `subscript` · `superscript` · `color` · `background` · `link` · `heading` · `font-family` · `text-size` · `line-height` · `capitalization` · `text-align` · `list` · `indent-increase` · `indent-decrease` · `image` · `video` · `table` · `emoji` · `tag`
 
-**Modules** — `toolbar` · `history` · `slash-menu` · `mention` · `block-toolbar` (bubble bar) · `table-toolbar` · `find-replace` · `code-view` · `resize-handles`
+**Modules** — `toolbar` · `history` · `slash-menu` · `mention` · `ai` (BYO-model assistant) · `block-toolbar` (bubble bar) · `table-toolbar` · `find-replace` · `code-view` · `resize-handles`
 
 ## Methods
 
@@ -229,6 +230,63 @@ Inserts a token that serializes with its id:
 If a `source` item has no `avatar_url`, pass `icon` (inline SVG) for special entries
 like “@all”. Menus are portaled to `<body>` but inherit the editor's `--rte-*` theme.
 
+### AI assistant (bring your own model)
+
+Turn yjd into a "write-with-AI" surface **without bundling any model**. Like
+`mention.source`, you supply a `complete` hook that calls whatever LLM you like
+(Claude, your own endpoint, anything). The module is **inert until you do**, and
+**tree-shakes to 0** when unused — so the AI code never reaches users who don't
+opt in.
+
+```js
+new yjd('#editor', {
+  ai: {
+    // REQUIRED. Resolve to the generated text. Stream by calling onToken with
+    // each chunk; if you only stream, return undefined and chunks are joined.
+    complete: async ({ action, prompt, text, signal }, onToken) => {
+      const res = await fetch('/api/ai', {
+        method: 'POST', signal,
+        body: JSON.stringify({ action, prompt, text }),
+      });
+      return (await res.json()).text;
+    },
+    autocomplete: true,   // optional: inline ghost-text, Tab to accept
+  },
+});
+```
+
+**What the user gets:**
+
+- **Selection toolbar** — select text and a floating bar offers *Improve · Fix
+  spelling & grammar · Shorten · Lengthen · Simplify · Summarize* plus a free-form
+  **Ask AI…** box. The result is previewed with **Accept / Retry / Discard** — the
+  user always stays in control (nothing overwrites their text until they accept).
+- **Ghost-text autocomplete** (opt-in) — a greyed inline suggestion as they type;
+  **Tab** accepts, any other key dismisses. Debounced and request-cancelling, so it
+  never blocks typing.
+
+Customise the actions, or drive it programmatically:
+
+```js
+ai: { complete, actions: [{ id: 'tr', label: 'Translate → FR', prompt: 'Translate to French.' }] }
+
+editor.ai.run('Make this sound friendlier');   // run on the current selection
+editor.on('ai:accept', ({ result }) => {});     // ai:start · ai:done · ai:error · ai:accept · ai:discard
+```
+
+Building your own agent UI? The same primitives are public:
+
+```js
+editor.getSelection();                 // { text, html, isEmpty, range }
+editor.replaceSelection(text, { asText: true });   // sanitized, undo-aware
+const s = editor.streamInto();         // token-by-token sink
+s.append('Hel'); s.append('lo'); s.commit();       // or s.cancel() to undo the stream
+```
+
+Nothing the module renders ever lives in the editable DOM, so `getContent()` /
+`getJSON()` / `onChange` stay clean. Menus portal to `<body>` but inherit the
+editor's `--rte-*` theme.
+
 ### Toolbar presets
 
 ```js
@@ -265,7 +323,8 @@ renderStatic(post.body_html, document.querySelector('#post'));
 
 - **Events** (via `editor.on(name, cb)` / `editor.off(name, cb)`): `change`,
   `image:upload` · `image:uploaded` · `image:error`, `file:upload` · `file:uploaded`
-  · `file:error`, `mention:select`, `content:overflow` (when `maxContentSize` exceeded).
+  · `file:error`, `mention:select`, `ai:start` · `ai:done` · `ai:accept` · `ai:discard`
+  · `ai:error`, `content:overflow` (when `maxContentSize` exceeded).
 - `editor.editor` is the public contentEditable element (attach your own listeners).
 - **Markdown dialect** — GFM-ish: headings `#`–`######`, `**bold**`, `*italic*`,
   `~~strike~~`, `` `code` ``, fenced ``` ``` ```, `>` quotes, `-`/`1.` lists,

@@ -3439,6 +3439,92 @@
 .yjd-mention-name { font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (prefers-reduced-motion: reduce) { .yjd-mention-menu { animation: none; } }
 
+/* ── AI assistant: selection toolbar + ghost text ─────────────────────── */
+.yjd-ai-bar {
+  position: absolute;
+  z-index: 2100;
+  width: 320px;
+  max-width: calc(100vw - 16px);
+  padding: 8px;
+  background: var(--rte-bg, #ffffff);
+  border: 1px solid var(--rte-border, #e9e9f1);
+  border-radius: var(--rte-radius-md, 12px);
+  box-shadow: var(--rte-shadow, 0 12px 32px -8px rgba(20, 24, 46, 0.20), 0 4px 10px -4px rgba(20, 24, 46, 0.10));
+  font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: var(--rte-ink, #20242f);
+  animation: yjd-slash-in 90ms ease-out;
+}
+.yjd-ai-actions { display: flex; flex-wrap: wrap; gap: 4px; }
+.yjd-ai-act {
+  flex: 1 1 auto;
+  padding: 6px 10px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  color: var(--rte-ink, #20242f);
+  font: inherit;
+}
+.yjd-ai-act:hover { background: var(--rte-accent-weak, #efedff); color: var(--rte-accent-ink, #5a48ee); }
+.yjd-ai-ask { margin-top: 6px; }
+.yjd-ai-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid var(--rte-border, #e9e9f1);
+  border-radius: 8px;
+  font: inherit;
+  color: var(--rte-ink, #20242f);
+  background: var(--rte-bg, #fff);
+}
+.yjd-ai-input:focus {
+  outline: none;
+  border-color: var(--rte-accent, #6d5efc);
+  box-shadow: 0 0 0 3px var(--rte-accent-ring, rgba(109, 94, 252, 0.28));
+}
+.yjd-ai-result {
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--rte-accent-weak, #efedff);
+  color: var(--rte-ink, #20242f);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.yjd-ai-result.is-error { background: #fdecec; color: #b3261e; }
+.yjd-ai-foot { display: flex; gap: 6px; margin-top: 8px; }
+.yjd-ai-foot button {
+  flex: 1 1 auto;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--rte-border, #e9e9f1);
+  background: var(--rte-bg, #fff);
+  color: var(--rte-ink, #20242f);
+  cursor: pointer;
+  font: inherit;
+}
+.yjd-ai-accept { background: var(--rte-accent, #6d5efc) !important; color: var(--rte-accent-ink-on, #fff) !important; border-color: var(--rte-accent, #6d5efc) !important; }
+.yjd-ai-foot button:hover { filter: brightness(0.97); }
+.yjd-ai-ghost {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  color: var(--rte-muted, #9aa0b4);
+  white-space: pre;
+  font: inherit;
+}
+@media (prefers-reduced-motion: reduce) { .yjd-ai-bar { animation: none; } }
+
+/* AI toolbar button — accent-tinted so the assistant reads as "special". */
+.rich-editor-toolbar-btn.ai-btn { color: var(--rte-accent, #6d5efc); }
+.rich-editor-toolbar-btn.ai-btn:hover {
+  background: var(--rte-accent-weak, #efedff);
+  color: var(--rte-accent-ink, #5a48ee);
+}
+
 /* ── Static read-view (.yjd-content) (v2.24) ──────────────────────────────
    renderStatic() tags its host with .yjd-content. These rules mirror the
    editor's content typography so a saved post renders identically without an

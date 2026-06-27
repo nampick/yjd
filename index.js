@@ -41,6 +41,7 @@ import CodeView from './lib/modules/code-view.js';
 import FindReplace from './lib/modules/find-replace.js';
 import SlashMenu from './lib/modules/slash-menu.js';
 import Mention from './lib/modules/mention.js';
+import Ai from './lib/modules/ai.js';
 
 import ResizeHandles from './lib/modules/resize-handles.js';
 
@@ -97,6 +98,7 @@ registry.register('modules/code-view', CodeView, true);
 registry.register('modules/find-replace', FindReplace, true);
 registry.register('modules/slash-menu', SlashMenu, true);
 registry.register('modules/mention', Mention, true);
+registry.register('modules/ai', Ai, true);
 
 registry.register('modules/resize-handles', ResizeHandles, true);
 
@@ -206,6 +208,7 @@ export {
   FindReplace,
   SlashMenu,
   Mention,
+  Ai,
 
   ResizeHandles
 };

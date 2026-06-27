@@ -76,6 +76,84 @@ export interface SubmitOptions {
   newlineOnShiftEnter?: boolean;
 }
 
+/** Context passed to the AI `complete` hook for one request. */
+export interface AiContext {
+  /** Action id ('improve', 'fix', 'ask', 'autocomplete', or a custom id). */
+  action: string;
+  /** Instruction for the action (the action's prompt, or the user's question). */
+  prompt: string;
+  /** The selected text (or, for autocomplete, the preceding context). */
+  text: string;
+  /** The selected HTML, when available. */
+  html: string;
+  /** Aborts when the request is superseded or cancelled. */
+  signal: AbortSignal;
+}
+
+/** A selection-toolbar action. */
+export interface AiAction {
+  id: string;
+  label: string;
+  /** Instruction handed to the `complete` hook as `prompt`. */
+  prompt: string;
+}
+
+/** Inline ghost-text autocomplete tuning. */
+export interface AiAutocompleteOptions {
+  /** Idle delay before requesting a suggestion (ms, default 400). */
+  debounce?: number;
+  /** Minimum context length before suggesting (default 3). */
+  minChars?: number;
+  /** Max characters of preceding text sent as context (default 600). */
+  maxContext?: number;
+}
+
+/**
+ * AI configuration. Inert until a `complete` hook is given (BYO-model, like
+ * `mention.source`). Enables a selection toolbar (improve/fix/shorten/…/Ask AI)
+ * with accept-or-discard, and optional ghost-text autocomplete.
+ */
+export interface AiOptions {
+  /**
+   * Call your LLM and resolve to the generated text. Stream by invoking
+   * `onToken` with each chunk; if you only stream, return undefined and the
+   * chunks are joined.
+   */
+  complete: (ctx: AiContext, onToken: (chunk: string) => void) => string | void | Promise<string | void>;
+  /** Replace/extend the selection-toolbar actions. */
+  actions?: AiAction[];
+  /** Inline ghost-text autocomplete (Tab to accept). */
+  autocomplete?: boolean | AiAutocompleteOptions;
+}
+
+/** Streaming sink returned by editor.streamInto(). */
+export interface StreamSink {
+  /** Append a chunk at the caret (first append replaces the selection). */
+  append(chunk: string): void;
+  /** Finish the stream. */
+  commit(): void;
+  /** Undo the whole streamed insertion. */
+  cancel(): void;
+}
+
+/** A snapshot of the current selection (the context an AI/tool acts on). */
+export interface SelectionSnapshot {
+  text: string;
+  html: string;
+  isEmpty: boolean;
+  range: Range;
+}
+
+/** The AI module instance, exposed as `editor.ai` when configured. */
+export interface AiController {
+  /** Run a built-in/custom action or a free-form prompt on the selection. */
+  run(action: AiAction | string, opts?: { text?: string; html?: string }): Promise<string>;
+  /** Open the assistant bar (selection actions, or Ask-AI at the caret). */
+  openFromToolbar(): void;
+  /** Manually trigger a ghost-text completion at the caret. */
+  autocomplete(): void;
+}
+
 /**
  * Toolbar configuration: a built-in preset, an exclusion of default items,
  * a flat item list (single group), or full custom groups via toolbar1/toolbar2.
@@ -126,6 +204,8 @@ export interface EditorOptions {
   mention?: MentionOptions;
   /** Enter-to-submit behaviour for comment-style editors. */
   submit?: SubmitOptions;
+  /** AI assistant (selection toolbar + ghost-text). Inert until `complete` is set. */
+  ai?: AiOptions;
   /** Built-in preset / exclusion / flat list, instead of toolbar1/toolbar2. */
   toolbar?: ToolbarOption;
   /** Warn (emit 'content:overflow') when serialized HTML exceeds this many chars. */
@@ -159,6 +239,8 @@ export class Editor {
   ): TextareaEditor;
   /** The contentEditable element (public — apps may attach listeners to it). */
   editor: HTMLElement;
+  /** The AI module, present when `ai.complete` was configured. */
+  ai?: AiController;
   on(event: string, handler: (data: any) => void): void;
   /** Remove a previously-added listener (symmetric with on()). */
   off(event: string, handler: (data: any) => void): void;
@@ -179,6 +261,12 @@ export class Editor {
   clear(): void;
   insertText(text: string): void;
   insertHTML(html: string): void;
+  /** Snapshot of the current selection (null when outside the editor). */
+  getSelection(): SelectionSnapshot | null;
+  /** Replace the current selection with content (sanitized, undo-aware). */
+  replaceSelection(content: string, opts?: { asText?: boolean }): void;
+  /** Open a streaming sink at the caret for token-by-token AI output. */
+  streamInto(): StreamSink;
   clearFormatting(): void;
   insertHorizontalRule(): void;
   insertImageFile(file: File): void;
@@ -281,6 +369,7 @@ export const CodeView: any;
 export const FindReplace: any;
 export const SlashMenu: any;
 export const Mention: any;
+export const Ai: any;
 export const ResizeHandles: any;
 
 // UI components

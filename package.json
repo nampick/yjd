@@ -1,6 +1,6 @@
 {
   "name": "@oix1987/yjd",
-  "version": "2.1.2",
+  "version": "2.2.0",
   "description": "A powerful rich text editor with real-time content change tracking for web applications using base javascript",
   "license": "ISC",
   "author": "Oix1987",
@@ -41,7 +41,7 @@
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
     "csso": "^5.0.5",
-    "jsdom": "^29.1.1",
+    "jsdom": "^24.1.3",
     "rollup": "^4.46.3"
   },
   "sideEffects": [

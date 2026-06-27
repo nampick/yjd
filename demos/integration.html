@@ -5,74 +5,87 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>yjd — Integration features</title>
   <meta name="description" content="Live test of yjd integration features: image upload hook, @mention, Markdown/JSON/HTML export, fromTextarea, renderStatic.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='4' fill='%236d5efc'/%3E%3Ctext x='8' y='12' font-family='monospace' font-size='10' font-weight='700' fill='white' text-anchor='middle'%3Ey%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="/lib/styles.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --violet: #6d5efc; --violet-ink: #4a3fd0; --ink: #14162e;
-      --muted: #5b6373; --line: #e7e7f0; --bg: #f6f6fb; --card: #fff;
-      --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    :root{
+      --ink:#16161d;--ink-2:#3b3d49;--paper:#fff;--bg:#f4f4f8;
+      --violet:#6d5efc;--violet-ink:#5a48ee;--violet-weak:#efedff;--line:#e7e7f0;--muted:#6b6f7e;
+      --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+      --display:"Space Grotesk",system-ui,sans-serif;--body:"Inter",system-ui,-apple-system,sans-serif;
     }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; background: var(--bg); color: var(--ink);
-      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      line-height: 1.5;
-    }
-    header {
-      background: var(--card); border-bottom: 1px solid var(--line);
-      padding: 18px 24px; position: sticky; top: 0; z-index: 50;
-    }
-    header h1 { margin: 0; font-size: 18px; letter-spacing: -0.01em; }
-    header h1 b { color: var(--violet); }
-    header p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
-    main { max-width: 980px; margin: 0 auto; padding: 28px 20px 80px; }
-    .card {
-      background: var(--card); border: 1px solid var(--line); border-radius: 16px;
-      padding: 22px; margin-bottom: 24px;
-    }
-    .card > h2 {
-      margin: 0 0 4px; font-size: 16px; display: flex; align-items: center; gap: 8px;
-    }
-    .card > h2 .tag {
-      font: 600 11px/1 var(--mono); color: var(--violet-ink); background: #efedff;
-      padding: 4px 7px; border-radius: 999px; letter-spacing: .02em;
-    }
-    .card > p.desc { margin: 0 0 16px; color: var(--muted); font-size: 13.5px; }
-    .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-    button.act {
-      font: 500 13px Inter, sans-serif; cursor: pointer;
-      background: var(--violet); color: #fff; border: none;
-      padding: 8px 14px; border-radius: 9px;
-    }
-    button.act.ghost { background: #efedff; color: var(--violet-ink); }
-    button.act:hover { filter: brightness(1.05); }
-    pre.out {
-      background: #14162e; color: #e6e6f5; border-radius: 12px; padding: 14px 16px;
-      font: 12.5px/1.55 var(--mono); overflow: auto; max-height: 320px;
-      margin: 14px 0 0; white-space: pre-wrap; word-break: break-word;
-    }
-    pre.out:empty { display: none; }
-    textarea#ta {
-      width: 100%; min-height: 90px; border: 1px solid var(--line); border-radius: 10px;
-      padding: 10px 12px; font: 13px var(--mono); resize: vertical;
-    }
-    .mono-note { font: 12px var(--mono); color: var(--muted); }
-    .read-view { border: 1px dashed var(--line); border-radius: 12px; padding: 18px; margin-top: 14px; background: #fafafe; }
-    .split { display: grid; gap: 18px; grid-template-columns: 1fr; }
-    @media (min-width: 760px) { .split.two { grid-template-columns: 1fr 1fr; } }
-    .hl { color: var(--violet-ink); font-weight: 600; }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.6;-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}
+    .mono{font-family:var(--mono)}
+    .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+
+    /* shared nav (matches yjd.io) */
+    header.nav{position:sticky;top:0;z-index:50;backdrop-filter:saturate(1.4) blur(10px);background:rgba(244,244,248,.85);border-bottom:1px solid var(--line)}
+    .nav-in{display:flex;align-items:center;justify-content:space-between;height:60px}
+    .logo{display:flex;align-items:center;gap:9px;font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.02em;color:var(--ink)}
+    .logo .mark{width:28px;height:28px;border-radius:8px;background:var(--violet);color:#fff;display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:15px}
+    .logo small{color:var(--muted);font-weight:500;font-size:13px;font-family:var(--body)}
+    .nav-links{display:flex;align-items:center;gap:24px;font-weight:500;font-size:15px}
+    .nav-links a{color:var(--ink)}.nav-links a:not(.nav-cta):hover{color:var(--violet-ink)}
+    .nav-cta{background:var(--ink);color:#fff;padding:8px 16px;border-radius:10px;font-weight:600}
+    .nav-cta:hover{background:var(--violet-ink);color:#fff}
+    @media(max-width:720px){.nav-links a.hide-sm{display:none}}
+
+    main{max-width:960px;margin:0 auto;padding:8px 24px 80px}
+    .page-head{padding:36px 0 24px}
+    .page-head h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,5vw,42px);letter-spacing:-.02em;margin:0}
+    .page-head .sub{color:var(--ink-2);font-size:17px;margin:10px 0 0;max-width:60ch}
+
+    .card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:24px;margin-bottom:22px;transition:border-color .15s,box-shadow .15s}
+    .card:hover{border-color:#d9d6f7;box-shadow:0 18px 36px -26px rgba(109,94,252,.4)}
+    .card>h2{margin:0 0 6px;font-family:var(--display);font-weight:600;font-size:18px;letter-spacing:-.01em;display:flex;align-items:center;gap:9px}
+    .card>h2 .tag{font:600 11px/1 var(--mono);color:var(--violet-ink);background:var(--violet-weak);padding:5px 8px;border-radius:999px;letter-spacing:.03em}
+    .card>p.desc{margin:0 0 16px;color:var(--ink-2);font-size:14.5px}
+    .card>p.desc code,.card>p.desc kbd{font-family:var(--mono);font-size:.86em;background:var(--violet-weak);color:var(--violet-ink);padding:2px 6px;border-radius:6px}
+    .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+    button.act{font:600 13.5px var(--body);cursor:pointer;background:var(--violet);color:#fff;border:1px solid transparent;padding:9px 15px;border-radius:10px;transition:background .15s,transform .12s,border-color .15s}
+    button.act:hover{background:var(--violet-ink)}
+    button.act:active{transform:translateY(1px)}
+    button.act.ghost{background:var(--paper);color:var(--ink);border-color:var(--line)}
+    button.act.ghost:hover{background:var(--violet-weak);color:var(--violet-ink);border-color:var(--violet)}
+    pre.out{background:#16161d;color:#e7e7f3;border-radius:14px;padding:16px 18px;font:12.5px/1.6 var(--mono);overflow:auto;max-height:320px;margin:14px 0 0;white-space:pre-wrap;word-break:break-word}
+    pre.out:empty{display:none}
+    textarea#ta{width:100%;min-height:90px;border:1px solid var(--line);border-radius:12px;padding:11px 13px;font:13px var(--mono);resize:vertical;background:var(--paper);color:var(--ink)}
+    textarea#ta:focus{outline:none;border-color:var(--violet);box-shadow:0 0 0 3px rgba(109,94,252,.18)}
+    .mono-note{font:12px var(--mono);color:var(--muted)}
+    .read-view{border:1px dashed #d4d0f0;border-radius:14px;padding:18px;margin-top:14px;background:#fbfbff}
+    .split{display:grid;gap:18px;grid-template-columns:1fr}
+    @media(min-width:760px){.split.two{grid-template-columns:1fr 1fr}}
+    .hl{color:var(--violet-ink);font-weight:600}
+    footer{border-top:1px solid var(--line);padding:32px 0;margin-top:8px;color:var(--muted);font-size:14px;text-align:center}
+    @media(max-width:720px){header.nav{backdrop-filter:none;-webkit-backdrop-filter:none;background:#f4f4f8}}
   </style>
 </head>
 <body>
-  <header>
-    <h1><b>yjd</b> · Integration features</h1>
-    <p>Live test — image upload hook · @mention &amp; #task · Markdown/JSON/HTML export · fromTextarea · renderStatic</p>
-  </header>
+  <header class="nav"><div class="wrap nav-in">
+    <a class="logo" href="/site/index.html"><span class="mark">y</span> yjd <small>.io</small></a>
+    <nav class="nav-links">
+      <a href="/site/index.html" class="hide-sm">Home</a>
+      <a href="/site/docs.html">Docs</a>
+      <a href="/demos/index.html">Playground</a>
+      <a class="nav-cta" href="https://github.com/nampick/yjd">GitHub ↗</a>
+    </nav>
+  </div></header>
 
   <main>
+    <div class="page-head">
+      <h1>Integration features</h1>
+      <p class="sub">Live, runnable demos — <b>AI assistant</b> · image upload hook · @mention &amp; #task · Markdown / JSON / HTML export · <span class="mono">fromTextarea</span> · <span class="mono">renderStatic</span>.</p>
+    </div>
+
     <!-- 1. Editor with image upload hook + mentions -->
     <section class="card">
-      <h2><span class="tag">P0</span> Editor — upload hook + @mention</h2>
+      <h2><span class="tag">P0</span> Editor — upload hook + @mention + AI</h2>
       <p class="desc">
         Type <span class="hl">@</span> to tag a person, <span class="hl">#</span> to link a task.
         Insert an image (toolbar / paste / drop) — it uploads via the <code>image.upload</code> hook
@@ -93,6 +106,11 @@
     </section>
 
     <!-- 2. Markdown / JSON round-trip -->
+    <section class="card">
+      <h2><span class="tag">P0</span> AI assistant — selection toolbar + ghost-text</h2>
+      <p class="desc">In the editor above: <b>select some text</b> → a floating bar offers Improve · Fix · Shorten · Lengthen · Simplify · Summarize and a free-form <b>Ask AI…</b> box, each previewed with Accept / Retry / Discard. Or just keep typing to see a greyed <b>ghost-text</b> suggestion — press <kbd>Tab</kbd> to accept. This demo mocks the model locally (it streams a transformed version of your text); in your app you point <code>ai.complete</code> at your own LLM. No SDK is bundled, and the module tree-shakes to 0 when unused.</p>
+    </section>
+
     <section class="card">
       <h2><span class="tag">P1</span> Markdown &amp; JSON round-trip</h2>
       <p class="desc">Load content into the editor above from Markdown or JSON. Edit, then re-export — the mention ids survive the round-trip.</p>
@@ -134,6 +152,8 @@ This **Markdown** seeded the editor. Edit above — the textarea stays in sync.<
       <pre class="out" id="ta-mirror" style="max-height:160px"></pre>
     </section>
   </main>
+
+  <footer><div class="wrap">Built with <a href="/site/index.html" style="color:var(--violet-ink)">yjd</a> — dependency-free, tree-shakeable rich text. <a href="https://github.com/nampick/yjd" style="color:var(--violet-ink)">GitHub ↗</a></div></footer>
 
   <script type="module">
     import { yjd, renderStatic } from '/dist/rich-editor.esm.js';
@@ -194,7 +214,42 @@ This **Markdown** seeded the editor. Edit above — the textarea stays in sync.<
           },
         ],
       },
+      // BYO-model AI. This demo MOCKS the LLM (transforms text locally + streams
+      // it) so it runs with no backend — in your app, fetch your own endpoint.
+      ai: {
+        autocomplete: { debounce: 500 },
+        complete: async ({ action, prompt, text, signal }, onToken) => {
+          log('ai:complete → ' + action);
+          const reply = mockLLM(action, prompt, text);
+          // Stream it word-by-word for the "watch it type" feel.
+          let acc = '';
+          for (const word of reply.split(/(\s+)/)) {
+            if (signal.aborted) return acc;
+            await wait(28);
+            acc += word;
+            onToken(word);
+          }
+          return acc;
+        },
+      },
     });
+
+    // A stand-in for a real model — deterministic, offline.
+    function mockLLM(action, prompt, text) {
+      const t = (text || '').trim();
+      switch (action) {
+        case 'autocomplete': return ' ' + (t.endsWith('the') ? 'best possible outcome.' : 'and that is exactly the point.');
+        case 'shorten':   return t.split(/\s+/).slice(0, Math.max(3, t.split(/\s+/).length >> 1)).join(' ') + '…';
+        case 'lengthen':  return t + ' Moreover, this expanded version adds supporting detail while keeping the original tone intact.';
+        case 'fix':       return t.replace(/\bi\b/g, 'I').replace(/\s+([,.!?])/g, '$1');
+        case 'summarize': return 'In short: ' + t.split(/[.!?]/)[0].trim() + '.';
+        case 'simplify':  return t.replace(/\butilize\b/gi, 'use').replace(/\bin order to\b/gi, 'to');
+        case 'ask':       return `(${prompt}) → ` + t.toUpperCase();
+        default:          return t.charAt(0).toUpperCase() + t.slice(1) + ' — now sharper and clearer.';
+      }
+    }
+    ['ai:start','ai:done','ai:accept','ai:discard','ai:error'].forEach((ev) =>
+      editor.on(ev, (d) => log(ev + ' → ' + JSON.stringify(d).slice(0, 80))));
 
     editor.on('mention:select', (item) => log('mention:select → ' + JSON.stringify(item)));
     editor.on('image:error', (e) => log('image:error → ' + (e.reason || 'unknown')));
