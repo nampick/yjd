@@ -1,11 +1,33 @@
 {
   "name": "@oix1987/yjd",
-  "version": "2.2.0",
-  "description": "Dependency-free, tree-shakeable rich text / WYSIWYG editor for the web (16 KB). Framework-agnostic — React, Vue, Svelte, or static pages.",
-    "keywords": ["rich-text-editor", "wysiwyg", "wysiwyg-editor", "editor", "text-editor", "contenteditable", "html-editor", "markdown", "tree-shakeable", "zero-dependencies", "typescript", "javascript", "react", "vue", "svelte"],
-    "homepage": "https://yjd.io",
-    "repository": { "type": "git", "url": "git+https://github.com/nampick/yjd.git" },
-    "bugs": { "url": "https://github.com/nampick/yjd/issues" },"license": "ISC",
+  "version": "2.2.1",
+  "description": "Dependency-free, tree-shakeable rich text editor for the web with a bring-your-own-model AI assistant (selection toolbar + ghost-text), @mentions, image/file upload, and HTML/Markdown/JSON export — ship 16 KB, not the whole library.",
+  "keywords": [
+    "rich-text-editor",
+    "wysiwyg",
+    "wysiwyg-editor",
+    "editor",
+    "text-editor",
+    "contenteditable",
+    "html-editor",
+    "markdown",
+    "tree-shakeable",
+    "zero-dependencies",
+    "typescript",
+    "javascript",
+    "react",
+    "vue",
+    "svelte"
+  ],
+  "homepage": "https://yjd.io",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nampick/yjd.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nampick/yjd/issues"
+  },
+  "license": "ISC",
   "author": "Oix1987",
   "type": "module",
   "main": "dist/rich-editor.min.js",
