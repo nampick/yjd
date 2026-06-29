@@ -13,7 +13,7 @@
  * from the public/ root. The landing is duplicated at the root so yjd.io/
  * shows it directly — no redirect needed.
  */
-import { rmSync, mkdirSync, cpSync, copyFileSync, readdirSync } from 'node:fs';
+import { rmSync, mkdirSync, cpSync, copyFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const out = 'public';
@@ -40,4 +40,20 @@ for (const f of readdirSync('dist')) {
 // shared stylesheet the pages <link>
 copyFileSync('lib/styles.min.css', join(out, 'lib/styles.min.css'));
 
-console.log('Built ./public for Cloudflare Pages (landing + docs + playground + bundles).');
+// SEO: sitemap.xml + robots.txt (Cloudflare Pages serves .html at clean URLs).
+const SITE = 'https://yjd.io';
+const pages = [
+  { loc: '/', priority: '1.0' },
+  { loc: '/site/docs', priority: '0.8' },
+  { loc: '/demos/', priority: '0.7' },
+  { loc: '/demos/integration', priority: '0.6' },
+];
+const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${pages.map((p) => `  <url>\n    <loc>${SITE}${p.loc}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>${p.priority}</priority>\n  </url>`).join('\n')}
+</urlset>
+`;
+writeFileSync(join(out, 'sitemap.xml'), sitemap);
+writeFileSync(join(out, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`);
+
+console.log('Built ./public for Cloudflare Pages (landing + docs + playground + bundles + sitemap).');

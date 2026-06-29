@@ -6,6 +6,8 @@
   <title>yjd — rich text, without the weight</title>
   <meta name="description" content="yjd is a dependency-free, tree-shakeable rich text editor for the web. Compose it from a /core entry and ship 16 KB, not the whole library.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='4' fill='%236d5efc'/%3E%3Ctext x='8' y='12' font-family='monospace' font-size='10' font-weight='700' fill='white' text-anchor='middle'%3Ey%3C/text%3E%3C/svg%3E">
+  <link rel="canonical" href="https://yjd.io/">
+  <link rel="sitemap" type="application/xml" href="/sitemap.xml">
   <link rel="stylesheet" href="/lib/styles.min.css">
   <link rel="modulepreload" href="/dist/rich-editor.esm.js">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,8 +36,8 @@
     .logo{display:flex;align-items:center;gap:9px;font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.02em}
     .logo .mark{width:28px;height:28px;border-radius:8px;background:var(--violet);color:#fff;display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:15px}
     .logo small{color:var(--muted);font-weight:500;font-size:13px;font-family:var(--body)}
-    .nav-links{display:flex;align-items:center;gap:26px;font-weight:500;font-size:15px}
-    .nav-links a:not(.nav-cta):hover{color:var(--violet-ink)}
+    .nav-links{display:flex;align-items:center;gap:22px;font-weight:500;font-size:15px}
+    .nav-links a:not(.nav-cta):hover,.nav-links a[aria-current]{color:var(--violet-ink)}
     .nav-cta:hover{color:#fff}
     .nav-cta{background:var(--ink);color:#fff;padding:8px 16px;border-radius:10px;font-weight:600}
     .nav-cta:hover{background:var(--violet-ink)}
@@ -129,10 +131,9 @@
         <span class="mark">y</span> yjd <small>.io</small>
       </a>
       <nav class="nav-links">
-        <a href="#features" class="hide-sm">Features</a>
-        <a href="#sizes" class="hide-sm">Bundle size</a>
-        <a href="/demos/index.html">Demo</a>
+        <a href="/site/index.html" aria-current="page">Home</a>
         <a href="/site/docs.html">Docs</a>
+        <a href="/demos/index.html">Playground</a>
         <a class="nav-cta" href="https://github.com/nampick/yjd">GitHub ↗</a>
       </nav>
     </div>
