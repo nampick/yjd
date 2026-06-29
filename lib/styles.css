@@ -660,17 +660,19 @@
   max-width: 100%;
   max-height: 37px;
   border-radius: 10px;
-  border: 1px solid #E1E1E1;
+  border: 1px solid var(--rte-border-strong, #E1E1E1);
   box-sizing: border-box;
-  color: #252424 !important;
+  background: var(--rte-bg, #fff);
+  color: var(--rte-ink, #252424);
   font-size: 14px;
   /* Allow interaction with inputs */
   pointer-events: auto;
 }
+.yjd-rich-editor .yjd-input::placeholder { color: var(--rte-muted, #9aa0b4); }
 .yjd-rich-editor .yjd-input:focus {
   outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1);
+    border-color: var(--rte-accent, #3b82f6);
+    box-shadow: 0 0 0 3px var(--rte-accent-ring, rgba(59, 130, 246, 0.1));
 }
 .yjd-rich-editor .yjd-button-container{
   display: flex ;
@@ -869,8 +871,8 @@
 .yjd-rich-editor .table-grid-cell {
   width: 20px;
   height: 20px;
-  background: #fff;
-  border: 1px solid rgb(238, 238, 238);
+  background: var(--rte-bg, #fff);
+  border: 1px solid var(--rte-border-strong, rgb(238, 238, 238));
   cursor: pointer;
   transition: background-color 0.1s ease;
   border-radius: 2px;
