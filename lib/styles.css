@@ -60,8 +60,8 @@
   line-height: 1.7;
   outline: none;
   padding: 20px 20px 20px 20px;
-  background: #fff;
-  color: #2c3e50;
+  background: var(--rte-bg, #fff);
+  color: var(--rte-ink, #2c3e50);
   font-family: inherit;
   overflow-y: auto;
   box-sizing: border-box;
@@ -120,7 +120,7 @@
 }
 
 .yjd-rich-editor .rich-editor-area a {
-  color: #2563eb;
+  color: var(--rte-link, #2563eb);
   text-decoration: underline;
   cursor: pointer;
 }
@@ -165,7 +165,7 @@
   font-size: 0.875em;
   font-weight: bold;
   margin: 1.5em 0;
-  color: #555;
+  color: var(--rte-muted, #555);
 }
 
 /* lists */
@@ -183,7 +183,8 @@
 .yjd-rich-editor .rich-editor-area pre,
 .yjd-rich-editor .rich-editor-area code {
   font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
-  background: #f1f2f3;
+  background: var(--rte-code-bg, #f1f2f3);
+  color: var(--rte-code-ink, inherit);
   padding: 4px 6px;
   border-radius: 4px;
   overflow-x: auto;
@@ -201,12 +202,12 @@
 
 /* blockquote */
 .yjd-rich-editor .rich-editor-area blockquote {
-  border-left: 4px solid #d1d5db;
+  border-left: 4px solid var(--rte-quote-border, #d1d5db);
   margin: 1em 0;
   padding: 4px 12px;
-  color: #555;
+  color: var(--rte-quote-ink, #555);
   font-style: italic;
-  background: #f9fafb;
+  background: var(--rte-quote-bg, #f9fafb);
 }
 .yjd-rich-editor .rich-editor-area sub {
   font-size: 0.75em;
@@ -223,7 +224,7 @@
   cursor: pointer;
 }
 .yjd-rich-editor .rich-editor-area pre {
-  background-color: #f1f2f3;
+  background-color: var(--rte-code-block-bg, #f1f2f3);
   width: 96%;
   padding: 10px 2% 10px 2%;
   font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
@@ -269,7 +270,7 @@
     justify-content:space-between;
     gap:20px;
     flex-wrap:wrap;
-    background:#FCFCFC;
+    background:var(--rte-chrome);
     align-items:center;
     min-height:48px;
     padding-bottom:8px;
@@ -285,7 +286,7 @@
   justify-content: space-between;
   gap: 20px;
   flex-wrap: wrap;
-  background: #FCFCFC;
+  background: var(--rte-chrome);
   align-items: center;
   min-height: 48px;
   padding-bottom: 8px;
@@ -336,7 +337,7 @@
   justify-content: center;
 }
 .yjd-rich-editor .rich-editor-toolbar-btn:hover {
-  background: #EEEEEE !important;
+  background: var(--rte-chrome-2) !important;
   cursor: pointer;
 }
 /* Active toolbar-button + icon colours are owned by the design-system layer
@@ -357,7 +358,7 @@
   display:inline-flex;
 }
 .yjd-rich-editor .block-toolbar-btn:hover{
-  background:#EEEEEE;
+  background:var(--rte-chrome-2);
 }
 .yjd-rich-editor .block-toolbar-btn.active{
   background:#CCCCCC;
@@ -540,12 +541,12 @@
 }
 
 .yjd-rich-editor .custom-select-item-button:hover {
-  background: #EEEEEE;
+  background: var(--rte-chrome-2);
 }
 
 .yjd-rich-editor .custom-select-item-button.current {
   font-weight: 500;
-  background: #EEEEEE !important;
+  background: var(--rte-chrome-2) !important;
 }
 .yjd-rich-editor .custom-select-item-button .item-checkmark{
   display:none;
@@ -877,7 +878,7 @@
 
 .yjd-rich-editor .table-grid-cell:hover,
 .yjd-rich-editor .table-grid-cell.highlighted {
-  background: #EEEEEE;
+  background: var(--rte-chrome-2);
 }
 
 /* === TABLE STYLES === */
@@ -1105,7 +1106,7 @@
 }
 
 .yjd-rich-editor .list-button.active {
-  background: #eeeeee;
+  background: var(--rte-chrome-2);
 }
 
 .yjd-rich-editor .list-button svg {
@@ -2142,7 +2143,18 @@
   --rte-accent-ink: #5a48ee;
   --rte-accent-weak: #efedff;
   --rte-accent-ring: rgba(109, 94, 252, 0.28);
+  --rte-accent-ink-on: #ffffff; /* text/icon colour on an accent fill */
   --rte-danger: #e5484d;
+  /* Content palette (editor body + read-view) */
+  --rte-link: #2563eb;
+  --rte-code-bg: #f1f2f3;
+  --rte-code-ink: inherit;
+  --rte-code-block-bg: #20242f;
+  --rte-code-block-ink: #ececf5;
+  --rte-quote-border: #d1d5db;
+  --rte-quote-bg: #f9fafb;
+  --rte-quote-ink: #555555;
+  --rte-table-border: #d1d5db;
   /* Shape & depth */
   --rte-radius: 14px;
   --rte-radius-md: 11px;
@@ -2296,8 +2308,8 @@
   font-size: 0.9em;
 }
 .yjd-rich-editor .rich-editor-area pre {
-  background: #20242f;
-  color: #ececf5;
+  background: var(--rte-code-block-bg);
+  color: var(--rte-code-block-ink);
   border-radius: var(--rte-radius-md);
   padding: 14px 16px;
   border: none;
@@ -2991,10 +3003,10 @@
   max-height: 320px;
   overflow-y: auto;
   padding: 6px;
-  background: #ffffff;
-  border: 1px solid #e9e9f1;
-  border-radius: 12px;
-  box-shadow: 0 12px 32px -8px rgba(20, 24, 46, 0.20), 0 4px 10px -4px rgba(20, 24, 46, 0.10);
+  background: var(--rte-bg, #ffffff);
+  border: 1px solid var(--rte-border, #e9e9f1);
+  border-radius: var(--rte-radius-md, 12px);
+  box-shadow: var(--rte-shadow, 0 12px 32px -8px rgba(20, 24, 46, 0.20), 0 4px 10px -4px rgba(20, 24, 46, 0.10));
   font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   animation: yjd-slash-in 90ms ease-out;
 }
@@ -3010,10 +3022,10 @@
   border-radius: 8px;
   cursor: pointer;
   text-align: left;
-  color: #20242f;
+  color: var(--rte-ink, #20242f);
 }
 .yjd-slash-item:hover,
-.yjd-slash-item.active { background: #efedff; color: #5a48ee; }
+.yjd-slash-item.active { background: var(--rte-accent-weak, #efedff); color: var(--rte-accent-ink, #5a48ee); }
 .yjd-slash-icon {
   display: inline-flex;
   align-items: center;
@@ -3022,10 +3034,10 @@
   height: 28px;
   flex: 0 0 auto;
   border-radius: 7px;
-  background: #f2f2f7;
+  background: var(--rte-chrome-2, #f2f2f7);
   color: inherit;
 }
-.yjd-slash-item.active .yjd-slash-icon { background: #ffffff; }
+.yjd-slash-item.active .yjd-slash-icon { background: var(--rte-bg, #ffffff); }
 .yjd-slash-icon svg {
   width: auto;
   height: 16px;
@@ -3038,8 +3050,8 @@
 .yjd-slash-icon svg [fill="currentColor"] { fill: currentColor; stroke: none; }
 .yjd-slash-text { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
 .yjd-slash-label { font-weight: 500; }
-.yjd-slash-hint { font-size: 12px; color: #767c8e; }
-.yjd-slash-item.active .yjd-slash-hint { color: #8b7ff0; }
+.yjd-slash-hint { font-size: 12px; color: var(--rte-muted, #767c8e); }
+.yjd-slash-item.active .yjd-slash-hint { color: var(--rte-accent, #8b7ff0); }
 @media (prefers-reduced-motion: reduce) { .yjd-slash-menu { animation: none; } }
 
 /* ── Colour button swatch (v2.10) ─────────────────────────────────────────
@@ -3639,3 +3651,101 @@
   outline-offset: -4px;
   background: var(--rte-accent-weak, #f6f5ff);
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DARK MODE (v2.27)
+   The whole UI is token-driven, so dark mode = redefining the --rte-* tokens.
+   Activated by options.theme:'dark' / editor.setTheme('dark') (sets
+   data-theme="dark" on the wrapper), the .yjd-theme-dark class, or
+   theme:'auto' which follows the OS via prefers-color-scheme. Portaled menus
+   (mention/slash) get data-theme set on them by JS so they match too.
+   To MATCH YOUR APP instead, just override any --rte-* var on .yjd-rich-editor
+   (or a shared ancestor) — no dark class needed.
+   ══════════════════════════════════════════════════════════════════════════ */
+.yjd-rich-editor[data-theme="dark"],
+.yjd-rich-editor.yjd-theme-dark,
+.yjd-mention-menu[data-theme="dark"],
+.yjd-slash-menu[data-theme="dark"],
+.yjd-content[data-theme="dark"],
+.yjd-content.yjd-theme-dark {
+  --rte-bg: #1b1d24;
+  --rte-chrome: #23252f;
+  --rte-chrome-2: #2d313d;
+  --rte-border: #353944;
+  --rte-border-strong: #434857;
+  --rte-ink: #e8e9ef;
+  --rte-muted: #9aa0b4;
+  --rte-accent: #8b7ff0;
+  --rte-accent-ink: #b3a8ff;
+  --rte-accent-weak: #2c2942;
+  --rte-accent-ring: rgba(139, 127, 240, 0.40);
+  --rte-accent-ink-on: #ffffff;
+  --rte-danger: #f2686c;
+  --rte-link: #8ab4ff;
+  --rte-code-bg: #2d313d;
+  --rte-code-ink: #e8e9ef;
+  --rte-code-block-bg: #14161d;
+  --rte-code-block-ink: #e3e4ec;
+  --rte-quote-border: #8b7ff0;
+  --rte-quote-bg: #262433;
+  --rte-quote-ink: #c7cad6;
+  --rte-table-border: #434857;
+  --rte-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --rte-shadow: 0 14px 36px -10px rgba(0, 0, 0, 0.6), 0 4px 12px -4px rgba(0, 0, 0, 0.45);
+}
+
+/* theme:'auto' → follow the operating system. */
+@media (prefers-color-scheme: dark) {
+  .yjd-rich-editor[data-theme="auto"],
+  .yjd-content[data-theme="auto"] {
+    --rte-bg: #1b1d24;
+    --rte-chrome: #23252f;
+    --rte-chrome-2: #2d313d;
+    --rte-border: #353944;
+    --rte-border-strong: #434857;
+    --rte-ink: #e8e9ef;
+    --rte-muted: #9aa0b4;
+    --rte-accent: #8b7ff0;
+    --rte-accent-ink: #b3a8ff;
+    --rte-accent-weak: #2c2942;
+    --rte-accent-ring: rgba(139, 127, 240, 0.40);
+    --rte-accent-ink-on: #ffffff;
+    --rte-danger: #f2686c;
+    --rte-link: #8ab4ff;
+    --rte-code-bg: #2d313d;
+    --rte-code-ink: #e8e9ef;
+    --rte-code-block-bg: #14161d;
+    --rte-code-block-ink: #e3e4ec;
+    --rte-quote-border: #8b7ff0;
+    --rte-quote-bg: #262433;
+    --rte-quote-ink: #c7cad6;
+    --rte-table-border: #434857;
+    --rte-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --rte-shadow: 0 14px 36px -10px rgba(0, 0, 0, 0.6), 0 4px 12px -4px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* A few surfaces still use literal light colours; flip them under dark. */
+.yjd-rich-editor[data-theme="dark"] .yjd-slash-menu,
+.yjd-rich-editor.yjd-theme-dark .yjd-slash-menu,
+.yjd-slash-menu[data-theme="dark"] {
+  background: var(--rte-bg);
+  border-color: var(--rte-border);
+  color: var(--rte-ink);
+}
+.yjd-content[data-theme="dark"] a,
+.yjd-content.yjd-theme-dark a { color: var(--rte-link); }
+.yjd-content[data-theme="dark"] code,
+.yjd-content.yjd-theme-dark code { background: var(--rte-code-bg); color: var(--rte-code-ink); }
+.yjd-content[data-theme="dark"] pre,
+.yjd-content.yjd-theme-dark pre { background: var(--rte-code-block-bg); color: var(--rte-code-block-ink); }
+.yjd-content[data-theme="dark"] blockquote,
+.yjd-content.yjd-theme-dark blockquote {
+  border-color: var(--rte-quote-border); background: var(--rte-quote-bg); color: var(--rte-quote-ink);
+}
+.yjd-content[data-theme="dark"] table td,
+.yjd-content[data-theme="dark"] table th,
+.yjd-content.yjd-theme-dark table td,
+.yjd-content.yjd-theme-dark table th { border-color: var(--rte-table-border); }
+.yjd-content[data-theme="dark"],
+.yjd-content.yjd-theme-dark { color: var(--rte-ink); background: var(--rte-bg); }

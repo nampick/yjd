@@ -331,18 +331,38 @@ renderStatic(post.body_html, document.querySelector('#post'));
   pipe tables, `![alt](src)` images, `[text](url)` links, mentions `@[Name](id)` /
   `#[Name](id)`, file chips `[name (size)](url)`.
 
-## Styling
+## Styling & theming
 
-Theme via CSS custom properties:
+The whole UI — editor, toolbar, popups, and the body-portaled mention/slash menus —
+is driven by `--rte-*` CSS custom properties.
+
+**Match your app** — override any token on `.yjd-rich-editor` (or a shared ancestor);
+the editor follows your colours, no dark class needed:
 
 ```css
 .yjd-rich-editor {
-  --rte-accent: #6d5efc;   /* primary */
-  --rte-ink:    #20242f;   /* text */
-  --rte-radius: 14px;
-  --rte-border: #e9e9f1;
+  --rte-accent: #e0488b;   /* brand */
+  --rte-bg:     #fffdf7;   /* surface */
+  --rte-ink:    #2a2320;   /* text */
+  --rte-border: #ece4d6;
+  --rte-radius: 10px;
 }
 ```
+
+> Tokens: `--rte-bg` · `--rte-chrome` · `--rte-chrome-2` · `--rte-ink` · `--rte-muted`
+> · `--rte-border` · `--rte-border-strong` · `--rte-accent` · `--rte-accent-ink`
+> · `--rte-accent-weak` · `--rte-accent-ink-on` · `--rte-danger` · `--rte-link`
+> · `--rte-code-bg` · `--rte-quote-*` · `--rte-table-border` · `--rte-radius` · `--rte-shadow`.
+
+**Dark mode** — built in (just redefines the tokens, so custom overrides still apply):
+
+```js
+new yjd('#editor', { theme: 'dark' });   // 'light' | 'dark' | 'auto' (follows the OS)
+editor.setTheme('dark');                  // at runtime; editor.getTheme() reads it
+```
+
+Or CSS-only: add the `yjd-theme-dark` class on `.yjd-rich-editor`. For a
+`renderStatic` read-view, add `data-theme="dark"` / `yjd-theme-dark` to the host.
 
 ## Development
 

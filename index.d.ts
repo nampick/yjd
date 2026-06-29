@@ -177,7 +177,8 @@ export interface JsonDoc {
 // Editor options interface
 export interface EditorOptions {
   placeholder?: string;
-  theme?: string;
+  /** Colour theme: 'light' (default), 'dark', or 'auto' (follows the OS). */
+  theme?: 'light' | 'dark' | 'auto';
   height?: number;
   width?: number;
   maxWidth?: number;
@@ -278,6 +279,10 @@ export class Editor {
   isMenuOpen(): boolean;
   setReadOnly(readOnly: boolean): void;
   isReadOnly(): boolean;
+  /** Switch the colour theme at runtime. */
+  setTheme(theme: 'light' | 'dark' | 'auto'): this;
+  /** Current theme option. */
+  getTheme(): 'light' | 'dark' | 'auto';
   setDirection(dir: 'ltr' | 'rtl'): void;
   getDirection(): 'ltr' | 'rtl';
   toggleDirection(): void;

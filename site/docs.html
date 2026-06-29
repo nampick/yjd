@@ -294,15 +294,43 @@ renderStatic(post.body_html, document.<span class="f">querySelector</span>(<span
         </tbody>
       </table>
 
-      <h2 id="styles">Styling</h2>
-      <p>The look is driven by CSS custom properties — override them to theme the editor:</p>
+      <h2 id="styles">Styling &amp; theming</h2>
+      <p>The entire UI — editor, toolbar, popups, even the body-portaled mention/slash
+        menus — is driven by <code>--rte-*</code> CSS custom properties.</p>
+
+      <h3>Match your app</h3>
+      <p>Override any token on <code>.yjd-rich-editor</code> (or a shared ancestor). No
+        dark class needed — the editor just follows your colours.</p>
       <pre><code>.yjd-rich-editor {
-  <span class="k">--rte-accent</span>: #6d5efc;     <span class="c">/* primary */</span>
-  <span class="k">--rte-ink</span>: #20242f;        <span class="c">/* text */</span>
-  <span class="k">--rte-radius</span>: 14px;
-  <span class="k">--rte-border</span>: #e9e9f1;
+  <span class="k">--rte-accent</span>: #e0488b;     <span class="c">/* your brand */</span>
+  <span class="k">--rte-bg</span>: #fffdf7;
+  <span class="k">--rte-ink</span>: #2a2320;
+  <span class="k">--rte-border</span>: #ece4d6;
+  <span class="k">--rte-radius</span>: 10px;
 }</code></pre>
-      <p style="margin-top:24px"><a href="/demos/index.html">→ Open the live playground</a></p>
+      <p>Tokens: <code>--rte-bg</code> · <code>--rte-chrome</code> · <code>--rte-chrome-2</code> ·
+        <code>--rte-ink</code> · <code>--rte-muted</code> · <code>--rte-border</code> ·
+        <code>--rte-border-strong</code> · <code>--rte-accent</code> · <code>--rte-accent-ink</code> ·
+        <code>--rte-accent-weak</code> · <code>--rte-accent-ink-on</code> · <code>--rte-danger</code> ·
+        <code>--rte-link</code> · <code>--rte-code-bg</code> · <code>--rte-quote-*</code> ·
+        <code>--rte-table-border</code> · <code>--rte-radius</code> · <code>--rte-shadow</code>.</p>
+
+      <h3>Dark mode</h3>
+      <p>Built in. Pick one:</p>
+      <pre><code><span class="c">// 1. at creation</span>
+<span class="k">new</span> <span class="f">yjd</span>(<span class="s">'#editor'</span>, { theme: <span class="s">'dark'</span> });   <span class="c">// 'light' | 'dark' | 'auto' (follows the OS)</span>
+
+<span class="c">// 2. at runtime</span>
+editor.<span class="f">setTheme</span>(<span class="s">'dark'</span>);
+editor.<span class="f">getTheme</span>();                  <span class="c">// 'light' | 'dark' | 'auto'</span>
+
+<span class="c">// 3. CSS only (e.g. toggling a class higher up)</span>
+&lt;div class=<span class="s">"yjd-rich-editor yjd-theme-dark"</span>&gt;…</code></pre>
+      <div class="note">🌙 Dark mode just redefines the <code>--rte-*</code> tokens, so your custom
+        overrides still apply on top. For a <code>renderStatic</code> read-view, add
+        <code>data-theme="dark"</code> or the <code>yjd-theme-dark</code> class to the host element.</div>
+
+      <p style="margin-top:24px"><a href="/demos/integration.html">→ Try the dark toggle in the integration demo</a></p>
     </main>
   </div>
 

@@ -73,6 +73,7 @@
       <a href="/site/index.html" class="hide-sm">Home</a>
       <a href="/site/docs.html">Docs</a>
       <a href="/demos/index.html">Playground</a>
+      <button id="theme-toggle" class="nav-cta" style="border:none;cursor:pointer;font:inherit">🌙 Dark editors</button>
       <a class="nav-cta" href="https://github.com/nampick/yjd">GitHub ↗</a>
     </nav>
   </div></header>
@@ -344,6 +345,16 @@ code block
 
     // expose for manual poking in the console
     window.__yjd = { editor, comment, taEditor, renderStatic };
+
+    /* ---- theme toggle: flip all editors light/dark at runtime ----------- */
+    const themeBtn = document.getElementById('theme-toggle');
+    let dark = false;
+    themeBtn.onclick = () => {
+      dark = !dark;
+      const t = dark ? 'dark' : 'light';
+      [editor, comment, taEditor].forEach((ed) => ed && ed.setTheme && ed.setTheme(t));
+      themeBtn.textContent = dark ? '☀️ Light editors' : '🌙 Dark editors';
+    };
   </script>
 </body>
 </html>
