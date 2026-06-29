@@ -129,7 +129,9 @@ const ed = Editor.fromTextarea('#comment', {
 | `placeholder` | string | Empty-state text. |
 | `content` | string | Initial HTML. |
 | `width` / `maxWidth` | number｜string | Number = px; string (e.g. `'100%'`) = responsive. |
-| `height` / `maxHeight` | number | Editor body height in px. |
+| `height` | number｜`'auto'` | px, or `'auto'` to grow with content (no cap). |
+| `minHeight` / `maxHeight` | number | Explicit bounds (override the height defaults). |
+| `theme` | `'inherit'`｜`'light'`｜`'dark'`｜`'auto'` | `'inherit'` (default) follows ancestor `[data-theme]`. |
 | `onChange` | fn(html) | Called on every content change. |
 | `toolbar1` / `toolbar2` | array | Toolbar groups: `{ group, items: [] }`. |
 | `formats` / `modules` | string[] | Which registered features to activate. |
@@ -336,11 +338,12 @@ renderStatic(post.body_html, document.querySelector('#post'));
 The whole UI — editor, toolbar, popups, and the body-portaled mention/slash menus —
 is driven by `--rte-*` CSS custom properties.
 
-**Match your app** — override any token on `.yjd-rich-editor` (or a shared ancestor);
-the editor follows your colours, no dark class needed:
+**Match your app** — override any token at `:root` (or any ancestor, or
+`.yjd-rich-editor`); the editor follows your colours, no dark class needed. The
+editor's own base styles inject *first* in `<head>`, so your CSS always wins:
 
 ```css
-.yjd-rich-editor {
+:root {
   --rte-accent: #e0488b;   /* brand */
   --rte-bg:     #fffdf7;   /* surface */
   --rte-ink:    #2a2320;   /* text */
@@ -349,20 +352,32 @@ the editor follows your colours, no dark class needed:
 }
 ```
 
-> Tokens: `--rte-bg` · `--rte-chrome` · `--rte-chrome-2` · `--rte-ink` · `--rte-muted`
-> · `--rte-border` · `--rte-border-strong` · `--rte-accent` · `--rte-accent-ink`
-> · `--rte-accent-weak` · `--rte-accent-ink-on` · `--rte-danger` · `--rte-link`
-> · `--rte-code-bg` · `--rte-quote-*` · `--rte-table-border` · `--rte-radius` · `--rte-shadow`.
+> **Token reference** — surfaces: `--rte-bg` (editor/popups), `--rte-chrome`
+> (toolbar/statusbar), `--rte-chrome-2` (hovers, code). Text: `--rte-ink`,
+> `--rte-muted`. Lines: `--rte-border`, `--rte-border-strong`. Accent:
+> `--rte-accent`, `--rte-accent-ink` (text on light), `--rte-accent-weak`
+> (tints/active), `--rte-accent-ink-on` (text on an accent fill), `--rte-accent-ring`
+> (focus). State: `--rte-danger`. Content: `--rte-link`, `--rte-code-bg`/`-ink`,
+> `--rte-code-block-bg`/`-ink`, `--rte-quote-bg`/`-border`/`-ink`, `--rte-table-border`.
+> Shape/depth: `--rte-radius`(`-md`/`-sm`), `--rte-shadow`(`-sm`).
 
-**Dark mode** — built in (just redefines the tokens, so custom overrides still apply):
+**Dark mode** — built in. By default `theme: 'inherit'` follows the nearest
+ancestor `[data-theme]`, so toggling **one** attribute on `<html>` themes every
+editor *and* `renderStatic` read-view with zero per-editor config:
 
-```js
-new yjd('#editor', { theme: 'dark' });   // 'light' | 'dark' | 'auto' (follows the OS)
-editor.setTheme('dark');                  // at runtime; editor.getTheme() reads it
+```html
+<html data-theme="dark">   <!-- your app's theme switch — editors follow it -->
 ```
 
-Or CSS-only: add the `yjd-theme-dark` class on `.yjd-rich-editor`. For a
-`renderStatic` read-view, add `data-theme="dark"` / `yjd-theme-dark` to the host.
+```js
+new yjd('#editor');                      // theme:'inherit' (default) → follows <html>
+new yjd('#editor', { theme: 'dark' });   // force: 'light' | 'dark' | 'auto' (OS) | 'inherit'
+editor.setTheme('dark');                 // at runtime; editor.getTheme() reads it
+```
+
+CSS-only alternatives: `yjd-theme-dark` class, or `data-theme="dark"` on the
+element / any ancestor. A forced `theme:'light'` editor stays light even inside a
+dark page.
 
 ## Development
 

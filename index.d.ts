@@ -177,12 +177,19 @@ export interface JsonDoc {
 // Editor options interface
 export interface EditorOptions {
   placeholder?: string;
-  /** Colour theme: 'light' (default), 'dark', or 'auto' (follows the OS). */
-  theme?: 'light' | 'dark' | 'auto';
-  height?: number;
-  width?: number;
-  maxWidth?: number;
+  /**
+   * Colour theme. 'inherit' (default) follows the nearest ancestor [data-theme]
+   * (falling back to the light :root tokens); 'light' / 'dark' force a theme;
+   * 'auto' follows the OS via prefers-color-scheme.
+   */
+  theme?: 'inherit' | 'light' | 'dark' | 'auto';
+  /** Editor height in px, or 'auto' to grow with content (no max cap). */
+  height?: number | 'auto';
+  /** Explicit min/max height in px (override the height-derived defaults). */
+  minHeight?: number;
   maxHeight?: number;
+  width?: number | string;
+  maxWidth?: number | string;
   content?: string | null;
   onChange?: (content: string) => void;
   /** When true, paste always inserts plain text (default: false). */
@@ -280,9 +287,9 @@ export class Editor {
   setReadOnly(readOnly: boolean): void;
   isReadOnly(): boolean;
   /** Switch the colour theme at runtime. */
-  setTheme(theme: 'light' | 'dark' | 'auto'): this;
+  setTheme(theme: 'inherit' | 'light' | 'dark' | 'auto'): this;
   /** Current theme option. */
-  getTheme(): 'light' | 'dark' | 'auto';
+  getTheme(): 'inherit' | 'light' | 'dark' | 'auto';
   setDirection(dir: 'ltr' | 'rtl'): void;
   getDirection(): 'ltr' | 'rtl';
   toggleDirection(): void;

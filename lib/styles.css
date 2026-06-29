@@ -5,8 +5,8 @@
 /* === CORE EDITOR === */
 .yjd-rich-editor {
   position: relative;
-  background: #fff;
-  border: 1px solid #d1d5db;
+  background: var(--rte-bg, #fff);
+  border: 1px solid var(--rte-border, #d1d5db);
   border-radius: 8px;
   overflow: hidden;
   margin: 0 auto;
@@ -99,7 +99,7 @@
   font-size: 16px;
   line-height: 1.7;
   font-family: inherit;
-  color: #2c3e50;
+  color: var(--rte-ink, #2c3e50);
   padding: 20px 20px;
   box-sizing: border-box;
 }
@@ -2132,7 +2132,11 @@
    This block is appended last so it themes the components above.
    ===================================================================== */
 
-.yjd-rich-editor {
+/* Default token palette lives on :root (NOT .yjd-rich-editor) so an app can
+   override any token at :root — or on any ancestor such as html[data-theme] —
+   and the editor inherits it. Defining these on .yjd-rich-editor used to block
+   ancestor/:root overrides. */
+:root {
   /* Palette */
   --rte-bg: #ffffff;
   --rte-chrome: #fbfbfd;
@@ -2164,7 +2168,9 @@
   --rte-shadow-sm: 0 1px 2px rgba(20, 24, 46, 0.06);
   --rte-shadow: 0 12px 32px -8px rgba(20, 24, 46, 0.20), 0 4px 10px -4px rgba(20, 24, 46, 0.10);
   --rte-t: 140ms cubic-bezier(0.4, 0, 0.2, 1);
+}
 
+.yjd-rich-editor {
   border: 1px solid var(--rte-border) !important;
   border-radius: var(--rte-radius) !important;
   background: var(--rte-bg);
@@ -3661,9 +3667,16 @@
    data-theme="dark" on the wrapper), the .yjd-theme-dark class, or
    theme:'auto' which follows the OS via prefers-color-scheme. Portaled menus
    (mention/slash) get data-theme set on them by JS so they match too.
-   To MATCH YOUR APP instead, just override any --rte-* var on .yjd-rich-editor
-   (or a shared ancestor) — no dark class needed.
+   To MATCH YOUR APP instead, just override any --rte-* var on :root, on a
+   shared ancestor, or on .yjd-rich-editor — no dark class needed.
+
+   ANCESTOR THEME: an editor/read-view created with theme:'inherit' (no own
+   data-theme) inside an element with [data-theme="dark"] (e.g. <html>) goes
+   dark automatically — zero per-editor config. Editors with an explicit
+   data-theme (light/dark/auto) ignore the ancestor and force that theme.
    ══════════════════════════════════════════════════════════════════════════ */
+[data-theme="dark"] .yjd-rich-editor:not([data-theme]),
+[data-theme="dark"] .yjd-content:not([data-theme]),
 .yjd-rich-editor[data-theme="dark"],
 .yjd-rich-editor.yjd-theme-dark,
 .yjd-mention-menu[data-theme="dark"],

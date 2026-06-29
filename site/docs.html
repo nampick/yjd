@@ -311,9 +311,10 @@ renderStatic(post.body_html, document.<span class="f">querySelector</span>(<span
         menus — is driven by <code>--rte-*</code> CSS custom properties.</p>
 
       <h3>Match your app</h3>
-      <p>Override any token on <code>.yjd-rich-editor</code> (or a shared ancestor). No
-        dark class needed — the editor just follows your colours.</p>
-      <pre><code>.yjd-rich-editor {
+      <p>Override any token at <code>:root</code> (or any ancestor, or <code>.yjd-rich-editor</code>).
+        The editor's base styles inject <b>first</b> in <code>&lt;head&gt;</code>, so your CSS
+        always wins — no specificity battles, no dark class needed.</p>
+      <pre><code>:root {
   <span class="k">--rte-accent</span>: #e0488b;     <span class="c">/* your brand */</span>
   <span class="k">--rte-bg</span>: #fffdf7;
   <span class="k">--rte-ink</span>: #2a2320;
@@ -328,19 +329,24 @@ renderStatic(post.body_html, document.<span class="f">querySelector</span>(<span
         <code>--rte-table-border</code> · <code>--rte-radius</code> · <code>--rte-shadow</code>.</p>
 
       <h3>Dark mode</h3>
-      <p>Built in. Pick one:</p>
-      <pre><code><span class="c">// 1. at creation</span>
-<span class="k">new</span> <span class="f">yjd</span>(<span class="s">'#editor'</span>, { theme: <span class="s">'dark'</span> });   <span class="c">// 'light' | 'dark' | 'auto' (follows the OS)</span>
+      <p>Built in. By default <code>theme:'inherit'</code> follows the nearest ancestor
+        <code>[data-theme]</code> — so one attribute on <code>&lt;html&gt;</code> themes every
+        editor <i>and</i> <code>renderStatic</code> read-view, zero per-editor config:</p>
+      <pre><code><span class="c">&lt;!-- your app's theme switch — editors follow it --&gt;</span>
+&lt;html data-theme=<span class="s">"dark"</span>&gt;
 
-<span class="c">// 2. at runtime</span>
-editor.<span class="f">setTheme</span>(<span class="s">'dark'</span>);
-editor.<span class="f">getTheme</span>();                  <span class="c">// 'light' | 'dark' | 'auto'</span>
-
-<span class="c">// 3. CSS only (e.g. toggling a class higher up)</span>
-&lt;div class=<span class="s">"yjd-rich-editor yjd-theme-dark"</span>&gt;…</code></pre>
+<span class="k">new</span> <span class="f">yjd</span>(<span class="s">'#editor'</span>);                    <span class="c">// theme:'inherit' (default) → follows &lt;html&gt;</span>
+<span class="k">new</span> <span class="f">yjd</span>(<span class="s">'#editor'</span>, { theme: <span class="s">'dark'</span> });   <span class="c">// force: 'light' | 'dark' | 'auto' | 'inherit'</span>
+editor.<span class="f">setTheme</span>(<span class="s">'dark'</span>);                <span class="c">// at runtime; editor.getTheme() reads it</span></code></pre>
       <div class="note">🌙 Dark mode just redefines the <code>--rte-*</code> tokens, so your custom
-        overrides still apply on top. For a <code>renderStatic</code> read-view, add
-        <code>data-theme="dark"</code> or the <code>yjd-theme-dark</code> class to the host element.</div>
+        overrides still apply on top. A forced <code>theme:'light'</code> editor stays light
+        even inside a dark page. CSS-only: <code>yjd-theme-dark</code> class or
+        <code>data-theme="dark"</code> on the element / any ancestor.</div>
+
+      <h3>Height</h3>
+      <p><code>height</code> is px, or <code>'auto'</code> to grow with content like a textarea
+        (small min-height, no cap). Use <code>minHeight</code> / <code>maxHeight</code> for explicit bounds.</p>
+      <pre><code><span class="k">new</span> <span class="f">yjd</span>(<span class="s">'#comment'</span>, { height: <span class="s">'auto'</span>, minHeight: 80 });</code></pre>
 
       <p style="margin-top:24px"><a href="/demos/integration.html">→ Try the dark toggle in the integration demo</a></p>
     </main>
