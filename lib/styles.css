@@ -8,7 +8,10 @@
   background: var(--rte-bg, #fff);
   border: 1px solid var(--rte-border, #d1d5db);
   border-radius: 8px;
-  overflow: hidden;
+  /* visible (not hidden) so popovers/dropdowns can extend past a short editor
+     without being clipped. Rounded corners are kept by rounding the toolbar top
+     and statusbar bottom (see design-system layer). */
+  overflow: visible;
   margin: 0 auto;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   display: flex;
@@ -2041,11 +2044,9 @@
   height: 100%;
   pointer-events: none;
   z-index: 1005;
+  /* Pure positioning layer — must NOT clip/scroll, or popovers get cut off in a
+     short editor. Each popup caps its own height + scrolls individually. */
   overflow: visible;
-  max-height: 90%;
-    /* không vượt quá chiều cao editor */
-  overflow-y: auto;
-    /* chỉ cuộn khi nội dung vượt quá */
 }
 
 /* Allow interaction with interactive elements inside popups */
@@ -2189,6 +2190,21 @@
 .yjd-rich-editor .rich-editor-popup-container select,
 .yjd-rich-editor .rich-editor-popup-container textarea {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+/* Keep rounded frame corners now that the wrapper is overflow:visible (so the
+   chrome bars don't show square corners over the rounded border). The outermost
+   visible bar shows its radius; covered ones are harmless. */
+.yjd-rich-editor .rich-editor-toolbar-container {
+  border-top-left-radius: var(--rte-radius);
+  border-top-right-radius: var(--rte-radius);
+}
+.yjd-rich-editor .rich-editor-statusbar {
+  border-bottom-left-radius: var(--rte-radius);
+  border-bottom-right-radius: var(--rte-radius);
+}
+.yjd-rich-editor .rich-editor-area {
+  border-radius: var(--rte-radius); /* fallback when there's no toolbar/statusbar */
 }
 
 /* ---------- Toolbar ---------- */
