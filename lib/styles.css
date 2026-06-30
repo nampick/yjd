@@ -1,6 +1,12 @@
 /* ===================================
    Rich Editor - Component Styles
-   ===================================*/
+   ===================================
+   Everything lives in @layer yjd so an app's unlayered CSS always wins —
+   override any --rte-* token (or rule) with zero !important and no specificity
+   battles. This wrapper is in the source itself so ALL shipped stylesheets
+   (styles.css, styles.min.css, styles.css.js) honor the contract, even if a
+   consumer links the raw file directly. */
+@layer yjd {
 
 /* === CORE EDITOR === */
 .yjd-rich-editor {
@@ -3857,3 +3863,5 @@
 .yjd-content.yjd-theme-dark table th { border-color: var(--rte-table-border); }
 .yjd-content[data-theme="dark"],
 .yjd-content.yjd-theme-dark { color: var(--rte-ink); background: var(--rte-bg); }
+
+} /* end @layer yjd */

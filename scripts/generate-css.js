@@ -19,15 +19,18 @@ const jsOut = join(__dirname, '..', 'lib', 'styles.css.js');
 const minOut = join(__dirname, '..', 'lib', 'styles.min.css');
 
 const raw = readFileSync(cssPath, 'utf8');
-// Minify so the inlined CSS string isn't shipped with comments/whitespace
-// (terser only minifies JS, not the CSS inside the string literal).
-const minified = minify(raw).css;
 
-// Wrap EVERYTHING in a cascade layer. Unlayered author CSS always beats layered
-// CSS regardless of specificity, so an app can override any --rte-* token (or
-// any rule) — e.g. `:root { --rte-bg: #111 }` — and win with zero !important and
-// no specificity battles. This is the theming contract: "your CSS always wins".
-const css = `@layer yjd {\n${minified}\n}`;
+// styles.css is already wrapped in `@layer yjd { … }` at the source, so the
+// theming contract ("unlayered app CSS always wins, no !important / specificity
+// battles") holds for EVERY shipped artifact — including the raw styles.css if a
+// consumer links it directly. Here we only minify (the @layer is preserved).
+const css = minify(raw).css;
+
+// Safety net: fail loudly if the source ever loses its layer wrapper, so we
+// never ship un-layered CSS that would silently break the override contract.
+if (!css.includes('@layer yjd')) {
+  throw new Error('generate-css: expected styles.css to be wrapped in "@layer yjd" — the theming contract would break without it.');
+}
 
 // (1) JS module — used by the all-in-one build (StylesLoader injects it).
 const banner = '// AUTO-GENERATED from lib/styles.css by scripts/generate-css.js — do not edit directly.\n';
