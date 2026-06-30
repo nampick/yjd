@@ -85,7 +85,7 @@
    instead of hardcoded offsets that drifted out of alignment. */
 .yjd-rich-editor .rich-editor-area[data-placeholder]:before {
   content: attr(data-placeholder);
-  color: #9ca3af;
+  color: var(--rte-muted, #9ca3af);
   pointer-events: none;
   position: absolute;
   top: 0;
@@ -93,8 +93,7 @@
   right: 0;
   padding: inherit;
   box-sizing: border-box;
-  font: inherit;
-  font-style: italic;
+  font: inherit; /* upright, matches the typed text (no forced italic) */
   line-height: inherit;
   display: none;
   z-index: 1;
@@ -474,9 +473,9 @@
 /* === CUSTOM SELECT === */
 .yjd-rich-editor .custom-select-popup, .yjd-rich-editor .heading-select-popup, .yjd-rich-editor .capitalization-select-popup, .yjd-rich-editor .font-family-select-popup, .yjd-rich-editor .line-height-select-popup, .yjd-rich-editor .text-size-select-popup {
   position: absolute;
-  background: #fff;
+  background: var(--rte-chrome, #fff);
   display: none;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--rte-border, #d1d5db);
   border-radius: 6.9px;
   padding: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
@@ -563,7 +562,7 @@
   transition: all 0.2s ease;
   font-size: 14px;
   line-height: 1.4;
-  color: #111827;
+  color: var(--rte-ink, #111827);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2708,13 +2707,16 @@
 }
 .yjd-rich-editor .custom-select-button {
   border-color: var(--rte-border);
-  background: var(--rte-bg);
+  /* The trigger lives in the toolbar, so it reads the toolbar surface token
+     (not --rte-bg): it stays in tone with the toolbar in every theme instead of
+     turning into a bright pill when an app themes the chrome but not --rte-bg. */
+  background: var(--rte-chrome);
   color: var(--rte-ink);
   font-weight: 500;
 }
 .yjd-rich-editor .custom-select-button:hover {
   border-color: var(--rte-border-strong);
-  background: var(--rte-bg);
+  background: var(--rte-chrome-2);
 }
 .yjd-rich-editor .dropdown-icon { color: var(--rte-muted); }
 
