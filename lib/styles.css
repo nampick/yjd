@@ -475,7 +475,9 @@
   padding: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   z-index: 1002;
-  max-height: 200px;
+  /* Tall enough to show every option without scrolling (heading has 9 items,
+     font-family 10): the old 200px cap hid Paragraph/Quote below the fold. */
+  max-height: 360px;
   overflow-y: auto;
   /* Prevent focus and click on popup container */
   pointer-events: none;
@@ -500,9 +502,29 @@
 
 
 .yjd-rich-editor .heading-select-popup {
-  width: 190px;
+  width: 230px;
   max-width: 100vw;
 }
+/* Cap the heading preview sizes so H1 doesn't overflow the popup. */
+.yjd-rich-editor .heading-select-popup h1,
+.yjd-rich-editor .heading-select-popup h2,
+.yjd-rich-editor .heading-select-popup h3,
+.yjd-rich-editor .heading-select-popup h4,
+.yjd-rich-editor .heading-select-popup h5,
+.yjd-rich-editor .heading-select-popup h6,
+.yjd-rich-editor .heading-select-popup p {
+  margin: 0 !important;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.yjd-rich-editor .heading-select-popup h1 { font-size: 1.45em; }
+.yjd-rich-editor .heading-select-popup h2 { font-size: 1.28em; }
+.yjd-rich-editor .heading-select-popup h3 { font-size: 1.14em; }
+.yjd-rich-editor .heading-select-popup h4 { font-size: 1.02em; }
+.yjd-rich-editor .heading-select-popup h5 { font-size: 0.94em; }
+.yjd-rich-editor .heading-select-popup h6 { font-size: 0.86em; color: var(--rte-muted); }
+.yjd-rich-editor .heading-select-popup p { font-size: 0.95em; font-weight: 500; }
 
 .yjd-rich-editor .capitalization-select-popup {
   width: 150px;
@@ -1345,6 +1367,17 @@
   display: block;
 }
 
+/* Display caps for inserted/read-view images so a large upload doesn't blow out
+   the frame. Off by default (none); set via options.image.maxHeight/maxWidth
+   which write --rte-img-max-h / --rte-img-max-w on the wrapper. object-fit keeps
+   aspect ratio. */
+.yjd-rich-editor .rich-editor-area img,
+.yjd-content img {
+  max-height: var(--rte-img-max-h, none);
+  object-fit: contain;
+}
+.yjd-content img { max-width: var(--rte-img-max-w, 100%); }
+
 .yjd-rich-editor .inserted-video {
   background: #000;
 }
@@ -1702,6 +1735,19 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease;
   z-index: 999; /* Higher than container but lower than toolbars */
+}
+
+/* Invisible enlarged grab target around the small visible dot: an 8px handle is
+   easy to miss by a few pixels, and a miss starts a text selection instead of a
+   resize. This keeps the dot small but makes it ~24px easy to grab. */
+.yjd-rich-editor .resize-handle::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  transform: translate(-50%, -50%);
 }
 
 .yjd-rich-editor .resize-handle:hover {
@@ -3686,13 +3732,14 @@
    To MATCH YOUR APP instead, just override any --rte-* var on :root, on a
    shared ancestor, or on .yjd-rich-editor — no dark class needed.
 
-   ANCESTOR THEME: an editor/read-view created with theme:'inherit' (no own
-   data-theme) inside an element with [data-theme="dark"] (e.g. <html>) goes
-   dark automatically — zero per-editor config. Editors with an explicit
-   data-theme (light/dark/auto) ignore the ancestor and force that theme.
+   ANCESTOR THEME: dark tokens are declared ON the [data-theme="dark"] element
+   (e.g. <html>), so an inherit-mode editor/read-view inside it goes dark by
+   inheritance — zero per-editor config. Declaring on the ancestor (not the
+   wrapper) is deliberate: it keeps the app's own :root/[data-theme] token
+   overrides winning via the @layer (an unlayered rule on the same element beats
+   our layered one). A forced theme:'light' editor re-declares light on itself.
    ══════════════════════════════════════════════════════════════════════════ */
-[data-theme="dark"] .yjd-rich-editor:not([data-theme]),
-[data-theme="dark"] .yjd-content:not([data-theme]),
+[data-theme="dark"],
 .yjd-rich-editor[data-theme="dark"],
 .yjd-rich-editor.yjd-theme-dark,
 .yjd-mention-menu[data-theme="dark"],
@@ -3723,6 +3770,36 @@
   --rte-table-border: #434857;
   --rte-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --rte-shadow: 0 14px 36px -10px rgba(0, 0, 0, 0.6), 0 4px 12px -4px rgba(0, 0, 0, 0.45);
+}
+
+/* Force light on the wrapper/read-view (theme:'light') so it stays light even
+   inside a [data-theme="dark"] ancestor. Re-declares the light :root values. */
+.yjd-rich-editor[data-theme="light"],
+.yjd-content[data-theme="light"] {
+  --rte-bg: #ffffff;
+  --rte-chrome: #fbfbfd;
+  --rte-chrome-2: #f2f2f7;
+  --rte-border: #e9e9f1;
+  --rte-border-strong: #dadae6;
+  --rte-ink: #20242f;
+  --rte-muted: #767c8e;
+  --rte-accent: #6d5efc;
+  --rte-accent-ink: #5a48ee;
+  --rte-accent-weak: #efedff;
+  --rte-accent-ring: rgba(109, 94, 252, 0.28);
+  --rte-accent-ink-on: #ffffff;
+  --rte-danger: #e5484d;
+  --rte-link: #2563eb;
+  --rte-code-bg: #f1f2f3;
+  --rte-code-ink: inherit;
+  --rte-code-block-bg: #20242f;
+  --rte-code-block-ink: #ececf5;
+  --rte-quote-border: #d1d5db;
+  --rte-quote-bg: #f9fafb;
+  --rte-quote-ink: #555555;
+  --rte-table-border: #d1d5db;
+  --rte-shadow-sm: 0 1px 2px rgba(20, 24, 46, 0.06);
+  --rte-shadow: 0 12px 32px -8px rgba(20, 24, 46, 0.20), 0 4px 10px -4px rgba(20, 24, 46, 0.10);
 }
 
 /* theme:'auto' → follow the operating system. */

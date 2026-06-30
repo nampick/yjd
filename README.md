@@ -200,6 +200,13 @@ new yjd('#editor', {
 // events: editor.on('file:upload' | 'file:uploaded' | 'file:error', cb)
 ```
 
+Cap how big inserted images *display* (so a large upload doesn't blow out the
+frame) with `image.maxHeight` / `image.maxWidth` (px or any CSS length):
+
+```js
+new yjd('#editor', { image: { upload, maxHeight: '60vh' } });
+```
+
 ### Enter-to-submit (comment boxes)
 
 ```js
@@ -339,8 +346,10 @@ The whole UI — editor, toolbar, popups, and the body-portaled mention/slash me
 is driven by `--rte-*` CSS custom properties.
 
 **Match your app** — override any token at `:root` (or any ancestor, or
-`.yjd-rich-editor`); the editor follows your colours, no dark class needed. The
-editor's own base styles inject *first* in `<head>`, so your CSS always wins:
+`.yjd-rich-editor`); the editor follows your colours, no dark class needed. All
+of yjd's CSS lives in an `@layer yjd` cascade layer, so **any unlayered rule of
+yours always wins** — even `:root { --rte-bg: … }` against the built-in dark
+theme — with **no `!important` and no specificity battles**:
 
 ```css
 :root {

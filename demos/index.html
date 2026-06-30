@@ -20,7 +20,7 @@
       --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
       --display:"Space Grotesk",system-ui,sans-serif;--body:"Inter",system-ui,sans-serif;
     }
-    *{box-sizing:border-box}
+    *{box-sizing:border-box}html{overflow-x:clip}
     body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.6;-webkit-font-smoothing:antialiased}
     a{color:inherit;text-decoration:none}
     .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
@@ -87,6 +87,10 @@
     .foot-in a:hover{color:var(--violet-ink)}
   @media(max-width:720px){
     header.nav{backdrop-filter:none;-webkit-backdrop-filter:none;background:#f4f4f8}
+    .nav-links a.hide-sm{display:none}
+    .nav-links{gap:14px;font-size:14px}
+    .nav-cta{padding:7px 12px}
+    .logo small{display:none}
     .ph{padding:32px 0 4px}
     .wrap{padding:0 16px}
     .code-pane{min-height:300px}
@@ -99,7 +103,7 @@
   <header class="nav"><div class="wrap nav-in">
     <a class="logo" href="/site/index.html"><span class="mark">y</span> yjd <small>.io</small></a>
     <nav class="nav-links">
-      <a href="/site/index.html">Home</a>
+      <a class="hide-sm" href="/site/index.html">Home</a>
       <a href="/site/docs.html">Docs</a>
       <a href="/demos/index.html" aria-current="page">Playground</a>
       <a class="nav-cta" href="https://github.com/nampick/yjd">GitHub ↗</a>

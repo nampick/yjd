@@ -1,6 +1,6 @@
 {
   "name": "@oix1987/yjd",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "description": "Dependency-free, tree-shakeable rich text editor for the web with a bring-your-own-model AI assistant (selection toolbar + ghost-text), @mentions, image/file upload, and HTML/Markdown/JSON export — ship 16 KB, not the whole library.",
   "keywords": [
     "rich-text-editor",

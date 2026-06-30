@@ -43,6 +43,10 @@ export interface ImageOptions {
   accept?: string;
   /** Maximum file size in bytes; larger files emit 'image:error'. */
   maxSize?: number;
+  /** Display cap for inserted images (px or any CSS length, e.g. '60vh'). */
+  maxHeight?: number | string;
+  /** Display cap for inserted images (px or any CSS length). */
+  maxWidth?: number | string;
 }
 
 /** Result of a file.upload hook — a URL, or richer metadata. */

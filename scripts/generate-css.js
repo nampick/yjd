@@ -21,7 +21,13 @@ const minOut = join(__dirname, '..', 'lib', 'styles.min.css');
 const raw = readFileSync(cssPath, 'utf8');
 // Minify so the inlined CSS string isn't shipped with comments/whitespace
 // (terser only minifies JS, not the CSS inside the string literal).
-const css = minify(raw).css;
+const minified = minify(raw).css;
+
+// Wrap EVERYTHING in a cascade layer. Unlayered author CSS always beats layered
+// CSS regardless of specificity, so an app can override any --rte-* token (or
+// any rule) — e.g. `:root { --rte-bg: #111 }` — and win with zero !important and
+// no specificity battles. This is the theming contract: "your CSS always wins".
+const css = `@layer yjd {\n${minified}\n}`;
 
 // (1) JS module — used by the all-in-one build (StylesLoader injects it).
 const banner = '// AUTO-GENERATED from lib/styles.css by scripts/generate-css.js — do not edit directly.\n';

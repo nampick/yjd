@@ -17,7 +17,7 @@
       --violet:#6d5efc;--violet-ink:#5a48ee;--violet-weak:#efedff;--line:#e7e7f0;--muted:#6b6f7e;
       --mono:"JetBrains Mono",ui-monospace,monospace;--display:"Space Grotesk",system-ui,sans-serif;--body:"Inter",system-ui,sans-serif;
     }
-    *{box-sizing:border-box}html{scroll-behavior:smooth}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;overflow-x:clip}
     body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.65}
     a{color:var(--violet-ink);text-decoration:none}a:hover{text-decoration:underline}
     code,.mono{font-family:var(--mono)}
@@ -32,10 +32,17 @@
     .nav-links a:not(.nav-cta):hover,.nav-links a[aria-current]{color:var(--violet-ink)}
     .nav-cta{background:var(--ink);color:#fff;padding:8px 16px;border-radius:10px;font-weight:600}
     .nav-cta:hover{background:var(--violet-ink);color:#fff}
-    @media(max-width:720px){.nav-links a.hide-sm{display:none}}
+    @media(max-width:720px){.nav-links a.hide-sm{display:none}.nav-links{gap:14px;font-size:14px}.nav-cta{padding:7px 12px}.logo small{display:none}}
+    /* On phones, keep tables within the viewport: fixed layout distributes the
+       columns to the container width and long cell text wraps instead of
+       forcing the page wider than the screen. */
+    @media(max-width:720px){.doc table{table-layout:fixed}.doc th,.doc td{word-break:break-word}}
 
     .layout{display:grid;grid-template-columns:220px 1fr;gap:48px;padding:40px 0 80px;align-items:start}
     @media(max-width:840px){.layout{grid-template-columns:1fr}.toc{position:static !important;display:none}}
+    /* Let the content column shrink below its widest code line so a long <pre>
+       scrolls inside its own box instead of widening the whole page on mobile. */
+    .doc{min-width:0}
     .toc{position:sticky;top:84px;font-size:14.5px}
     .toc strong{display:block;font-family:var(--display);font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:18px 0 8px}
     .toc a{display:block;color:var(--ink-2);padding:4px 0}.toc a:hover{color:var(--violet-ink);text-decoration:none}
@@ -64,7 +71,7 @@
   <header class="nav"><div class="wrap nav-in">
     <a class="logo" href="/site/index.html"><span class="mark">y</span> yjd <small>.io</small></a>
     <nav class="nav-links">
-      <a href="/site/index.html">Home</a>
+      <a class="hide-sm" href="/site/index.html">Home</a>
       <a href="/site/docs.html" aria-current="page">Docs</a>
       <a href="/demos/index.html">Playground</a>
       <a class="nav-cta" href="https://github.com/nampick/yjd">GitHub ↗</a>
@@ -312,8 +319,9 @@ renderStatic(post.body_html, document.<span class="f">querySelector</span>(<span
 
       <h3>Match your app</h3>
       <p>Override any token at <code>:root</code> (or any ancestor, or <code>.yjd-rich-editor</code>).
-        The editor's base styles inject <b>first</b> in <code>&lt;head&gt;</code>, so your CSS
-        always wins — no specificity battles, no dark class needed.</p>
+        All of yjd's CSS lives in an <code>@layer yjd</code> cascade layer, so <b>any unlayered
+        rule of yours always wins</b> — even <code>:root { --rte-bg }</code> against the built-in
+        dark theme — with no <code>!important</code> and no specificity battles.</p>
       <pre><code>:root {
   <span class="k">--rte-accent</span>: #e0488b;     <span class="c">/* your brand */</span>
   <span class="k">--rte-bg</span>: #fffdf7;
