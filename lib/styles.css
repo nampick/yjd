@@ -11,8 +11,8 @@
 /* === CORE EDITOR === */
 .yjd-rich-editor {
   position: relative;
-  background: var(--rte-bg, #fff);
-  border: 1px solid var(--rte-border, #d1d5db);
+  background: var(--rte-bg, var(--rte-bg));
+  border: 1px solid var(--rte-border, var(--rte-table-border));
   border-radius: 8px;
   /* visible (not hidden) so popovers/dropdowns can extend past a short editor
      without being clipped. Rounded corners are kept by rounding the toolbar top
@@ -69,45 +69,51 @@
   line-height: 1.7;
   outline: none;
   padding: 20px 20px 20px 20px;
-  background: var(--rte-bg, #fff);
-  color: var(--rte-ink, #2c3e50);
+  background: var(--rte-bg, var(--rte-bg));
+  color: var(--rte-ink, var(--rte-ink));
   font-family: inherit;
   overflow-y: auto;
   box-sizing: border-box;
   border: none;
-  text-align: left;
+  /* `start` (not `left`) so the editor follows dir="rtl"/"ltr" — a hardcoded
+     `left` kept RTL text left-aligned. */
+  text-align: start;
   position: relative;
 }
 
-/* Placeholder styles for contentEditable.
-   Inherit the editor's padding + font so the placeholder lands exactly on the
-   content origin (where the caret/first character sits) at ANY padding/size —
-   instead of hardcoded offsets that drifted out of alignment. */
-.yjd-rich-editor .rich-editor-area[data-placeholder]:before {
+/* Placeholder for contentEditable.
+   Rendered INSIDE the first block (JS adds .rte-placeholder + data-placeholder to
+   it) so the ::before inherits that block's direction / text-align / font /
+   line-height — staying aligned with the caret when those change (RTL, alignment,
+   font-size, line-spacing). Absolutely positioned within the block so it never
+   adds layout height; the block carries the editor's padding via its position in
+   the padded area, so top/inset-inline 0 lands on the content origin. */
+.yjd-rich-editor .rich-editor-area > .rte-placeholder {
+  position: relative;
+}
+.yjd-rich-editor .rich-editor-area > .rte-placeholder::before {
   content: attr(data-placeholder);
-  color: var(--rte-muted, #9ca3af);
+  color: var(--rte-muted, var(--rte-muted));
   pointer-events: none;
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  padding: inherit;
+  inset: 0;               /* fill the block's padding box */
+  padding: inherit;       /* re-inset by the block's OWN padding so the text lands
+                             on the content origin (where the caret sits) even for
+                             padded blocks like <pre> (code) and <blockquote>. */
   box-sizing: border-box;
-  font: inherit; /* upright, matches the typed text (no forced italic) */
-  line-height: inherit;
-  display: none;
+  font: inherit;          /* inherit the block's font-size/family (upright) */
+  line-height: inherit;   /* follow line-spacing changes on the block */
+  text-align: inherit;    /* follow left/center/right alignment */
+  direction: inherit;     /* follow LTR/RTL so it sits on the caret side */
+  overflow: hidden;       /* keep a long placeholder inside a padded block */
   z-index: 1;
-}
-
-.yjd-rich-editor .rich-editor-area[data-placeholder].placeholder-visible:before {
-  display: block;
 }
 
 .yjd-rich-editor .rich-editor-area {
   font-size: 16px;
   line-height: 1.7;
   font-family: inherit;
-  color: var(--rte-ink, #2c3e50);
+  color: var(--rte-ink, var(--rte-ink));
   padding: 20px 20px;
   box-sizing: border-box;
 }
@@ -128,7 +134,7 @@
 }
 
 .yjd-rich-editor .rich-editor-area a {
-  color: var(--rte-link, #2563eb);
+  color: var(--rte-link, var(--rte-link));
   text-decoration: underline;
   cursor: pointer;
 }
@@ -173,7 +179,7 @@
   font-size: 0.875em;
   font-weight: bold;
   margin: 1.5em 0;
-  color: var(--rte-muted, #555);
+  color: var(--rte-muted, var(--rte-muted));
 }
 
 /* lists */
@@ -191,7 +197,7 @@
 .yjd-rich-editor .rich-editor-area pre,
 .yjd-rich-editor .rich-editor-area code {
   font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
-  background: var(--rte-code-bg, #f1f2f3);
+  background: var(--rte-code-bg, var(--rte-code-bg));
   color: var(--rte-code-ink, inherit);
   padding: 4px 6px;
   border-radius: 4px;
@@ -210,12 +216,12 @@
 
 /* blockquote */
 .yjd-rich-editor .rich-editor-area blockquote {
-  border-left: 4px solid var(--rte-quote-border, #d1d5db);
+  border-left: 4px solid var(--rte-quote-border, var(--rte-table-border));
   margin: 1em 0;
   padding: 4px 12px;
-  color: var(--rte-quote-ink, #555);
+  color: var(--rte-quote-ink, var(--rte-muted));
   font-style: italic;
-  background: var(--rte-quote-bg, #f9fafb);
+  background: var(--rte-quote-bg, var(--rte-quote-bg));
 }
 .yjd-rich-editor .rich-editor-area sub {
   font-size: 0.75em;
@@ -232,7 +238,7 @@
   cursor: pointer;
 }
 .yjd-rich-editor .rich-editor-area pre {
-  background-color: var(--rte-code-block-bg, #f1f2f3);
+  background-color: var(--rte-code-block-bg, var(--rte-code-bg));
   width: 96%;
   padding: 10px 2% 10px 2%;
   font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
@@ -254,10 +260,10 @@
   position: relative;
   z-index: 1000;
   padding: 4px 12px;
-  border-top: 1px solid #d1d5db;
-  background: #f9fafb;
+  border-top: 1px solid var(--rte-table-border);
+  background: var(--rte-quote-bg);
   font-size: 13px;
-  color: #6b7280;
+  color: var(--rte-muted);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -268,7 +274,7 @@
 
 /* === TOOLBAR === */
 .yjd-rich-editor .rich-editor-toolbar-container{
-  border-bottom: 1px solid #d1d5db;
+  border-bottom: 1px solid var(--rte-table-border);
   position: relative;
   z-index: 1000; /* Ensure toolbars are above resize handles */
 }
@@ -335,7 +341,7 @@
 }
 .yjd-rich-editor .custom-select-button:focus  {
   outline: none;
-    border-color: #3b82f6;
+    border-color: var(--rte-focus);
     box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1);
   
 }
@@ -350,7 +356,7 @@
 }
 /* Active toolbar-button + icon colours are owned by the design-system layer
    (accent), and icon sizing/stroke by the outline-icon layer — the old blue
-   (#136FDF) / grey (#454545) overrides have been removed. */
+   (#136FDF) / grey (var(--rte-ink)) overrides have been removed. */
 
 /*block toolbar*/
 .yjd-rich-editor .block-toolbar-btn{
@@ -389,7 +395,7 @@
   align-items: center;
   gap: 28px;
   padding: 8px;
-  background: #fff;
+  background: var(--rte-bg);
   border-radius: 6.9px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.13);
 }
@@ -403,7 +409,7 @@
   height: 0;
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-top: 6px solid #fff;
+  border-top: 6px solid var(--rte-accent-ink-on);
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
 }
 
@@ -413,7 +419,7 @@
   align-items: center;
   gap: 12px;
   padding: 8px;
-  background: #fff;
+  background: var(--rte-bg);
   border-radius: 6px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.13);
 }
@@ -427,7 +433,7 @@
   height: 0;
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-top: 6px solid #fff;
+  border-top: 6px solid var(--rte-accent-ink-on);
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
 }
 
@@ -452,7 +458,7 @@
 /* === COLOR PICKER === */
 .yjd-rich-editor .color-picker-popup {
   position: absolute;
-  background: #fff;
+  background: var(--rte-bg);
   display:none;
   border-radius: 6.9px;
   padding: 8px;
@@ -473,9 +479,9 @@
 /* === CUSTOM SELECT === */
 .yjd-rich-editor .custom-select-popup, .yjd-rich-editor .heading-select-popup, .yjd-rich-editor .capitalization-select-popup, .yjd-rich-editor .font-family-select-popup, .yjd-rich-editor .line-height-select-popup, .yjd-rich-editor .text-size-select-popup {
   position: absolute;
-  background: var(--rte-chrome, #fff);
+  background: var(--rte-chrome, var(--rte-bg));
   display: none;
-  border: 1px solid var(--rte-border, #d1d5db);
+  border: 1px solid var(--rte-border, var(--rte-table-border));
   border-radius: 6.9px;
   padding: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
@@ -628,7 +634,7 @@
 
 .yjd-rich-editor .color-button:hover {
   transform: scale(1.1);
-  border-color: #374151;
+  border-color: var(--rte-ink);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -650,28 +656,28 @@
   width: calc(100% + 16px);
   /* 8px trái + 8px phải */
   height: 0;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--rte-border);
   z-index: -1;
   /* đặt phía sau nội dung */
 }
 
 .yjd-rich-editor .custom-color-label {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--rte-muted);
   margin: 0;
 }
 
 
 .yjd-rich-editor .yjd-input-title{
   margin: 0;
-  color: #252424;
+  color: var(--rte-ink);
   font-size: 16px;
   font-style: normal;
   font-weight: 700;
   line-height: normal;
 }
 .yjd-rich-editor .yjd-input-label{
-  color: #252424;
+  color: var(--rte-ink);
   margin: 0;
   font-size: 14px;
   font-style: normal;
@@ -690,10 +696,10 @@
   max-width: 100%;
   max-height: 37px;
   border-radius: 10px;
-  border: 1px solid var(--rte-border-strong, #E1E1E1);
+  border: 1px solid var(--rte-border-strong, var(--rte-border));
   box-sizing: border-box;
-  background: var(--rte-bg, #fff);
-  color: var(--rte-ink, #252424);
+  background: var(--rte-bg, var(--rte-bg));
+  color: var(--rte-ink, var(--rte-ink));
   font-size: 14px;
   /* Allow interaction with inputs */
   pointer-events: auto;
@@ -701,7 +707,7 @@
 .yjd-rich-editor .yjd-input::placeholder { color: var(--rte-muted, #9aa0b4); }
 .yjd-rich-editor .yjd-input:focus {
   outline: none;
-    border-color: var(--rte-accent, #3b82f6);
+    border-color: var(--rte-accent, var(--rte-focus));
     box-shadow: 0 0 0 3px var(--rte-accent-ring, rgba(59, 130, 246, 0.1));
 }
 .yjd-rich-editor .yjd-button-container{
@@ -717,7 +723,7 @@
   box-shadow: 0px 1px 3.3px 0px rgba(0, 0, 0, 0.04);
   /* Allow interaction with buttons */
   pointer-events: auto;
-  color: #FFF;
+  color: var(--rte-accent-ink-on);
   font-size: 12px;
   font-style: normal;
   font-weight: 700;
@@ -728,8 +734,8 @@
   border-radius: 6px;
   align-items: center;
   padding: 8px 15px;
-  border: 1px solid #E0E0E0;
-  background: #FFFFFF;
+  border: 1px solid var(--rte-border);
+  background: var(--rte-bg);
   box-shadow: 0px 1px 3.3px 0px rgba(0, 0, 0, 0.04);
   color: #2A2727;
   font-size: 12px;
@@ -744,7 +750,7 @@
 /* === LINK POPUP === */
 .yjd-rich-editor .link-popup {
   position: absolute;
-  background: #fff;
+  background: var(--rte-bg);
   font-family: 'Lato', sans-serif;
   display: none;
   border: none;
@@ -780,8 +786,8 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  border: 1px solid #E1E1E1;
-  background: #FFF;
+  border: 1px solid var(--rte-border);
+  background: var(--rte-bg);
   width: 34px;
   height: 34px;
   border-radius: 10px;
@@ -802,10 +808,10 @@
   justify-content: center;
   align-items: center;
   border-radius: 30px;
-  background:  #F5F5F5;
+  background:  var(--rte-chrome-2);
   cursor: pointer;
   font-size: 14px;
-  color: #252424 !important;
+  color: var(--rte-ink) !important;
 }
 .yjd-rich-editor .yjd-select-input{
   -webkit-appearance: none;
@@ -814,7 +820,7 @@
   cursor: pointer;
   padding: 10px 10px 10px 10px;
   border-radius: 10px;
-  border: 1px solid #E1E1E1;
+  border: 1px solid var(--rte-border);
   max-height: 37px;
   align-items: center;
   background-image: url('data:image/svg+xml;utf8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10" fill="none"%3E%3Cpath d="M4.55859 7.94141C4.80273 8.18555 5.19922 8.18555 5.44336 7.94141L9.19336 4.19141C9.4375 3.94727 9.4375 3.55078 9.19336 3.30664C8.94922 3.0625 8.55274 3.0625 8.30859 3.30664L5 6.61523L1.69141 3.30859C1.44727 3.06445 1.05078 3.06445 0.806641 3.30859C0.5625 3.55273 0.5625 3.94922 0.806641 4.19336L4.55664 7.94336L4.55859 7.94141Z" fill="%23A4A7AE" /%3E%3C/svg%3E');
@@ -822,11 +828,11 @@
   background-position: right 10px center;
   background-size: 10px;
   font-size: 14px;
-  color: #252424 !important;
+  color: var(--rte-ink) !important;
 }
 .yjd-rich-editor .yjd-select-input:focus {
   outline: none;
-    border-color: #3b82f6;
+    border-color: var(--rte-focus);
     box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1);
 }
 
@@ -834,10 +840,10 @@
 /* === TABLE POPUP === */
 .yjd-rich-editor .table-popup {
   position: absolute;
-  background: #fff;
+  background: var(--rte-bg);
   font-family: 'Lato', sans-serif;
   display: none;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--rte-table-border);
   border-radius: 6.9px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   z-index: 1000;
@@ -877,7 +883,7 @@
   /* tràn ra ngoài padding 8px */
   right: -8px;
   height: 1px;
-  background-color: #e5e7eb;
+  background-color: var(--rte-chrome-2);
 }
 
 .yjd-rich-editor .table-grid-selector {
@@ -892,7 +898,7 @@
   align-items: center;
   justify-content: center;
   font-family: 'Lato', sans-serif;
-  color: #252424 !important;
+  color: var(--rte-ink) !important;
   font-size: 12px;
   font-style: normal;
   font-weight: 400;
@@ -901,7 +907,7 @@
 .yjd-rich-editor .table-grid-cell {
   width: 20px;
   height: 20px;
-  background: var(--rte-bg, #fff);
+  background: var(--rte-bg, var(--rte-bg));
   border: 1px solid var(--rte-border-strong, rgb(238, 238, 238));
   cursor: pointer;
   transition: background-color 0.1s ease;
@@ -932,16 +938,16 @@
   /* border-box so a cell's min-width includes its padding+border — otherwise
      padding/borders push the table past the width set during resize. */
   box-sizing: border-box;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--rte-table-border);
   padding: 8px 12px;
   min-height: 28px;
   vertical-align: top;
-  background: #fff;
+  background: var(--rte-bg);
   overflow-wrap: break-word;
 }
 
 .yjd-rich-editor .rich-editor-table td:focus {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid var(--rte-focus);
   outline-offset: -2px;
   background: #fefefe;
 }
@@ -977,7 +983,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  color: #374151;
+  color: var(--rte-ink);
   border:none;
   background:transparent;
   font-size: 12px;
@@ -988,13 +994,13 @@
 }
 
 .yjd-rich-editor .table-toolbar-btn:hover {
-  background: #f3f4f6;
+  background: var(--rte-chrome-2);
   color: #111827;
 }
 
 .yjd-rich-editor .table-toolbar-btn:active {
-  background: #e5e7eb;
-  border-color: #9ca3af;
+  background: var(--rte-chrome-2);
+  border-color: var(--rte-muted);
   color: #136FDF !important;
 }
 
@@ -1017,9 +1023,9 @@
 /* === TEXT ALIGN PICKER === */
 .yjd-rich-editor .text-align-picker-popup {
   position: absolute;
-  background: #fff;
+  background: var(--rte-bg);
   display: none;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--rte-table-border);
   border-radius: 6.9px;
   padding: 8px 4px 0 4px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
@@ -1051,7 +1057,7 @@
   justify-content: center;
 }
 .yjd-rich-editor .align-button .label-text{
-  color: #252424;
+  color: var(--rte-ink);
   font-size: 12px;
   font-style: normal;
   font-weight: 400;
@@ -1061,7 +1067,7 @@
 .yjd-rich-editor .align-button {
   height: 24px;
   border-radius: 3.456px;
-  background: #fff;
+  background: var(--rte-bg);
   border: none;
   align-items: center;
   display: flex;
@@ -1074,29 +1080,29 @@
 }
 
 .yjd-rich-editor .align-button:hover {
-  background: #f3f4f6;
-  border-color: #9ca3af;
+  background: var(--rte-chrome-2);
+  border-color: var(--rte-muted);
 }
 
 .yjd-rich-editor .align-button.active {
-  background: #e5e7eb;
-  border-color: #6b7280;
+  background: var(--rte-chrome-2);
+  border-color: var(--rte-muted);
 }
 
 .yjd-rich-editor .align-button svg {
   width: 16px;
   height: 16px;
-  color: #374151;
+  color: var(--rte-ink);
 }
 
 .yjd-rich-editor .align-button.active svg {
-  color: #1f2937;
+  color: var(--rte-ink);
 }
 
 /* === LIST PICKER === */
 .yjd-rich-editor .list-picker-popup {
   position: absolute;
-  background: #fff;
+  background: var(--rte-bg);
   display: none;
   border-radius: 6.9px;
   padding: 12px;
@@ -1134,20 +1140,23 @@
 }
 
 .yjd-rich-editor .list-button:hover {
-  background: #f3f4f6;
+  background: var(--rte-chrome-2);
 }
 
+/* Active = light accent wash + accent-ink icon (matches the toolbar button
+   convention). The old style paired a light-grey background with a white icon,
+   so the active icon was invisible/wrong; it also broke in dark mode. */
 .yjd-rich-editor .list-button.active {
-  background: var(--rte-chrome-2);
+  background: var(--rte-accent-weak);
 }
 
 .yjd-rich-editor .list-button svg {
   height: 16px;
-  color: #374151;
+  color: var(--rte-ink);
 }
 
 .yjd-rich-editor .list-button.active svg {
-  color: #fff;
+  color: var(--rte-accent-ink);
 }
 
 /* === LIST FORMATTING === */
@@ -1199,12 +1208,12 @@
 .yjd-rich-editor .indent-decrease-btn svg {
   width: 16px;
   height: 16px;
-  fill: #454545;
+  fill: var(--rte-ink);
 }
 
 .yjd-rich-editor .indent-increase-btn:hover svg,
 .yjd-rich-editor .indent-decrease-btn:hover svg {
-  fill: #454545;
+  fill: var(--rte-ink);
 }
 
 .yjd-rich-editor .indent-increase-btn:disabled,
@@ -1215,14 +1224,14 @@
 
 .yjd-rich-editor .indent-increase-btn:disabled svg,
 .yjd-rich-editor .indent-decrease-btn:disabled svg {
-  fill: #9ca3af;
+  fill: var(--rte-muted);
 }
 
 /* === EMOJI PICKER === */
 .yjd-rich-editor .emoji-picker-popup {
   position: absolute;
   z-index: 10000;
-  background: #fff;
+  background: var(--rte-bg);
   border-radius: 8px;
   padding: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
@@ -1275,7 +1284,7 @@
 }
 
 .yjd-rich-editor .emoji-button:hover {
-  background-color: #f3f4f6;
+  background-color: var(--rte-chrome-2);
 }
 
 .yjd-rich-editor .emoji {
@@ -1287,7 +1296,7 @@
 .yjd-rich-editor .image-popup {
   position: absolute;
   z-index: 10000;
-  background: #fff;
+  background: var(--rte-bg);
   font-family: 'Lato', sans-serif;
   border-radius: 10px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
@@ -1330,7 +1339,7 @@
 .yjd-rich-editor .video-popup {
   position: absolute;
   z-index: 10000;
-  background: #fff;
+  background: var(--rte-bg);
   font-family: 'Lato', sans-serif;
   border-radius: 10px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
@@ -1391,7 +1400,7 @@
 .yjd-rich-editor .tag-popup {
   position: absolute;
   z-index: 10000;
-  background: #fff;
+  background: var(--rte-bg);
   font-family: 'Lato', sans-serif;
   border-radius: 10px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
@@ -1469,8 +1478,8 @@
 .yjd-rich-editor .import-popup {
   position: absolute;
   z-index: 10000;
-  background: #fff;
-  border: 1px solid #d1d5db;
+  background: var(--rte-bg);
+  border: 1px solid var(--rte-table-border);
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   display: none;
@@ -1496,7 +1505,7 @@
   margin: 0 0 20px 0;
   font-size: 18px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--rte-ink);
 }
 
 .yjd-rich-editor .import-type-container {
@@ -1508,60 +1517,60 @@
   margin-bottom: 8px;
   font-size: 14px;
   font-weight: 500;
-  color: #374151;
+  color: var(--rte-ink);
 }
 
 .yjd-rich-editor .import-type-select {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--rte-table-border);
   border-radius: 6px;
   font-size: 14px;
   background: white;
-  color: #374151;
+  color: var(--rte-ink);
   cursor: pointer;
   box-sizing: border-box;
 }
 
 .yjd-rich-editor .import-type-select:focus {
   outline: none;
-    border-color: #3b82f6;
+    border-color: var(--rte-focus);
     box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1);
 }
 
 .yjd-rich-editor .import-file-input {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--rte-table-border);
   border-radius: 6px;
   font-size: 14px;
   background: white;
-  color: #374151;
+  color: var(--rte-ink);
   margin-bottom: 16px;
   cursor: pointer;
   box-sizing: border-box;
 }
 
 .yjd-rich-editor .import-file-input:disabled {
-  background-color: #f3f4f6;
+  background-color: var(--rte-chrome-2);
   cursor: not-allowed;
   opacity: 0.5;
 }
 
 .yjd-rich-editor .import-file-input:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--rte-focus);
   box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1);
 }
 
 .yjd-rich-editor .import-file-info {
   padding: 12px;
-  background-color: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background-color: var(--rte-quote-bg);
+  border: 1px solid var(--rte-border);
   border-radius: 6px;
   margin-bottom: 16px;
   font-size: 14px;
-  color: #374151;
+  color: var(--rte-ink);
 }
 
 .yjd-rich-editor .import-file-info div {
@@ -1581,7 +1590,7 @@
 
 .yjd-rich-editor .import-button {
   padding: 10px 20px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--rte-table-border);
   border-radius: 6px;
   font-size: 14px;
   font-weight: 500;
@@ -1590,45 +1599,45 @@
 }
 
 .yjd-rich-editor .import-button:hover {
-  background-color: #f3f4f6;
+  background-color: var(--rte-chrome-2);
 }
 
 .yjd-rich-editor .import-button.import-button-main {
-  background-color: #3b82f6;
+  background-color: var(--rte-focus);
   color: white;
-  border-color: #3b82f6;
+  border-color: var(--rte-focus);
 }
 
 .yjd-rich-editor .import-button.import-button-main:hover {
-  background-color: #2563eb;
+  background-color: var(--rte-link);
 }
 
 .yjd-rich-editor .import-button.import-button-main:disabled {
-  background-color: #9ca3af;
-  border-color: #9ca3af;
+  background-color: var(--rte-muted);
+  border-color: var(--rte-muted);
   cursor: not-allowed;
 }
 
 .yjd-rich-editor .import-button.cancel-button {
   background-color: white;
-  color: #6b7280;
+  color: var(--rte-muted);
 }
 
 .yjd-rich-editor .import-button.cancel-button:hover {
-  background-color: #f9fafb;
+  background-color: var(--rte-quote-bg);
 }
 
 /* === IMPORTED CONTENT === */
 .yjd-rich-editor .imported-content {
   margin: 16px 0;
   padding: 16px;
-  border: 1px dashed #d1d5db;
+  border: 1px dashed var(--rte-table-border);
   border-radius: 6px;
-  background-color: #f9fafb;
+  background-color: var(--rte-quote-bg);
 }
 
 .yjd-rich-editor .imported-content.html-content {
-  border-color: #3b82f6;
+  border-color: var(--rte-focus);
   background-color: #eff6ff;
 }
 
@@ -1656,23 +1665,23 @@
 .yjd-rich-editor .imported-table td {
   padding: 12px;
   text-align: left;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--rte-border);
 }
 
 .yjd-rich-editor .imported-table th {
-  background-color: #f3f4f6;
+  background-color: var(--rte-chrome-2);
   font-weight: 600;
-  color: #374151;
+  color: var(--rte-ink);
 }
 
 .yjd-rich-editor .imported-table tr:hover {
-  background-color: #f9fafb;
+  background-color: var(--rte-quote-bg);
 }
 
 .yjd-rich-editor .imported-content p {
   margin: 8px 0;
   line-height: 1.6;
-  color: #374151;
+  color: var(--rte-ink);
 }
 
 .yjd-rich-editor .imported-content p:first-child {
@@ -1691,8 +1700,8 @@
   font-size: 14px;
   line-height: 1.5;
   padding: 16px;
-  background-color: #f8fafc;
-  color: #374151;
+  background-color: var(--rte-chrome-2);
+  color: var(--rte-ink);
   resize: vertical;
   border: none;
   outline: none;
@@ -1733,8 +1742,8 @@
   position: absolute;
   width: 8px;
   height: 8px;
-  background-color: #3b82f6;
-  border: 1px solid #fff;
+  background-color: var(--rte-focus);
+  border: 1px solid var(--rte-accent-ink-on);
   border-radius: 50%;
   pointer-events: auto;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -1756,7 +1765,7 @@
 }
 
 .yjd-rich-editor .resize-handle:hover {
-  background-color: #2563eb;
+  background-color: var(--rte-link);
   transform: scale(1.2);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
@@ -1789,7 +1798,7 @@
 .yjd-rich-editor .inserted-image.resizing,
 .yjd-rich-editor .inserted-video.resizing,
 .yjd-rich-editor .rich-editor-table.resizing {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid var(--rte-focus);
   outline-offset: 2px;
   opacity: 0.8;
 }
@@ -1819,7 +1828,7 @@
 .yjd-rich-editor .inserted-image:hover,
 .yjd-rich-editor .inserted-video:hover,
 .yjd-rich-editor .rich-editor-table:hover {
-  outline: 1px solid #3b82f6;
+  outline: 1px solid var(--rte-focus);
   outline-offset: 1px;
   cursor: pointer;
 }
@@ -2203,6 +2212,7 @@
   --rte-accent-ring: rgba(109, 94, 252, 0.28);
   --rte-accent-ink-on: #ffffff; /* text/icon colour on an accent fill */
   --rte-danger: #e5484d;
+  --rte-focus: #3b82f6;
   /* Content palette (editor body + read-view) */
   --rte-link: #2563eb;
   --rte-code-bg: #f1f2f3;
@@ -2215,6 +2225,12 @@
   --rte-table-border: #d1d5db;
   /* Shape & depth */
   --rte-radius: 14px;
+  /* Concentric inner radius for the chrome bars (toolbar/statusbar/area) which
+     sit 1px inside the container's border. Using the same radius as the outer
+     frame makes the curves non-concentric, so the bar's background overlaps the
+     1px border at the corners and the border looks broken there. Keep this in
+     sync with the .yjd-rich-editor border-width (1px). */
+  --rte-radius-inner: calc(var(--rte-radius) - 1px);
   --rte-radius-md: 11px;
   --rte-radius-sm: 8px;
   --rte-shadow-sm: 0 1px 2px rgba(20, 24, 46, 0.06);
@@ -2247,15 +2263,25 @@
    chrome bars don't show square corners over the rounded border). The outermost
    visible bar shows its radius; covered ones are harmless. */
 .yjd-rich-editor .rich-editor-toolbar-container {
-  border-top-left-radius: var(--rte-radius);
-  border-top-right-radius: var(--rte-radius);
+  border-top-left-radius: var(--rte-radius-inner);
+  border-top-right-radius: var(--rte-radius-inner);
+  /* Clip the (square-cornered, chrome-filled) toolbar rows to the rounded top
+     corners — otherwise the top row's square background bleeds over the curved
+     1px frame border and the border looks broken at the two top corners. */
+  overflow: hidden;
+}
+/* The always-top row must carry the same rounded top corners so its background
+   never fills the corner square (belt-and-suspenders with the clip above). */
+.yjd-rich-editor .rich-editor-toolbar-1 {
+  border-top-left-radius: var(--rte-radius-inner);
+  border-top-right-radius: var(--rte-radius-inner);
 }
 .yjd-rich-editor .rich-editor-statusbar {
-  border-bottom-left-radius: var(--rte-radius);
-  border-bottom-right-radius: var(--rte-radius);
+  border-bottom-left-radius: var(--rte-radius-inner);
+  border-bottom-right-radius: var(--rte-radius-inner);
 }
 .yjd-rich-editor .rich-editor-area {
-  border-radius: var(--rte-radius); /* fallback when there's no toolbar/statusbar */
+  border-radius: var(--rte-radius-inner); /* fallback when there's no toolbar/statusbar */
 }
 
 /* ---------- Toolbar ---------- */
@@ -2457,7 +2483,7 @@
 }
 .yjd-rich-editor .yjd-button-confirm {
   background: var(--rte-accent);
-  color: #fff;
+  color: var(--rte-accent-ink-on);
   border: none;
   border-radius: var(--rte-radius-sm);
   transition: background var(--rte-t);
@@ -2534,7 +2560,7 @@
 /* ---------- Resize handles ---------- */
 .yjd-rich-editor .resize-handle {
   background: var(--rte-accent) !important;
-  border: 2px solid #fff !important;
+  border: 2px solid var(--rte-accent-ink-on) !important;
   border-radius: 50% !important;
   box-shadow: var(--rte-shadow-sm) !important;
 }
@@ -2636,7 +2662,7 @@
 }
 .yjd-rich-editor mark.yjd-find-hit.active {
   background: var(--rte-accent);
-  color: #fff;
+  color: var(--rte-accent-ink-on);
 }
 
 /* ---------- Accessibility: respect reduced motion ---------- */
@@ -2656,12 +2682,12 @@
 /* Convert the hard-coded greys to currentColor so every icon follows the
    button's text colour (and the accent on active). Outline icons (stroke)
    and the deliberately-coloured "no colour" swatch are left untouched. */
-.yjd-rich-editor .icon svg [fill="#454545"],
+.yjd-rich-editor .icon svg [fill="var(--rte-ink)"],
 .yjd-rich-editor .icon svg [fill="#231F20"],
 .yjd-rich-editor .icon svg [fill="#010101"],
-.yjd-rich-editor .icon svg[fill="#454545"],
-.yjd-rich-editor .block-toolbar-btn svg [fill="#454545"],
-.yjd-rich-editor .table-toolbar-btn svg [fill="#454545"] {
+.yjd-rich-editor .icon svg[fill="var(--rte-ink)"],
+.yjd-rich-editor .block-toolbar-btn svg [fill="var(--rte-ink)"],
+.yjd-rich-editor .table-toolbar-btn svg [fill="var(--rte-ink)"] {
   fill: currentColor;
 }
 
@@ -2816,7 +2842,7 @@
 .yjd-rich-editor .yjd-button-confirm {
   background: var(--rte-accent);
   border: 1px solid var(--rte-accent);
-  color: #fff;
+  color: var(--rte-accent-ink-on);
 }
 .yjd-rich-editor .yjd-button-confirm:hover {
   background: var(--rte-accent-ink);
@@ -2894,7 +2920,7 @@
 }
 
 /* quiet default colour, accent on active */
-.yjd-rich-editor .rich-editor-toolbar-btn .icon svg { color: #565b6b; }
+.yjd-rich-editor .rich-editor-toolbar-btn .icon svg { color: var(--rte-muted); }
 .yjd-rich-editor .rich-editor-toolbar-btn:hover .icon svg { color: var(--rte-ink); }
 .yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg,
 .yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg path,
@@ -2943,7 +2969,7 @@
   border: 1px solid transparent;
   border-radius: var(--rte-radius-sm);
   background: transparent;
-  color: #565b6b;
+  color: var(--rte-muted);
   cursor: pointer;
   transition: background var(--rte-t), color var(--rte-t);
 }
@@ -2991,7 +3017,7 @@
   fill: currentColor !important;
   stroke: none !important;
 }
-.yjd-rich-editor .table-toolbar-btn { color: #565b6b; }
+.yjd-rich-editor .table-toolbar-btn { color: var(--rte-muted); }
 .yjd-rich-editor .table-toolbar-btn:hover { color: var(--rte-ink); }
 
 /* =====================================================================
@@ -3081,8 +3107,8 @@
   max-height: 320px;
   overflow-y: auto;
   padding: 6px;
-  background: var(--rte-bg, #ffffff);
-  border: 1px solid var(--rte-border, #e9e9f1);
+  background: var(--rte-bg, var(--rte-bg));
+  border: 1px solid var(--rte-border, var(--rte-border));
   border-radius: var(--rte-radius-md, 12px);
   box-shadow: var(--rte-shadow, 0 12px 32px -8px rgba(20, 24, 46, 0.20), 0 4px 10px -4px rgba(20, 24, 46, 0.10));
   font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -3100,10 +3126,10 @@
   border-radius: 8px;
   cursor: pointer;
   text-align: left;
-  color: var(--rte-ink, #20242f);
+  color: var(--rte-ink, var(--rte-ink));
 }
 .yjd-slash-item:hover,
-.yjd-slash-item.active { background: var(--rte-accent-weak, #efedff); color: var(--rte-accent-ink, #5a48ee); }
+.yjd-slash-item.active { background: var(--rte-accent-weak, var(--rte-accent-weak)); color: var(--rte-accent-ink, var(--rte-accent-ink)); }
 .yjd-slash-icon {
   display: inline-flex;
   align-items: center;
@@ -3112,10 +3138,10 @@
   height: 28px;
   flex: 0 0 auto;
   border-radius: 7px;
-  background: var(--rte-chrome-2, #f2f2f7);
+  background: var(--rte-chrome-2, var(--rte-chrome-2));
   color: inherit;
 }
-.yjd-slash-item.active .yjd-slash-icon { background: var(--rte-bg, #ffffff); }
+.yjd-slash-item.active .yjd-slash-icon { background: var(--rte-bg, var(--rte-bg)); }
 .yjd-slash-icon svg {
   width: auto;
   height: 16px;
@@ -3128,7 +3154,7 @@
 .yjd-slash-icon svg [fill="currentColor"] { fill: currentColor; stroke: none; }
 .yjd-slash-text { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
 .yjd-slash-label { font-weight: 500; }
-.yjd-slash-hint { font-size: 12px; color: var(--rte-muted, #767c8e); }
+.yjd-slash-hint { font-size: 12px; color: var(--rte-muted, var(--rte-muted)); }
 .yjd-slash-item.active .yjd-slash-hint { color: var(--rte-accent, #8b7ff0); }
 @media (prefers-reduced-motion: reduce) { .yjd-slash-menu { animation: none; } }
 
@@ -3154,7 +3180,7 @@
 /* Background swatch defaults to a "no fill" look until a colour is chosen. */
 .yjd-rich-editor .rich-editor-toolbar-btn.background-btn .rte-swatch {
   background: transparent;
-  box-shadow: inset 0 0 0 1px var(--rte-border, #e9e9f1);
+  box-shadow: inset 0 0 0 1px var(--rte-border, var(--rte-border));
 }
 .yjd-rich-editor .rich-editor-toolbar-btn.background-btn.has-color .rte-swatch {
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
@@ -3437,11 +3463,11 @@
 }
 
 /* ── A11y: statusbar text contrast (v2.22) ────────────────────────────────
-   --rte-muted (#767c8e) on the near-white statusbar was only 4.02:1; darken
+   --rte-muted (var(--rte-muted)) on the near-white statusbar was only 4.02:1; darken
    the breadcrumb + word-count to meet WCAG AA (>=4.5:1). */
 .yjd-rich-editor .rich-editor-breadcrumb,
 .yjd-rich-editor .wordcount {
-  color: #5b6373;
+  color: var(--rte-muted);
 }
 
 /* ── Find & Replace: icon buttons (v2.23) ─────────────────────────────────
@@ -3469,8 +3495,8 @@
   display: inline;
   padding: 0 2px;
   border-radius: 4px;
-  background: #efedff;
-  color: #5a48ee;
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
   font-weight: 500;
   text-decoration: none;
   white-space: nowrap;
@@ -3490,8 +3516,8 @@
   max-height: 280px;
   overflow-y: auto;
   padding: 6px;
-  background: var(--rte-bg, #ffffff);
-  border: 1px solid var(--rte-border, #e9e9f1);
+  background: var(--rte-bg, var(--rte-bg));
+  border: 1px solid var(--rte-border, var(--rte-border));
   border-radius: var(--rte-radius-md, 12px);
   box-shadow: var(--rte-shadow, 0 12px 32px -8px rgba(20, 24, 46, 0.20), 0 4px 10px -4px rgba(20, 24, 46, 0.10));
   font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -3508,22 +3534,22 @@
   border-radius: 8px;
   cursor: pointer;
   text-align: left;
-  color: var(--rte-ink, #20242f);
+  color: var(--rte-ink, var(--rte-ink));
 }
 .yjd-mention-item:hover,
-.yjd-mention-item.active { background: var(--rte-accent-weak, #efedff); color: var(--rte-accent-ink, #5a48ee); }
+.yjd-mention-item.active { background: var(--rte-accent-weak, var(--rte-accent-weak)); color: var(--rte-accent-ink, var(--rte-accent-ink)); }
 .yjd-mention-avatar {
   width: 26px;
   height: 26px;
   border-radius: 50%;
   object-fit: cover;
   flex: 0 0 auto;
-  background: #f2f2f7;
+  background: var(--rte-chrome-2);
 }
 .yjd-mention-ico {
   width: 26px; height: 26px; flex: 0 0 auto;
   display: inline-flex; align-items: center; justify-content: center;
-  border-radius: 50%; background: var(--rte-accent-weak, #efedff); color: var(--rte-accent-ink, #5a48ee);
+  border-radius: 50%; background: var(--rte-accent-weak, var(--rte-accent-weak)); color: var(--rte-accent-ink, var(--rte-accent-ink));
 }
 .yjd-mention-ico svg { width: 16px; height: 16px; stroke: currentColor; fill: none; }
 .yjd-mention-name { font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -3536,12 +3562,12 @@
   width: 320px;
   max-width: calc(100vw - 16px);
   padding: 8px;
-  background: var(--rte-bg, #ffffff);
-  border: 1px solid var(--rte-border, #e9e9f1);
+  background: var(--rte-bg, var(--rte-bg));
+  border: 1px solid var(--rte-border, var(--rte-border));
   border-radius: var(--rte-radius-md, 12px);
   box-shadow: var(--rte-shadow, 0 12px 32px -8px rgba(20, 24, 46, 0.20), 0 4px 10px -4px rgba(20, 24, 46, 0.10));
   font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  color: var(--rte-ink, #20242f);
+  color: var(--rte-ink, var(--rte-ink));
   animation: yjd-slash-in 90ms ease-out;
 }
 .yjd-ai-actions { display: flex; flex-wrap: wrap; gap: 4px; }
@@ -3554,24 +3580,24 @@
   cursor: pointer;
   text-align: left;
   white-space: nowrap;
-  color: var(--rte-ink, #20242f);
+  color: var(--rte-ink, var(--rte-ink));
   font: inherit;
 }
-.yjd-ai-act:hover { background: var(--rte-accent-weak, #efedff); color: var(--rte-accent-ink, #5a48ee); }
+.yjd-ai-act:hover { background: var(--rte-accent-weak, var(--rte-accent-weak)); color: var(--rte-accent-ink, var(--rte-accent-ink)); }
 .yjd-ai-ask { margin-top: 6px; }
 .yjd-ai-input {
   width: 100%;
   box-sizing: border-box;
   padding: 8px 10px;
-  border: 1px solid var(--rte-border, #e9e9f1);
+  border: 1px solid var(--rte-border, var(--rte-border));
   border-radius: 8px;
   font: inherit;
-  color: var(--rte-ink, #20242f);
-  background: var(--rte-bg, #fff);
+  color: var(--rte-ink, var(--rte-ink));
+  background: var(--rte-bg, var(--rte-bg));
 }
 .yjd-ai-input:focus {
   outline: none;
-  border-color: var(--rte-accent, #6d5efc);
+  border-color: var(--rte-accent, var(--rte-accent));
   box-shadow: 0 0 0 3px var(--rte-accent-ring, rgba(109, 94, 252, 0.28));
 }
 .yjd-ai-result {
@@ -3579,8 +3605,8 @@
   overflow-y: auto;
   padding: 8px 10px;
   border-radius: 8px;
-  background: var(--rte-accent-weak, #efedff);
-  color: var(--rte-ink, #20242f);
+  background: var(--rte-accent-weak, var(--rte-accent-weak));
+  color: var(--rte-ink, var(--rte-ink));
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -3590,13 +3616,13 @@
   flex: 1 1 auto;
   padding: 6px 10px;
   border-radius: 8px;
-  border: 1px solid var(--rte-border, #e9e9f1);
-  background: var(--rte-bg, #fff);
-  color: var(--rte-ink, #20242f);
+  border: 1px solid var(--rte-border, var(--rte-border));
+  background: var(--rte-bg, var(--rte-bg));
+  color: var(--rte-ink, var(--rte-ink));
   cursor: pointer;
   font: inherit;
 }
-.yjd-ai-accept { background: var(--rte-accent, #6d5efc) !important; color: var(--rte-accent-ink-on, #fff) !important; border-color: var(--rte-accent, #6d5efc) !important; }
+.yjd-ai-accept { background: var(--rte-accent, var(--rte-accent)) !important; color: var(--rte-accent-ink-on, var(--rte-accent-ink-on)) !important; border-color: var(--rte-accent, var(--rte-accent)) !important; }
 .yjd-ai-foot button:hover { filter: brightness(0.97); }
 .yjd-ai-ghost {
   position: absolute;
@@ -3609,10 +3635,10 @@
 @media (prefers-reduced-motion: reduce) { .yjd-ai-bar { animation: none; } }
 
 /* AI toolbar button — accent-tinted so the assistant reads as "special". */
-.rich-editor-toolbar-btn.ai-btn { color: var(--rte-accent, #6d5efc); }
+.rich-editor-toolbar-btn.ai-btn { color: var(--rte-accent, var(--rte-accent)); }
 .rich-editor-toolbar-btn.ai-btn:hover {
-  background: var(--rte-accent-weak, #efedff);
-  color: var(--rte-accent-ink, #5a48ee);
+  background: var(--rte-accent-weak, var(--rte-accent-weak));
+  color: var(--rte-accent-ink, var(--rte-accent-ink));
 }
 
 /* ── Static read-view (.yjd-content) (v2.24) ──────────────────────────────
@@ -3623,7 +3649,7 @@
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   font-size: 16px;
   line-height: 1.6;
-  color: #20242f;
+  color: var(--rte-ink);
   word-wrap: break-word;
 }
 .yjd-content > :first-child { margin-top: 0; }
@@ -3634,31 +3660,31 @@
 .yjd-content h3 { font-size: 1.25em; font-weight: bold; margin: 0.83em 0; }
 .yjd-content h4 { font-size: 1.1em; font-weight: bold; margin: 1em 0; }
 .yjd-content h5 { font-size: 1em; font-weight: bold; margin: 1.25em 0; }
-.yjd-content h6 { font-size: 0.875em; font-weight: bold; margin: 1.5em 0; color: #555; }
+.yjd-content h6 { font-size: 0.875em; font-weight: bold; margin: 1.5em 0; color: var(--rte-muted); }
 .yjd-content ul, .yjd-content ol { margin: 0 0 1em 2em; padding: 0; }
 .yjd-content li { margin: 0.25em 0; }
-.yjd-content a { color: #2563eb; text-decoration: underline; }
+.yjd-content a { color: var(--rte-link); text-decoration: underline; }
 .yjd-content code {
   font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
-  background: #f1f2f3; padding: 2px 6px; border-radius: 4px;
+  background: var(--rte-code-bg); padding: 2px 6px; border-radius: 4px;
 }
 .yjd-content pre {
   font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
-  background: #f1f2f3; padding: 12px 14px; border-radius: 6px;
+  background: var(--rte-code-bg); padding: 12px 14px; border-radius: 6px;
   margin: 1em 0; overflow-x: auto; white-space: pre;
 }
 .yjd-content pre code { background: none; padding: 0; }
 .yjd-content blockquote {
-  border-left: 4px solid #d1d5db; margin: 1em 0; padding: 4px 12px;
-  color: #555; font-style: italic; background: #f9fafb;
+  border-left: 4px solid var(--rte-table-border); margin: 1em 0; padding: 4px 12px;
+  color: var(--rte-muted); font-style: italic; background: var(--rte-quote-bg);
 }
 .yjd-content img { max-width: 100%; height: auto; border-radius: 4px; }
-.yjd-content hr { border: none; border-top: 1px solid #d1d5db; margin: 1.5em 0; }
+.yjd-content hr { border: none; border-top: 1px solid var(--rte-table-border); margin: 1.5em 0; }
 .yjd-content table {
   border-collapse: collapse; width: 100%; margin: 1em 0;
 }
 .yjd-content table td, .yjd-content table th {
-  border: 1px solid #d1d5db; padding: 8px 10px; text-align: left;
+  border: 1px solid var(--rte-table-border); padding: 8px 10px; text-align: left;
 }
 
 /* ── File chip (v2.25) ────────────────────────────────────────────────────
@@ -3674,19 +3700,19 @@
   margin: 0 1px;
   border: 1px solid #e0e0ec;
   border-radius: 8px;
-  background: #f7f7fb;
-  color: #20242f;
+  background: var(--rte-chrome-2);
+  color: var(--rte-ink);
   text-decoration: none;
   font-size: 0.9em;
   line-height: 1.5;
   white-space: nowrap;
 }
-.yjd-file-chip:hover { border-color: #6d5efc; background: #efedff; }
+.yjd-file-chip:hover { border-color: var(--rte-accent); background: var(--rte-accent-weak); }
 .yjd-file-chip[data-state="uploading"] { opacity: 0.6; }
-.yjd-file-ico { display: inline-flex; flex: 0 0 auto; color: #5a48ee; }
+.yjd-file-ico { display: inline-flex; flex: 0 0 auto; color: var(--rte-accent-ink); }
 .yjd-file-ico svg { width: 15px; height: 15px; stroke: currentColor; fill: none; }
 .yjd-file-name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; max-width: 22em; }
-.yjd-file-size { color: #767c8e; font-variant-numeric: tabular-nums; }
+.yjd-file-size { color: var(--rte-muted); font-variant-numeric: tabular-nums; }
 
 /* ── Upload loading state (v2.26) ─────────────────────────────────────────
    Spinner shown while an image/file is uploading, plus a drop-zone highlight.
@@ -3698,7 +3724,7 @@
   height: 15px;
   flex: 0 0 auto;
   border: 2px solid var(--rte-accent-weak, #d9d4ff);
-  border-top-color: var(--rte-accent, #6d5efc);
+  border-top-color: var(--rte-accent, var(--rte-accent));
   border-radius: 50%;
   animation: yjd-spin 0.7s linear infinite;
   vertical-align: middle;
@@ -3717,7 +3743,7 @@
   border: 1px dashed var(--rte-border-strong, #c9c5ec);
   border-radius: 10px;
   background: var(--rte-accent-weak, #f3f1ff);
-  color: var(--rte-muted, #5b6373);
+  color: var(--rte-muted, var(--rte-muted));
   font-size: 0.9em;
   user-select: none;
 }
@@ -3725,7 +3751,7 @@
 
 /* Drag-and-drop target highlight (image or file dragged over the editor). */
 .rich-editor-area.yjd-drag-over {
-  outline: 2px dashed var(--rte-accent, #6d5efc);
+  outline: 2px dashed var(--rte-accent, var(--rte-accent));
   outline-offset: -4px;
   background: var(--rte-accent-weak, #f6f5ff);
 }
@@ -3767,6 +3793,7 @@
   --rte-accent-ring: rgba(139, 127, 240, 0.40);
   --rte-accent-ink-on: #ffffff;
   --rte-danger: #f2686c;
+  --rte-focus: #5b9bff;
   --rte-link: #8ab4ff;
   --rte-code-bg: #2d313d;
   --rte-code-ink: #e8e9ef;
@@ -3797,6 +3824,7 @@
   --rte-accent-ring: rgba(109, 94, 252, 0.28);
   --rte-accent-ink-on: #ffffff;
   --rte-danger: #e5484d;
+  --rte-focus: #3b82f6;
   --rte-link: #2563eb;
   --rte-code-bg: #f1f2f3;
   --rte-code-ink: inherit;
@@ -3827,6 +3855,7 @@
     --rte-accent-ring: rgba(139, 127, 240, 0.40);
     --rte-accent-ink-on: #ffffff;
     --rte-danger: #f2686c;
+    --rte-focus: #5b9bff;
     --rte-link: #8ab4ff;
     --rte-code-bg: #2d313d;
     --rte-code-ink: #e8e9ef;
