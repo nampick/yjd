@@ -934,7 +934,8 @@
   table-layout: fixed;
 }
 
-.yjd-rich-editor .rich-editor-table td {
+.yjd-rich-editor .rich-editor-table td,
+.yjd-rich-editor .rich-editor-table th {
   /* border-box so a cell's min-width includes its padding+border — otherwise
      padding/borders push the table past the width set during resize. */
   box-sizing: border-box;
@@ -944,6 +945,12 @@
   vertical-align: top;
   background: var(--rte-bg);
   overflow-wrap: break-word;
+}
+/* Header row cells: emphasised background + weight. */
+.yjd-rich-editor .rich-editor-table th {
+  background: var(--rte-chrome-2);
+  font-weight: 600;
+  text-align: start;
 }
 
 .yjd-rich-editor .rich-editor-table td:focus {
