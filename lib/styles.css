@@ -1826,6 +1826,11 @@
   pointer-events: auto;
   z-index: 998;
 }
+/* Flipped below the image when there isn't room above (image near the top —
+   otherwise the bar hides under the toolbar). */
+.yjd-rich-editor .yjd-image-align-bar.below {
+  top: calc(100% + 6px);
+}
 .yjd-rich-editor .yjd-image-align-btn {
   display: inline-flex;
   align-items: center;
