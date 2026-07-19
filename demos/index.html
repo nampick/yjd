@@ -79,6 +79,18 @@
     .preview-head .lbl{font:600 11px var(--display);text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
     .preview-head .size{font-family:var(--mono);font-size:12px;color:var(--violet-ink);background:var(--violet-weak);padding:3px 10px;border-radius:999px;font-weight:600}
     #yjd-stage{min-width:0;width:100%}
+    /* Keep the previewed editor a self-contained widget: cap its height so the
+       toolbar + statusbar stay pinned and the content scrolls INSIDE the area —
+       otherwise a tall preset grows past the viewport and its toolbar slides up
+       under the page's sticky nav. The editor sets an inline max-height:800px by
+       default, so this override needs !important. */
+    #yjd-stage .yjd-rich-editor{display:flex;flex-direction:column;max-height:min(560px,72vh)!important}
+    /* Only the content area flexes; the toolbar (incl. the More second row) and
+       statusbar must NEVER shrink, or the toolbar's overflow:hidden clips the
+       second row when the height cap is tight. */
+    #yjd-stage .rich-editor-toolbar-container{flex:0 0 auto}
+    #yjd-stage .rich-editor-area{flex:1 1 auto;min-height:0}
+    #yjd-stage .rich-editor-statusbar{flex:0 0 auto}
 
     /* note + footer */
     .hint{display:flex;gap:10px;align-items:flex-start;color:var(--ink-2);font-size:14px;background:var(--violet-weak);border:1px solid #ddd8ff;border-radius:12px;padding:12px 14px;margin:0 0 14px}
