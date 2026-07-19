@@ -2276,6 +2276,21 @@
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
+/* Distraction-free full screen: fill the viewport (Esc exits). The editor area
+   already flexes to fill the column, so no per-child sizing is needed. */
+.yjd-rich-editor.yjd-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  width: 100vw !important;
+  max-width: 100vw !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+body.yjd-fullscreen-lock { overflow: hidden; }
+
 /* Use a friendly system stack everywhere (overrides the forced "Inter") */
 .yjd-rich-editor .toolbar-container button,
 .yjd-rich-editor .toolbar-container input,
