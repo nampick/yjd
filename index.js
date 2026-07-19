@@ -5,6 +5,11 @@ import { Format, InlineFormat, BlockFormat } from './lib/core/format.js';
 import StylesLoader from './lib/styles-loader.js';
 import { renderStatic } from './lib/static.js';
 import { htmlToMarkdown, markdownToHtml, domToJson, jsonToHtml } from './lib/serialize.js';
+import { applySerializeMethods } from './lib/core/serialize-methods.js';
+
+// The all-in-one build ships getJSON/setJSON/getMarkdown/setMarkdown; the
+// tree-shakeable /core Editor omits them (keeps serialize.js out of Minimal).
+applySerializeMethods(Editor);
 
 // Import formats
 import Bold from './lib/formats/bold.js';
