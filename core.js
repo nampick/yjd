@@ -28,6 +28,14 @@ export { Format, InlineFormat, BlockFormat } from './lib/core/format.js';
 export { default as registry } from './lib/core/registry.js';
 export { default as StylesLoader } from './lib/styles-loader.js';
 
+// Optional Editor capabilities (tree-shaken out of Minimal). Call these when a
+// /core build uses the matching features (the all-in-one build calls them for
+// you): serialize md/json; full-screen / text-direction / clear-format;
+// image & file insert, auto-linkify, markdown shortcuts.
+export { applySerializeMethods } from './lib/core/serialize-methods.js';
+export { applyEditorCommands } from './lib/core/editor-commands.js';
+export { applyEditorInput } from './lib/core/editor-input.js';
+
 // Formats
 export { default as Bold } from './lib/formats/bold.js';
 export { default as Italic } from './lib/formats/italic.js';

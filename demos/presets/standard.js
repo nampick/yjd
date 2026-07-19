@@ -4,11 +4,15 @@
  * resize handles, table toolbar. Built from /core (tree-shaken).
  */
 import {
-  Editor, registry,
+  Editor, registry, applyEditorInput,
   Bold, Italic, Underline, Strike, Link, Heading, List, TextAlign, FontFamily,
   Color, Background, Image, Table, IndentIncrease, IndentDecrease, TextSize,
   Toolbar, History, SlashMenu, BlockToolbar, TableToolbar, FindReplace, CodeView, ResizeHandles
 } from '../../core.js';
+
+// This preset uses the image format + auto-linkify/markdown, so it opts into
+// the input-path capabilities the tree-shakeable /core Editor omits.
+applyEditorInput(Editor);
 
 [
   ['formats/bold', Bold], ['formats/italic', Italic], ['formats/underline', Underline],
