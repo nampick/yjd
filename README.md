@@ -20,6 +20,15 @@ new yjd('#editor', { placeholder: 'Start writing…' });
 - **XSS-safe paste** — sanitises pasted HTML (scripts/handlers/unsafe URLs stripped; only trusted embeds survive).
 - **Accessible** — keyboard navigable, WCAG-AA contrast (Lighthouse a11y 100).
 
+## New in 2.3
+
+- **Interactive checklists** — a task-list variant of `list`; click a box to toggle it, state saved in the HTML.
+- **Full-screen mode** — a distraction-free writing surface, toggled from the toolbar.
+- **Image alignment & live resize** — drag-resize handles plus a left/center/right align bar on the selected image; both reflect into `onChange` in real time.
+- **Richer tables** — merge/split cells (drag-select a range), toggle a header row (`td ↔ th`), and set per-cell background & alignment.
+- **Auto-linkify** — bare URLs turn into links as you type (on space/Enter).
+- **Fully tokenised theming** — ~187 hardcoded colours replaced by `--rte-*` custom properties in an `@layer yjd` cascade layer. See [docs/THEMING.md](docs/THEMING.md).
+
 ## Bundle size (gzipped JS)
 
 Every preset is built from the same `/core` entry — pick a profile, tree-shake the rest.
@@ -143,6 +152,11 @@ const ed = Editor.fromTextarea('#comment', {
 **Formats** — `bold` · `italic` · `underline` · `strike` · `subscript` · `superscript` · `color` · `background` · `link` · `heading` · `font-family` · `text-size` · `line-height` · `capitalization` · `text-align` · `list` · `indent-increase` · `indent-decrease` · `image` · `video` · `table` · `emoji` · `tag`
 
 **Modules** — `toolbar` · `history` · `slash-menu` · `mention` · `ai` (BYO-model assistant) · `block-toolbar` (bubble bar) · `table-toolbar` · `find-replace` · `code-view` · `resize-handles`
+
+> `list` includes an interactive **checklist** variant; `table-toolbar` adds cell
+> **merge/split**, **header-row** toggle and per-cell **background/alignment**;
+> `resize-handles` drives image **resize + alignment**. Full-screen mode and
+> auto-linkify ship with the default toolbar/build.
 
 ## Methods
 
@@ -343,7 +357,8 @@ renderStatic(post.body_html, document.querySelector('#post'));
 ## Styling & theming
 
 The whole UI — editor, toolbar, popups, and the body-portaled mention/slash menus —
-is driven by `--rte-*` CSS custom properties.
+is driven by `--rte-*` CSS custom properties. For the full token reference and
+recipes, see **[docs/THEMING.md](docs/THEMING.md)**.
 
 **Match your app** — override any token at `:root` (or any ancestor, or
 `.yjd-rich-editor`); the editor follows your colours, no dark class needed. All
