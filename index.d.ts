@@ -237,6 +237,16 @@ export interface EditorOptions {
     group: string;
     items: string[];
   }>;
+  /**
+   * Explicit list of module names to load, overriding the default set
+   * (e.g. ['toolbar', 'history']). Names resolve against the registry.
+   */
+  modules?: string[];
+  /**
+   * Explicit list of format names to load, overriding the default set.
+   * Names resolve against the registry.
+   */
+  formats?: string[];
 }
 
 export class Editor {
@@ -269,6 +279,10 @@ export class Editor {
   getMarkdown(): string;
   setMarkdown(markdown: string): void;
   getText(): string;
+  /** Undo the last change (uses the history module, falls back to execCommand). */
+  undo(): void;
+  /** Redo the last undone change. */
+  redo(): void;
   isEmpty(): boolean;
   clear(): void;
   insertText(text: string): void;
