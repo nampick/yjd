@@ -42,6 +42,12 @@ export default [
       format: 'es',
       sourcemap: true
     },
+    // Feature modules register their icons via a top-level registerIcons() call.
+    // Honour package.json "sideEffects" (only the full-bundle entries) so unused
+    // features and their icons tree-shake out of this /core build.
+    treeshake: {
+      moduleSideEffects: (id) => /index\.js$|umd-entry\.js$/.test(id)
+    },
     plugins: [terserPlugin]
   }
 ];
