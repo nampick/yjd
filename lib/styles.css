@@ -151,6 +151,15 @@
   margin: 0.67em 0;
 }
 
+/* Horizontal rule: a flat themed line (execCommand inserts a bare <hr> that
+   otherwise renders as the browser's beveled default). Matches .yjd-content hr
+   so the editor and the read-view/preview look identical. */
+.yjd-rich-editor .rich-editor-area hr {
+  border: none;
+  border-top: 1px solid var(--rte-table-border);
+  margin: 1.5em 0;
+}
+
 .yjd-rich-editor .rich-editor-area h2 {
   font-size: 1.5em;
   font-weight: bold;
