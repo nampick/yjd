@@ -6,10 +6,13 @@ import StylesLoader from './lib/styles-loader.js';
 import { renderStatic } from './lib/static.js';
 import { htmlToMarkdown, markdownToHtml, domToJson, jsonToHtml } from './lib/serialize.js';
 import { applySerializeMethods } from './lib/core/serialize-methods.js';
+import { applyEditorCommands } from './lib/core/editor-commands.js';
 
-// The all-in-one build ships getJSON/setJSON/getMarkdown/setMarkdown; the
-// tree-shakeable /core Editor omits them (keeps serialize.js out of Minimal).
+// The all-in-one build ships the optional Editor methods that the
+// tree-shakeable /core Editor omits (serialize md/json; full-screen, text
+// direction, clear-formatting) — keeping them out of a Minimal bundle.
 applySerializeMethods(Editor);
+applyEditorCommands(Editor);
 
 // Import formats
 import Bold from './lib/formats/bold.js';
