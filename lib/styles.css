@@ -1767,6 +1767,42 @@
   display: block;
 }
 
+/* Image align bar (shown above a selected image). */
+.yjd-rich-editor .yjd-image-align-bar {
+  position: absolute;
+  top: -42px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  background: var(--rte-bg);
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-sm);
+  box-shadow: var(--rte-shadow-sm);
+  pointer-events: auto;
+  z-index: 998;
+}
+.yjd-rich-editor .yjd-image-align-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--rte-radius-sm);
+  background: transparent;
+  cursor: pointer;
+  color: var(--rte-ink);
+}
+.yjd-rich-editor .yjd-image-align-btn:hover { background: var(--rte-chrome-2); }
+.yjd-rich-editor .yjd-image-align-btn.active {
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
+}
+.yjd-rich-editor .yjd-image-align-btn .icon { display: inline-flex; }
+.yjd-rich-editor .yjd-image-align-btn .icon svg { width: 16px; height: 16px; }
+
 .yjd-rich-editor .resize-handle {
   position: absolute;
   width: 8px;
