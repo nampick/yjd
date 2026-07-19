@@ -74,3 +74,23 @@ Keep the public surface stable so `@oix1987/yjd` consumers don't churn:
 This should not be done silently. Confirm: target engine (Tiptap vs Lexical),
 acceptable bundle budget, and whether collaboration (Yjs) is in scope — then the
 spike in phase 1 can start on a dedicated branch.
+
+---
+
+## `/core` optional-method installers
+
+The tree-shakeable `/core` `Editor` omits some methods so a Minimal build stays
+small (~17 KB). The default/UMD/all-in-one build wires them for you — this only
+affects hand-rolled `/core` builds. Opt in once, per group:
+
+```js
+import { Editor, applySerializeMethods, applyEditorCommands, applyEditorInput } from '@oix1987/yjd/core';
+
+applySerializeMethods(Editor); // getJSON/setJSON · getMarkdown/setMarkdown · fromTextarea({format:'markdown'})
+applyEditorCommands(Editor);   // toggleFullscreen · setDirection/toggleTextDirection · clearFormatting
+applyEditorInput(Editor);      // insertImageFile (image toolbar/drop/paste) · file attachments · auto-linkify · markdown shortcuts
+```
+
+Symptoms when an installer is missing: the image toolbar button / drop / paste
+does nothing (a console warning points here), `getMarkdown()`/`getJSON()` are
+`undefined`, or full-screen / text-direction toolbar buttons no-op.

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>yjd — rich text, without the weight</title>
-  <meta name="description" content="yjd is a dependency-free, tree-shakeable rich text editor for the web. Compose it from a /core entry and ship 16 KB, not the whole library.">
+  <meta name="description" content="yjd is a dependency-free, tree-shakeable rich text editor for the web. Compose it from a /core entry and ship 17 KB, not the whole library.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='4' fill='%236d5efc'/%3E%3Ctext x='8' y='12' font-family='monospace' font-size='10' font-weight='700' fill='white' text-anchor='middle'%3Ey%3C/text%3E%3C/svg%3E">
   <link rel="canonical" href="https://yjd.io/">
   <link rel="sitemap" type="application/xml" href="/sitemap.xml">
@@ -151,7 +151,7 @@
           <a class="btn btn-ghost" href="/site/docs.html">Get started</a>
         </div>
         <div class="hero-meta">
-          <div><b>16 KB</b> minimal, gzip</div>
+          <div><b>17 KB</b> minimal, gzip</div>
           <div><b>0</b> runtime deps</div>
           <div><b>100</b> Lighthouse a11y</div>
         </div>
@@ -171,11 +171,11 @@
       <p>Every preset is built from the same <span class="mono">/core</span> entry. Pick a profile — the rest is tree-shaken away. (gzipped JS)</p>
     </div>
     <div class="bars" id="bars">
-      <div class="bar-row"><div class="name">Minimal<span>bold · italic · link</span></div><div class="track"><div class="fill" data-kb="16"></div></div><div class="kb">16 KB</div></div>
-      <div class="bar-row"><div class="name">Bubble<span>no toolbar</span></div><div class="track"><div class="fill" data-kb="21"></div></div><div class="kb">21 KB</div></div>
-      <div class="bar-row"><div class="name">Basic<span>+ headings · lists</span></div><div class="track"><div class="fill" data-kb="25"></div></div><div class="kb">25 KB</div></div>
-      <div class="bar-row"><div class="name">Standard<span>+ colour · table · find</span></div><div class="track"><div class="fill" data-kb="38"></div></div><div class="kb">38 KB</div></div>
-      <div class="bar-row"><div class="name">Full<span>everything + AI</span></div><div class="track"><div class="fill" data-kb="56"></div></div><div class="kb">56 KB</div></div>
+      <div class="bar-row"><div class="name">Minimal<span>bold · italic · link</span></div><div class="track"><div class="fill" data-kb="17"></div></div><div class="kb">17 KB</div></div>
+      <div class="bar-row"><div class="name">Bubble<span>no toolbar</span></div><div class="track"><div class="fill" data-kb="23"></div></div><div class="kb">23 KB</div></div>
+      <div class="bar-row"><div class="name">Basic<span>+ headings · lists</span></div><div class="track"><div class="fill" data-kb="28"></div></div><div class="kb">28 KB</div></div>
+      <div class="bar-row"><div class="name">Standard<span>+ colour · table · find</span></div><div class="track"><div class="fill" data-kb="46"></div></div><div class="kb">46 KB</div></div>
+      <div class="bar-row"><div class="name">Full<span>everything + AI, CSS inlined</span></div><div class="track"><div class="fill" data-kb="75"></div></div><div class="kb">75 KB</div></div>
       <div class="bar-row"><div class="name" style="color:#8e92a6">Quill 2<span>for comparison</span></div><div class="track"><div class="fill alt" data-kb="60"></div></div><div class="kb" style="color:#8e92a6">60 KB</div></div>
     </div>
   </section></div>
@@ -235,7 +235,7 @@ registry.<span class="f">register</span>(<span class="s">'modules/toolbar'</span
       <p>Five ready profiles in the <a href="/demos/index.html" style="color:var(--violet-ink);font-weight:600">live playground</a> — edit the code and watch it rebuild.</p>
     </div>
     <div class="presets">
-      <a class="preset" href="/demos/index.html"><b>Minimal</b><span class="kb">16 KB</span></a>
+      <a class="preset" href="/demos/index.html"><b>Minimal</b><span class="kb">17 KB</span></a>
       <a class="preset" href="/demos/index.html"><b>Bubble</b><span class="kb">21 KB</span></a>
       <a class="preset" href="/demos/index.html"><b>Basic</b><span class="kb">25 KB</span></a>
       <a class="preset" href="/demos/index.html"><b>Standard</b><span class="kb">38 KB</span></a>
@@ -270,7 +270,7 @@ registry.<span class="f">register</span>(<span class="s">'modules/toolbar'</span
 
     // Animate the size bars when they scroll into view.
     const bars = document.querySelectorAll('#bars .fill');
-    const max = 60;
+    const max = 75;
     const io = new IntersectionObserver((entries) => {
       entries.forEach(e => {
         if (e.isIntersecting) {

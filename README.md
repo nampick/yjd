@@ -1,6 +1,6 @@
 # yjd
 
-**Rich text, without the weight.** A dependency-free, tree-shakeable rich text editor for the web. Compose it from a `/core` entry and ship **16 KB**, not the whole library.
+**Rich text, without the weight.** A dependency-free, tree-shakeable rich text editor for the web. Compose it from a `/core` entry and ship **17 KB**, not the whole library.
 
 🔗 **[yjd.io](https://yjd.io)** · [Live playground](https://yjd.io/demos/) · [Docs](https://yjd.io/site/docs.html)
 
@@ -35,18 +35,19 @@ Every preset is built from the same `/core` entry — pick a profile, tree-shake
 
 | Preset | Includes | Size |
 |---|---|---|
-| Minimal | bold · italic · underline · link | **~16 KB** |
-| Comment box | bold · italic · link · list · image · mention + `fromTextarea` | **~26 KB** |
-| Basic | + strike · headings · lists · align | **~25 KB** |
-| Standard | + colour · image · table · find · code view | **~38 KB** |
+| Minimal | bold · italic · underline · link | **~17 KB** |
+| Bubble | + strike · headings · lists · font · bubble bar | **~23 KB** |
+| Basic | + strike · headings · lists · align | **~28 KB** |
+| Standard | + colour · image · table · find · code view · resize | **~46 KB** |
 | + AI assistant | any preset + `ai` module (BYO model, no SDK bundled) | **+~2 KB** |
-| Full (all-in-one) | everything, CSS inlined | **~66 KB** |
+| Full (all-in-one) | everything, CSS inlined | **~75 KB** |
 
-> All figures are measured gzip. Tree-shake from the `/core` entry to land near the
-> top of the table; the all-in-one default (`import yjd from '@oix1987/yjd'`) is the
-> ~66 KB row because it registers every format/module and inlines the CSS. For
-> comparison, Quill 2 is ~60 KB. The standalone stylesheet is ~10 KB gzip — link it
-> once (and skip `StylesLoader`) to keep it out of the JS.
+> All figures are measured gzip (gzip -9). Tree-shake from the `/core` entry to land
+> near the top of the table; the all-in-one default (`import yjd from '@oix1987/yjd'`)
+> is the ~75 KB row because it registers every format/module and inlines the CSS.
+> Icons and the optional Editor methods (see below) tree-shake per feature, so a
+> Minimal build ships ~5 icons, not all 64. The standalone stylesheet is ~11 KB gzip
+> — link it once (and skip `StylesLoader`) to keep it out of the JS.
 
 ## Install
 
@@ -161,6 +162,24 @@ const ed = Editor.fromTextarea('#comment', {
 ## Methods
 
 `getHTML()` · `getText()` · `insertHTML(html)` · `insertText(t)` · `clear()` · `isEmpty()` · `focus()` · `setReadOnly(bool)` · `undo()` · `redo()`
+
+### Optional methods (tree-shaken from `/core`)
+
+The default build (`import yjd from '@oix1987/yjd'`) ships everything below — **no
+setup needed**. They're split out only so a hand-tree-shaken **`/core`** build can
+drop the ones it doesn't use (that's how a Minimal build lands at ~17 KB). If you
+build from `/core` and want these, opt in once, per group:
+
+```js
+import { Editor, applySerializeMethods, applyEditorCommands, applyEditorInput } from '@oix1987/yjd/core';
+
+applySerializeMethods(Editor); // getJSON/setJSON · getMarkdown/setMarkdown · fromTextarea({format:'markdown'})
+applyEditorCommands(Editor);   // toggleFullscreen · text direction · clearFormatting
+applyEditorInput(Editor);      // image & file insert (drop/paste/picker) · auto-linkify · markdown shortcuts
+```
+
+> These affect **only** hand-rolled `/core` builds. Every preset/CDN/all-in-one
+> import is unchanged and fully backward compatible.
 
 ## Integration API
 
