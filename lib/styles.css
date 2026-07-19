@@ -952,6 +952,13 @@
   font-weight: 600;
   text-align: start;
 }
+/* Drag-selected cells (for merge/align/background). */
+.yjd-rich-editor .rich-editor-table td.yjd-cell-selected,
+.yjd-rich-editor .rich-editor-table th.yjd-cell-selected {
+  background: var(--rte-accent-weak) !important;
+  outline: 1px solid var(--rte-accent);
+  outline-offset: -1px;
+}
 
 .yjd-rich-editor .rich-editor-table td:focus {
   outline: 2px solid var(--rte-focus);
