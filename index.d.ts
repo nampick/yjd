@@ -206,6 +206,8 @@ export interface EditorOptions {
   direction?: 'ltr' | 'rtl';
   /** Enable markdown shortcuts (default: true). Set false to disable. */
   markdown?: boolean;
+  /** Auto-convert a bare URL to a link on space/Enter (default: true). */
+  linkify?: boolean;
   /** Autosave drafts to localStorage. true, or { key, debounce(ms) }. */
   autosave?: boolean | { key?: string; debounce?: number };
   /** Image upload hook (replaces inline base64 when `upload` is provided). */
