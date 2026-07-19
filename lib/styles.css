@@ -1167,16 +1167,45 @@
 
 .yjd-rich-editor .rich-editor-area ul.checklist li {
   position: relative;
-  padding-left: 25px;
+  padding-left: 28px;
   margin-bottom: 4px;
 }
 
-.yjd-rich-editor .rich-editor-area ul.checklist li input[type="checkbox"] {
+/* Pseudo-checkbox rendered from data-checked (no real <input>, which is awkward
+   inside contentEditable and in serialisation). Click handling lives in the
+   editor; theme-aware via --rte-* tokens. */
+.yjd-rich-editor .rich-editor-area ul.checklist li::before {
+  content: "";
   position: absolute;
   left: 0;
-  top: 2px;
-  margin: 0;
+  top: 0.2em;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border: 1.5px solid var(--rte-border-strong);
+  border-radius: 4px;
+  background: var(--rte-bg);
   cursor: pointer;
+}
+.yjd-rich-editor .rich-editor-area ul.checklist li[data-checked="true"]::before {
+  background: var(--rte-accent);
+  border-color: var(--rte-accent);
+}
+.yjd-rich-editor .rich-editor-area ul.checklist li[data-checked="true"]::after {
+  content: "";
+  position: absolute;
+  left: 5.5px;
+  top: calc(0.2em + 2px);
+  width: 5px;
+  height: 9px;
+  border: solid var(--rte-accent-ink-on);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+.yjd-rich-editor .rich-editor-area ul.checklist li[data-checked="true"] {
+  color: var(--rte-muted);
+  text-decoration: line-through;
 }
 
 .yjd-rich-editor .rich-editor-area ul {
