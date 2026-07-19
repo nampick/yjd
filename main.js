@@ -4,6 +4,11 @@
 import RichEditor from './dist/rich-editor.esm.js';
 
 const contentContainer = document.getElementById('content-container');
+// Render editor output with the library's read-view class so headings, links,
+// code, quotes, tables etc. are styled exactly like inside the editor (the
+// editor's own rules are scoped to .rich-editor-area and don't apply to a bare
+// container). Same idea as the renderStatic() helper.
+contentContainer.classList.add('yjd-content');
 
 const editor = new RichEditor('#editor-container', {
   content: "",
