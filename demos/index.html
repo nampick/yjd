@@ -81,7 +81,14 @@
     #yjd-stage{min-width:0;width:100%}
 
     /* note + footer */
-    .hint{display:flex;gap:10px;align-items:flex-start;color:var(--ink-2);font-size:14px;background:var(--violet-weak);border:1px solid #ddd8ff;border-radius:12px;padding:12px 14px;margin:0 0 24px}
+    .hint{display:flex;gap:10px;align-items:flex-start;color:var(--ink-2);font-size:14px;background:var(--violet-weak);border:1px solid #ddd8ff;border-radius:12px;padding:12px 14px;margin:0 0 14px}
+    .whatsnew{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 24px}
+    .whatsnew .wn-tag{font-family:var(--display);font-weight:700;font-size:13px;color:var(--violet-ink)}
+    .whatsnew .wn-pills{display:flex;flex-wrap:wrap;gap:6px}
+    .whatsnew .wn-pills span{background:var(--violet-weak);border:1px solid #ddd8ff;border-radius:999px;padding:3px 10px;font-size:12.5px;font-weight:600;color:var(--ink-2)}
+    .whatsnew .wn-try{color:var(--muted);font-size:13px;margin-left:auto}
+    .whatsnew .wn-try b{color:var(--ink-2)}
+    @media(max-width:620px){.whatsnew .wn-try{margin-left:0;flex-basis:100%}}
     footer{border-top:1px solid var(--line);padding:36px 0;color:var(--muted);font-size:14px}
     .foot-in{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     .foot-in a:hover{color:var(--violet-ink)}
@@ -121,6 +128,18 @@
     <p class="tab-desc" id="tab-desc"></p>
 
     <div class="hint">💡 <span>The code shown imports from the CDN for copy-paste; here it runs against a pre-loaded core. Edit anything and hit Run.</span></div>
+
+    <div class="whatsnew">
+      <span class="wn-tag">✨ New in 2.3</span>
+      <span class="wn-pills">
+        <span>✓ Checklists</span>
+        <span>⤢ Full-screen</span>
+        <span>🖼 Image resize + align</span>
+        <span>▦ Table merge/split · header · cell styling</span>
+        <span>🔗 Auto-linkify</span>
+      </span>
+      <span class="wn-try">Try them in the <b>Standard</b> or <b>Full</b> preset.</span>
+    </div>
 
     <div class="stage">
       <div class="pane code-pane">
