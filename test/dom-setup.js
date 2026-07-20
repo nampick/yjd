@@ -18,3 +18,10 @@ dom.window.document.execCommand = (cmd, ui, val) => {
 };
 dom.window.document.queryCommandState = () => false;
 dom.window.document.queryCommandValue = () => '';
+
+// Extra globals needed to construct a full Editor under jsdom.
+globalThis.MutationObserver = dom.window.MutationObserver;
+globalThis.HTMLElement = dom.window.HTMLElement;
+globalThis.requestAnimationFrame = (cb) => setTimeout(cb, 0);
+globalThis.cancelAnimationFrame = (id) => clearTimeout(id);
+globalThis.getSelection = dom.window.getSelection.bind(dom.window);
