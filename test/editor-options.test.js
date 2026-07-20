@@ -38,3 +38,21 @@ test('autoFocus defaults to true (mount focuses the editor)', async () => {
   await new Promise((r) => setTimeout(r, 150));
   assert.ok(calls >= 1);
 });
+
+test('ListPicker filters its types via options.types', async () => {
+  const { default: ListPicker } = await import('../lib/ui/list-picker.js');
+  const picker = new ListPicker({ types: ['bullet', 'ordered'] });
+  await new Promise((r) => setTimeout(r, 0)); // createListTypeButtons is async
+  const vals = [...picker.popup.querySelectorAll('[data-list-type]')].map((b) => b.dataset.listType);
+  assert.deepEqual(vals, ['bullet', 'ordered']);
+});
+
+test('editor options.list.types reaches the list picker', async () => {
+  const ed = new Editor(mount(), { list: { types: ['bullet'] } });
+  const { default: List } = await import('../lib/formats/list.js');
+  new List(); // format construction wires the picker for Editor.currentInstance
+  await new Promise((r) => setTimeout(r, 0));
+  const picker = ed.getPopupInstance('list');
+  const vals = [...picker.popup.querySelectorAll('[data-list-type]')].map((b) => b.dataset.listType);
+  assert.deepEqual(vals, ['bullet']);
+});
