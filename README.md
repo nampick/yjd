@@ -143,6 +143,8 @@ const ed = Editor.fromTextarea('#comment', {
 | `minHeight` / `maxHeight` | number | Explicit bounds (override the height defaults). |
 | `theme` | `'inherit'`｜`'light'`｜`'dark'`｜`'auto'` | `'inherit'` (default) follows ancestor `[data-theme]`. |
 | `onChange` | fn(html) | Called on every content change. |
+| `autoFocus` | boolean | Focus the editor after mount (default `true`). Set `false` for editors rendered on page load — avoids scroll-jump and mobile keyboard pop. |
+| `list.types` | string[] | Restrict the list picker, e.g. `list: { types: ['bullet', 'ordered'] }`. Valid: `checklist`, `bullet`, `ordered`, `roman`, `alpha`. |
 | `toolbar1` / `toolbar2` | array | Toolbar groups: `{ group, items: [] }`. |
 | `formats` / `modules` | string[] | Which registered features to activate. |
 | `features` | object | `{ wordCount, breadcrumb, … }` — toggle the status bar. |
@@ -335,6 +337,7 @@ editor's `--rte-*` theme.
 toolbar: 'full'                    // the default set
 toolbar: 'compact'                 // bold/italic/underline · link · list · image · emoji
 toolbar: { exclude: ['table','video','color'] }   // defaults minus these
+toolbar: { overflow: false }       // never split into a "⋯" second row; wraps instead
 toolbar1: [{ group, items: [...] }]               // or full custom groups
 ```
 
@@ -371,7 +374,8 @@ renderStatic(post.body_html, document.querySelector('#post'));
 - **Markdown dialect** — GFM-ish: headings `#`–`######`, `**bold**`, `*italic*`,
   `~~strike~~`, `` `code` ``, fenced ``` ``` ```, `>` quotes, `-`/`1.` lists,
   pipe tables, `![alt](src)` images, `[text](url)` links, mentions `@[Name](id)` /
-  `#[Name](id)`, file chips `[name (size)](url)`.
+  `#[Name](id)`, file chips `[name (size)](url)`. Checklists round-trip as GFM task
+  lists — `- [x]` / `- [ ]`.
 
 ## Styling & theming
 

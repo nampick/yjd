@@ -40,9 +40,13 @@ overriding tokens, without touching component CSS.
 | `--rte-accent-weak` | `#efedff` | `#2c2942` | Accent wash (active background) |
 | `--rte-accent-ink-on` | `#ffffff` | `#ffffff` | Text/icon **on** an accent fill |
 | `--rte-accent-ring` | `rgba(109,94,252,.28)` | `rgba(139,127,240,.40)` | Focus ring around accent |
-| `--rte-focus` | `#3b82f6` | `#5b9bff` | Focus/selection outlines |
+| `--rte-focus` | `var(--rte-accent, #3b82f6)` | `var(--rte-accent, #5b9bff)` | Focus/selection outlines |
 | `--rte-danger` | `#e5484d` | `#f2686c` | Destructive actions |
 | `--rte-link` | `#2563eb` | `#8ab4ff` | Links |
+
+> `--rte-focus` now **defaults to `var(--rte-accent, …)`** instead of a fixed
+> blue. Set `--rte-accent` and focus rings/outlines match it for free — set
+> `--rte-focus` explicitly only if you want it to diverge from the accent.
 
 ### Content (editor body + read-view)
 
@@ -85,6 +89,15 @@ overrides are never blocked):
 Switch built-in themes at runtime via the `theme` option / `setTheme()`:
 `'inherit'` (default, follows the nearest ancestor `[data-theme]`), `'light'`,
 `'dark'`, `'auto'`.
+
+## Stacking context
+
+`.yjd-rich-editor` sets `isolation: isolate` — the editor gets its own
+stacking context, so its internal `z-index`es (toolbars, dropdowns, resize
+handles) never compete with the host page's overlays/modals, and never leak
+above them either. If your app previously lowered the toolbar's `z-index` or
+wrapped the editor in its own stacking-context hack to keep it under a modal,
+you can delete that workaround — isolation now does it for you.
 
 ## Known exceptions (not yet tokenised)
 
