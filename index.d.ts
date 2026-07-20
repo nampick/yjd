@@ -162,7 +162,11 @@ export interface AiController {
  * Toolbar configuration: a built-in preset, an exclusion of default items,
  * a flat item list (single group), or full custom groups via toolbar1/toolbar2.
  */
-export type ToolbarOption = 'full' | 'compact' | { exclude: string[] } | string[];
+export type ToolbarOption =
+  | 'full'
+  | 'compact'
+  | { exclude?: string[]; /** false = never split into a "more" row; the toolbar wraps instead. */ overflow?: boolean }
+  | string[];
 
 /** A JSON document node produced by getJSON()/domToJson. */
 export interface JsonNode {
@@ -195,6 +199,13 @@ export interface EditorOptions {
   width?: number | string;
   maxWidth?: number | string;
   content?: string | null;
+  /**
+   * Focus the editor after mount (default: true). Set false for editors
+   * rendered on page load — prevents scroll-jump and mobile keyboard pop.
+   */
+  autoFocus?: boolean;
+  /** List feature config: restrict the list picker to these types. */
+  list?: { types?: Array<'checklist' | 'bullet' | 'ordered' | 'roman' | 'alpha'> };
   onChange?: (content: string) => void;
   /** When true, paste always inserts plain text (default: false). */
   pasteAsPlainText?: boolean;

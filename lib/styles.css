@@ -11,6 +11,9 @@
 /* === CORE EDITOR === */
 .yjd-rich-editor {
   position: relative;
+  /* Own stacking context: internal z-index (toolbars 1000, handles 997-999,
+     dropdowns) never competes with the host page's popovers/modals. */
+  isolation: isolate;
   background: var(--rte-bg, var(--rte-bg));
   border: 1px solid var(--rte-border, var(--rte-table-border));
   border-radius: 8px;
@@ -350,9 +353,9 @@
 }
 .yjd-rich-editor .custom-select-button:focus  {
   outline: none;
-    border-color: var(--rte-focus);
-    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1);
-  
+    border-color: var(--rte-accent, var(--rte-focus));
+    box-shadow: 0 0 0 3px var(--rte-accent-ring, rgba(59, 130, 246, 0.1));
+
 }
 .yjd-rich-editor .rich-editor-toolbar-btn span{
   display: flex !important;
@@ -384,18 +387,18 @@
   background:var(--rte-chrome-2);
 }
 .yjd-rich-editor .block-toolbar-btn.active{
-  background:#CCCCCC;
-  color: #136FDF !important;
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
 }
 
 .yjd-rich-editor .block-toolbar-btn.active svg,
 .yjd-rich-editor .block-toolbar-btn.active .icon svg {
-  fill: #136FDF !important;
+  fill: var(--rte-accent-ink);
 }
 
 .yjd-rich-editor .block-toolbar-btn.active svg path,
 .yjd-rich-editor .block-toolbar-btn.active .icon svg path {
-  fill: #136FDF !important;
+  fill: var(--rte-accent-ink);
 }
 
 /* Block toolbar container and arrow */
@@ -841,8 +844,8 @@
 }
 .yjd-rich-editor .yjd-select-input:focus {
   outline: none;
-    border-color: var(--rte-focus);
-    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1);
+    border-color: var(--rte-accent, var(--rte-focus));
+    box-shadow: 0 0 0 3px var(--rte-accent-ring, rgba(59, 130, 246, 0.1));
 }
 
 
@@ -1001,7 +1004,7 @@
 .yjd-rich-editor .rich-editor-table td:focus {
   outline: 2px solid var(--rte-focus);
   outline-offset: -2px;
-  background: #fefefe;
+  background: var(--rte-chrome-2);
 }
 
 /* === TABLE TOOLBAR === */
@@ -1053,7 +1056,7 @@
 .yjd-rich-editor .table-toolbar-btn:active {
   background: var(--rte-chrome-2);
   border-color: var(--rte-muted);
-  color: #136FDF !important;
+  color: var(--rte-accent-ink);
 }
 
 /* Responsive table toolbar */
@@ -1471,6 +1474,7 @@
   max-height: var(--rte-img-max-h, none);
   object-fit: contain;
 }
+.yjd-rich-editor .rich-editor-area img,
 .yjd-content img { max-width: var(--rte-img-max-w, 100%); }
 
 .yjd-rich-editor .inserted-video {
@@ -1615,8 +1619,8 @@
 
 .yjd-rich-editor .import-type-select:focus {
   outline: none;
-    border-color: var(--rte-focus);
-    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1);
+    border-color: var(--rte-accent, var(--rte-focus));
+    box-shadow: 0 0 0 3px var(--rte-accent-ring, rgba(59, 130, 246, 0.1));
 }
 
 .yjd-rich-editor .import-file-input {
@@ -1640,8 +1644,8 @@
 
 .yjd-rich-editor .import-file-input:focus {
   outline: none;
-  border-color: var(--rte-focus);
-  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1);
+  border-color: var(--rte-accent, var(--rte-focus));
+  box-shadow: 0 0 0 3px var(--rte-accent-ring, rgba(59, 130, 246, 0.1));
 }
 
 .yjd-rich-editor .import-file-info {
@@ -1684,13 +1688,13 @@
 }
 
 .yjd-rich-editor .import-button.import-button-main {
-  background-color: var(--rte-focus);
-  color: white;
-  border-color: var(--rte-focus);
+  background-color: var(--rte-accent);
+  color: var(--rte-accent-ink-on, #ffffff);
+  border-color: var(--rte-accent);
 }
 
 .yjd-rich-editor .import-button.import-button-main:hover {
-  background-color: var(--rte-link);
+  background-color: var(--rte-accent-ink);
 }
 
 .yjd-rich-editor .import-button.import-button-main:disabled {
@@ -2334,7 +2338,7 @@
   --rte-accent-ring: rgba(109, 94, 252, 0.28);
   --rte-accent-ink-on: #ffffff; /* text/icon colour on an accent fill */
   --rte-danger: #e5484d;
-  --rte-focus: #3b82f6;
+  --rte-focus: var(--rte-accent, #3b82f6);
   /* Content palette (editor body + read-view) */
   --rte-link: #2563eb;
   --rte-code-bg: #f1f2f3;
@@ -2526,10 +2530,6 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   color: var(--rte-accent-ink);
   text-decoration-color: var(--rte-accent-ring);
   text-underline-offset: 2px;
-}
-.yjd-rich-editor .rich-editor-area[data-placeholder].placeholder-visible:before {
-  color: var(--rte-muted);
-  opacity: 0.55;
 }
 .yjd-rich-editor .rich-editor-area blockquote {
   border-left: 3px solid var(--rte-accent);
@@ -3956,7 +3956,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   --rte-accent-ring: rgba(139, 127, 240, 0.40);
   --rte-accent-ink-on: #ffffff;
   --rte-danger: #f2686c;
-  --rte-focus: #5b9bff;
+  --rte-focus: var(--rte-accent, #5b9bff);
   --rte-link: #8ab4ff;
   --rte-code-bg: #2d313d;
   --rte-code-ink: #e8e9ef;
@@ -4018,7 +4018,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
     --rte-accent-ring: rgba(139, 127, 240, 0.40);
     --rte-accent-ink-on: #ffffff;
     --rte-danger: #f2686c;
-    --rte-focus: #5b9bff;
+    --rte-focus: var(--rte-accent, #5b9bff);
     --rte-link: #8ab4ff;
     --rte-code-bg: #2d313d;
     --rte-code-ink: #e8e9ef;
