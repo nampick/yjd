@@ -22,3 +22,19 @@ test('setContent clears a stale placeholder (and restores it when emptied)', () 
   ed.setContent('');
   assert.equal(ed.editor.classList.contains('placeholder-visible'), true);
 });
+
+test('autoFocus:false skips the mount-time focus grab', async () => {
+  const ed = new Editor(mount(), { autoFocus: false });
+  let calls = 0;
+  ed.focus = () => { calls++; };
+  await new Promise((r) => setTimeout(r, 150));
+  assert.equal(calls, 0);
+});
+
+test('autoFocus defaults to true (mount focuses the editor)', async () => {
+  const ed = new Editor(mount(), {});
+  let calls = 0;
+  ed.focus = () => { calls++; };
+  await new Promise((r) => setTimeout(r, 150));
+  assert.ok(calls >= 1);
+});
