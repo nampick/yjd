@@ -2,6 +2,11 @@ import './dom-setup.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import Editor from '../lib/core/editor.js';
+import registry from '../lib/core/registry.js';
+import Toolbar from '../lib/modules/toolbar.js';
+
+// Register required modules for tests
+registry.register('modules/toolbar', Toolbar, true);
 
 function mount() {
   const host = document.createElement('div');
@@ -55,4 +60,19 @@ test('editor options.list.types reaches the list picker', async () => {
   const picker = ed.getPopupInstance('list');
   const vals = [...picker.popup.querySelectorAll('[data-list-type]')].map((b) => b.dataset.listType);
   assert.deepEqual(vals, ['bullet']);
+});
+
+test('more button starts hidden until reflow finds overflow', () => {
+  const ed = new Editor(mount(), {});
+  const tb = ed.getModule('toolbar');
+  assert.equal(tb.moreBtn.style.display, 'none');
+});
+
+test('toolbar overflow:false disables the more split', () => {
+  const ed = new Editor(mount(), { toolbar: { overflow: false } });
+  const tb = ed.getModule('toolbar');
+  assert.equal(tb._overflowDisabled, true);
+  tb.reflow();
+  assert.equal(tb.moreBtn.style.display, 'none');
+  assert.equal(tb.toolbar2.style.display, 'none');
 });
