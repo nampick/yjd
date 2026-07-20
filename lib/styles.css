@@ -384,18 +384,18 @@
   background:var(--rte-chrome-2);
 }
 .yjd-rich-editor .block-toolbar-btn.active{
-  background:#CCCCCC;
-  color: #136FDF !important;
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
 }
 
 .yjd-rich-editor .block-toolbar-btn.active svg,
 .yjd-rich-editor .block-toolbar-btn.active .icon svg {
-  fill: #136FDF !important;
+  fill: var(--rte-accent-ink);
 }
 
 .yjd-rich-editor .block-toolbar-btn.active svg path,
 .yjd-rich-editor .block-toolbar-btn.active .icon svg path {
-  fill: #136FDF !important;
+  fill: var(--rte-accent-ink);
 }
 
 /* Block toolbar container and arrow */
@@ -1001,7 +1001,7 @@
 .yjd-rich-editor .rich-editor-table td:focus {
   outline: 2px solid var(--rte-focus);
   outline-offset: -2px;
-  background: #fefefe;
+  background: var(--rte-chrome-2);
 }
 
 /* === TABLE TOOLBAR === */
@@ -1053,7 +1053,7 @@
 .yjd-rich-editor .table-toolbar-btn:active {
   background: var(--rte-chrome-2);
   border-color: var(--rte-muted);
-  color: #136FDF !important;
+  color: var(--rte-accent-ink);
 }
 
 /* Responsive table toolbar */
