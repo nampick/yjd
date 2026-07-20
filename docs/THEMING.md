@@ -107,9 +107,6 @@ matching token yet. If you touch these, prefer adding a semantic token
 
 - Success / warning / info tints on upload chips & AI states (greens `#dcfce7`,
   ambers `#fef3c7`/`#f59e0b`, blues `#dbeafe`/`#eff6ff`).
-- The block toolbar's active colour (`#136fdf` / `#cccccc`) predates the accent
-  system and is intentionally left; unifying it with `--rte-accent-ink` /
-  `--rte-accent-weak` is a recommended follow-up.
 - Colour-picker swatches (`lib/ui/color-picker.js`) are a deliberate fixed
   palette — **not** theme tokens.
 
