@@ -262,6 +262,13 @@ the toolbar as a bottom action bar — `[ + add ]  [ format tools ]  …  [ send
 that grows with its content (`height:'auto'`). Enter and the send button both call
 your `submit` handler.
 
+> **Leave `toolbar` unset** with `layout:'prompt'` (or pass `toolbar:'prompt'`).
+> Passing an explicit toolbar **array** or `toolbar1/toolbar2` opts out of the
+> prompt bar and renders that layout instead. A plain `{ overflow, exclude }`
+> object keeps the prompt bar (its flags are ignored — configure tools via
+> `prompt.tools`). Bar buttons never steal focus, so the mobile soft keyboard
+> stays up across sends.
+
 ```js
 new yjd('#prompt', {
   layout: 'prompt',
@@ -291,12 +298,34 @@ message text. Read them in your submit handler and clear happens automatically:
 
 ```js
 submit: {
-  onSubmit: (html, ed) => send(html, ed.getAttachments()), // [{ kind, file, src }]
+  onSubmit: (html, ed) => send(html, ed.getAttachments()),
 }
 ```
 
-`table` still inserts inline. `getAttachments()` returns `{ kind, file, src }` per
-item (`src` is the upload-hook URL if `image.upload` is set, otherwise a data URL).
+`table` still inserts inline. `getAttachments()` returns
+`{ id, kind, file, src, status, meta }` per item — `src` is the upload-hook URL
+when `image.upload` is set (otherwise the image data URL); `status` is
+`'pending' | 'done' | 'error'`; `meta` is an open bag you can fill.
+
+For apps with their own attachment model, drive the tray by events instead:
+
+```js
+prompt: {
+  deferUpload: true,              // skip the built-in upload hook on add
+  serializeAttachments: true,     // or (att) => `![](${att.src})` — append to submit content
+}
+editor.on('attachment:add', (att) => {          // att is the live item
+  uploadToMyServer(att.file).then((r) => {       // write results back onto it
+    att.src = r.url; att.meta = r; att.status = 'done';
+  });
+});
+editor.on('attachment:remove', (att) => cancelUpload(att.id));
+```
+
+`serializeAttachments` appends attachments to the content passed to your submit
+handler (`true` = default `<img>`/`<a>` HTML; a function returns a custom string
+per attachment, e.g. Markdown), so a markdown/HTML store needn't wire
+`getAttachments()` by hand.
 
 ### @mention / #task
 
@@ -314,8 +343,17 @@ editor.on('mention:select', (item) => { /* … */ });
 
 Inserts a token that serializes with its id:
 `<span class="mention" data-id="u_123">@Ann</span>` → Markdown `@[Ann](u_123)`.
-If a `source` item has no `avatar_url`, pass `icon` (inline SVG) for special entries
-like “@all”. Menus are portaled to `<body>` but inherit the editor's `--rte-*` theme.
+Pass `serialize(item) → string` (per trigger, or on the primary config) to control
+the exact token — e.g. `{ char: '#', source, serialize: (t) => '#' + t.id }` stores
+a bare `#id` with no regex post-processing. If a `source` item has no `avatar_url`,
+pass `icon` (inline SVG) for special entries like “@all”. Menus are portaled to
+`<body>` but inherit the editor's `--rte-*` theme.
+
+Both Enter-to-send and the send button run `submit`; use `submit.enterToSend`
+(`'auto'` · `'always'` · `'never'`) to decouple them — e.g. `'never'` keeps the
+send button while making Enter a newline everywhere. Format tools with popovers
+(`list`, `emoji`, `link`, `heading`, …) work in the prompt bar too — their
+popovers open above it and are portaled so they're never clipped.
 
 ### AI assistant (bring your own model)
 

@@ -12,6 +12,17 @@ test('htmlToMarkdown keeps plain bullets untouched', () => {
   assert.equal(htmlToMarkdown('<ul><li>item</li></ul>'), '- item\n');
 });
 
+test('htmlToMarkdown uses a custom mention data-token verbatim', () => {
+  const html = '<p><span class="mention" data-id="t-42" data-trigger="#" data-token="#t-42">#Fix bug</span></p>';
+  assert.ok(htmlToMarkdown(html).includes('#t-42'));
+  assert.ok(!htmlToMarkdown(html).includes('](')); // not the default [Name](id) form
+});
+
+test('htmlToMarkdown falls back to trigger[Name](id) without a data-token', () => {
+  const html = '<p><span class="mention" data-id="7" data-trigger="@">@Duc Le</span></p>';
+  assert.ok(htmlToMarkdown(html).includes('@[Duc Le](7)'));
+});
+
 test('htmlToMarkdown handles nested checklist', () => {
   const html = '<ul class="checklist"><li data-checked="false">Parent' +
     '<ul class="checklist"><li data-checked="true">Child</li></ul></li></ul>';
