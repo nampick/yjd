@@ -3261,6 +3261,53 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 }
 
 /* =====================================================================
+   PROMPT LAYOUT (options.layout:'prompt') — chat-style input.
+   Rounded pill; the toolbar becomes a bottom action bar (flex `order` moves it
+   under the text — no DOM change); one focus ring wraps the whole control.
+   All opt-in behind [data-layout="prompt"], so it costs nothing when unused.
+   ===================================================================== */
+.yjd-rich-editor[data-layout="prompt"] {
+  border-radius: 26px !important; /* beat the `border-radius: var(--rte-radius) !important` base */
+  border: 1px solid var(--rte-border-strong, var(--rte-border));
+  box-shadow: 0 1px 2px rgba(20, 24, 47, 0.04), 0 8px 24px rgba(20, 24, 47, 0.06);
+  overflow: visible;
+  transition: border-color var(--rte-t, .15s), box-shadow var(--rte-t, .15s);
+}
+.yjd-rich-editor[data-layout="prompt"]:focus-within {
+  border-color: var(--rte-accent, var(--rte-focus));
+  box-shadow: 0 0 0 4px var(--rte-accent-ring, rgba(59, 130, 246, 0.22));
+}
+/* Text on top (rounded top), action bar below (order overrides DOM insertion). */
+.yjd-rich-editor[data-layout="prompt"] .rich-editor-area {
+  order: 1;
+  min-height: 28px;
+  padding: 18px 22px 6px;
+  border-radius: 25px 25px 0 0; /* 26px pill minus the 1px border */
+}
+/* Bottom action bar: one flush surface with the text — transparent, no border,
+   no top-radius/clip, bottom corners rounded, popovers allowed to overflow. */
+.yjd-rich-editor[data-layout="prompt"] .rich-editor-toolbar-container {
+  order: 2;
+  background: transparent;
+  border: 0;
+  border-radius: 0 0 25px 25px;
+  overflow: visible;
+  z-index: 1;
+}
+.yjd-rich-editor[data-layout="prompt"] .rich-editor-toolbar-1,
+.yjd-rich-editor[data-layout="prompt"] .rich-editor-toolbar-2 {
+  background: transparent;
+  min-height: 0;
+  padding: 8px 12px 12px;
+  border: 0;
+  border-radius: 0;
+}
+/* No word-count/breadcrumb bar in a compact prompt input. */
+.yjd-rich-editor[data-layout="prompt"] .rich-editor-statusbar {
+  display: none;
+}
+
+/* =====================================================================
    DESIGN SYSTEM v2.8 — remove the triangle pointer on floating toolbars
    ===================================================================== */
 .yjd-rich-editor .block-toolbar-arrow,
