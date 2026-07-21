@@ -267,18 +267,27 @@ new yjd('#prompt', {
   layout: 'prompt',
   placeholder: 'Message…',
   submit: { onSubmit: (html, editor) => send(html) },  // Enter + send button
-  prompt: {
-    add:   ['image', 'file', 'video', 'table'],  // items in the "+" popover
-    tools: ['bold', 'italic', 'link'],           // format buttons next to "+"
-  },
 });
 ```
 
+Defaults are mobile-first: **"+" adds an image** straight away (opens the file
+picker — no popover), plus **bold / italic** and the send button. Configure more:
+
+```js
+prompt: {
+  add:   ['image', 'file', 'video', 'table'],  // 2+ items → "+" opens a popover menu
+  tools: ['bold', 'italic', 'link'],           // format buttons next to "+"
+}
+```
+
 `prompt.add` accepts built-in keys (`image` · `file` · `video` · `table`),
-`'separator'`, or custom items `{ label, icon?, onSelect(editor) }`. Built-ins
-reuse the normal insert flows (image/file open the file picker; video/table open
-their popovers). The "+" popover component is loaded lazily on first open, so it
-adds nothing to editors that don't use the prompt layout.
+`'separator'`, or custom items `{ label, icon?, onSelect(editor) }`. A **single**
+item makes `+` trigger it directly; **two or more** open a popover menu (portaled
+so it's never clipped, loaded lazily on first open). Built-ins reuse the normal
+insert flows: image/file open the file picker, video/table open their popovers.
+
+> Image/file **upload insertion** needs `applyEditorInput(Editor)` on a `/core`
+> build (it's already applied in the all-in-one bundle).
 
 ### @mention / #task
 
