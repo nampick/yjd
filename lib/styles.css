@@ -713,10 +713,25 @@
   background: var(--rte-bg, var(--rte-bg));
   color: var(--rte-ink, var(--rte-ink));
   font-size: 14px;
+  /* A value longer than the field shows an ellipsis (…) when the input isn't
+     focused, instead of a hard cut at the edge. While typing the browser still
+     scrolls to the caret as usual. */
+  text-overflow: ellipsis;
   /* Allow interaction with inputs */
   pointer-events: auto;
 }
 .yjd-rich-editor .yjd-input::placeholder { color: var(--rte-muted, #9aa0b4); }
+/* Same ellipsis-not-cut treatment for every other popup text input that can
+   hold a long value (URLs, tag values, file names, hex colours). */
+.yjd-rich-editor .yjd-select-input,
+.yjd-rich-editor .tag-value-input,
+.yjd-rich-editor .import-input,
+.yjd-rich-editor .import-url-input,
+.yjd-rich-editor .import-file-input,
+.yjd-rich-editor .custom-color-input,
+.yjd-rich-editor .table-popup input {
+  text-overflow: ellipsis;
+}
 .yjd-rich-editor .yjd-input:focus {
   outline: none;
     border-color: var(--rte-accent, var(--rte-focus));
