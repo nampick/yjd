@@ -3547,6 +3547,45 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   .yjd-rich-editor .rich-editor-toolbar-2 .toolbar-group { flex: 0 0 auto; }
 }
 
+/* ── Desktop "More" overflow: stacked, evenly-spaced rows with separators ──
+   The reflow JS packs overflow groups into .rich-editor-toolbar-2-row wrappers
+   (one per line that fits), because a flex-wrap container can't draw a border
+   between its own wrapped lines. So toolbar-2 becomes a column of real rows;
+   each row matches the primary toolbar's padding/height and gets a divider
+   between rows — even spacing, clear structure. On touch this whole panel is
+   hidden (the single swipe-scroll row is used instead), so these rules only
+   shape the desktop overflow. */
+.yjd-rich-editor .rich-editor-toolbar-2 {
+  flex-direction: column;
+  align-items: stretch;
+  flex-wrap: nowrap;
+  padding: 0;
+  row-gap: 0;
+  column-gap: 0;
+  min-height: 0;
+}
+.yjd-rich-editor .rich-editor-toolbar-2-row {
+  display: flex;
+  align-items: center;
+  /* Packed to fit one line, so normally no wrap. `wrap` is only a safety net for
+     pathologically narrow editors where a single group is wider than the row —
+     the group drops to a second line instead of scrolling sideways. */
+  flex-wrap: wrap;
+  gap: 20px;                 /* group spacing; the JS packer budgets this exact value */
+  padding: 8px 16px;         /* horizontal padding is overwritten inline to match row 1 */
+  min-height: 48px;
+  box-sizing: border-box;
+}
+/* Spacing inside an overflow row comes ONLY from the row's flex gap, so the JS
+   width-packer (which knows just the gap) can never overflow a row. Neutralise
+   the sibling margin the groups carry in the primary row. */
+.yjd-rich-editor .rich-editor-toolbar-2-row > .toolbar-group {
+  margin: 0;
+}
+.yjd-rich-editor .rich-editor-toolbar-2-row + .rich-editor-toolbar-2-row {
+  border-top: 1px solid var(--rte-border);
+}
+
 /* ── Labelled selects (v2.18) ─────────────────────────────────────────────
    A small header at the top of each dropdown + a leading icon on the trigger,
    so it's clear what Paragraph / Font / Size / Line-height / Case control. */
