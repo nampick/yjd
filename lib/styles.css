@@ -3346,6 +3346,59 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   margin-left: auto;
 }
 
+/* "+" add button — circular outline; accent tint while its menu is open. */
+.yjd-rich-editor .rich-editor-toolbar-btn.rte-add-btn {
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--rte-border, var(--rte-table-border));
+  border-radius: 50%;
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.rte-add-btn.open {
+  background: var(--rte-accent-weak);
+  border-color: var(--rte-accent);
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.rte-add-btn.open .icon svg { color: var(--rte-accent-ink); }
+
+/* Add-menu popover (lazy component .rte-add-menu-popup). */
+.yjd-rich-editor .rte-add-menu-popup {
+  display: none;
+  position: absolute;
+  background: var(--rte-bg, #fff);
+  border: 1px solid var(--rte-border, var(--rte-table-border));
+  border-radius: var(--rte-radius-md, 14px);
+  box-shadow: 0 8px 28px rgba(20, 24, 47, 0.14);
+  padding: 6px;
+  min-width: 196px;
+  pointer-events: auto;
+}
+.yjd-rich-editor .rte-add-menu-popup.visible { display: block; }
+.yjd-rich-editor .rte-add-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--rte-ink);
+  font: 500 14px/1.2 inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.yjd-rich-editor .rte-add-item:hover { background: var(--rte-chrome-2); }
+.yjd-rich-editor .rte-add-ic {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  color: var(--rte-muted);
+}
+.yjd-rich-editor .rte-add-ic svg { width: 20px; height: 20px; fill: none; stroke: currentColor; color: inherit; }
+.yjd-rich-editor .rte-add-sep { height: 1px; background: var(--rte-border, var(--rte-table-border)); margin: 5px 8px; }
+
 /* =====================================================================
    DESIGN SYSTEM v2.8 — remove the triangle pointer on floating toolbars
    ===================================================================== */
