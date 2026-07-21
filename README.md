@@ -2,7 +2,7 @@
 
 **Rich text, without the weight.** A dependency-free, tree-shakeable rich text editor for the web. Compose it from a `/core` entry and ship **17 KB**, not the whole library.
 
-🔗 **[yjd.io](https://yjd.io)** · [Live playground](https://yjd.io/demos/) · [Docs](https://yjd.io/site/docs.html)
+🔗 **[yjd.io](https://yjd.io)** · [Live playground](https://yjd.io/demos/) · [Docs](https://yjd.io/site/docs.html) · [Changelog](./CHANGELOG.md)
 
 ```js
 import yjd from '@oix1987/yjd';
