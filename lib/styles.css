@@ -3361,6 +3361,12 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   padding: 8px 12px 12px;
   border: 0;
   border-radius: 0;
+  /* The prompt bar has no "More" overflow split, so let it wrap (rather than the
+     design-system's nowrap+clip) — the send button on the right always stays
+     visible when there are many tools on a narrow screen. */
+  flex-wrap: wrap !important;
+  overflow: visible;
+  row-gap: 6px;
 }
 /* No word-count/breadcrumb bar in a compact prompt input. */
 .yjd-rich-editor[data-layout="prompt"] .rich-editor-statusbar {
