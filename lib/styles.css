@@ -3456,8 +3456,11 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 /* ── Mobile toolbar: one horizontal-scroll row (v2.14) ────────────────────
    Instead of wrapping every tool into a cramped multi-row "More" panel, mobile
    shows a single row you swipe sideways — the pattern used by Google Docs,
-   Notion, etc. (The reflow JS keeps all groups in row 1 at this width.) */
-@media (max-width: 640px) {
+   Notion, etc. (The reflow JS keeps all groups in row 1 on touch devices.)
+   Gated on touch (hover:none + pointer:coarse), NOT viewport width: a narrow
+   desktop window keeps the "More" overflow split, so horizontal swipe-scroll is
+   reserved for real touch devices. The reflow JS uses the same media query. */
+@media (hover: none) and (pointer: coarse) {
   .yjd-rich-editor .rich-editor-toolbar-1 {
     flex-wrap: nowrap !important;
     overflow-x: auto !important;
