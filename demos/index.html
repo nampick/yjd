@@ -266,10 +266,11 @@ new Editor('#editor', {
   placeholder: 'Message yjd…',
   content: '<p>Viết lại đoạn này ngắn gọn hơn 👋</p>',
   prompt: {
-    add: ['image'],                        // "+" adds an image (no popover)
+    add: ['image', 'file', 'video'],       // mobile: "+" adds image · desktop: menu
     tools: ['bold', 'italic'],             // basic tools, no popovers
   },
-  submit: { onSubmit: (html) => console.log('send:', html) }, // Enter + send
+  // Attachments show as removable thumbnails and travel with the message.
+  submit: { onSubmit: (html, ed) => console.log('send:', html, ed.getAttachments()) },
 });`
       },
       {

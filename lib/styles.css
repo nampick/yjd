@@ -3292,13 +3292,68 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 /* Bottom action bar: one flush surface with the text — transparent, no border,
    no top-radius/clip, bottom corners rounded, popovers allowed to overflow. */
 .yjd-rich-editor[data-layout="prompt"] .rich-editor-toolbar-container {
-  order: 2;
+  order: 3;
   background: transparent;
   border: 0;
   border-radius: 0 0 25px 25px;
   overflow: visible;
   z-index: 1;
 }
+/* Attachments tray: chat-style thumbnails between the text and the bottom bar. */
+.yjd-rich-editor[data-layout="prompt"] .rte-prompt-attachments {
+  order: 2;
+  display: none;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 4px 18px 6px;
+}
+.yjd-rich-editor[data-layout="prompt"] .rte-prompt-attachments.has-items { display: flex; }
+.rte-attach-chip {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  border: 1px solid var(--rte-border, var(--rte-table-border));
+  background: var(--rte-chrome-2);
+  overflow: hidden;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.rte-attach-chip img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.rte-attach-ic { width: 22px; height: 22px; color: var(--rte-muted); display: inline-flex; }
+.rte-attach-ic svg { width: 22px; height: 22px; fill: none; stroke: currentColor; color: inherit; }
+.rte-attach-name {
+  max-width: 52px;
+  padding: 0 4px;
+  font: 500 9px/1.1 system-ui, sans-serif;
+  color: var(--rte-muted);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rte-attach-close {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(20, 24, 47, 0.62);
+  color: #fff;
+  font: 600 13px/1 system-ui, sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.rte-attach-close:hover { background: rgba(20, 24, 47, 0.82); }
 .yjd-rich-editor[data-layout="prompt"] .rich-editor-toolbar-1,
 .yjd-rich-editor[data-layout="prompt"] .rich-editor-toolbar-2 {
   background: transparent;

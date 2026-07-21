@@ -281,13 +281,22 @@ prompt: {
 ```
 
 `prompt.add` accepts built-in keys (`image` · `file` · `video` · `table`),
-`'separator'`, or custom items `{ label, icon?, onSelect(editor) }`. A **single**
-item makes `+` trigger it directly; **two or more** open a popover menu (portaled
-so it's never clipped, loaded lazily on first open). Built-ins reuse the normal
-insert flows: image/file open the file picker, video/table open their popovers.
+`'separator'`, or custom items `{ label, icon?, onSelect(editor) }`. On mobile (or
+with a single item) `+` adds an image directly; on desktop with two or more items
+it opens a popover menu (portaled so it's never clipped, loaded lazily).
 
-> Image/file **upload insertion** needs `applyEditorInput(Editor)` on a `/core`
-> build (it's already applied in the all-in-one bundle).
+**Attachments.** In the prompt layout, `image` / `file` / `video` attach as
+chat-style thumbnails with a remove button — above the bar, not inserted into the
+message text. Read them in your submit handler and clear happens automatically:
+
+```js
+submit: {
+  onSubmit: (html, ed) => send(html, ed.getAttachments()), // [{ kind, file, src }]
+}
+```
+
+`table` still inserts inline. `getAttachments()` returns `{ kind, file, src }` per
+item (`src` is the upload-hook URL if `image.upload` is set, otherwise a data URL).
 
 ### @mention / #task
 
