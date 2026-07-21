@@ -255,6 +255,31 @@ new yjd('#comment', {
 When a mention/slash/emoji popup is open, Enter is left for the popup (it picks the
 item, doesn't submit). Check it yourself with `editor.isMenuOpen()`.
 
+### Prompt / chat layout
+
+`layout: 'prompt'` turns the editor into a chat-style input: a rounded pill with
+the toolbar as a bottom action bar — `[ + add ]  [ format tools ]  …  [ send ]` —
+that grows with its content (`height:'auto'`). Enter and the send button both call
+your `submit` handler.
+
+```js
+new yjd('#prompt', {
+  layout: 'prompt',
+  placeholder: 'Message…',
+  submit: { onSubmit: (html, editor) => send(html) },  // Enter + send button
+  prompt: {
+    add:   ['image', 'file', 'video', 'table'],  // items in the "+" popover
+    tools: ['bold', 'italic', 'link'],           // format buttons next to "+"
+  },
+});
+```
+
+`prompt.add` accepts built-in keys (`image` · `file` · `video` · `table`),
+`'separator'`, or custom items `{ label, icon?, onSelect(editor) }`. Built-ins
+reuse the normal insert flows (image/file open the file picker; video/table open
+their popovers). The "+" popover component is loaded lazily on first open, so it
+adds nothing to editors that don't use the prompt layout.
+
 ### @mention / #task
 
 ```js
