@@ -16,6 +16,7 @@ export default [
     output: {
       file: 'dist/rich-editor.min.js',
       format: 'umd',
+      inlineDynamicImports: true,
       name: 'yjd',
       exports: 'default',
       sourcemap: true,
@@ -29,6 +30,7 @@ export default [
     output: {
       file: 'dist/rich-editor.esm.js',
       format: 'es',
+      inlineDynamicImports: true,
       sourcemap: true
     },
     plugins: [terserPlugin]
@@ -40,6 +42,7 @@ export default [
     output: {
       file: 'dist/core.esm.js',
       format: 'es',
+      inlineDynamicImports: true,
       sourcemap: true
     },
     // Feature modules register their icons via a top-level registerIcons() call.
