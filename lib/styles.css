@@ -2376,9 +2376,14 @@
 /* Distraction-free full screen: fill the viewport (Esc exits). The editor area
    already flexes to fill the column, so no per-child sizing is needed. */
 .yjd-rich-editor.yjd-fullscreen {
-  position: fixed;
-  inset: 0;
-  z-index: 2147483000;
+  /* position/inset/z-index are !important like width/height below: the editor
+     sets an inline `position: relative` on this same wrapper (editor.js), and a
+     layered rule can't beat an inline declaration — so fullscreen would only
+     resize in-flow (grow taller) instead of overlaying. !important (author) wins
+     over inline non-important and pins it to the viewport. */
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483000 !important;
   width: 100vw !important;
   max-width: 100vw !important;
   height: 100vh !important;
