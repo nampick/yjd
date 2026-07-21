@@ -322,10 +322,14 @@ editor.on('attachment:add', (att) => {          // att is the live item
 editor.on('attachment:remove', (att) => cancelUpload(att.id));
 ```
 
-`serializeAttachments` appends attachments to the content passed to your submit
-handler (`true` = default `<img>`/`<a>` HTML; a function returns a custom string
-per attachment, e.g. Markdown), so a markdown/HTML store needn't wire
-`getAttachments()` by hand.
+`serializeAttachments` appends attachments to the content (`true` = default
+`<img>`/`<a>` HTML — or Markdown `![](src)` when the store is markdown; a function
+returns a custom string per attachment). It flows into **both** the submit
+handler's content arg **and** `Editor.fromTextarea`'s synced `ta.value` /
+`getMarkdown()` (in the textarea's format), so a `<textarea>`-backed form that
+posts `ta.value` gets the attachments without a manual flush. Adding/removing an
+attachment re-syncs the value immediately. Call `editor.clearAttachments()` (or
+`editor.clear()`, which also empties the tray) to reset after posting.
 
 ### @mention / #task
 
