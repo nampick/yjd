@@ -3307,6 +3307,45 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   display: none;
 }
 
+/* Send button — accent circle with an up-arrow; disabled (muted) while empty.
+   Usable in any toolbar, but designed for the prompt bar where it sits far
+   right. */
+.yjd-rich-editor .rich-editor-toolbar-btn.rte-send-btn {
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--rte-accent);
+  color: var(--rte-accent-ink-on, #fff);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--rte-t, .15s), color var(--rte-t, .15s);
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.rte-send-btn:hover:not(:disabled) {
+  background: var(--rte-accent-ink);
+  color: var(--rte-accent-ink-on, #fff);
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.rte-send-btn:disabled {
+  background: var(--rte-chrome-2);
+  color: var(--rte-muted);
+  cursor: default;
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.rte-send-btn .icon svg {
+  /* Beat the generic `.icon svg { color: var(--rte-muted) }` so the arrow takes
+     the button's own colour (white on accent / muted when disabled). */
+  color: inherit;
+  fill: none;
+  stroke: currentColor;
+}
+/* In the prompt bar the whole send group pins to the far right. */
+.yjd-rich-editor[data-layout="prompt"] .toolbar-group-send {
+  margin-left: auto;
+}
+
 /* =====================================================================
    DESIGN SYSTEM v2.8 — remove the triangle pointer on floating toolbars
    ===================================================================== */
