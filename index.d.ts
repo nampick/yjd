@@ -329,6 +329,13 @@ export class Editor {
   clear(): void;
   insertText(text: string): void;
   insertHTML(html: string): void;
+  /**
+   * Prompt layout: attach a file as a chat-style thumbnail (not inserted into the
+   * message text). kind defaults to 'image'. Opens the file picker.
+   */
+  promptAttach(kind?: 'image' | 'video' | 'file'): Promise<void>;
+  /** Prompt layout: current attachments. Read them in your submit handler. */
+  getAttachments(): Array<{ kind: 'image' | 'video' | 'file'; file: File; src: string }>;
   /** Snapshot of the current selection (null when outside the editor). */
   getSelection(): SelectionSnapshot | null;
   /** Replace the current selection with content (sanitized, undo-aware). */
