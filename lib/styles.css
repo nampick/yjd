@@ -3244,6 +3244,21 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .rich-editor-toolbar-1 .more-btn {
   margin-left: 12px;
 }
+/* Right-side action cluster: push the pinned history group (undo/redo) and the
+   "More" button to the right edge as one tight unit, so "More" reads as part of
+   a deliberate action group instead of a lone icon. The auto margin absorbs the
+   toolbar's free space, collapsing the left groups to their natural gap. */
+.yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group-history {
+  margin-left: auto;
+}
+/* When a history group is present it carries the auto margin, so the More button
+   must NOT also auto-margin (two auto margins would split the free space and
+   leave a gap between undo/redo and More). Collapse More to a tight gap right
+   after the history group — the cluster stays one unit. Higher specificity than
+   the base `.more-btn { margin-left: auto !important }`, so it wins. */
+.yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group-history ~ .more-btn {
+  margin-left: 12px !important;
+}
 
 /* =====================================================================
    DESIGN SYSTEM v2.8 — remove the triangle pointer on floating toolbars
