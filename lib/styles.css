@@ -3530,19 +3530,22 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   width: auto !important;
 }
 
-/* ── "More" overflow = one extra row, not a crammed wrap (v2.17) ───────────
-   The secondary toolbar stays hidden until "More" is pressed; when shown it's
-   a single tidy row (scrolls sideways if it ever exceeds the width) instead of
-   wrapping its groups into several stacked rows. */
-.yjd-rich-editor .rich-editor-toolbar-2 {
-  flex-wrap: nowrap !important;
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+/* ── "More" overflow row: single swipe-scroll row on TOUCH only (v2.17) ────
+   On touch devices the secondary toolbar is one tidy row you swipe sideways,
+   rather than a tall multi-row stack. On desktop it wraps to as many rows as
+   needed (flex-wrap:wrap from the base rule) so every tool is visible without
+   any horizontal scroll — swipe-scroll is reserved for real touch devices. */
+@media (hover: none) and (pointer: coarse) {
+  .yjd-rich-editor .rich-editor-toolbar-2 {
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .yjd-rich-editor .rich-editor-toolbar-2::-webkit-scrollbar { display: none; }
+  .yjd-rich-editor .rich-editor-toolbar-2 .toolbar-group { flex: 0 0 auto; }
 }
-.yjd-rich-editor .rich-editor-toolbar-2::-webkit-scrollbar { display: none; }
-.yjd-rich-editor .rich-editor-toolbar-2 .toolbar-group { flex: 0 0 auto; }
 
 /* ── Labelled selects (v2.18) ─────────────────────────────────────────────
    A small header at the top of each dropdown + a leading icon on the trigger,
