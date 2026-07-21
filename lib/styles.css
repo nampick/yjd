@@ -3271,6 +3271,11 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   border: 1px solid var(--rte-border-strong, var(--rte-border));
   box-shadow: 0 1px 2px rgba(20, 24, 47, 0.04), 0 8px 24px rgba(20, 24, 47, 0.06);
   overflow: visible;
+  /* The base rule isolates the editor's stacking context; a prompt input's "+"
+     popover must overlay whatever sits above the pill (a chat input hugs the
+     bottom), so opt back out — the popover's own z-index then wins over page
+     content instead of being trapped inside the pill. */
+  isolation: auto;
   transition: border-color var(--rte-t, .15s), box-shadow var(--rte-t, .15s);
 }
 .yjd-rich-editor[data-layout="prompt"]:focus-within {
@@ -3362,7 +3367,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .rich-editor-toolbar-btn.rte-add-btn.open .icon svg { color: var(--rte-accent-ink); }
 
 /* Add-menu popover (lazy component .rte-add-menu-popup). */
-.yjd-rich-editor .rte-add-menu-popup {
+.rte-add-menu-popup {
   display: none;
   position: absolute;
   background: var(--rte-bg, #fff);
@@ -3373,8 +3378,8 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   min-width: 196px;
   pointer-events: auto;
 }
-.yjd-rich-editor .rte-add-menu-popup.visible { display: block; }
-.yjd-rich-editor .rte-add-item {
+.rte-add-menu-popup.visible { display: block; }
+.rte-add-item {
   display: flex;
   align-items: center;
   gap: 11px;
@@ -3388,16 +3393,16 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   text-align: left;
   cursor: pointer;
 }
-.yjd-rich-editor .rte-add-item:hover { background: var(--rte-chrome-2); }
-.yjd-rich-editor .rte-add-ic {
+.rte-add-item:hover { background: var(--rte-chrome-2); }
+.rte-add-ic {
   width: 20px;
   height: 20px;
   flex: 0 0 auto;
   display: inline-flex;
   color: var(--rte-muted);
 }
-.yjd-rich-editor .rte-add-ic svg { width: 20px; height: 20px; fill: none; stroke: currentColor; color: inherit; }
-.yjd-rich-editor .rte-add-sep { height: 1px; background: var(--rte-border, var(--rte-table-border)); margin: 5px 8px; }
+.rte-add-ic svg { width: 20px; height: 20px; fill: none; stroke: currentColor; color: inherit; }
+.rte-add-sep { height: 1px; background: var(--rte-border, var(--rte-table-border)); margin: 5px 8px; }
 
 /* =====================================================================
    DESIGN SYSTEM v2.8 — remove the triangle pointer on floating toolbars
