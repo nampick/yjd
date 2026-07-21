@@ -3644,9 +3644,15 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .custom-select-button .button-text {
   flex: 1 1 auto;
   min-width: 0;
+  /* Must be block (not flex) for text-overflow:ellipsis to render — a shared
+     `.rich-editor-toolbar-btn span { display:flex !important }` rule otherwise
+     makes this a flex box, where ellipsis is ignored and a long value (e.g.
+     "Times New Roman") is hard-cut with no "…". */
+  display: block !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: left;
 }
 .yjd-rich-editor .custom-select-button .select-lead-icon,
 .yjd-rich-editor .custom-select-button .dropdown-icon {
