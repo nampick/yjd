@@ -19,6 +19,12 @@ export interface MentionTrigger {
   source: (query: string) => MentionItem[] | Promise<MentionItem[]>;
   /** Custom HTML for a suggestion row. Defaults to avatar + name. */
   renderItem?: (item: MentionItem) => string;
+  /**
+   * Custom token this trigger serializes to in getContent()/getMarkdown().
+   * Defaults to `#[Name](id)`. Return e.g. `'#' + item.id` to store a bare id
+   * with no regex post-processing.
+   */
+  serialize?: (item: MentionItem) => string;
 }
 
 /** @mention configuration. The token inserted carries `data-id`. */
@@ -27,6 +33,8 @@ export interface MentionOptions {
   trigger?: string;
   source?: (query: string) => MentionItem[] | Promise<MentionItem[]>;
   renderItem?: (item: MentionItem) => string;
+  /** Custom token for the primary trigger. Defaults to `@[Name](id)`. */
+  serialize?: (item: MentionItem) => string;
   /** Additional triggers, e.g. '#' for task references. */
   triggers?: MentionTrigger[];
 }
@@ -84,6 +92,14 @@ export interface SubmitOptions {
   onSubmit?: (html: string, editor: Editor) => void;
   /** Shift+Enter inserts a newline (default true). */
   newlineOnShiftEnter?: boolean;
+  /**
+   * When Enter submits vs. inserts a newline (the send button always submits):
+   * - 'auto' (default): submit on Enter, EXCEPT on a touch soft keyboard in the
+   *   prompt layout, where Enter inserts a newline.
+   * - 'always': Enter always submits (even on mobile).
+   * - 'never': Enter is always a newline; only the send button submits.
+   */
+  enterToSend?: 'auto' | 'always' | 'never';
 }
 
 /** Context passed to the AI `complete` hook for one request. */
@@ -187,6 +203,32 @@ export interface PromptOptions {
   add?: PromptAddItem[];
   /** Format buttons next to "+" in the bottom bar. Default: ['bold', 'italic'] (basic, no popovers). */
   tools?: string[];
+  /**
+   * Skip the built-in image/file upload hook when an attachment is added; the
+   * integrator uploads later (e.g. on submit) and writes src/url/meta/status
+   * back onto the item from an 'attachment:add' handler.
+   */
+  deferUpload?: boolean;
+  /**
+   * Append tray attachments to the content passed to the submit handler:
+   * - true: a default HTML tail (<img> / <a>) per attachment.
+   * - function: a custom string per attachment (e.g. markdown `![](src)`).
+   */
+  serializeAttachments?: boolean | ((att: PromptAttachment) => string);
+}
+
+/** One tray attachment, as returned by getAttachments() and the attachment events. */
+export interface PromptAttachment {
+  /** Stable id within this composer (correlate add/remove events). */
+  id: number;
+  kind: 'image' | 'video' | 'file';
+  file: File;
+  /** Uploaded URL when an upload hook ran, else the preview value (image data URL, or undefined). */
+  src?: string;
+  /** Upload state: 'done' when nothing to upload or resolved; 'pending' mid-upload; 'error' on failure. */
+  status: 'pending' | 'done' | 'error';
+  /** Integrator-supplied bag (empty by default); set it from an 'attachment:add' handler. */
+  meta: Record<string, any>;
 }
 
 /** A JSON document node produced by getJSON()/domToJson. */
@@ -305,6 +347,12 @@ export class Editor {
   editor: HTMLElement;
   /** The AI module, present when `ai.complete` was configured. */
   ai?: AiController;
+  /**
+   * Subscribe to an editor event. Notable events:
+   * - 'change' / 'text-change' (html), 'mention:select' (MentionItem)
+   * - 'attachment:add' / 'attachment:remove' (PromptAttachment) — the payload is
+   *   the live item; set src/url/meta/status on it for a deferred-upload model.
+   */
   on(event: string, handler: (data: any) => void): void;
   /** Remove a previously-added listener (symmetric with on()). */
   off(event: string, handler: (data: any) => void): void;
@@ -335,7 +383,7 @@ export class Editor {
    */
   promptAttach(kind?: 'image' | 'video' | 'file'): Promise<void>;
   /** Prompt layout: current attachments. Read them in your submit handler. */
-  getAttachments(): Array<{ kind: 'image' | 'video' | 'file'; file: File; src: string }>;
+  getAttachments(): PromptAttachment[];
   /** Snapshot of the current selection (null when outside the editor). */
   getSelection(): SelectionSnapshot | null;
   /** Replace the current selection with content (sanitized, undo-aware). */

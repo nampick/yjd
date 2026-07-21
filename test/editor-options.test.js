@@ -68,11 +68,41 @@ test('more button starts hidden until reflow finds overflow', () => {
   assert.equal(tb.moreBtn.style.display, 'none');
 });
 
+test("layout:'prompt' with toolbar:{overflow:false} still applies the prompt bar", () => {
+  const ed = new Editor(mount(), { layout: 'prompt', toolbar: { overflow: false }, prompt: { tools: ['bold'] } });
+  const tb = ed.getModule('toolbar');
+  assert.equal(tb._promptPreset, true, 'a plain toolbar object must not disable the prompt preset');
+  assert.ok(tb.buttons.has('send'), 'send button present');
+  assert.ok(tb.buttons.has('add'), '+ add button present');
+  assert.ok(!tb.buttons.has('more'), 'no dead more button');
+});
+
+test('submit.enterToSend controls whether Enter submits', () => {
+  const fire = (ed) => ed.editor.dispatchEvent(
+    new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+
+  let never = 0;
+  const edN = new Editor(mount(), { submit: { enterToSend: 'never', onSubmit: () => { never++; } } });
+  edN.setContent('<p>hi</p>');
+  fire(edN);
+  assert.equal(never, 0, "'never' → Enter must not submit");
+  edN.submitContent();
+  assert.equal(never, 1, 'the send path still submits under enterToSend:never');
+
+  let always = 0;
+  const edA = new Editor(mount(), { submit: { enterToSend: 'always', onSubmit: () => { always++; } } });
+  edA.setContent('<p>hi</p>');
+  fire(edA);
+  assert.equal(always, 1, "'always' → Enter submits");
+});
+
 test('toolbar overflow:false disables the more split', () => {
   const ed = new Editor(mount(), { toolbar: { overflow: false } });
   const tb = ed.getModule('toolbar');
   assert.equal(tb._overflowDisabled, true);
-  tb.reflow();
-  assert.equal(tb.moreBtn.style.display, 'none');
+  tb.reflow(); // must no-op safely with no more button
+  // The "more" button is not created at all (no hidden, focusable dead node).
+  assert.ok(!tb.moreBtn);
+  assert.equal(ed.wrapper.querySelectorAll('.more-btn').length, 0);
   assert.equal(tb.toolbar2.style.display, 'none');
 });
