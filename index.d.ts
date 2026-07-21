@@ -183,9 +183,9 @@ export type PromptAddItem =
 
 /** Prompt/chat layout configuration (used with layout:'prompt'). */
 export interface PromptOptions {
-  /** Items in the "+" add-menu popover. Default: ['image', 'file']. */
+  /** A single item makes "+" do it directly (no popover) — the default is ['image'] (tap "+" to add an image). Two or more items open a popover menu. */
   add?: PromptAddItem[];
-  /** Format buttons shown next to "+" in the bottom bar. Default: ['bold','italic','link']. */
+  /** Format buttons next to "+" in the bottom bar. Default: ['bold', 'italic'] (basic, no popovers). */
   tools?: string[];
 }
 
