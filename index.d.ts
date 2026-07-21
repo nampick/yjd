@@ -384,6 +384,8 @@ export class Editor {
   promptAttach(kind?: 'image' | 'video' | 'file'): Promise<void>;
   /** Prompt layout: current attachments. Read them in your submit handler. */
   getAttachments(): PromptAttachment[];
+  /** Empty the prompt attachment tray (text untouched). `clear()` does this too. */
+  clearAttachments(): void;
   /** Snapshot of the current selection (null when outside the editor). */
   getSelection(): SelectionSnapshot | null;
   /** Replace the current selection with content (sanitized, undo-aware). */

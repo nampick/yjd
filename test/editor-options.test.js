@@ -96,6 +96,29 @@ test('submit.enterToSend controls whether Enter submits', () => {
   assert.equal(always, 1, "'always' → Enter submits");
 });
 
+test('serializeAttachments folds into submit content (format-aware tails)', () => {
+  const ed = new Editor(mount(), { prompt: { serializeAttachments: true } });
+  ed.getAttachments = () => [{ kind: 'image', file: { name: 'a.png' }, src: 'http://x/a.png' }];
+  assert.equal(ed._serializeAttachmentsTail('markdown'), '\n\n![a.png](http://x/a.png)');
+  assert.ok(ed._serializeAttachmentsTail('html').includes('<img src="http://x/a.png" alt="a.png">'));
+
+  let submitted = '';
+  ed.options.submit = { onSubmit: (html) => { submitted = html; } };
+  ed.setContent('<p>hi</p>');
+  ed.submitContent();
+  assert.ok(submitted.includes('<img src="http://x/a.png"'), 'onSubmit content carries the attachment');
+});
+
+test('fromTextarea value includes serialized attachments', () => {
+  const ta = document.createElement('textarea');
+  document.body.appendChild(ta);
+  const ed = Editor.fromTextarea(ta, { format: 'html', prompt: { serializeAttachments: true } });
+  ed.getAttachments = () => [{ kind: 'file', file: { name: 'doc.pdf' }, src: 'http://x/doc.pdf' }];
+  ed.setContent('<p>see</p>');
+  assert.ok(ed.getValue().includes('<a href="http://x/doc.pdf">doc.pdf</a>'),
+    'the synced textarea value carries the attachment');
+});
+
 test('toolbar overflow:false disables the more split', () => {
   const ed = new Editor(mount(), { toolbar: { overflow: false } });
   const tb = ed.getModule('toolbar');
