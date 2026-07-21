@@ -73,9 +73,15 @@ export interface FileOptions {
 export interface SubmitOptions {
   /**
    * Called when Enter is pressed and no autocomplete popup (mention/slash/emoji)
-   * is open. Receives the current HTML and the editor instance.
+   * is open. Receives the current HTML and the editor instance. In the prompt
+   * layout the send button uses this too. Prefer `onSubmit` for new code.
    */
-  onEnter: (html: string, editor: Editor) => void;
+  onEnter?: (html: string, editor: Editor) => void;
+  /**
+   * Preferred submit handler — fired by both Enter-to-send and the prompt
+   * layout's send button. Receives the current HTML and the editor instance.
+   */
+  onSubmit?: (html: string, editor: Editor) => void;
   /** Shift+Enter inserts a newline (default true). */
   newlineOnShiftEnter?: boolean;
 }
@@ -165,8 +171,23 @@ export interface AiController {
 export type ToolbarOption =
   | 'full'
   | 'compact'
+  /** Chat-style bottom bar: [ + add ] [ format tools ] [ send ]. Implied by layout:'prompt'. */
+  | 'prompt'
   | { exclude?: string[]; /** false = never split into a "more" row; the toolbar wraps instead. */ overflow?: boolean }
   | string[];
+
+/** An item in the prompt "+" add-menu: a built-in insert action or a custom entry. */
+export type PromptAddItem =
+  | 'image' | 'file' | 'video' | 'table' | 'separator'
+  | { label: string; icon?: string; onSelect: (editor: Editor) => void };
+
+/** Prompt/chat layout configuration (used with layout:'prompt'). */
+export interface PromptOptions {
+  /** Items in the "+" add-menu popover. Default: ['image', 'file']. */
+  add?: PromptAddItem[];
+  /** Format buttons shown next to "+" in the bottom bar. Default: ['bold','italic','link']. */
+  tools?: string[];
+}
 
 /** A JSON document node produced by getJSON()/domToJson. */
 export interface JsonNode {
@@ -233,6 +254,14 @@ export interface EditorOptions {
   ai?: AiOptions;
   /** Built-in preset / exclusion / flat list, instead of toolbar1/toolbar2. */
   toolbar?: ToolbarOption;
+  /**
+   * Overall layout. 'default' (top toolbar) or 'prompt' — a chat-style pill with
+   * the toolbar as a bottom action bar. layout:'prompt' also defaults to a prompt
+   * bottom bar and height:'auto' unless you configure otherwise.
+   */
+  layout?: 'default' | 'prompt';
+  /** Prompt/chat layout configuration (the "+" add-menu and its format tools). */
+  prompt?: PromptOptions;
   /** Warn (emit 'content:overflow') when serialized HTML exceeds this many chars. */
   maxContentSize?: number;
   features?: {

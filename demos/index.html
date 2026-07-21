@@ -244,6 +244,32 @@ new Editor('#editor', {
 });`
       },
       {
+        id: 'prompt', title: 'Prompt', badge: 'chat input',
+        desc: 'Chat-style pill — a "+" add-menu and a send button on a bottom bar. Enter sends.',
+        code:
+`// Stylesheet: <link rel="stylesheet" href="${CDN}/lib/styles.min.css">
+import { Editor, registry, Bold, Italic, Link, Image, Video, Table,
+  Toolbar, History } from '${CDN}/core.js';
+
+registry.register('formats/bold', Bold);
+registry.register('formats/italic', Italic);
+registry.register('formats/link', Link);
+registry.register('formats/image', Image);
+registry.register('formats/video', Video);
+registry.register('formats/table', Table);
+registry.register('modules/toolbar', Toolbar);
+registry.register('modules/history', History);
+
+new Editor('#editor', {
+  width: '100%',
+  layout: 'prompt',                       // chat pill + bottom action bar
+  placeholder: 'Message yjd…',
+  content: '<p>Viết lại đoạn này ngắn gọn hơn 👋</p>',
+  prompt: { add: ['image', 'video', 'table'] },  // the "+" popover
+  submit: { onSubmit: (html) => console.log('send:', html) }, // Enter + send
+});`
+      },
+      {
         id: 'basic', title: 'Basic', badge: '~28 KB JS',
         desc: 'Blog / notes — try typing / for the command menu.',
         code:
