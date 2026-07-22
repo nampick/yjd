@@ -16,6 +16,7 @@
 import { rmSync, mkdirSync, cpSync, copyFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { PRESETS } from '../demos/presets.data.mjs';
+import { COMPETITORS } from '../site/compare.data.mjs';
 
 const out = 'public';
 rmSync(out, { recursive: true, force: true });
@@ -27,11 +28,16 @@ mkdirSync(join(out, 'lib'), { recursive: true });
 
 // pages
 copyFileSync('site/index.html', join(out, 'index.html'));      // landing at root
-// Every static page in site/ (landing, docs, react/vue integration) + its CSS.
+// Every static page in site/ (landing, docs, framework + comparison pages) + CSS.
 for (const f of readdirSync('site')) {
   if (f.endsWith('.html') || f.endsWith('.css')) {
     copyFileSync(join('site', f), join(out, 'site', f));
   }
+}
+// Comparison pages live in site/vs/ (yjd vs <editor>).
+mkdirSync(join(out, 'site', 'vs'), { recursive: true });
+for (const f of readdirSync('site/vs')) {
+  if (f.endsWith('.html')) copyFileSync(join('site/vs', f), join(out, 'site', 'vs', f));
 }
 // Framework integration demos (mount yjd inside React/Vue). Linked from the
 // site/react.html and site/vue.html pages.
@@ -68,6 +74,9 @@ const pages = [
   { loc: '/site/vue2', priority: '0.8' },
   { loc: '/site/angular', priority: '0.8' },
   { loc: '/site/angularjs', priority: '0.8' },
+  // Comparison pages (SEO: "<editor> alternative" / "yjd vs <editor>").
+  { loc: '/site/compare', priority: '0.8' },
+  ...COMPETITORS.map((c) => ({ loc: `/site/vs/${c.slug}`, priority: '0.7' })),
   { loc: '/demos/', priority: '0.7' },
   // One entry per preset demo page (generated from the same source of truth).
   ...PRESETS.map((p) => ({ loc: `/demos/${p.slug}`, priority: '0.7' })),

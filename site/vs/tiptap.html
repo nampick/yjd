@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>yjd vs Tiptap — a lighter rich text editor alternative</title>
+  <meta name="description" content="yjd vs Tiptap: a dependency-free, tree-shakeable editor (~17 KB) versus a ProseMirror-based headless framework. When each one is the right call.">
+  <link rel="canonical" href="https://yjd.io/site/vs/tiptap">
+  <link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="yjd">
+  <meta property="og:title" content="yjd vs Tiptap — a lighter rich text editor alternative">
+  <meta property="og:description" content="yjd vs Tiptap: a dependency-free, tree-shakeable editor (~17 KB) versus a ProseMirror-based headless framework. When each one is the right call.">
+  <meta property="og:url" content="https://yjd.io/site/vs/tiptap">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="yjd vs Tiptap — a lighter rich text editor alternative">
+  <meta name="twitter:description" content="yjd vs Tiptap: a dependency-free, tree-shakeable editor (~17 KB) versus a ProseMirror-based headless framework. When each one is the right call.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='4' fill='%236d5efc'/%3E%3Ctext x='8' y='12' font-family='monospace' font-size='10' font-weight='700' fill='white' text-anchor='middle'%3Ey%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/lib/styles.min.css">
+  <link rel="stylesheet" href="/site/frameworks.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"yjd vs Tiptap — a lighter rich text editor alternative","description":"yjd vs Tiptap: a dependency-free, tree-shakeable editor (~17 KB) versus a ProseMirror-based headless framework. When each one is the right call.","url":"https://yjd.io/site/vs/tiptap","isPartOf":{"@type":"WebSite","name":"yjd","url":"https://yjd.io"},"breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Compare","item":"https://yjd.io/site/compare"},{"@type":"ListItem","position":2,"name":"yjd vs Tiptap","item":"https://yjd.io/site/vs/tiptap"}]}}</script>
+</head>
+<body>
+  <header class="nav"><div class="wrap nav-in">
+    <a class="logo" href="/site/index.html"><span class="mark">y</span> yjd <small>.io</small></a>
+    <nav class="nav-links">
+      <a class="hide-sm" href="/site/index.html">Home</a>
+      <a href="/site/docs.html">Docs</a>
+      <a href="/demos/index.html">Playground</a>
+      <a class="nav-cta" href="https://github.com/nampick/yjd">GitHub ↗</a>
+    </nav>
+  </div></header>
+  <main class="wrap">
+    <div class="ph">
+      <div class="kicker">Comparison</div>
+      <h1>yjd vs Tiptap</h1>
+      <p class="lede">Tiptap is a headless editor framework built on ProseMirror, with official React and Vue wrappers and a deep extension system. It shines when you need custom node views rendered as framework components, collaboration, or a strict document schema. yjd is the opposite trade: a tiny, dependency-free editor you drop into any framework for comments, chat and posts without pulling ProseMirror.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="/site/docs.html">Get started with yjd</a>
+        <a class="btn" href="/demos/index.html">Playground</a>
+        <a class="btn" href="https://tiptap.dev" rel="nofollow noopener">Tiptap ↗</a>
+      </div>
+    </div>
+
+    <section>
+      <h2>At a glance</h2>
+      <div class="cmp-wrap">
+        <table class="cmp">
+          <thead><tr><th></th><th class="yjd">yjd</th><th>Tiptap</th></tr></thead>
+          <tbody>
+        <tr><th>Bundle size</th><td class="yjd">~17 KB min → ~75 KB full (gzip), tree-shakeable</td><td>~30–80+ KB gzip (core + ProseMirror + extensions)</td></tr>
+        <tr><th>Dependencies</th><td class="yjd">None (zero runtime deps)</td><td>ProseMirror (several packages)</td></tr>
+        <tr><th>Frameworks</th><td class="yjd">React, Vue 3/2, Angular, AngularJS, Svelte, vanilla</td><td>React, Vue, Svelte wrappers + vanilla</td></tr>
+        <tr><th>TypeScript types</th><td class="yjd">Yes (bundled .d.ts)</td><td>Yes</td></tr>
+        <tr><th>License</th><td class="yjd">ISC</td><td>MIT (core)</td></tr>
+        <tr><th>Architecture</th><td class="yjd">Vanilla DOM / contenteditable</td><td>ProseMirror schema + node views</td></tr>
+        <tr><th>Best for</th><td class="yjd">Comments, chat/prompt inputs, blog &amp; social posts, light CMS</td><td>Complex documents, collaboration, custom framework-rendered nodes</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="disclaimer">Sizes are approximate and vary a lot with configuration/plugins. Figures for Tiptap come from its public docs; check <a href="https://tiptap.dev" rel="nofollow noopener">https://tiptap.dev</a> for current details.</p>
+    </section>
+
+    <section>
+      <h2>Which should you pick?</h2>
+      <div class="cmp-cols">
+        <div class="cmp-col">
+          <h3>Choose Tiptap when</h3>
+          <ul><li>Node views: render editor nodes as React/Vue components</li><li>Rich extension ecosystem + strict schema</li><li>Collaboration (Yjs) is well-trodden</li></ul>
+          <p class="disclaimer">You are building a document app (Notion/Google-Docs class) with custom interactive blocks or real-time collaboration.</p>
+        </div>
+        <div class="cmp-col yjd">
+          <h3>Choose yjd when</h3>
+          <ul><li>No ProseMirror dependency; smaller footprint</li><li>Works the same across React, Vue, Angular and vanilla</li><li>Native chat/prompt layout + BYO-AI, no plugins</li></ul>
+          <p class="disclaimer">You want a small editor for comments, chat or posts and do not need framework-component nodes.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="split">
+        <div>
+          <h2>Try yjd</h2>
+          <p class="sec-lead">A real editor, ~17 KB, zero dependencies. Install: <code>npm i @oix1987/yjd</code>. It runs in <a href="/site/react.html" style="color:var(--violet-ink);font-weight:600">React</a>, <a href="/site/vue.html" style="color:var(--violet-ink);font-weight:600">Vue</a>, <a href="/site/angular.html" style="color:var(--violet-ink);font-weight:600">Angular</a> and vanilla.</p>
+          <p class="sec-lead">More comparisons: <a href="/site/vs/quill.html" style="color:var(--violet-ink);font-weight:600">vs Quill</a> · <a href="/site/vs/tinymce.html" style="color:var(--violet-ink);font-weight:600">vs TinyMCE</a> · <a href="/site/vs/ckeditor.html" style="color:var(--violet-ink);font-weight:600">vs CKEditor 5</a> · <a href="/site/vs/slate.html" style="color:var(--violet-ink);font-weight:600">vs Slate</a> · <a href="/site/vs/lexical.html" style="color:var(--violet-ink);font-weight:600">vs Lexical</a></p>
+        </div>
+        <div>
+          <div class="live-card">
+            <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="tag">yjd — live</span></div>
+            <div id="live"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer><div class="wrap foot-in">
+    <div class="logo" style="font-size:17px"><span class="mark" style="width:24px;height:24px;font-size:13px">y</span> yjd<small>.io</small></div>
+    <div style="display:flex;gap:20px"><a href="/site/index.html">Home</a><a href="/site/compare.html">Compare</a><a href="/site/docs.html">Docs</a><a href="https://github.com/nampick/yjd">GitHub</a></div>
+  </div></footer>
+  <script type="module">
+    import yjd from '/dist/rich-editor.esm.js';
+    new yjd('#live', { width: '100%', placeholder: 'Type here…',
+      content: '<p>This is <b>yjd</b> — a ~17 KB editor. Type in it 👋</p><ul><li>zero dependencies</li><li>any framework</li></ul>',
+      toolbar1: [
+        { group: 'text-format', items: ['bold', 'italic', 'underline'] },
+        { group: 'paragraph', items: ['heading'] },
+        { group: 'link', items: ['link'] },
+        { group: 'paragraph-ops', items: ['list'] },
+      ],
+    });
+  </script>
+</body>
+</html>
