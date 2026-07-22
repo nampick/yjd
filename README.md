@@ -20,14 +20,26 @@ new yjd('#editor', { placeholder: 'Start writing…' });
 - **XSS-safe paste** — sanitises pasted HTML (scripts/handlers/unsafe URLs stripped; only trusted embeds survive).
 - **Accessible** — keyboard navigable, WCAG-AA contrast (Lighthouse a11y 100).
 
-## New in 2.3
+## New in 2.7
 
-- **Interactive checklists** — a task-list variant of `list`; click a box to toggle it, state saved in the HTML.
-- **Full-screen mode** — a distraction-free writing surface, toggled from the toolbar.
-- **Image alignment & live resize** — drag-resize handles plus a left/center/right align bar on the selected image; both reflect into `onChange` in real time.
-- **Richer tables** — merge/split cells (drag-select a range), toggle a header row (`td ↔ th`), and set per-cell background & alignment.
-- **Auto-linkify** — bare URLs turn into links as you type (on space/Enter).
-- **Fully tokenised theming** — ~187 hardcoded colours replaced by `--rte-*` custom properties in an `@layer yjd` cascade layer. See [docs/THEMING.md](docs/THEMING.md).
+- **Prompt / chat layout** — `layout:'prompt'` turns the editor into a chat-style
+  composer: a rounded pill with a bottom action bar (`+ add · tools · send`),
+  auto-growing height, and a soft-keyboard-aware Enter (sends on desktop, newlines
+  on mobile). See [Prompt / chat layout](#prompt--chat-layout).
+- **Attachment tray** — images/files/videos attach as removable thumbnails that
+  travel with the message. Read them via `getAttachments()` (with upload `status`
+  and a `meta` bag), react to `attachment:add` / `attachment:remove`, or fold them
+  into the content with `prompt.serializeAttachments` — which also flows into the
+  `fromTextarea` value.
+- **Smarter Enter** — inside a list, blockquote or code block, Enter continues the
+  block instead of submitting; `submit.enterToSend` (`'auto' | 'always' | 'never'`)
+  decouples Enter-to-send from the send button.
+- **Per-trigger mention tokens** — `mention` `serialize(item)` emits the exact
+  token you store (e.g. a bare `#id`).
+
+Earlier highlights (2.3): interactive checklists, full-screen mode, image align &
+live resize, richer tables (merge/split, header row, cell styling), auto-linkify,
+and fully tokenised `--rte-*` theming. Full history in the [changelog](./CHANGELOG.md).
 
 ## Bundle size (gzipped JS)
 
