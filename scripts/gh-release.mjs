@@ -17,12 +17,15 @@ if (!version || !/^\d+\.\d+\.\d+/.test(version)) {
   process.exit(1);
 }
 const tag = `v${version}`;
-const REPO = 'nampick/yjd';
+const REPO = process.env.GITHUB_REPOSITORY || 'nampick/yjd';
 
-// --- token from the git credential helper ---
-const token = execSync("printf 'protocol=https\\nhost=github.com\\n\\n' | git credential fill | sed -n 's/^password=//p'")
-  .toString().trim();
-if (!token) { console.error('No GitHub token from git credential fill.'); process.exit(1); }
+// --- token: CI env first (GITHUB_TOKEN/GH_TOKEN), else the git credential helper ---
+let token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN || '';
+if (!token) {
+  token = execSync("printf 'protocol=https\\nhost=github.com\\n\\n' | git credential fill | sed -n 's/^password=//p'")
+    .toString().trim();
+}
+if (!token) { console.error('No GitHub token (set GITHUB_TOKEN, or configure git credentials).'); process.exit(1); }
 
 // --- release notes = the CHANGELOG section for this version ---
 const cl = readFileSync('CHANGELOG.md', 'utf8').split('\n');
