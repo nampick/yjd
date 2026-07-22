@@ -3,120 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>yjd — Playground</title>
-  <meta name="description" content="Try every yjd preset live, edit the config and watch it rebuild — the tree-shakeable rich text editor.">
+  <title>Playground — live rich text editor demos | yjd</title>
+  <meta name="description" content="Live, editable demos of every yjd preset: a 17 KB comment box, a bubble-menu editor, an AI-style chat input, blog, full CMS, and a social post composer.">
   <link rel="canonical" href="https://yjd.io/demos/">
   <link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="yjd">
+  <meta property="og:title" content="Playground — live rich text editor demos">
+  <meta property="og:description" content="Live, editable demos of every yjd preset: a 17 KB comment box, a bubble-menu editor, an AI-style chat input, blog, full CMS, and a social post composer.">
+  <meta property="og:url" content="https://yjd.io/demos/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Playground — live rich text editor demos">
+  <meta name="twitter:description" content="Live, editable demos of every yjd preset: a 17 KB comment box, a bubble-menu editor, an AI-style chat input, blog, full CMS, and a social post composer.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='4' fill='%236d5efc'/%3E%3Ctext x='8' y='12' font-family='monospace' font-size='10' font-weight='700' fill='white' text-anchor='middle'%3Ey%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="/lib/styles.min.css">
+  <link rel="stylesheet" href="/demos/playground.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --ink:#16161d;--ink-2:#3b3d49;--paper:#fff;--bg:#f4f4f8;
-      --violet:#6d5efc;--violet-ink:#5a48ee;--violet-weak:#efedff;--line:#e7e7f0;--muted:#6b6f7e;
-      --code-bg:#16161d;--code-ink:#e7e7f3;
-      --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
-      --display:"Space Grotesk",system-ui,sans-serif;--body:"Inter",system-ui,sans-serif;
-    }
-    *{box-sizing:border-box}html{overflow-x:clip}
-    body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.6;-webkit-font-smoothing:antialiased}
-    a{color:inherit;text-decoration:none}
-    .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
-    .mono{font-family:var(--mono)}
-
-    /* nav (matches yjd.io) */
-    header.nav{position:sticky;top:0;z-index:50;backdrop-filter:saturate(1.4) blur(10px);background:rgba(244,244,248,.85);border-bottom:1px solid var(--line)}
-    .nav-in{display:flex;align-items:center;justify-content:space-between;height:60px}
-    .logo{display:flex;align-items:center;gap:9px;font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.02em}
-    .logo .mark{width:28px;height:28px;border-radius:8px;background:var(--violet);color:#fff;display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:15px}
-    .logo small{color:var(--muted);font-weight:500;font-size:13px;font-family:var(--body)}
-    .nav-links{display:flex;align-items:center;gap:22px;font-weight:500;font-size:15px}
-    .nav-links a:not(.nav-cta):hover,.nav-links a[aria-current]{color:var(--violet-ink)}
-    .nav-cta:hover{color:#fff}
-    .nav-cta{background:var(--ink);color:#fff;padding:8px 16px;border-radius:10px;font-weight:600}
-    .nav-cta:hover{background:var(--violet-ink)}
-
-    /* header */
-    .ph{padding:48px 0 8px}
-    .ph .kicker{font-family:var(--mono);font-size:12.5px;font-weight:600;color:var(--violet-ink);text-transform:uppercase;letter-spacing:.1em}
-    .ph h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,5vw,46px);letter-spacing:-.025em;margin:10px 0 0}
-    .ph p{color:var(--ink-2);font-size:17px;margin:12px 0 0;max-width:60ch}
-
-    /* tabs */
-    .tabs{display:flex;flex-wrap:wrap;gap:8px;margin:28px 0 18px}
-    .tab{display:flex;align-items:center;gap:9px;padding:9px 15px;border:1px solid var(--line);background:var(--paper);border-radius:11px;font-family:var(--display);font-weight:600;font-size:14.5px;color:var(--ink-2);cursor:pointer;transition:all .14s}
-    .tab:hover{border-color:var(--violet)}
-    .tab .kb{font-family:var(--mono);font-weight:400;font-size:11.5px;color:var(--muted);background:var(--bg);padding:2px 7px;border-radius:999px}
-    .tab[aria-selected="true"]{background:var(--violet);border-color:var(--violet);color:#fff;box-shadow:0 8px 20px -8px rgba(109,94,252,.6)}
-    .tab[aria-selected="true"] .kb{background:rgba(255,255,255,.18);color:#fff}
-
-    .tab-desc{color:var(--ink-2);font-size:15px;margin:0 0 18px;min-height:22px}
-
-    /* stage */
-    .stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start;padding-bottom:64px}
-    @media(max-width:920px){.stage{grid-template-columns:1fr}}
-    .pane{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--paper)}
-
-    /* code pane */
-    .code-pane{background:var(--code-bg);display:flex;flex-direction:column;border-color:#2a2a36;min-height:420px}
-    .code-bar{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #2a2a36}
-    .code-bar .dot{width:11px;height:11px;border-radius:50%}
-    .code-bar .r{background:#ff5f57}.code-bar .y{background:#febc2e}.code-bar .g{background:#28c840}
-    .code-bar .fname{color:#9a9ac0;font:600 12.5px var(--mono);margin-left:6px}
-    .code-bar .spacer{flex:1}
-    .code-bar button{font:600 12px var(--body);border:0;border-radius:8px;padding:6px 12px;cursor:pointer}
-    .btn-run{background:var(--violet);color:#fff}.btn-run:hover{background:var(--violet-ink)}
-    .btn-ghost{background:#2c2c3a;color:#c7c7e6}.btn-ghost:hover{background:#37374a}
-    textarea.code{flex:1;min-height:330px;resize:vertical;border:0;outline:0;background:transparent;color:var(--code-ink);padding:16px 18px;font:13px/1.65 var(--mono);tab-size:2;white-space:pre;overflow:auto}
-    .code-status{font:12px var(--mono);padding:0 18px 12px;min-height:18px}
-    .code-status.ok{color:#7ee0a6}.code-status.err{color:#ff9a9a;white-space:pre-wrap}
-
-    /* preview pane */
-    .preview-pane{padding:18px}
-    .preview-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-    .preview-head .lbl{font:600 11px var(--display);text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
-    .preview-head .size{font-family:var(--mono);font-size:12px;color:var(--violet-ink);background:var(--violet-weak);padding:3px 10px;border-radius:999px;font-weight:600}
-    #yjd-stage{min-width:0;width:100%}
-    /* Keep the previewed editor a self-contained widget: cap its height so the
-       toolbar + statusbar stay pinned and the content scrolls INSIDE the area —
-       otherwise a tall preset grows past the viewport and its toolbar slides up
-       under the page's sticky nav. The editor sets an inline max-height:800px by
-       default, so this override needs !important. */
-    #yjd-stage .yjd-rich-editor{display:flex;flex-direction:column;max-height:min(560px,72vh)!important}
-    /* Only the content area flexes; the toolbar (incl. the More second row) and
-       statusbar must NEVER shrink, or the toolbar's overflow:hidden clips the
-       second row when the height cap is tight. */
-    #yjd-stage .rich-editor-toolbar-container{flex:0 0 auto}
-    #yjd-stage .rich-editor-area{flex:1 1 auto;min-height:0}
-    #yjd-stage .rich-editor-statusbar{flex:0 0 auto}
-
-    /* note + footer */
-    .hint{display:flex;gap:10px;align-items:flex-start;color:var(--ink-2);font-size:14px;background:var(--violet-weak);border:1px solid #ddd8ff;border-radius:12px;padding:12px 14px;margin:0 0 14px}
-    .whatsnew{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 24px}
-    .whatsnew .wn-tag{font-family:var(--display);font-weight:700;font-size:13px;color:var(--violet-ink)}
-    .whatsnew .wn-pills{display:flex;flex-wrap:wrap;gap:6px}
-    .whatsnew .wn-pills span{background:var(--violet-weak);border:1px solid #ddd8ff;border-radius:999px;padding:3px 10px;font-size:12.5px;font-weight:600;color:var(--ink-2)}
-    .whatsnew .wn-try{color:var(--muted);font-size:13px;margin-left:auto}
-    .whatsnew .wn-try b{color:var(--ink-2)}
-    @media(max-width:620px){.whatsnew .wn-try{margin-left:0;flex-basis:100%}}
-    footer{border-top:1px solid var(--line);padding:36px 0;color:var(--muted);font-size:14px}
-    .foot-in{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
-    .foot-in a:hover{color:var(--violet-ink)}
-  @media(max-width:720px){
-    header.nav{backdrop-filter:none;-webkit-backdrop-filter:none;background:#f4f4f8}
-    .nav-links a.hide-sm{display:none}
-    .nav-links{gap:14px;font-size:14px}
-    .nav-cta{padding:7px 12px}
-    .logo small{display:none}
-    .ph{padding:32px 0 4px}
-    .wrap{padding:0 16px}
-    .code-pane{min-height:300px}
-    textarea.code{min-height:240px;font-size:12.5px}
-    .ph p,.tab-desc{font-size:15px}
-  }
-  </style>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"yjd Playground — live rich text editor demos","description":"Live, editable demos of every yjd preset — from a 17 KB comment box to a full CMS editor, an AI-style chat input, and a social post composer.","url":"https://yjd.io/demos/","hasPart":[{"@type":"WebPage","name":"Minimal rich text editor demo — a 17 KB comment box","url":"https://yjd.io/demos/minimal"},{"@type":"WebPage","name":"Bubble menu rich text editor demo — floating toolbar on select","url":"https://yjd.io/demos/bubble"},{"@type":"WebPage","name":"AI chat input demo — a prompt-style rich text composer","url":"https://yjd.io/demos/prompt"},{"@type":"WebPage","name":"Basic rich text editor demo — blog & notes with a slash menu","url":"https://yjd.io/demos/basic"},{"@type":"WebPage","name":"Full-featured rich text editor demo — CMS & docs (tables, images)","url":"https://yjd.io/demos/standard"},{"@type":"WebPage","name":"Social post editor demo — images, video embeds, mentions & hashtags","url":"https://yjd.io/demos/social"}]}</script>
 </head>
 <body>
   <header class="nav"><div class="wrap nav-in">
@@ -133,43 +38,40 @@
     <div class="ph">
       <div class="kicker">Playground</div>
       <h1>Try yjd, live</h1>
-      <p>Pick a preset, edit the config on the left, and press <strong>Run</strong> — the editor on the right rebuilds with your code. Same tree-shakeable <span class="mono">/core</span> entry every time.</p>
+      <p>Pick a preset below to open its own interactive demo — edit the config, press <strong>Run</strong>, and watch the editor rebuild. Same tree-shakeable <span class="mono">/core</span> entry every time.</p>
     </div>
 
-    <div class="tabs" id="tabs" role="tablist" aria-label="Presets"></div>
-    <p class="tab-desc" id="tab-desc"></p>
-
-    <div class="hint">💡 <span>The code shown imports from the CDN for copy-paste; here it runs against a pre-loaded core. Edit anything and hit Run.</span></div>
-
-    <div class="whatsnew">
-      <span class="wn-tag">✨ New in 2.3</span>
-      <span class="wn-pills">
-        <span>✓ Checklists</span>
-        <span>⤢ Full-screen</span>
-        <span>🖼 Image resize + align</span>
-        <span>▦ Table merge/split · header · cell styling</span>
-        <span>🔗 Auto-linkify</span>
-      </span>
-      <span class="wn-try">Try them in the <b>Standard</b> or <b>Full</b> preset.</span>
-    </div>
-
-    <div class="stage">
-      <div class="pane code-pane">
-        <div class="code-bar">
-          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
-          <span class="fname" id="fname">preset.js</span>
-          <span class="spacer"></span>
-          <button class="btn-ghost" id="btn-copy">⧉ Copy</button>
-          <button class="btn-ghost" id="btn-reset">↺ Reset</button>
-          <button class="btn-run" id="btn-run">▶ Run</button>
-        </div>
-        <textarea class="code" id="code" spellcheck="false"></textarea>
-        <div class="code-status ok" id="status" role="status"></div>
-      </div>
-      <div class="pane preview-pane">
-        <div class="preview-head"><span class="lbl">Live preview</span><span class="size" id="size">~17 KB JS</span></div>
-        <div id="yjd-stage"></div>
-      </div>
+    <div class="cards">
+      <a class="card" href="/demos/minimal.html">
+        <div class="card-top"><h2>Minimal</h2><span class="kb">~17 KB</span></div>
+        <p>Comment / chat box — bold, italic, underline, link.</p>
+        <span class="go">Open demo →</span>
+      </a>
+      <a class="card" href="/demos/bubble.html">
+        <div class="card-top"><h2>Bubble</h2><span class="kb">~23 KB</span></div>
+        <p>No top toolbar — select text for the floating bar; type / for blocks.</p>
+        <span class="go">Open demo →</span>
+      </a>
+      <a class="card" href="/demos/prompt.html">
+        <div class="card-top"><h2>Prompt</h2><span class="kb">chat input</span></div>
+        <p>Mobile-first chat pill — &quot;+&quot; adds an image, basic tools, a send button. Enter sends.</p>
+        <span class="go">Open demo →</span>
+      </a>
+      <a class="card" href="/demos/basic.html">
+        <div class="card-top"><h2>Basic</h2><span class="kb">~28 KB</span></div>
+        <p>Blog / notes — try typing / for the command menu.</p>
+        <span class="go">Open demo →</span>
+      </a>
+      <a class="card" href="/demos/standard.html">
+        <div class="card-top"><h2>Standard</h2><span class="kb">~46 KB</span></div>
+        <p>CMS / docs — colour, image, table, find &amp; replace, code view.</p>
+        <span class="go">Open demo →</span>
+      </a>
+      <a class="card" href="/demos/social.html">
+        <div class="card-top"><h2>Social</h2><span class="kb">image + video</span></div>
+        <p>A creator post with a photo and an embedded video, drag-to-resize media, colours, mentions and hashtags.</p>
+        <span class="go">Open demo →</span>
+      </a>
     </div>
   </main>
 
@@ -177,288 +79,5 @@
     <div class="logo" style="font-size:17px"><span class="mark" style="width:24px;height:24px;font-size:13px">y</span> yjd<small>.io</small></div>
     <div style="display:flex;gap:20px"><a href="/site/index.html">Home</a><a href="/site/docs.html">Docs</a><a href="https://github.com/nampick/yjd">GitHub</a></div>
   </div></footer>
-
-  <script type="module">
-    import * as YJD from '/dist/core.esm.js';
-    const CDN = 'https://cdn.jsdelivr.net/npm/@oix1987/yjd';
-
-    const PRESETS = [
-      {
-        id: 'minimal', title: 'Minimal', badge: '~17 KB JS',
-        desc: 'Comment / chat box — bold, italic, underline, link.',
-        code:
-`// 1) Add the stylesheet once:
-//    <link rel="stylesheet" href="${CDN}/lib/styles.min.css">
-
-// 2) Import only what you need (tree-shaken):
-import { Editor, registry, Bold, Italic, Underline, Link, Toolbar, History }
-  from '${CDN}/core.js';
-
-registry.register('formats/bold', Bold);
-registry.register('formats/italic', Italic);
-registry.register('formats/underline', Underline);
-registry.register('formats/link', Link);
-registry.register('modules/toolbar', Toolbar);
-registry.register('modules/history', History);
-
-new Editor('#editor', {
-  width: '100%',
-  placeholder: 'Write a comment…',
-  content: '<p>🔥 This thread is gold! Loved the <b>breakdown on retention</b> — bookmarking it. <a href="https://example.com">Full notes here</a> 👏 <span style="color: #6d5efc">#growth</span> <span style="color: #6d5efc">#startups</span></p>',
-  toolbar1: [
-    { group: 'text-format', items: ['bold', 'italic', 'underline'] },
-    { group: 'link', items: ['link'] }
-  ],
-  formats: ['bold', 'italic', 'underline', 'link'],
-  modules: ['toolbar', 'history']
-});`
-      },
-      {
-        id: 'bubble', title: 'Bubble', badge: '~23 KB JS',
-        desc: 'No top toolbar — select text for the floating bar; type / for blocks.',
-        code:
-`// Stylesheet: <link rel="stylesheet" href="${CDN}/lib/styles.min.css">
-import { Editor, registry, Bold, Italic, Underline, Strike, Heading, List,
-  FontFamily, History, BlockToolbar, SlashMenu } from '${CDN}/core.js';
-
-registry.register('formats/bold', Bold);
-registry.register('formats/italic', Italic);
-registry.register('formats/underline', Underline);
-registry.register('formats/strike', Strike);
-registry.register('formats/heading', Heading);
-registry.register('formats/list', List);
-registry.register('formats/font-family', FontFamily);
-registry.register('modules/history', History);
-registry.register('modules/block-toolbar', BlockToolbar);
-registry.register('modules/slash-menu', SlashMenu);
-
-new Editor('#editor', {
-  width: '100%',
-  content: '<h3>✨ Shipping update</h3><p>We just launched <b>dark mode</b> 🌙 — way smoother than the beta. <i>Highlight any text</i> to format it 💬</p><ul><li>⚡ Faster load</li><li>🎨 New themes</li><li>♿ Better contrast</li></ul><p><span style="color: #6d5efc">#release</span> <span style="color: #6d5efc">#darkmode</span> <span style="color: #6d5efc">#buildinpublic</span></p>',
-  // No 'toolbar' module → no top toolbar.
-  modules: ['history', 'block-toolbar', 'slash-menu'],
-  formats: ['bold', 'italic', 'underline', 'strike', 'heading', 'list', 'font-family'],
-  // Which tools appear in the floating bubble bar:
-  'block-toolbar': { buttons: ['bold', 'italic', 'underline', 'link', 'code'] },
-  features: { wordCount: false, breadcrumb: false }
-});`
-      },
-      {
-        id: 'prompt', title: 'Prompt', badge: 'chat input',
-        desc: 'Mobile-first chat pill — "+" adds an image, basic tools, a send button. Enter sends.',
-        code:
-`// Stylesheet: <link rel="stylesheet" href="${CDN}/lib/styles.min.css">
-import { Editor, registry, applyEditorInput, Bold, Italic, Image,
-  Toolbar, History } from '${CDN}/core.js';
-
-registry.register('formats/bold', Bold);
-registry.register('formats/italic', Italic);
-registry.register('formats/image', Image);
-registry.register('modules/toolbar', Toolbar);
-registry.register('modules/history', History);
-
-// Enables file-upload insertion (image/file) on a /core build.
-applyEditorInput(Editor);
-
-new Editor('#editor', {
-  width: '100%',
-  layout: 'prompt',                        // chat pill + bottom action bar
-  placeholder: 'Message yjd…',
-  content: '<p>Viết lại đoạn này ngắn gọn hơn 👋</p>',
-  prompt: {
-    add: ['image', 'file', 'video'],       // mobile: "+" adds image · desktop: menu
-    tools: ['bold', 'italic'],             // basic tools, no popovers
-  },
-  // Attachments show as removable thumbnails and travel with the message.
-  submit: { onSubmit: (html, ed) => console.log('send:', html, ed.getAttachments()) },
-});`
-      },
-      {
-        id: 'basic', title: 'Basic', badge: '~28 KB JS',
-        desc: 'Blog / notes — try typing / for the command menu.',
-        code:
-`// Stylesheet: <link rel="stylesheet" href="${CDN}/lib/styles.min.css">
-import { Editor, registry, Bold, Italic, Underline, Strike, Link, Heading, List,
-  TextAlign, FontFamily, Toolbar, History, SlashMenu, BlockToolbar } from '${CDN}/core.js';
-
-registry.register('formats/bold', Bold);
-registry.register('formats/italic', Italic);
-registry.register('formats/underline', Underline);
-registry.register('formats/strike', Strike);
-registry.register('formats/link', Link);
-registry.register('formats/heading', Heading);
-registry.register('formats/list', List);
-registry.register('formats/text-align', TextAlign);
-registry.register('formats/font-family', FontFamily);
-registry.register('modules/toolbar', Toolbar);
-registry.register('modules/history', History);
-registry.register('modules/slash-menu', SlashMenu);
-registry.register('modules/block-toolbar', BlockToolbar);
-
-new Editor('#editor', {
-  width: '100%',
-  content: '<h2>🍞 Weekend baking win</h2><p>The sourdough finally worked — <b>crispy crust</b>, <i>open crumb</i>, <s>no more bricks</s> 🙌</p><p>My tweaks 👇</p><ul><li>🧊 Overnight cold proof</li><li>🔥 Hotter oven + steam</li></ul><ol><li>Mix &amp; rest</li><li>Stretch &amp; fold ×4</li><li>Shape &amp; chill</li></ol><p style="text-align: center">📍 <span style="color: #6d5efc">#sourdough</span> <span style="color: #6d5efc">#homebaking</span> <span style="color: #6d5efc">#foodie</span></p>',
-  placeholder: 'Write your post…',
-  toolbar1: [
-    { group: 'text-format', items: ['bold', 'italic', 'underline', 'strike'] },
-    { group: 'paragraph', items: ['heading'] },
-    { group: 'link', items: ['link'] },
-    { group: 'paragraph-ops', items: ['list', 'text-align'] },
-    { group: 'history', items: ['undo', 'redo'] }
-  ],
-  formats: ['bold', 'italic', 'underline', 'strike', 'heading', 'list', 'text-align', 'font-family', 'link'],
-  modules: ['toolbar', 'history', 'slash-menu', 'block-toolbar']
-});`
-      },
-      {
-        id: 'standard', title: 'Standard', badge: '~46 KB JS',
-        desc: 'CMS / docs — colour, image, table, find & replace, code view.',
-        code:
-`// Stylesheet: <link rel="stylesheet" href="${CDN}/lib/styles.min.css">
-import { Editor, registry, Bold, Italic, Underline, Strike, Link, Heading, List,
-  TextAlign, FontFamily, Color, Background, Image, Table, IndentIncrease,
-  IndentDecrease, TextSize, Toolbar, History, SlashMenu, BlockToolbar,
-  TableToolbar, FindReplace, CodeView, ResizeHandles } from '${CDN}/core.js';
-
-[
-  ['formats/bold', Bold], ['formats/italic', Italic], ['formats/underline', Underline],
-  ['formats/strike', Strike], ['formats/link', Link], ['formats/heading', Heading],
-  ['formats/list', List], ['formats/text-align', TextAlign], ['formats/font-family', FontFamily],
-  ['formats/color', Color], ['formats/background', Background], ['formats/image', Image],
-  ['formats/table', Table], ['formats/text-size', TextSize],
-  ['formats/indent-increase', IndentIncrease], ['formats/indent-decrease', IndentDecrease],
-  ['modules/toolbar', Toolbar], ['modules/history', History], ['modules/slash-menu', SlashMenu],
-  ['modules/block-toolbar', BlockToolbar], ['modules/table-toolbar', TableToolbar],
-  ['modules/find-replace', FindReplace], ['modules/code-view', CodeView],
-  ['modules/resize-handles', ResizeHandles]
-].forEach(([k, v]) => registry.register(k, v));
-
-new Editor('#editor', {
-  width: '100%',
-  content: '<h1>🚀 Q3 product update</h1><p>Big quarter, team! <span style="color: #6d5efc"><b>3 new features</b></span> shipped, plus a few <span style="background-color: #fff3bf">things to watch</span> 👀</p><img class="inserted-image" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=900&amp;q=80" alt="Dashboard screenshot" style="max-width: 100%; height: auto; border-radius: 8px"><p>Shoutout to <span style="color: #1c7ed6">@design</span> &amp; <span style="color: #1c7ed6">@mobile</span> 💜</p><h2>📊 Release summary</h2><table class="rich-editor-table"><tbody><tr><td><b>Area</b></td><td><b>Status</b></td></tr><tr><td>Editor</td><td>🟢 <span style="color: #2f9e44">Shipped</span></td></tr><tr><td>Mobile apps</td><td>🟠 <span style="color: #e8590c">In progress</span></td></tr><tr><td>Search</td><td>🔵 <span style="color: #1c7ed6">Planned</span></td></tr></tbody></table><p>Full notes in the <a href="https://example.com/changelog">changelog</a> · <span style="color: #6d5efc">#productupdate</span> <span style="color: #6d5efc">#shipit</span></p>',
-  toolbar1: [
-    { group: 'text-format', items: ['bold', 'italic', 'underline', 'strike'] },
-    { group: 'paragraph', items: ['heading'] },
-    { group: 'colors', items: ['color', 'background'] },
-    { group: 'link', items: ['link'] },
-    { group: 'paragraph-ops', items: ['list', 'indent-increase', 'indent-decrease', 'text-align'] },
-    { group: 'insert', items: ['image', 'table'] },
-    { group: 'font', items: ['text-size'] },
-    { group: 'tools', items: ['find', 'code-view'] },
-    { group: 'history', items: ['undo', 'redo'] }
-  ],
-  formats: ['bold', 'italic', 'underline', 'strike', 'color', 'background', 'heading',
-    'text-size', 'text-align', 'list', 'indent-increase', 'indent-decrease', 'link', 'image', 'table'],
-  modules: ['toolbar', 'history', 'slash-menu', 'block-toolbar', 'table-toolbar',
-    'find-replace', 'code-view', 'resize-handles']
-});`
-      },
-      {
-        id: 'social', title: 'Social', badge: 'image + video',
-        desc: 'A creator post with a photo and an embedded video, drag-to-resize media, colours, mentions and hashtags.',
-        code:
-`// Stylesheet: <link rel="stylesheet" href="${CDN}/lib/styles.min.css">
-import { Editor, registry, Bold, Italic, Underline, Strike, Link, Heading, List,
-  TextAlign, Color, Background, Image, Video, Emoji, Toolbar, History, SlashMenu,
-  BlockToolbar, ResizeHandles } from '${CDN}/core.js';
-
-[
-  ['formats/bold', Bold], ['formats/italic', Italic], ['formats/underline', Underline],
-  ['formats/strike', Strike], ['formats/link', Link], ['formats/heading', Heading],
-  ['formats/list', List], ['formats/text-align', TextAlign], ['formats/color', Color],
-  ['formats/background', Background], ['formats/image', Image], ['formats/video', Video],
-  ['formats/emoji', Emoji],
-  ['modules/toolbar', Toolbar], ['modules/history', History], ['modules/slash-menu', SlashMenu],
-  ['modules/block-toolbar', BlockToolbar], ['modules/resize-handles', ResizeHandles]
-].forEach(([k, v]) => registry.register(k, v));
-
-new Editor('#editor', {
-  width: '100%',
-  content:
-    '<h2>🌅 48 hours in Da Lat</h2>' +
-    '<p>Best long weekend this year — <b>pine forests</b>, <i>cold brew</i>, ' +
-    'and endless <span style="color: #6d5efc">#views</span> 📸</p>' +
-    '<img class="inserted-image" src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=900&q=80" ' +
-    'alt="Misty pine hills" style="max-width: 100%; height: auto; border-radius: 10px">' +
-    '<p>🎬 Watch the 60-second recap:</p>' +
-    '<iframe class="inserted-video youtube-video" src="https://www.youtube.com/embed/ScMzIvxBSi4" ' +
-    'width="560" height="315" style="max-width: 100%; border-radius: 10px" frameborder="0" allowfullscreen></iframe>' +
-    '<p>Shoutout to <span style="color: #1c7ed6">@travelcrew</span> 💚 ' +
-    '<span style="color: #6d5efc">#dalat</span> <span style="color: #6d5efc">#vietnam</span> ' +
-    '<span style="color: #6d5efc">#travel</span></p>',
-  toolbar1: [
-    { group: 'text-format', items: ['bold', 'italic', 'underline', 'strike'] },
-    { group: 'paragraph', items: ['heading'] },
-    { group: 'colors', items: ['color', 'background'] },
-    { group: 'link', items: ['link'] },
-    { group: 'paragraph-ops', items: ['list', 'text-align'] },
-    { group: 'insert', items: ['image', 'video', 'emoji'] },
-    { group: 'history', items: ['undo', 'redo'] }
-  ],
-  formats: ['bold', 'italic', 'underline', 'strike', 'color', 'background',
-    'heading', 'text-align', 'list', 'link', 'image', 'video', 'emoji'],
-  modules: ['toolbar', 'history', 'slash-menu', 'block-toolbar', 'resize-handles']
-});`
-      }
-    ];
-
-    const NAMES = Object.keys(YJD), VALUES = Object.values(YJD);
-    const MOUNT_ID = 'yjd-stage';
-    const tabsEl = document.getElementById('tabs');
-    const codeEl = document.getElementById('code');
-    const statusEl = document.getElementById('status');
-    const sizeEl = document.getElementById('size');
-    const descEl = document.getElementById('tab-desc');
-    const fnameEl = document.getElementById('fname');
-    const mount = document.getElementById(MOUNT_ID);
-    let active = 0;
-
-    // Build tabs
-    PRESETS.forEach((p, i) => {
-      const t = document.createElement('button');
-      t.className = 'tab'; t.role = 'tab'; t.type = 'button';
-      t.innerHTML = `${p.title} <span class="kb">${p.badge.replace(' JS','')}</span>`;
-      t.addEventListener('click', () => select(i));
-      tabsEl.appendChild(t);
-    });
-
-    function run() {
-      mount.innerHTML = '';
-      try {
-        const body = codeEl.value
-          .replace(/import[\s\S]*?from\s*['"][^'"]+['"];?/g, '')
-          .replace(/['"]#editor['"]/g, `'#${MOUNT_ID}'`);
-        new Function(...NAMES, body)(...VALUES);
-        statusEl.className = 'code-status ok';
-        statusEl.textContent = '✓ built ' + PRESETS[active].title.toLowerCase();
-      } catch (err) {
-        statusEl.className = 'code-status err';
-        statusEl.textContent = '✗ ' + err.message;
-      }
-    }
-
-    function select(i) {
-      active = i;
-      const p = PRESETS[i];
-      [...tabsEl.children].forEach((t, j) => t.setAttribute('aria-selected', j === i ? 'true' : 'false'));
-      descEl.textContent = p.desc;
-      sizeEl.textContent = p.badge;
-      fnameEl.textContent = p.id + '.js';
-      codeEl.value = p.code;
-      run();
-    }
-
-    document.getElementById('btn-run').addEventListener('click', run);
-    document.getElementById('btn-reset').addEventListener('click', () => { codeEl.value = PRESETS[active].code; run(); });
-    document.getElementById('btn-copy').addEventListener('click', (e) => {
-      navigator.clipboard?.writeText(codeEl.value);
-      const b = e.currentTarget; b.textContent = '✓ Copied'; setTimeout(() => b.textContent = '⧉ Copy', 1200);
-    });
-    codeEl.addEventListener('keydown', (e) => {
-      if (e.key === 'Tab') { e.preventDefault(); const s = codeEl.selectionStart; codeEl.value = codeEl.value.slice(0, s) + '  ' + codeEl.value.slice(codeEl.selectionEnd); codeEl.selectionStart = codeEl.selectionEnd = s + 2; }
-    });
-
-    select(0);
-  </script>
 </body>
 </html>

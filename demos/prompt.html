@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI chat input demo — a prompt-style rich text composer | yjd</title>
+  <meta name="description" content="A live prompt/chat composer demo: a mobile-first rounded pill with a “+” for images, basic formatting, attachments and a send button. Enter sends, Shift+Enter newlines.">
+  <link rel="canonical" href="https://yjd.io/demos/prompt">
+  <link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="yjd">
+  <meta property="og:title" content="AI chat input demo — a prompt-style rich text composer">
+  <meta property="og:description" content="A live prompt/chat composer demo: a mobile-first rounded pill with a “+” for images, basic formatting, attachments and a send button. Enter sends, Shift+Enter newlines.">
+  <meta property="og:url" content="https://yjd.io/demos/prompt">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AI chat input demo — a prompt-style rich text composer">
+  <meta name="twitter:description" content="A live prompt/chat composer demo: a mobile-first rounded pill with a “+” for images, basic formatting, attachments and a send button. Enter sends, Shift+Enter newlines.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='4' fill='%236d5efc'/%3E%3Ctext x='8' y='12' font-family='monospace' font-size='10' font-weight='700' fill='white' text-anchor='middle'%3Ey%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/lib/styles.min.css">
+  <link rel="stylesheet" href="/demos/playground.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"AI chat input demo — a prompt-style rich text composer | yjd","description":"A live prompt/chat composer demo: a mobile-first rounded pill with a “+” for images, basic formatting, attachments and a send button. Enter sends, Shift+Enter newlines.","url":"https://yjd.io/demos/prompt","isPartOf":{"@type":"WebSite","name":"yjd","url":"https://yjd.io"},"breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Playground","item":"https://yjd.io/demos/"},{"@type":"ListItem","position":2,"name":"Prompt","item":"https://yjd.io/demos/prompt"}]}}</script>
+</head>
+<body>
+  <header class="nav"><div class="wrap nav-in">
+    <a class="logo" href="/site/index.html"><span class="mark">y</span> yjd <small>.io</small></a>
+    <nav class="nav-links">
+      <a class="hide-sm" href="/site/index.html">Home</a>
+      <a href="/site/docs.html">Docs</a>
+      <a href="/demos/index.html" aria-current="page">Playground</a>
+      <a class="nav-cta" href="https://github.com/nampick/yjd">GitHub ↗</a>
+    </nav>
+  </div></header>
+
+  <main class="wrap">
+    <div class="ph">
+      <div class="kicker">Playground · Prompt</div>
+      <h1>AI chat input demo — a prompt-style rich text composer</h1>
+      <p class="intro">A chat-style composer in the shape of a rounded pill — the same layout as modern AI prompt inputs. The “+” adds an image (a popover of image/file/video on desktop), attachments ride along as removable thumbnails, and <strong>Enter sends</strong> while the on-screen keyboard’s return key inserts a newline on mobile. Built for AI prompts, messaging and comment composers.</p>
+    </div>
+
+    <nav class="tabs" aria-label="Presets">
+      <a class="tab" href="/demos/minimal.html">Minimal <span class="kb">~17 KB</span></a>
+      <a class="tab" href="/demos/bubble.html">Bubble <span class="kb">~23 KB</span></a>
+      <a class="tab" href="/demos/prompt.html" aria-current="page">Prompt <span class="kb">chat input</span></a>
+      <a class="tab" href="/demos/basic.html">Basic <span class="kb">~28 KB</span></a>
+      <a class="tab" href="/demos/standard.html">Standard <span class="kb">~46 KB</span></a>
+      <a class="tab" href="/demos/social.html">Social <span class="kb">image + video</span></a>
+    </nav>
+    <p class="tab-desc">Mobile-first chat pill — &quot;+&quot; adds an image, basic tools, a send button. Enter sends.</p>
+
+    <div class="hint">💡 <span>The code shown imports from the CDN for copy-paste; here it runs against a pre-loaded core. Edit anything and hit Run.</span></div>
+
+    <div class="stage">
+      <div class="pane code-pane">
+        <div class="code-bar">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="fname">prompt.js</span>
+          <span class="spacer"></span>
+          <button class="btn-ghost" id="btn-copy">⧉ Copy</button>
+          <button class="btn-ghost" id="btn-reset">↺ Reset</button>
+          <button class="btn-run" id="btn-run">▶ Run</button>
+        </div>
+        <textarea class="code" id="code" spellcheck="false">// Stylesheet: &lt;link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/@oix1987/yjd/lib/styles.min.css&quot;&gt;
+import { Editor, registry, applyEditorInput, Bold, Italic, Image,
+  Toolbar, History } from 'https://cdn.jsdelivr.net/npm/@oix1987/yjd/core.js';
+
+registry.register('formats/bold', Bold);
+registry.register('formats/italic', Italic);
+registry.register('formats/image', Image);
+registry.register('modules/toolbar', Toolbar);
+registry.register('modules/history', History);
+
+// Enables file-upload insertion (image/file) on a /core build.
+applyEditorInput(Editor);
+
+new Editor('#editor', {
+  width: '100%',
+  layout: 'prompt',                        // chat pill + bottom action bar
+  placeholder: 'Message yjd…',
+  content: '&lt;p&gt;Viết lại đoạn này ngắn gọn hơn 👋&lt;/p&gt;',
+  prompt: {
+    add: ['image', 'file', 'video'],       // mobile: &quot;+&quot; adds image · desktop: menu
+    tools: ['bold', 'italic'],             // basic tools, no popovers
+  },
+  // Attachments show as removable thumbnails and travel with the message.
+  submit: { onSubmit: (html, ed) =&gt; console.log('send:', html, ed.getAttachments()) },
+});</textarea>
+        <div class="code-status ok" id="status" role="status"></div>
+      </div>
+      <div class="pane preview-pane">
+        <div class="preview-head"><span class="lbl">Live preview</span><span class="size">chat input</span></div>
+        <div id="yjd-stage"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="wrap foot-in">
+    <div class="logo" style="font-size:17px"><span class="mark" style="width:24px;height:24px;font-size:13px">y</span> yjd<small>.io</small></div>
+    <div style="display:flex;gap:20px"><a href="/site/index.html">Home</a><a href="/site/docs.html">Docs</a><a href="https://github.com/nampick/yjd">GitHub</a></div>
+  </div></footer>
+
+  <script type="module">
+    import * as YJD from '/dist/core.esm.js';
+    const NAMES = Object.keys(YJD), VALUES = Object.values(YJD);
+    const MOUNT_ID = 'yjd-stage';
+    const codeEl = document.getElementById('code');
+    const statusEl = document.getElementById('status');
+    const mount = document.getElementById(MOUNT_ID);
+    const ORIGINAL = "// Stylesheet: <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/@oix1987/yjd/lib/styles.min.css\">\nimport { Editor, registry, applyEditorInput, Bold, Italic, Image,\n  Toolbar, History } from 'https://cdn.jsdelivr.net/npm/@oix1987/yjd/core.js';\n\nregistry.register('formats/bold', Bold);\nregistry.register('formats/italic', Italic);\nregistry.register('formats/image', Image);\nregistry.register('modules/toolbar', Toolbar);\nregistry.register('modules/history', History);\n\n// Enables file-upload insertion (image/file) on a /core build.\napplyEditorInput(Editor);\n\nnew Editor('#editor', {\n  width: '100%',\n  layout: 'prompt',                        // chat pill + bottom action bar\n  placeholder: 'Message yjd…',\n  content: '<p>Viết lại đoạn này ngắn gọn hơn 👋</p>',\n  prompt: {\n    add: ['image', 'file', 'video'],       // mobile: \"+\" adds image · desktop: menu\n    tools: ['bold', 'italic'],             // basic tools, no popovers\n  },\n  // Attachments show as removable thumbnails and travel with the message.\n  submit: { onSubmit: (html, ed) => console.log('send:', html, ed.getAttachments()) },\n});";
+
+    function run() {
+      mount.innerHTML = '';
+      try {
+        const body = codeEl.value
+          .replace(/import[\s\S]*?from\s*['"][^'"]+['"];?/g, '')
+          .replace(/['"]#editor['"]/g, "'#" + MOUNT_ID + "'");
+        new Function(...NAMES, body)(...VALUES);
+        statusEl.className = 'code-status ok';
+        statusEl.textContent = '✓ built prompt';
+      } catch (err) {
+        statusEl.className = 'code-status err';
+        statusEl.textContent = '✗ ' + err.message;
+      }
+    }
+    document.getElementById('btn-run').addEventListener('click', run);
+    document.getElementById('btn-reset').addEventListener('click', () => { codeEl.value = ORIGINAL; run(); });
+    document.getElementById('btn-copy').addEventListener('click', (e) => {
+      navigator.clipboard?.writeText(codeEl.value);
+      const b = e.currentTarget; b.textContent = '✓ Copied'; setTimeout(() => b.textContent = '⧉ Copy', 1200);
+    });
+    codeEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab') { e.preventDefault(); const s = codeEl.selectionStart; codeEl.value = codeEl.value.slice(0, s) + '  ' + codeEl.value.slice(codeEl.selectionEnd); codeEl.selectionStart = codeEl.selectionEnd = s + 2; }
+    });
+    run();
+  </script>
+</body>
+</html>

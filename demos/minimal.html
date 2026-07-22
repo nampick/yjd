@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minimal rich text editor demo — a 17 KB comment box | yjd</title>
+  <meta name="description" content="A live 17 KB rich text editor demo: bold, italic, underline and links — the tree-shakeable build for comment boxes and chat inputs. Edit the config and run it.">
+  <link rel="canonical" href="https://yjd.io/demos/minimal">
+  <link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="yjd">
+  <meta property="og:title" content="Minimal rich text editor demo — a 17 KB comment box">
+  <meta property="og:description" content="A live 17 KB rich text editor demo: bold, italic, underline and links — the tree-shakeable build for comment boxes and chat inputs. Edit the config and run it.">
+  <meta property="og:url" content="https://yjd.io/demos/minimal">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Minimal rich text editor demo — a 17 KB comment box">
+  <meta name="twitter:description" content="A live 17 KB rich text editor demo: bold, italic, underline and links — the tree-shakeable build for comment boxes and chat inputs. Edit the config and run it.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='4' fill='%236d5efc'/%3E%3Ctext x='8' y='12' font-family='monospace' font-size='10' font-weight='700' fill='white' text-anchor='middle'%3Ey%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/lib/styles.min.css">
+  <link rel="stylesheet" href="/demos/playground.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Minimal rich text editor demo — a 17 KB comment box | yjd","description":"A live 17 KB rich text editor demo: bold, italic, underline and links — the tree-shakeable build for comment boxes and chat inputs. Edit the config and run it.","url":"https://yjd.io/demos/minimal","isPartOf":{"@type":"WebSite","name":"yjd","url":"https://yjd.io"},"breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Playground","item":"https://yjd.io/demos/"},{"@type":"ListItem","position":2,"name":"Minimal","item":"https://yjd.io/demos/minimal"}]}}</script>
+</head>
+<body>
+  <header class="nav"><div class="wrap nav-in">
+    <a class="logo" href="/site/index.html"><span class="mark">y</span> yjd <small>.io</small></a>
+    <nav class="nav-links">
+      <a class="hide-sm" href="/site/index.html">Home</a>
+      <a href="/site/docs.html">Docs</a>
+      <a href="/demos/index.html" aria-current="page">Playground</a>
+      <a class="nav-cta" href="https://github.com/nampick/yjd">GitHub ↗</a>
+    </nav>
+  </div></header>
+
+  <main class="wrap">
+    <div class="ph">
+      <div class="kicker">Playground · Minimal</div>
+      <h1>Minimal rich text editor demo — a 17 KB comment box</h1>
+      <p class="intro">The smallest useful build — bold, italic, underline and a link, and nothing else. Import only those formats from the tree-shakeable <code>/core</code> entry and ship about <strong>17 KB of JavaScript</strong>. Ideal for comment boxes, review fields and chat inputs where a full toolbar would be overkill.</p>
+    </div>
+
+    <nav class="tabs" aria-label="Presets">
+      <a class="tab" href="/demos/minimal.html" aria-current="page">Minimal <span class="kb">~17 KB</span></a>
+      <a class="tab" href="/demos/bubble.html">Bubble <span class="kb">~23 KB</span></a>
+      <a class="tab" href="/demos/prompt.html">Prompt <span class="kb">chat input</span></a>
+      <a class="tab" href="/demos/basic.html">Basic <span class="kb">~28 KB</span></a>
+      <a class="tab" href="/demos/standard.html">Standard <span class="kb">~46 KB</span></a>
+      <a class="tab" href="/demos/social.html">Social <span class="kb">image + video</span></a>
+    </nav>
+    <p class="tab-desc">Comment / chat box — bold, italic, underline, link.</p>
+
+    <div class="hint">💡 <span>The code shown imports from the CDN for copy-paste; here it runs against a pre-loaded core. Edit anything and hit Run.</span></div>
+
+    <div class="stage">
+      <div class="pane code-pane">
+        <div class="code-bar">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="fname">minimal.js</span>
+          <span class="spacer"></span>
+          <button class="btn-ghost" id="btn-copy">⧉ Copy</button>
+          <button class="btn-ghost" id="btn-reset">↺ Reset</button>
+          <button class="btn-run" id="btn-run">▶ Run</button>
+        </div>
+        <textarea class="code" id="code" spellcheck="false">// 1) Add the stylesheet once:
+//    &lt;link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/@oix1987/yjd/lib/styles.min.css&quot;&gt;
+
+// 2) Import only what you need (tree-shaken):
+import { Editor, registry, Bold, Italic, Underline, Link, Toolbar, History }
+  from 'https://cdn.jsdelivr.net/npm/@oix1987/yjd/core.js';
+
+registry.register('formats/bold', Bold);
+registry.register('formats/italic', Italic);
+registry.register('formats/underline', Underline);
+registry.register('formats/link', Link);
+registry.register('modules/toolbar', Toolbar);
+registry.register('modules/history', History);
+
+new Editor('#editor', {
+  width: '100%',
+  placeholder: 'Write a comment…',
+  content: '&lt;p&gt;🔥 This thread is gold! Loved the &lt;b&gt;breakdown on retention&lt;/b&gt; — bookmarking it. &lt;a href=&quot;https://example.com&quot;&gt;Full notes here&lt;/a&gt; 👏 &lt;span style=&quot;color: #6d5efc&quot;&gt;#growth&lt;/span&gt; &lt;span style=&quot;color: #6d5efc&quot;&gt;#startups&lt;/span&gt;&lt;/p&gt;',
+  toolbar1: [
+    { group: 'text-format', items: ['bold', 'italic', 'underline'] },
+    { group: 'link', items: ['link'] }
+  ],
+  formats: ['bold', 'italic', 'underline', 'link'],
+  modules: ['toolbar', 'history']
+});</textarea>
+        <div class="code-status ok" id="status" role="status"></div>
+      </div>
+      <div class="pane preview-pane">
+        <div class="preview-head"><span class="lbl">Live preview</span><span class="size">~17 KB JS</span></div>
+        <div id="yjd-stage"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="wrap foot-in">
+    <div class="logo" style="font-size:17px"><span class="mark" style="width:24px;height:24px;font-size:13px">y</span> yjd<small>.io</small></div>
+    <div style="display:flex;gap:20px"><a href="/site/index.html">Home</a><a href="/site/docs.html">Docs</a><a href="https://github.com/nampick/yjd">GitHub</a></div>
+  </div></footer>
+
+  <script type="module">
+    import * as YJD from '/dist/core.esm.js';
+    const NAMES = Object.keys(YJD), VALUES = Object.values(YJD);
+    const MOUNT_ID = 'yjd-stage';
+    const codeEl = document.getElementById('code');
+    const statusEl = document.getElementById('status');
+    const mount = document.getElementById(MOUNT_ID);
+    const ORIGINAL = "// 1) Add the stylesheet once:\n//    <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/@oix1987/yjd/lib/styles.min.css\">\n\n// 2) Import only what you need (tree-shaken):\nimport { Editor, registry, Bold, Italic, Underline, Link, Toolbar, History }\n  from 'https://cdn.jsdelivr.net/npm/@oix1987/yjd/core.js';\n\nregistry.register('formats/bold', Bold);\nregistry.register('formats/italic', Italic);\nregistry.register('formats/underline', Underline);\nregistry.register('formats/link', Link);\nregistry.register('modules/toolbar', Toolbar);\nregistry.register('modules/history', History);\n\nnew Editor('#editor', {\n  width: '100%',\n  placeholder: 'Write a comment…',\n  content: '<p>🔥 This thread is gold! Loved the <b>breakdown on retention</b> — bookmarking it. <a href=\"https://example.com\">Full notes here</a> 👏 <span style=\"color: #6d5efc\">#growth</span> <span style=\"color: #6d5efc\">#startups</span></p>',\n  toolbar1: [\n    { group: 'text-format', items: ['bold', 'italic', 'underline'] },\n    { group: 'link', items: ['link'] }\n  ],\n  formats: ['bold', 'italic', 'underline', 'link'],\n  modules: ['toolbar', 'history']\n});";
+
+    function run() {
+      mount.innerHTML = '';
+      try {
+        const body = codeEl.value
+          .replace(/import[\s\S]*?from\s*['"][^'"]+['"];?/g, '')
+          .replace(/['"]#editor['"]/g, "'#" + MOUNT_ID + "'");
+        new Function(...NAMES, body)(...VALUES);
+        statusEl.className = 'code-status ok';
+        statusEl.textContent = '✓ built minimal';
+      } catch (err) {
+        statusEl.className = 'code-status err';
+        statusEl.textContent = '✗ ' + err.message;
+      }
+    }
+    document.getElementById('btn-run').addEventListener('click', run);
+    document.getElementById('btn-reset').addEventListener('click', () => { codeEl.value = ORIGINAL; run(); });
+    document.getElementById('btn-copy').addEventListener('click', (e) => {
+      navigator.clipboard?.writeText(codeEl.value);
+      const b = e.currentTarget; b.textContent = '✓ Copied'; setTimeout(() => b.textContent = '⧉ Copy', 1200);
+    });
+    codeEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab') { e.preventDefault(); const s = codeEl.selectionStart; codeEl.value = codeEl.value.slice(0, s) + '  ' + codeEl.value.slice(codeEl.selectionEnd); codeEl.selectionStart = codeEl.selectionEnd = s + 2; }
+    });
+    run();
+  </script>
+</body>
+</html>

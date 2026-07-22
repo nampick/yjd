@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Basic rich text editor demo — blog &amp; notes with a slash menu | yjd</title>
+  <meta name="description" content="A live blog/notes editor demo: headings, lists, alignment and a “/” command menu in a ~28 KB tree-shakeable build. Edit the config and run it in your browser.">
+  <link rel="canonical" href="https://yjd.io/demos/basic">
+  <link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="yjd">
+  <meta property="og:title" content="Basic rich text editor demo — blog &amp; notes with a slash menu">
+  <meta property="og:description" content="A live blog/notes editor demo: headings, lists, alignment and a “/” command menu in a ~28 KB tree-shakeable build. Edit the config and run it in your browser.">
+  <meta property="og:url" content="https://yjd.io/demos/basic">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Basic rich text editor demo — blog &amp; notes with a slash menu">
+  <meta name="twitter:description" content="A live blog/notes editor demo: headings, lists, alignment and a “/” command menu in a ~28 KB tree-shakeable build. Edit the config and run it in your browser.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='4' fill='%236d5efc'/%3E%3Ctext x='8' y='12' font-family='monospace' font-size='10' font-weight='700' fill='white' text-anchor='middle'%3Ey%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/lib/styles.min.css">
+  <link rel="stylesheet" href="/demos/playground.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Basic rich text editor demo — blog & notes with a slash menu | yjd","description":"A live blog/notes editor demo: headings, lists, alignment and a “/” command menu in a ~28 KB tree-shakeable build. Edit the config and run it in your browser.","url":"https://yjd.io/demos/basic","isPartOf":{"@type":"WebSite","name":"yjd","url":"https://yjd.io"},"breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Playground","item":"https://yjd.io/demos/"},{"@type":"ListItem","position":2,"name":"Basic","item":"https://yjd.io/demos/basic"}]}}</script>
+</head>
+<body>
+  <header class="nav"><div class="wrap nav-in">
+    <a class="logo" href="/site/index.html"><span class="mark">y</span> yjd <small>.io</small></a>
+    <nav class="nav-links">
+      <a class="hide-sm" href="/site/index.html">Home</a>
+      <a href="/site/docs.html">Docs</a>
+      <a href="/demos/index.html" aria-current="page">Playground</a>
+      <a class="nav-cta" href="https://github.com/nampick/yjd">GitHub ↗</a>
+    </nav>
+  </div></header>
+
+  <main class="wrap">
+    <div class="ph">
+      <div class="kicker">Playground · Basic</div>
+      <h1>Basic rich text editor demo — blog &amp; notes with a slash menu</h1>
+      <p class="intro">A comfortable everyday editor for <strong>blogs and notes</strong>: headings, lists, alignment, strike-through and links, plus a <code>/</code> command menu and the floating bubble bar. Around <strong>28 KB</strong> — a balanced middle ground between the minimal comment box and the full CMS build.</p>
+    </div>
+
+    <nav class="tabs" aria-label="Presets">
+      <a class="tab" href="/demos/minimal.html">Minimal <span class="kb">~17 KB</span></a>
+      <a class="tab" href="/demos/bubble.html">Bubble <span class="kb">~23 KB</span></a>
+      <a class="tab" href="/demos/prompt.html">Prompt <span class="kb">chat input</span></a>
+      <a class="tab" href="/demos/basic.html" aria-current="page">Basic <span class="kb">~28 KB</span></a>
+      <a class="tab" href="/demos/standard.html">Standard <span class="kb">~46 KB</span></a>
+      <a class="tab" href="/demos/social.html">Social <span class="kb">image + video</span></a>
+    </nav>
+    <p class="tab-desc">Blog / notes — try typing / for the command menu.</p>
+
+    <div class="hint">💡 <span>The code shown imports from the CDN for copy-paste; here it runs against a pre-loaded core. Edit anything and hit Run.</span></div>
+
+    <div class="stage">
+      <div class="pane code-pane">
+        <div class="code-bar">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="fname">basic.js</span>
+          <span class="spacer"></span>
+          <button class="btn-ghost" id="btn-copy">⧉ Copy</button>
+          <button class="btn-ghost" id="btn-reset">↺ Reset</button>
+          <button class="btn-run" id="btn-run">▶ Run</button>
+        </div>
+        <textarea class="code" id="code" spellcheck="false">// Stylesheet: &lt;link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/@oix1987/yjd/lib/styles.min.css&quot;&gt;
+import { Editor, registry, Bold, Italic, Underline, Strike, Link, Heading, List,
+  TextAlign, FontFamily, Toolbar, History, SlashMenu, BlockToolbar } from 'https://cdn.jsdelivr.net/npm/@oix1987/yjd/core.js';
+
+registry.register('formats/bold', Bold);
+registry.register('formats/italic', Italic);
+registry.register('formats/underline', Underline);
+registry.register('formats/strike', Strike);
+registry.register('formats/link', Link);
+registry.register('formats/heading', Heading);
+registry.register('formats/list', List);
+registry.register('formats/text-align', TextAlign);
+registry.register('formats/font-family', FontFamily);
+registry.register('modules/toolbar', Toolbar);
+registry.register('modules/history', History);
+registry.register('modules/slash-menu', SlashMenu);
+registry.register('modules/block-toolbar', BlockToolbar);
+
+new Editor('#editor', {
+  width: '100%',
+  content: '&lt;h2&gt;🍞 Weekend baking win&lt;/h2&gt;&lt;p&gt;The sourdough finally worked — &lt;b&gt;crispy crust&lt;/b&gt;, &lt;i&gt;open crumb&lt;/i&gt;, &lt;s&gt;no more bricks&lt;/s&gt; 🙌&lt;/p&gt;&lt;p&gt;My tweaks 👇&lt;/p&gt;&lt;ul&gt;&lt;li&gt;🧊 Overnight cold proof&lt;/li&gt;&lt;li&gt;🔥 Hotter oven + steam&lt;/li&gt;&lt;/ul&gt;&lt;ol&gt;&lt;li&gt;Mix &amp;amp; rest&lt;/li&gt;&lt;li&gt;Stretch &amp;amp; fold ×4&lt;/li&gt;&lt;li&gt;Shape &amp;amp; chill&lt;/li&gt;&lt;/ol&gt;&lt;p style=&quot;text-align: center&quot;&gt;📍 &lt;span style=&quot;color: #6d5efc&quot;&gt;#sourdough&lt;/span&gt; &lt;span style=&quot;color: #6d5efc&quot;&gt;#homebaking&lt;/span&gt; &lt;span style=&quot;color: #6d5efc&quot;&gt;#foodie&lt;/span&gt;&lt;/p&gt;',
+  placeholder: 'Write your post…',
+  toolbar1: [
+    { group: 'text-format', items: ['bold', 'italic', 'underline', 'strike'] },
+    { group: 'paragraph', items: ['heading'] },
+    { group: 'link', items: ['link'] },
+    { group: 'paragraph-ops', items: ['list', 'text-align'] },
+    { group: 'history', items: ['undo', 'redo'] }
+  ],
+  formats: ['bold', 'italic', 'underline', 'strike', 'heading', 'list', 'text-align', 'font-family', 'link'],
+  modules: ['toolbar', 'history', 'slash-menu', 'block-toolbar']
+});</textarea>
+        <div class="code-status ok" id="status" role="status"></div>
+      </div>
+      <div class="pane preview-pane">
+        <div class="preview-head"><span class="lbl">Live preview</span><span class="size">~28 KB JS</span></div>
+        <div id="yjd-stage"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="wrap foot-in">
+    <div class="logo" style="font-size:17px"><span class="mark" style="width:24px;height:24px;font-size:13px">y</span> yjd<small>.io</small></div>
+    <div style="display:flex;gap:20px"><a href="/site/index.html">Home</a><a href="/site/docs.html">Docs</a><a href="https://github.com/nampick/yjd">GitHub</a></div>
+  </div></footer>
+
+  <script type="module">
+    import * as YJD from '/dist/core.esm.js';
+    const NAMES = Object.keys(YJD), VALUES = Object.values(YJD);
+    const MOUNT_ID = 'yjd-stage';
+    const codeEl = document.getElementById('code');
+    const statusEl = document.getElementById('status');
+    const mount = document.getElementById(MOUNT_ID);
+    const ORIGINAL = "// Stylesheet: <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/@oix1987/yjd/lib/styles.min.css\">\nimport { Editor, registry, Bold, Italic, Underline, Strike, Link, Heading, List,\n  TextAlign, FontFamily, Toolbar, History, SlashMenu, BlockToolbar } from 'https://cdn.jsdelivr.net/npm/@oix1987/yjd/core.js';\n\nregistry.register('formats/bold', Bold);\nregistry.register('formats/italic', Italic);\nregistry.register('formats/underline', Underline);\nregistry.register('formats/strike', Strike);\nregistry.register('formats/link', Link);\nregistry.register('formats/heading', Heading);\nregistry.register('formats/list', List);\nregistry.register('formats/text-align', TextAlign);\nregistry.register('formats/font-family', FontFamily);\nregistry.register('modules/toolbar', Toolbar);\nregistry.register('modules/history', History);\nregistry.register('modules/slash-menu', SlashMenu);\nregistry.register('modules/block-toolbar', BlockToolbar);\n\nnew Editor('#editor', {\n  width: '100%',\n  content: '<h2>🍞 Weekend baking win</h2><p>The sourdough finally worked — <b>crispy crust</b>, <i>open crumb</i>, <s>no more bricks</s> 🙌</p><p>My tweaks 👇</p><ul><li>🧊 Overnight cold proof</li><li>🔥 Hotter oven + steam</li></ul><ol><li>Mix &amp; rest</li><li>Stretch &amp; fold ×4</li><li>Shape &amp; chill</li></ol><p style=\"text-align: center\">📍 <span style=\"color: #6d5efc\">#sourdough</span> <span style=\"color: #6d5efc\">#homebaking</span> <span style=\"color: #6d5efc\">#foodie</span></p>',\n  placeholder: 'Write your post…',\n  toolbar1: [\n    { group: 'text-format', items: ['bold', 'italic', 'underline', 'strike'] },\n    { group: 'paragraph', items: ['heading'] },\n    { group: 'link', items: ['link'] },\n    { group: 'paragraph-ops', items: ['list', 'text-align'] },\n    { group: 'history', items: ['undo', 'redo'] }\n  ],\n  formats: ['bold', 'italic', 'underline', 'strike', 'heading', 'list', 'text-align', 'font-family', 'link'],\n  modules: ['toolbar', 'history', 'slash-menu', 'block-toolbar']\n});";
+
+    function run() {
+      mount.innerHTML = '';
+      try {
+        const body = codeEl.value
+          .replace(/import[\s\S]*?from\s*['"][^'"]+['"];?/g, '')
+          .replace(/['"]#editor['"]/g, "'#" + MOUNT_ID + "'");
+        new Function(...NAMES, body)(...VALUES);
+        statusEl.className = 'code-status ok';
+        statusEl.textContent = '✓ built basic';
+      } catch (err) {
+        statusEl.className = 'code-status err';
+        statusEl.textContent = '✗ ' + err.message;
+      }
+    }
+    document.getElementById('btn-run').addEventListener('click', run);
+    document.getElementById('btn-reset').addEventListener('click', () => { codeEl.value = ORIGINAL; run(); });
+    document.getElementById('btn-copy').addEventListener('click', (e) => {
+      navigator.clipboard?.writeText(codeEl.value);
+      const b = e.currentTarget; b.textContent = '✓ Copied'; setTimeout(() => b.textContent = '⧉ Copy', 1200);
+    });
+    codeEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab') { e.preventDefault(); const s = codeEl.selectionStart; codeEl.value = codeEl.value.slice(0, s) + '  ' + codeEl.value.slice(codeEl.selectionEnd); codeEl.selectionStart = codeEl.selectionEnd = s + 2; }
+    });
+    run();
+  </script>
+</body>
+</html>
