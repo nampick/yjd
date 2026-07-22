@@ -21,13 +21,23 @@ const out = 'public';
 rmSync(out, { recursive: true, force: true });
 mkdirSync(join(out, 'site'), { recursive: true });
 mkdirSync(join(out, 'demos'), { recursive: true });
+mkdirSync(join(out, 'examples'), { recursive: true });
 mkdirSync(join(out, 'dist'), { recursive: true });
 mkdirSync(join(out, 'lib'), { recursive: true });
 
 // pages
 copyFileSync('site/index.html', join(out, 'index.html'));      // landing at root
-copyFileSync('site/index.html', join(out, 'site/index.html'));
-copyFileSync('site/docs.html', join(out, 'site/docs.html'));
+// Every static page in site/ (landing, docs, react/vue integration) + its CSS.
+for (const f of readdirSync('site')) {
+  if (f.endsWith('.html') || f.endsWith('.css')) {
+    copyFileSync(join('site', f), join(out, 'site', f));
+  }
+}
+// Framework integration demos (mount yjd inside React/Vue). Linked from the
+// site/react.html and site/vue.html pages.
+for (const f of readdirSync('examples')) {
+  if (f.endsWith('.html')) copyFileSync(join('examples', f), join(out, 'examples', f));
+}
 // All demo pages (hub index + one per preset + integration) and the shared
 // playground stylesheet. Copying the whole set keeps this in step with
 // scripts/build-demo-pages.js without re-listing every slug here.
@@ -52,10 +62,15 @@ const SITE = 'https://yjd.io';
 const pages = [
   { loc: '/', priority: '1.0' },
   { loc: '/site/docs', priority: '0.8' },
+  // Framework integration landing pages (SEO: "React/Vue rich text editor").
+  { loc: '/site/react', priority: '0.8' },
+  { loc: '/site/vue', priority: '0.8' },
   { loc: '/demos/', priority: '0.7' },
   // One entry per preset demo page (generated from the same source of truth).
   ...PRESETS.map((p) => ({ loc: `/demos/${p.slug}`, priority: '0.7' })),
   { loc: '/demos/integration', priority: '0.6' },
+  { loc: '/examples/react.html', priority: '0.5' },
+  { loc: '/examples/vue.html', priority: '0.5' },
 ];
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

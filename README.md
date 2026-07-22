@@ -95,6 +95,60 @@ Via `<script>` (UMD) the global is `yjd` (and `window.RichEditor` still works):
 <script>const editor = new yjd('#editor');</script>
 ```
 
+## React & Vue
+
+yjd has no framework baked in — the constructor takes a DOM element, so you wrap
+it in a small component. Guides with a live editor: **[React](https://yjd.io/site/react)**
+· **[Vue](https://yjd.io/site/vue)**. Runnable demos: [React](https://yjd.io/examples/react.html)
+· [Vue](https://yjd.io/examples/vue.html).
+
+**React** — a hook wrapper (StrictMode-safe; `destroy()` on cleanup, `setContent`
+only when the value differs so typing never resets the caret):
+
+```jsx
+import { useEffect, useRef } from 'react';
+import yjd from '@oix1987/yjd';
+import '@oix1987/yjd/styles.css';
+
+export function Editor({ value, onChange, placeholder }) {
+  const host = useRef(null), ed = useRef(null);
+  useEffect(() => {
+    ed.current = new yjd(host.current, { content: value ?? '', placeholder,
+      onChange: (html) => onChange?.(html) });
+    return () => ed.current.destroy();
+  }, []);
+  useEffect(() => {
+    const e = ed.current;
+    if (e && value != null && value !== e.getContent()) e.setContent(value);
+  }, [value]);
+  return <div ref={host} />;
+}
+```
+
+**Vue 3** — a composition-API component with `v-model`:
+
+```vue
+<script setup>
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+import yjd from '@oix1987/yjd';
+import '@oix1987/yjd/styles.css';
+
+const props = defineProps({ modelValue: String, placeholder: String });
+const emit = defineEmits(['update:modelValue']);
+const host = ref(null); let ed;
+onMounted(() => { ed = new yjd(host.value, { content: props.modelValue ?? '',
+  placeholder: props.placeholder, onChange: (h) => emit('update:modelValue', h) }); });
+onBeforeUnmount(() => ed?.destroy());
+watch(() => props.modelValue, (v) => {
+  if (ed && v != null && v !== ed.getContent()) ed.setContent(v);
+});
+</script>
+<template><div ref="host" /></template>
+```
+
+> **SSR (Next.js / Nuxt):** the editor touches the DOM, so mount it client-side —
+> React `useEffect` already does; for a whole page use `dynamic(() => import('./Editor'), { ssr: false })`, and in Nuxt wrap the component in `<client-only>`.
+
 ## Tree-shakeable core
 
 For the smallest bundle, import from `@oix1987/yjd/core` (side-effect-free) and register only what you need. Link the stylesheet once.

@@ -4,6 +4,14 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [2.7.4] — 2026-07-22
+
+### Docs
+- Add a "React & Vue" section to the README (hook wrapper + `v-model` component,
+  SSR notes). Dedicated integration landing pages ship on the site
+  (`/site/react`, `/site/vue`) with a live editor, plus runnable `/examples/`
+  demos, all linked from the home and docs. No code changes.
+
 ## [2.7.3] — 2026-07-22
 
 ### Docs
@@ -90,6 +98,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.7.4]: https://github.com/nampick/yjd/releases/tag/v2.7.4
 [2.7.3]: https://github.com/nampick/yjd/releases/tag/v2.7.3
 [2.7.2]: https://github.com/nampick/yjd/releases/tag/v2.7.2
 [2.7.1]: https://github.com/nampick/yjd/releases/tag/v2.7.1
