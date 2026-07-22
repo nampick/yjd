@@ -68,7 +68,16 @@
     .editor-card .dot{width:11px;height:11px;border-radius:50%}
     .editor-card .dot.r{background:#ff5f57}.editor-card .dot.y{background:#febc2e}.editor-card .dot.g{background:#28c840}
     .editor-card .tag{margin-left:8px;font-family:var(--mono);font-size:12px;color:var(--muted)}
-    #hero-editor .yjd-rich-editor{border:none !important;border-radius:0 !important;box-shadow:none !important}
+    /* The editor root carries a layered !important border+radius (@layer yjd),
+       and a layered !important beats an unlayered one — so an ordinary override
+       loses and the editor's own frame doubles up with the card's title-bar
+       border. Re-open the SAME layer with a higher-specificity (#id) selector so
+       the embedded editor sits flush inside the browser-chrome card. */
+    @layer yjd {
+      #hero-editor .yjd-rich-editor{border:none !important;border-radius:0 !important;box-shadow:none !important}
+      #hero-editor .rich-editor-toolbar-container,
+      #hero-editor .rich-editor-toolbar-1{border-top-left-radius:0 !important;border-top-right-radius:0 !important}
+    }
 
     /* section heading */
     section{padding:64px 0}
