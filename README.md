@@ -95,12 +95,23 @@ Via `<script>` (UMD) the global is `yjd` (and `window.RichEditor` still works):
 <script>const editor = new yjd('#editor');</script>
 ```
 
-## React & Vue
+## React, Vue & Angular
 
 yjd has no framework baked in — the constructor takes a DOM element, so you wrap
-it in a small component. Guides with a live editor: **[React](https://yjd.io/site/react)**
-· **[Vue](https://yjd.io/site/vue)**. Runnable demos: [React](https://yjd.io/examples/react.html)
-· [Vue](https://yjd.io/examples/vue.html).
+it in a small component. Guides with a live editor:
+**[React](https://yjd.io/site/react)** ·
+**[Vue 3](https://yjd.io/site/vue)** ·
+**[Vue 2](https://yjd.io/site/vue2)** ·
+**[Angular](https://yjd.io/site/angular)** ·
+**[AngularJS](https://yjd.io/site/angularjs)**. Runnable demos:
+[React](https://yjd.io/examples/react.html) ·
+[Vue 3](https://yjd.io/examples/vue.html) ·
+[Vue 2](https://yjd.io/examples/vue2.html) ·
+[AngularJS](https://yjd.io/examples/angularjs.html).
+
+The React and Vue 3 wrappers are below; Vue 2 (Options API), Angular (standalone
+component with `[(value)]`) and AngularJS (an `ng-model` directive) are on their
+pages above.
 
 **React** — a hook wrapper (StrictMode-safe; `destroy()` on cleanup, `setContent`
 only when the value differs so typing never resets the caret):

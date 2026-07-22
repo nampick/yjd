@@ -62,15 +62,20 @@ const SITE = 'https://yjd.io';
 const pages = [
   { loc: '/', priority: '1.0' },
   { loc: '/site/docs', priority: '0.8' },
-  // Framework integration landing pages (SEO: "React/Vue rich text editor").
+  // Framework integration landing pages (SEO: "<framework> rich text editor").
   { loc: '/site/react', priority: '0.8' },
   { loc: '/site/vue', priority: '0.8' },
+  { loc: '/site/vue2', priority: '0.8' },
+  { loc: '/site/angular', priority: '0.8' },
+  { loc: '/site/angularjs', priority: '0.8' },
   { loc: '/demos/', priority: '0.7' },
   // One entry per preset demo page (generated from the same source of truth).
   ...PRESETS.map((p) => ({ loc: `/demos/${p.slug}`, priority: '0.7' })),
   { loc: '/demos/integration', priority: '0.6' },
   { loc: '/examples/react.html', priority: '0.5' },
   { loc: '/examples/vue.html', priority: '0.5' },
+  { loc: '/examples/vue2.html', priority: '0.5' },
+  { loc: '/examples/angularjs.html', priority: '0.5' },
 ];
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
