@@ -1,0 +1,33 @@
+name: Release
+
+# Push a tag vX.Y.Z (after merging the release commit) and this publishes to npm
+# with provenance and creates the GitHub Release from the CHANGELOG section.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write   # create the GitHub Release
+  id-token: write   # npm provenance (OIDC)
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          registry-url: https://registry.npmjs.org
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - name: Publish to npm (provenance)
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Create GitHub Release from CHANGELOG
+        run: node scripts/gh-release.mjs "${GITHUB_REF_NAME#v}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

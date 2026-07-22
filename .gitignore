@@ -81,3 +81,7 @@ jspm_packages/
 public/
 .gstack/
 .superpowers/
+test-results/
+playwright-report/
+/blob-report/
+.playwright/
