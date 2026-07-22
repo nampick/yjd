@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Full-featured rich text editor demo — CMS &amp; docs (tables, images) | yjd</title>
+  <meta name="description" content="A live CMS/docs editor demo: colour, images, tables, find &amp; replace, indentation and a code view in a ~46 KB tree-shakeable build. Try it in your browser.">
+  <link rel="canonical" href="https://yjd.io/demos/standard">
+  <link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="yjd">
+  <meta property="og:title" content="Full-featured rich text editor demo — CMS &amp; docs (tables, images)">
+  <meta property="og:description" content="A live CMS/docs editor demo: colour, images, tables, find &amp; replace, indentation and a code view in a ~46 KB tree-shakeable build. Try it in your browser.">
+  <meta property="og:url" content="https://yjd.io/demos/standard">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Full-featured rich text editor demo — CMS &amp; docs (tables, images)">
+  <meta name="twitter:description" content="A live CMS/docs editor demo: colour, images, tables, find &amp; replace, indentation and a code view in a ~46 KB tree-shakeable build. Try it in your browser.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='4' fill='%236d5efc'/%3E%3Ctext x='8' y='12' font-family='monospace' font-size='10' font-weight='700' fill='white' text-anchor='middle'%3Ey%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/lib/styles.min.css">
+  <link rel="stylesheet" href="/demos/playground.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Full-featured rich text editor demo — CMS & docs (tables, images) | yjd","description":"A live CMS/docs editor demo: colour, images, tables, find & replace, indentation and a code view in a ~46 KB tree-shakeable build. Try it in your browser.","url":"https://yjd.io/demos/standard","isPartOf":{"@type":"WebSite","name":"yjd","url":"https://yjd.io"},"breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Playground","item":"https://yjd.io/demos/"},{"@type":"ListItem","position":2,"name":"Standard","item":"https://yjd.io/demos/standard"}]}}</script>
+</head>
+<body>
+  <header class="nav"><div class="wrap nav-in">
+    <a class="logo" href="/site/index.html"><span class="mark">y</span> yjd <small>.io</small></a>
+    <nav class="nav-links">
+      <a class="hide-sm" href="/site/index.html">Home</a>
+      <a href="/site/docs.html">Docs</a>
+      <a href="/demos/index.html" aria-current="page">Playground</a>
+      <a class="nav-cta" href="https://github.com/nampick/yjd">GitHub ↗</a>
+    </nav>
+  </div></header>
+
+  <main class="wrap">
+    <div class="ph">
+      <div class="kicker">Playground · Standard</div>
+      <h1>Full-featured rich text editor demo — CMS &amp; docs (tables, images)</h1>
+      <p class="intro">The <strong>CMS and documents</strong> build: text colour and highlight, images with drag-to-resize, tables, find &amp; replace, indentation, font sizing and an HTML code view — around <strong>46 KB</strong>. Everything a content editor needs without pulling the entire all-in-one bundle.</p>
+    </div>
+
+    <nav class="tabs" aria-label="Presets">
+      <a class="tab" href="/demos/minimal.html">Minimal <span class="kb">~17 KB</span></a>
+      <a class="tab" href="/demos/bubble.html">Bubble <span class="kb">~23 KB</span></a>
+      <a class="tab" href="/demos/prompt.html">Prompt <span class="kb">chat input</span></a>
+      <a class="tab" href="/demos/basic.html">Basic <span class="kb">~28 KB</span></a>
+      <a class="tab" href="/demos/standard.html" aria-current="page">Standard <span class="kb">~46 KB</span></a>
+      <a class="tab" href="/demos/social.html">Social <span class="kb">image + video</span></a>
+    </nav>
+    <p class="tab-desc">CMS / docs — colour, image, table, find &amp; replace, code view.</p>
+
+    <div class="hint">💡 <span>The code shown imports from the CDN for copy-paste; here it runs against a pre-loaded core. Edit anything and hit Run.</span></div>
+
+    <div class="stage">
+      <div class="pane code-pane">
+        <div class="code-bar">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="fname">standard.js</span>
+          <span class="spacer"></span>
+          <button class="btn-ghost" id="btn-copy">⧉ Copy</button>
+          <button class="btn-ghost" id="btn-reset">↺ Reset</button>
+          <button class="btn-run" id="btn-run">▶ Run</button>
+        </div>
+        <textarea class="code" id="code" spellcheck="false">// Stylesheet: &lt;link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/@oix1987/yjd/lib/styles.min.css&quot;&gt;
+import { Editor, registry, Bold, Italic, Underline, Strike, Link, Heading, List,
+  TextAlign, FontFamily, Color, Background, Image, Table, IndentIncrease,
+  IndentDecrease, TextSize, Toolbar, History, SlashMenu, BlockToolbar,
+  TableToolbar, FindReplace, CodeView, ResizeHandles } from 'https://cdn.jsdelivr.net/npm/@oix1987/yjd/core.js';
+
+[
+  ['formats/bold', Bold], ['formats/italic', Italic], ['formats/underline', Underline],
+  ['formats/strike', Strike], ['formats/link', Link], ['formats/heading', Heading],
+  ['formats/list', List], ['formats/text-align', TextAlign], ['formats/font-family', FontFamily],
+  ['formats/color', Color], ['formats/background', Background], ['formats/image', Image],
+  ['formats/table', Table], ['formats/text-size', TextSize],
+  ['formats/indent-increase', IndentIncrease], ['formats/indent-decrease', IndentDecrease],
+  ['modules/toolbar', Toolbar], ['modules/history', History], ['modules/slash-menu', SlashMenu],
+  ['modules/block-toolbar', BlockToolbar], ['modules/table-toolbar', TableToolbar],
+  ['modules/find-replace', FindReplace], ['modules/code-view', CodeView],
+  ['modules/resize-handles', ResizeHandles]
+].forEach(([k, v]) =&gt; registry.register(k, v));
+
+new Editor('#editor', {
+  width: '100%',
+  content: '&lt;h1&gt;🚀 Q3 product update&lt;/h1&gt;&lt;p&gt;Big quarter, team! &lt;span style=&quot;color: #6d5efc&quot;&gt;&lt;b&gt;3 new features&lt;/b&gt;&lt;/span&gt; shipped, plus a few &lt;span style=&quot;background-color: #fff3bf&quot;&gt;things to watch&lt;/span&gt; 👀&lt;/p&gt;&lt;img class=&quot;inserted-image&quot; src=&quot;https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=900&amp;amp;q=80&quot; alt=&quot;Dashboard screenshot&quot; style=&quot;max-width: 100%; height: auto; border-radius: 8px&quot;&gt;&lt;p&gt;Shoutout to &lt;span style=&quot;color: #1c7ed6&quot;&gt;@design&lt;/span&gt; &amp;amp; &lt;span style=&quot;color: #1c7ed6&quot;&gt;@mobile&lt;/span&gt; 💜&lt;/p&gt;&lt;h2&gt;📊 Release summary&lt;/h2&gt;&lt;table class=&quot;rich-editor-table&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;Area&lt;/b&gt;&lt;/td&gt;&lt;td&gt;&lt;b&gt;Status&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Editor&lt;/td&gt;&lt;td&gt;🟢 &lt;span style=&quot;color: #2f9e44&quot;&gt;Shipped&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Mobile apps&lt;/td&gt;&lt;td&gt;🟠 &lt;span style=&quot;color: #e8590c&quot;&gt;In progress&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Search&lt;/td&gt;&lt;td&gt;🔵 &lt;span style=&quot;color: #1c7ed6&quot;&gt;Planned&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;p&gt;Full notes in the &lt;a href=&quot;https://example.com/changelog&quot;&gt;changelog&lt;/a&gt; · &lt;span style=&quot;color: #6d5efc&quot;&gt;#productupdate&lt;/span&gt; &lt;span style=&quot;color: #6d5efc&quot;&gt;#shipit&lt;/span&gt;&lt;/p&gt;',
+  toolbar1: [
+    { group: 'text-format', items: ['bold', 'italic', 'underline', 'strike'] },
+    { group: 'paragraph', items: ['heading'] },
+    { group: 'colors', items: ['color', 'background'] },
+    { group: 'link', items: ['link'] },
+    { group: 'paragraph-ops', items: ['list', 'indent-increase', 'indent-decrease', 'text-align'] },
+    { group: 'insert', items: ['image', 'table'] },
+    { group: 'font', items: ['text-size'] },
+    { group: 'tools', items: ['find', 'code-view'] },
+    { group: 'history', items: ['undo', 'redo'] }
+  ],
+  formats: ['bold', 'italic', 'underline', 'strike', 'color', 'background', 'heading',
+    'text-size', 'text-align', 'list', 'indent-increase', 'indent-decrease', 'link', 'image', 'table'],
+  modules: ['toolbar', 'history', 'slash-menu', 'block-toolbar', 'table-toolbar',
+    'find-replace', 'code-view', 'resize-handles']
+});</textarea>
+        <div class="code-status ok" id="status" role="status"></div>
+      </div>
+      <div class="pane preview-pane">
+        <div class="preview-head"><span class="lbl">Live preview</span><span class="size">~46 KB JS</span></div>
+        <div id="yjd-stage"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="wrap foot-in">
+    <div class="logo" style="font-size:17px"><span class="mark" style="width:24px;height:24px;font-size:13px">y</span> yjd<small>.io</small></div>
+    <div style="display:flex;gap:20px"><a href="/site/index.html">Home</a><a href="/site/docs.html">Docs</a><a href="https://github.com/nampick/yjd">GitHub</a></div>
+  </div></footer>
+
+  <script type="module">
+    import * as YJD from '/dist/core.esm.js';
+    const NAMES = Object.keys(YJD), VALUES = Object.values(YJD);
+    const MOUNT_ID = 'yjd-stage';
+    const codeEl = document.getElementById('code');
+    const statusEl = document.getElementById('status');
+    const mount = document.getElementById(MOUNT_ID);
+    const ORIGINAL = "// Stylesheet: <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/@oix1987/yjd/lib/styles.min.css\">\nimport { Editor, registry, Bold, Italic, Underline, Strike, Link, Heading, List,\n  TextAlign, FontFamily, Color, Background, Image, Table, IndentIncrease,\n  IndentDecrease, TextSize, Toolbar, History, SlashMenu, BlockToolbar,\n  TableToolbar, FindReplace, CodeView, ResizeHandles } from 'https://cdn.jsdelivr.net/npm/@oix1987/yjd/core.js';\n\n[\n  ['formats/bold', Bold], ['formats/italic', Italic], ['formats/underline', Underline],\n  ['formats/strike', Strike], ['formats/link', Link], ['formats/heading', Heading],\n  ['formats/list', List], ['formats/text-align', TextAlign], ['formats/font-family', FontFamily],\n  ['formats/color', Color], ['formats/background', Background], ['formats/image', Image],\n  ['formats/table', Table], ['formats/text-size', TextSize],\n  ['formats/indent-increase', IndentIncrease], ['formats/indent-decrease', IndentDecrease],\n  ['modules/toolbar', Toolbar], ['modules/history', History], ['modules/slash-menu', SlashMenu],\n  ['modules/block-toolbar', BlockToolbar], ['modules/table-toolbar', TableToolbar],\n  ['modules/find-replace', FindReplace], ['modules/code-view', CodeView],\n  ['modules/resize-handles', ResizeHandles]\n].forEach(([k, v]) => registry.register(k, v));\n\nnew Editor('#editor', {\n  width: '100%',\n  content: '<h1>🚀 Q3 product update</h1><p>Big quarter, team! <span style=\"color: #6d5efc\"><b>3 new features</b></span> shipped, plus a few <span style=\"background-color: #fff3bf\">things to watch</span> 👀</p><img class=\"inserted-image\" src=\"https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=900&amp;q=80\" alt=\"Dashboard screenshot\" style=\"max-width: 100%; height: auto; border-radius: 8px\"><p>Shoutout to <span style=\"color: #1c7ed6\">@design</span> &amp; <span style=\"color: #1c7ed6\">@mobile</span> 💜</p><h2>📊 Release summary</h2><table class=\"rich-editor-table\"><tbody><tr><td><b>Area</b></td><td><b>Status</b></td></tr><tr><td>Editor</td><td>🟢 <span style=\"color: #2f9e44\">Shipped</span></td></tr><tr><td>Mobile apps</td><td>🟠 <span style=\"color: #e8590c\">In progress</span></td></tr><tr><td>Search</td><td>🔵 <span style=\"color: #1c7ed6\">Planned</span></td></tr></tbody></table><p>Full notes in the <a href=\"https://example.com/changelog\">changelog</a> · <span style=\"color: #6d5efc\">#productupdate</span> <span style=\"color: #6d5efc\">#shipit</span></p>',\n  toolbar1: [\n    { group: 'text-format', items: ['bold', 'italic', 'underline', 'strike'] },\n    { group: 'paragraph', items: ['heading'] },\n    { group: 'colors', items: ['color', 'background'] },\n    { group: 'link', items: ['link'] },\n    { group: 'paragraph-ops', items: ['list', 'indent-increase', 'indent-decrease', 'text-align'] },\n    { group: 'insert', items: ['image', 'table'] },\n    { group: 'font', items: ['text-size'] },\n    { group: 'tools', items: ['find', 'code-view'] },\n    { group: 'history', items: ['undo', 'redo'] }\n  ],\n  formats: ['bold', 'italic', 'underline', 'strike', 'color', 'background', 'heading',\n    'text-size', 'text-align', 'list', 'indent-increase', 'indent-decrease', 'link', 'image', 'table'],\n  modules: ['toolbar', 'history', 'slash-menu', 'block-toolbar', 'table-toolbar',\n    'find-replace', 'code-view', 'resize-handles']\n});";
+
+    function run() {
+      mount.innerHTML = '';
+      try {
+        const body = codeEl.value
+          .replace(/import[\s\S]*?from\s*['"][^'"]+['"];?/g, '')
+          .replace(/['"]#editor['"]/g, "'#" + MOUNT_ID + "'");
+        new Function(...NAMES, body)(...VALUES);
+        statusEl.className = 'code-status ok';
+        statusEl.textContent = '✓ built standard';
+      } catch (err) {
+        statusEl.className = 'code-status err';
+        statusEl.textContent = '✗ ' + err.message;
+      }
+    }
+    document.getElementById('btn-run').addEventListener('click', run);
+    document.getElementById('btn-reset').addEventListener('click', () => { codeEl.value = ORIGINAL; run(); });
+    document.getElementById('btn-copy').addEventListener('click', (e) => {
+      navigator.clipboard?.writeText(codeEl.value);
+      const b = e.currentTarget; b.textContent = '✓ Copied'; setTimeout(() => b.textContent = '⧉ Copy', 1200);
+    });
+    codeEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab') { e.preventDefault(); const s = codeEl.selectionStart; codeEl.value = codeEl.value.slice(0, s) + '  ' + codeEl.value.slice(codeEl.selectionEnd); codeEl.selectionStart = codeEl.selectionEnd = s + 2; }
+    });
+    run();
+  </script>
+</body>
+</html>

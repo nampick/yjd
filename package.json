@@ -62,7 +62,8 @@
     "prepublishOnly": "npm run build",
     "build:demos": "rollup -c demos/rollup.demos.config.js",
     "build:site": "node scripts/build-site.js",
-    "build:pages": "npm run build && node scripts/build-site.js"
+    "build:pages": "npm run build && npm run build:demo-pages && node scripts/build-site.js",
+    "build:demo-pages": "node scripts/build-demo-pages.js"
   },
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
