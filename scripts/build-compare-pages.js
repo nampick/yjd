@@ -69,9 +69,16 @@ const liveEditor = `  <script type="module">
     });
   <\/script>`;
 
+function fmt(key, val) {
+  if (key === 'types') {
+    if (/^yes/i.test(val)) return '<span class="yes">✓</span> Yes';
+    if (/community/i.test(val)) return '<span class="partial">~</span> Community';
+  }
+  return esc(val);
+}
 function tableRows(col) {
   return ROWS.map(([label, key]) =>
-    `        <tr><th>${esc(label)}</th><td class="yjd">${esc(YJD[key])}</td><td>${esc(col[key])}</td></tr>`
+    `        <tr><th>${esc(label)}</th><td class="yjd">${fmt(key, YJD[key])}</td><td>${fmt(key, col[key])}</td></tr>`
   ).join('\n');
 }
 
@@ -117,7 +124,7 @@ ${tableRows(c.col)}
           </tbody>
         </table>
       </div>
-      <p class="disclaimer">Sizes are approximate and vary a lot with configuration/plugins. Figures for ${esc(c.name)} come from its public docs; check <a href="${esc(c.url)}" rel="nofollow noopener">${esc(c.url)}</a> for current details.</p>
+      <p class="cmp-legend">Facts, not a scorecard — both are capable editors. Sizes are approximate and vary with configuration/plugins; figures for ${esc(c.name)} come from its public docs (<a href="${esc(c.url)}" rel="nofollow noopener">${esc(c.url)}</a>). The trade-offs are below.</p>
     </section>
 
     <section>

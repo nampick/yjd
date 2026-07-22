@@ -91,18 +91,25 @@ footer{border-top:1px solid var(--line);padding:36px 0;color:var(--muted);font-s
 }
 
 /* ---- comparison pages (site/vs/*) ---- */
-.cmp-wrap{overflow-x:auto;margin:14px 0}
-table.cmp{border-collapse:collapse;width:100%;min-width:560px;font-size:14.5px}
-table.cmp th,table.cmp td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
-table.cmp thead th{font-family:var(--display);font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid var(--line)}
-table.cmp tbody th{font-weight:600;color:var(--ink-2);white-space:nowrap}
-table.cmp td.yjd{background:var(--violet-weak)}
+.cmp-wrap{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:14px}
+table.cmp{border-collapse:collapse;width:100%;min-width:520px;font-size:14.5px;background:var(--paper)}
+table.cmp th,table.cmp td{text-align:left;padding:12px 16px;vertical-align:top;line-height:1.45}
+table.cmp thead th{font-family:var(--display);font-weight:600;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--line);background:#fbfbfd}
+table.cmp tbody th{font-weight:600;color:var(--ink);white-space:nowrap;width:34%}
+table.cmp tbody tr:not(:last-child) th,table.cmp tbody tr:not(:last-child) td{border-bottom:1px solid var(--line)}
+table.cmp tbody tr:nth-child(even) th,table.cmp tbody tr:nth-child(even) td{background:#fafafb}
+/* yjd column: a subtle accent, not a full fill — keeps the table neutral. */
+table.cmp .yjd{box-shadow:inset 3px 0 0 var(--violet)}
 table.cmp thead th.yjd{color:var(--violet-ink)}
+table.cmp td .yes{color:#2f9e44;font-weight:600}
+table.cmp td .partial{color:#e8590c;font-weight:600}
+.cmp-legend{color:var(--muted);font-size:12.5px;margin:8px 2px 0}
 .cmp-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:8px 0}
 @media(max-width:760px){.cmp-cols{grid-template-columns:1fr}}
 .cmp-col{border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:var(--paper)}
-.cmp-col.yjd{border-color:#ddd8ff;background:var(--violet-weak)}
-.cmp-col h3{font-family:var(--display);font-size:16px;margin:0 0 8px}
+.cmp-col.yjd{border-color:#ddd8ff}
+.cmp-col.yjd h3{color:var(--violet-ink)}
+.cmp-col h3{font-family:var(--display);font-size:16px;margin:0 0 10px}
 .cmp-col ul{margin:0;padding-left:18px;color:var(--ink-2)}
-.cmp-col li{margin:3px 0}
-.disclaimer{color:var(--muted);font-size:13px;margin-top:8px}
+.cmp-col li{margin:4px 0}
+.disclaimer{color:var(--muted);font-size:13px;margin-top:10px}
