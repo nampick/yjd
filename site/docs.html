@@ -83,6 +83,7 @@
       <strong>Guide</strong>
       <a href="#install">Install</a>
       <a href="#quick">Quick start</a>
+      <a href="#frameworks">React &amp; Vue</a>
       <a href="#core">Tree-shakeable core</a>
       <a href="#presets">Presets</a>
       <strong>Integration</strong>
@@ -122,6 +123,41 @@
   placeholder: <span class="s">'Start writing…'</span>,
   onChange: (html) =&gt; console.<span class="f">log</span>(html),
 });</code></pre>
+
+      <h2 id="frameworks">React &amp; Vue</h2>
+      <p>yjd has no framework baked in — the constructor takes a DOM element, so you wrap it in a small component. Create it once, <code>destroy()</code> on unmount, and sync <code>value</code> only when it differs (so typing never resets the caret). Full guides: <a href="/site/react.html">React</a> · <a href="/site/vue.html">Vue</a>. Live: <a href="/examples/react.html">React example</a> · <a href="/examples/vue.html">Vue example</a>.</p>
+      <p><strong>React</strong> (hook, StrictMode-safe):</p>
+      <pre><code><span class="k">import</span> { useEffect, useRef } <span class="k">from</span> <span class="s">'react'</span>;
+<span class="k">import</span> yjd <span class="k">from</span> <span class="s">'@oix1987/yjd'</span>;
+<span class="k">import</span> <span class="s">'@oix1987/yjd/styles.css'</span>;
+
+<span class="k">export function</span> <span class="f">Editor</span>({ value, onChange, placeholder }) {
+  <span class="k">const</span> host = <span class="f">useRef</span>(<span class="k">null</span>), ed = <span class="f">useRef</span>(<span class="k">null</span>);
+  <span class="f">useEffect</span>(() =&gt; {
+    ed.current = <span class="k">new</span> <span class="f">yjd</span>(host.current, { content: value ?? <span class="s">''</span>, placeholder,
+      onChange: (html) =&gt; onChange?.(html) });
+    <span class="k">return</span> () =&gt; ed.current.<span class="f">destroy</span>();   <span class="c">// StrictMode-safe</span>
+  }, []);
+  <span class="f">useEffect</span>(() =&gt; { <span class="k">const</span> e = ed.current;
+    <span class="k">if</span> (e &amp;&amp; value != <span class="k">null</span> &amp;&amp; value !== e.<span class="f">getContent</span>()) e.<span class="f">setContent</span>(value);
+  }, [value]);
+  <span class="k">return</span> &lt;div ref={host} /&gt;;
+}</code></pre>
+      <p><strong>Vue 3</strong> (composition API, <code>v-model</code>):</p>
+      <pre><code><span class="k">import</span> { ref, onMounted, onBeforeUnmount, watch } <span class="k">from</span> <span class="s">'vue'</span>;
+<span class="k">import</span> yjd <span class="k">from</span> <span class="s">'@oix1987/yjd'</span>;
+
+<span class="k">const</span> props = <span class="f">defineProps</span>({ modelValue: String, placeholder: String });
+<span class="k">const</span> emit = <span class="f">defineEmits</span>([<span class="s">'update:modelValue'</span>]);
+<span class="k">const</span> host = <span class="f">ref</span>(<span class="k">null</span>); <span class="k">let</span> ed;
+<span class="f">onMounted</span>(() =&gt; { ed = <span class="k">new</span> <span class="f">yjd</span>(host.value, { content: props.modelValue ?? <span class="s">''</span>,
+  placeholder: props.placeholder, onChange: (html) =&gt; <span class="f">emit</span>(<span class="s">'update:modelValue'</span>, html) }); });
+<span class="f">onBeforeUnmount</span>(() =&gt; ed?.<span class="f">destroy</span>());
+<span class="f">watch</span>(() =&gt; props.modelValue, (v) =&gt; {
+  <span class="k">if</span> (ed &amp;&amp; v != <span class="k">null</span> &amp;&amp; v !== ed.<span class="f">getContent</span>()) ed.<span class="f">setContent</span>(v);
+});
+<span class="c">// &lt;template&gt;&lt;div ref="host" /&gt;&lt;/template&gt;</span></code></pre>
+      <p>SSR (Next.js / Nuxt): the editor touches the DOM, so mount it client-side (React <code>useEffect</code> already does; Nuxt: wrap in <code>&lt;client-only&gt;</code>).</p>
 
       <h2 id="core">Tree-shakeable core</h2>
       <p>For the smallest bundle, import from <code>@oix1987/yjd/core</code> (side-effect-free) and register only the formats/modules you want. Anything you don't register is tree-shaken out.</p>
