@@ -66,12 +66,13 @@
     "prepublishOnly": "npm run build",
     "build:demos": "rollup -c demos/rollup.demos.config.js",
     "build:site": "node scripts/build-site.js",
-    "build:pages": "npm run build && npm run build:demo-pages && node scripts/build-site.js",
+    "build:pages": "npm run build && npm run build:demo-pages && npm run build:compare && node scripts/build-site.js",
     "build:demo-pages": "node scripts/build-demo-pages.js",
     "release": "node scripts/release.mjs",
     "release:gh": "node scripts/gh-release.mjs",
     "size": "size-limit",
-    "test:browser": "playwright test"
+    "test:browser": "playwright test",
+    "build:compare": "node scripts/build-compare-pages.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",

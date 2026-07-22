@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>yjd vs popular rich text editors — alternatives compared</title>
+  <meta name="description" content="Fair comparisons of yjd against Tiptap, Quill, TinyMCE, CKEditor, Slate and Lexical — size, dependencies, frameworks, license and when each fits.">
+  <link rel="canonical" href="https://yjd.io/site/compare">
+  <link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="yjd">
+  <meta property="og:title" content="yjd vs popular rich text editors — alternatives compared">
+  <meta property="og:description" content="Fair comparisons of yjd against Tiptap, Quill, TinyMCE, CKEditor, Slate and Lexical — size, dependencies, frameworks, license and when each fits.">
+  <meta property="og:url" content="https://yjd.io/site/compare">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="yjd vs popular rich text editors — alternatives compared">
+  <meta name="twitter:description" content="Fair comparisons of yjd against Tiptap, Quill, TinyMCE, CKEditor, Slate and Lexical — size, dependencies, frameworks, license and when each fits.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='4' fill='%236d5efc'/%3E%3Ctext x='8' y='12' font-family='monospace' font-size='10' font-weight='700' fill='white' text-anchor='middle'%3Ey%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/lib/styles.min.css">
+  <link rel="stylesheet" href="/site/frameworks.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"yjd vs popular rich text editors","description":"Fair comparisons of yjd against Tiptap, Quill, TinyMCE, CKEditor, Slate and Lexical.","url":"https://yjd.io/site/compare","hasPart":[{"@type":"WebPage","name":"yjd vs Tiptap — a lighter rich text editor alternative","url":"https://yjd.io/site/vs/tiptap"},{"@type":"WebPage","name":"yjd vs Quill — a modern, tree-shakeable Quill alternative","url":"https://yjd.io/site/vs/quill"},{"@type":"WebPage","name":"yjd vs TinyMCE — a lightweight, no-license-tier alternative","url":"https://yjd.io/site/vs/tinymce"},{"@type":"WebPage","name":"yjd vs CKEditor 5 — a smaller, permissively-licensed alternative","url":"https://yjd.io/site/vs/ckeditor"},{"@type":"WebPage","name":"yjd vs Slate — a framework-agnostic alternative to Slate (React)","url":"https://yjd.io/site/vs/slate"},{"@type":"WebPage","name":"yjd vs Lexical — a tiny, framework-agnostic editor comparison","url":"https://yjd.io/site/vs/lexical"}]}</script>
+  <link rel="stylesheet" href="/demos/playground.css">
+</head>
+<body>
+  <header class="nav"><div class="wrap nav-in">
+    <a class="logo" href="/site/index.html"><span class="mark">y</span> yjd <small>.io</small></a>
+    <nav class="nav-links">
+      <a class="hide-sm" href="/site/index.html">Home</a>
+      <a href="/site/docs.html">Docs</a>
+      <a href="/demos/index.html">Playground</a>
+      <a class="nav-cta" href="https://github.com/nampick/yjd">GitHub ↗</a>
+    </nav>
+  </div></header>
+  <main class="wrap">
+    <div class="ph">
+      <div class="kicker">Comparisons</div>
+      <h1>yjd vs the popular rich text editors</h1>
+      <p class="lede">How yjd — a dependency-free, tree-shakeable ~17 KB editor — compares to the well-known options. Fair takes: each page says when the other tool is the better call.</p>
+    </div>
+    <section>
+      <div class="cmp-wrap">
+        <table class="cmp">
+          <thead><tr><th>Comparison</th><th>Their size (approx)</th><th>License</th><th>Best for</th></tr></thead>
+          <tbody>
+        <tr><th><a href="/site/vs/tiptap.html" style="color:var(--violet-ink);font-weight:600">yjd vs Tiptap</a></th><td>~30–80+ KB gzip (core + ProseMirror + extensions)</td><td>MIT (core)</td><td>Complex documents, collaboration, custom framework-rendered nodes</td></tr>
+        <tr><th><a href="/site/vs/quill.html" style="color:var(--violet-ink);font-weight:600">yjd vs Quill</a></th><td>~43 KB gzip (core + snow theme)</td><td>BSD-3-Clause</td><td>General WYSIWYG, Delta-based workflows</td></tr>
+        <tr><th><a href="/site/vs/tinymce.html" style="color:var(--violet-ink);font-weight:600">yjd vs TinyMCE</a></th><td>~300+ KB (self-contained, iframe)</td><td>MIT core; some premium features paid</td><td>Full document editing, migrations from classic editors</td></tr>
+        <tr><th><a href="/site/vs/ckeditor.html" style="color:var(--violet-ink);font-weight:600">yjd vs CKEditor 5</a></th><td>~200+ KB (build-dependent)</td><td>GPL-2+ or commercial</td><td>Enterprise editing, real-time collaboration</td></tr>
+        <tr><th><a href="/site/vs/slate.html" style="color:var(--violet-ink);font-weight:600">yjd vs Slate</a></th><td>~40–50 KB gzip (+ React)</td><td>MIT</td><td>Fully custom, bespoke React editors</td></tr>
+        <tr><th><a href="/site/vs/lexical.html" style="color:var(--violet-ink);font-weight:600">yjd vs Lexical</a></th><td>~22 KB core gzip (+ plugins / bindings)</td><td>MIT</td><td>Custom, performant, extensible editors</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="disclaimer">yjd: ~17 KB min → ~75 KB full (gzip), zero deps, ISC. Sizes above are approximate and configuration-dependent.</p>
+    </section>
+    <section>
+      <div class="cards">
+      <a class="card" href="/site/vs/tiptap.html">
+        <div class="card-top"><h2>vs Tiptap</h2></div>
+        <p>You want a small editor for comments, chat or posts and do not need framework-component nodes.</p>
+        <span class="go">Compare →</span>
+      </a>
+      <a class="card" href="/site/vs/quill.html">
+        <div class="card-top"><h2>vs Quill</h2></div>
+        <p>You want a smaller, TS-first editor that stores HTML/Markdown and a chat/prompt composer out of the box.</p>
+        <span class="go">Compare →</span>
+      </a>
+      <a class="card" href="/site/vs/tinymce.html">
+        <div class="card-top"><h2>vs TinyMCE</h2></div>
+        <p>You want a light, fully-open editor for comments/posts/chat without a heavyweight toolbar.</p>
+        <span class="go">Compare →</span>
+      </a>
+      <a class="card" href="/site/vs/ckeditor.html">
+        <div class="card-top"><h2>vs CKEditor 5</h2></div>
+        <p>You want a small, permissively-licensed editor for comments/posts/chat with no license gymnastics.</p>
+        <span class="go">Compare →</span>
+      </a>
+      <a class="card" href="/site/vs/slate.html">
+        <div class="card-top"><h2>vs Slate</h2></div>
+        <p>You want a ready editor that works everywhere and do not want to build the editing layer.</p>
+        <span class="go">Compare →</span>
+      </a>
+      <a class="card" href="/site/vs/lexical.html">
+        <div class="card-top"><h2>vs Lexical</h2></div>
+        <p>You want a ready-to-use editor with a toolbar and HTML/Markdown output, minimal wiring.</p>
+        <span class="go">Compare →</span>
+      </a>
+      </div>
+    </section>
+  </main>
+  <footer><div class="wrap foot-in">
+    <div class="logo" style="font-size:17px"><span class="mark" style="width:24px;height:24px;font-size:13px">y</span> yjd<small>.io</small></div>
+    <div style="display:flex;gap:20px"><a href="/site/index.html">Home</a><a href="/site/compare.html">Compare</a><a href="/site/docs.html">Docs</a><a href="https://github.com/nampick/yjd">GitHub</a></div>
+  </div></footer>
+</body>
+</html>

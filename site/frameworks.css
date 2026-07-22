@@ -89,3 +89,20 @@ footer{border-top:1px solid var(--line);padding:36px 0;color:var(--muted);font-s
   .nav-links a.hide-sm{display:none}.nav-links{gap:14px;font-size:14px}.nav-cta{padding:7px 12px}.logo small{display:none}
   .wrap{padding:0 16px}.ph{padding:36px 0 4px}
 }
+
+/* ---- comparison pages (site/vs/*) ---- */
+.cmp-wrap{overflow-x:auto;margin:14px 0}
+table.cmp{border-collapse:collapse;width:100%;min-width:560px;font-size:14.5px}
+table.cmp th,table.cmp td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+table.cmp thead th{font-family:var(--display);font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid var(--line)}
+table.cmp tbody th{font-weight:600;color:var(--ink-2);white-space:nowrap}
+table.cmp td.yjd{background:var(--violet-weak)}
+table.cmp thead th.yjd{color:var(--violet-ink)}
+.cmp-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:8px 0}
+@media(max-width:760px){.cmp-cols{grid-template-columns:1fr}}
+.cmp-col{border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:var(--paper)}
+.cmp-col.yjd{border-color:#ddd8ff;background:var(--violet-weak)}
+.cmp-col h3{font-family:var(--display);font-size:16px;margin:0 0 8px}
+.cmp-col ul{margin:0;padding-left:18px;color:var(--ink-2)}
+.cmp-col li{margin:3px 0}
+.disclaimer{color:var(--muted);font-size:13px;margin-top:8px}
