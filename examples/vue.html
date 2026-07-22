@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>yjd × Vue 3 — dev test</title>
+<link rel="stylesheet" href="/lib/styles.min.css">
+<style>
+  body{font:15px/1.6 system-ui,sans-serif;margin:0;background:#f4f4f8;color:#16161d}
+  .wrap{max-width:900px;margin:0 auto;padding:24px}
+  h1{font-size:20px}.muted{color:#6b6f7e}
+  .grid{display:grid;grid-template-columns:1fr;gap:16px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+  button{font:600 13px system-ui;border:1px solid #d7d7e2;background:#fff;border-radius:9px;padding:7px 12px;cursor:pointer}
+  button:hover{border-color:#42b883}
+  pre{background:#16161d;color:#e7e7f3;padding:12px 14px;border-radius:12px;overflow:auto;font-size:12px;max-height:220px}
+  .badge{display:inline-block;background:#e6f7ee;color:#2f9e44;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600}
+  .err{color:#c92a2a;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<!-- Vue 3 full build (includes the template compiler for in-browser templates). -->
+<script src="https://unpkg.com/vue@3.5.13/dist/vue.global.js"></script>
+<script type="module">
+import yjd from '/dist/rich-editor.esm.js';
+const { createApp, ref, onMounted, onBeforeUnmount, watch, h } = Vue;
+
+// --- Reusable component: <YjdEditor v-model="html" placeholder="…" /> ---
+const YjdEditor = {
+  name: 'YjdEditor',
+  props: { modelValue: { type: String, default: '' }, placeholder: String, options: Object },
+  emits: ['update:modelValue'],
+  setup(props, { emit }) {
+    const host = ref(null);
+    let ed;
+    onMounted(() => {
+      ed = new yjd(host.value, {
+        content: props.modelValue ?? '',
+        placeholder: props.placeholder,
+        onChange: (html) => emit('update:modelValue', html),
+        ...props.options,
+      });
+      window.__ed = ed;                       // for the WebKit smoke test
+    });
+    onBeforeUnmount(() => ed?.destroy());
+    watch(() => props.modelValue, (v) => {
+      if (ed && v != null && v !== ed.getContent()) ed.setContent(v);
+    });
+    return () => h('div', { ref: host });
+  },
+};
+
+// --- Demo app: v-model two-way binding + live HTML output ---
+createApp({
+  components: { YjdEditor },
+  setup() {
+    const html = ref('<p>Hello from <b>Vue</b> 💚 — type here.</p>');
+    const setSample = () => (html.value = '<h2>Set from Vue ref</h2><ul><li>one</li><li>two</li></ul>');
+    const clear = () => (html.value = '');
+    return { html, setSample, clear };
+  },
+  template: `
+    <div class="wrap">
+      <h1>yjd × Vue 3 <span class="badge">dev test</span></h1>
+      <p class="muted">Two-way <code>v-model</code>. Edit below; the HTML updates live. Buttons prove <code>setContent</code> sync.</p>
+      <div class="grid">
+        <YjdEditor v-model="html" placeholder="Write something…" />
+        <div>
+          <div class="row">
+            <button id="btn-sample" @click="setSample">Set sample</button>
+            <button id="btn-clear" @click="clear">Clear</button>
+          </div>
+          <div class="muted">Live <code>v-model</code> (HTML):</div>
+          <pre id="out">{{ html }}</pre>
+        </div>
+      </div>
+    </div>
+  `,
+}).mount('#app');
+
+window.addEventListener('error', (e) => {
+  const d = document.createElement('pre'); d.className = 'err'; d.textContent = 'JS error: ' + e.message;
+  document.body.appendChild(d);
+});
+</script>
+</body>
+</html>
