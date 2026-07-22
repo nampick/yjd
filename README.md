@@ -1,5 +1,7 @@
 # yjd
 
+[![npm](https://img.shields.io/npm/v/@oix1987/yjd?color=6d5efc)](https://www.npmjs.com/package/@oix1987/yjd) [![CI](https://github.com/nampick/yjd/actions/workflows/ci.yml/badge.svg)](https://github.com/nampick/yjd/actions/workflows/ci.yml) [![npm downloads](https://img.shields.io/npm/dm/@oix1987/yjd?color=6d5efc)](https://www.npmjs.com/package/@oix1987/yjd) [![license](https://img.shields.io/npm/l/@oix1987/yjd)](./LICENSE)
+
 **Rich text, without the weight.** A dependency-free, tree-shakeable rich text editor for the web. Compose it from a `/core` entry and ship **17 KB**, not the whole library.
 
 🔗 **[yjd.io](https://yjd.io)** · [Live playground](https://yjd.io/demos/) · [Docs](https://yjd.io/site/docs.html) · [Changelog](./CHANGELOG.md)

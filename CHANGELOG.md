@@ -4,6 +4,13 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [2.7.6] — 2026-07-22
+
+### Added
+- CI/CD via GitHub Actions: unit tests + build + size-limit + a Chromium/WebKit
+  browser smoke on every PR; `npm publish --provenance` + the GitHub Release on
+  a pushed tag. README now shows npm / CI / downloads / license badges.
+
 ## [2.7.5] — 2026-07-22
 
 ### Docs
@@ -107,6 +114,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.7.6]: https://github.com/nampick/yjd/releases/tag/v2.7.6
 [2.7.5]: https://github.com/nampick/yjd/releases/tag/v2.7.5
 [2.7.4]: https://github.com/nampick/yjd/releases/tag/v2.7.4
 [2.7.3]: https://github.com/nampick/yjd/releases/tag/v2.7.3
