@@ -24,6 +24,9 @@ jobs:
       - run: npm test
       - run: npm run build
       - name: Publish to npm (provenance)
+        # NPM_TOKEN MUST be a classic "Automation" token (it bypasses 2FA).
+        # A "Publish" or granular token without 2FA-bypass fails with:
+        #   403 - Two-factor authentication ... is required to publish packages.
         run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
