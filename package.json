@@ -68,7 +68,8 @@
     "build:site": "node scripts/build-site.js",
     "build:pages": "npm run build && npm run build:demo-pages && node scripts/build-site.js",
     "build:demo-pages": "node scripts/build-demo-pages.js",
-    "release": "node scripts/release.mjs"
+    "release": "node scripts/release.mjs",
+    "release:gh": "node scripts/gh-release.mjs"
   },
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",

@@ -89,9 +89,11 @@ function printNext() {
   console.log(`   git push origin master`);
   console.log(`   git tag -a v${v} -m "v${v}: ..." && git push origin v${v}`);
   console.log(`   git branch -d release/v${v} && git push origin --delete release/v${v}`);
-  console.log(`\n${B}4) Publish (only if package files changed: lib/dist/README/index.d.ts/package.json)${X}`);
+  console.log(`\n${B}4) GitHub Release (a git tag is NOT a Release — this fills the Releases page)${X}`);
+  console.log(`   npm run release:gh -- ${v}      # body pulled from the CHANGELOG section`);
+  console.log(`\n${B}5) Publish (only if package files changed: lib/dist/README/index.d.ts/package.json)${X}`);
   console.log(`   npm publish --access public`);
-  console.log(`\n${B}5) Verify (yjd.io auto-deploys from the master push)${X}`);
+  console.log(`\n${B}6) Verify (yjd.io auto-deploys from the master push)${X}`);
   console.log(`   curl -s https://registry.npmjs.org/@oix1987%2Fyjd | python3 -c "import sys,json;d=json.load(sys.stdin);print('latest:',d['dist-tags']['latest'])"`);
   console.log(`   curl -s -o /dev/null -w '%{http_code}\\n' https://yjd.io/`);
   console.log(`\nFull rule: memory/release-checklist + gstack learning "version-bump-checklist".`);
