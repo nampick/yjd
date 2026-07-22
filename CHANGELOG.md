@@ -4,6 +4,15 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [2.7.5] — 2026-07-22
+
+### Docs
+- Add integration guides for Vue 2 (Options API), Angular (standalone component)
+  and AngularJS 1.x (directive), alongside the existing React and Vue 3 pages —
+  each an on-brand site page (`/site/vue2`, `/site/angular`, `/site/angularjs`)
+  with a live editor, plus runnable `/examples/vue2` and `/examples/angularjs`
+  demos. Home, docs and README link them all. No code changes.
+
 ## [2.7.4] — 2026-07-22
 
 ### Docs
@@ -98,6 +107,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.7.5]: https://github.com/nampick/yjd/releases/tag/v2.7.5
 [2.7.4]: https://github.com/nampick/yjd/releases/tag/v2.7.4
 [2.7.3]: https://github.com/nampick/yjd/releases/tag/v2.7.3
 [2.7.2]: https://github.com/nampick/yjd/releases/tag/v2.7.2

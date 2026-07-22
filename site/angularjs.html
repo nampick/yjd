@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AngularJS 1.x rich text editor — yjd (directive, 17 KB)</title>
+<meta name="description" content="Add a rich text editor to AngularJS 1.x with yjd: a small directive with ng-model two-way binding and $destroy cleanup. Tree-shakeable ~17 KB, dependency-free.">
+<link rel="canonical" href="https://yjd.io/site/angularjs">
+<link rel="sitemap" type="application/xml" href="/sitemap.xml">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="yjd">
+<meta property="og:title" content="AngularJS 1.x rich text editor — yjd">
+<meta property="og:description" content="A small AngularJS 1.x directive with ng-model two-way binding for a dependency-free, tree-shakeable rich text editor (~17 KB).">
+<meta property="og:url" content="https://yjd.io/site/angularjs">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AngularJS 1.x rich text editor — yjd">
+<meta name="twitter:description" content="A small AngularJS 1.x directive with ng-model for a dependency-free rich text editor.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='4' fill='%236d5efc'/%3E%3Ctext x='8' y='12' font-family='monospace' font-size='10' font-weight='700' fill='white' text-anchor='middle'%3Ey%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/lib/styles.min.css">
+<link rel="stylesheet" href="/site/frameworks.css">
+<link rel="modulepreload" href="/dist/rich-editor.esm.js">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"AngularJS 1.x rich text editor — yjd","description":"A small AngularJS 1.x directive with ng-model two-way binding for a dependency-free, tree-shakeable rich text editor (~17 KB).","url":"https://yjd.io/site/angularjs","isPartOf":{"@type":"WebSite","name":"yjd","url":"https://yjd.io"},"breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"yjd","item":"https://yjd.io/"},{"@type":"ListItem","position":2,"name":"AngularJS","item":"https://yjd.io/site/angularjs"}]}}</script>
+</head>
+<body>
+<header class="nav"><div class="wrap nav-in">
+  <a class="logo" href="/site/index.html"><span class="mark">y</span> yjd <small>.io</small></a>
+  <nav class="nav-links">
+    <a class="hide-sm" href="/site/index.html">Home</a>
+    <a href="/site/docs.html">Docs</a>
+    <a href="/demos/index.html">Playground</a>
+    <a class="nav-cta" href="https://github.com/nampick/yjd">GitHub ↗</a>
+  </nav>
+</div></header>
+
+<main class="wrap">
+  <div class="ph">
+    <div class="kicker">AngularJS 1.x integration</div>
+    <h1>A rich text editor for AngularJS 1.x</h1>
+    <p class="lede">Maintaining a legacy AngularJS (1.x) app? yjd wraps into a small <strong>directive</strong> with <code>ng-model</code> two-way binding and a <code>$destroy</code> cleanup — no jqLite gymnastics. Tree-shakeable, <strong>~17 KB</strong>. On modern Angular? See the <a href="/site/angular.html" style="color:var(--violet-ink);font-weight:600">Angular guide</a>.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="/examples/angularjs.html">See it running in AngularJS →</a>
+      <a class="btn" href="/site/docs.html">Docs</a>
+      <a class="btn" href="/demos/index.html">Playground</a>
+    </div>
+  </div>
+
+  <section>
+    <div class="step-num">01 — Install</div>
+    <h2>Add the editor</h2>
+    <p class="sec-lead">Via npm, or a plain <code>&lt;script&gt;</code> (the UMD global is <code>yjd</code>) + the stylesheet — whatever your AngularJS build uses.</p>
+    <div class="code"><div class="code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">index.html</span></div><pre><code>&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@oix1987/yjd/lib/styles.min.css"&gt;
+&lt;script src="https://cdn.jsdelivr.net/npm/@oix1987/yjd"&gt;&lt;/script&gt;  &lt;!-- global: yjd --&gt;</code></pre></div>
+  </section>
+
+  <section>
+    <div class="split">
+      <div>
+        <div class="step-num">02 — The directive</div>
+        <h2>An ng-model directive</h2>
+        <p class="sec-lead">Create the editor in <code>link</code>, push changes back through <code>$applyAsync</code>, watch <code>ngModel</code> and <code>setContent</code> only when it differs, and <code>destroy()</code> on <code>$destroy</code>.</p>
+        <div class="code"><div class="code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">yjd-editor.directive.js</span></div><pre><code>angular.module('app', []).directive('yjdEditor', function () {
+  return {
+    restrict: 'E',
+    scope: { ngModel: '=', placeholder: '@' },
+    link: function (scope, element) {
+      var ed = new yjd(element[0], {
+        content: scope.ngModel || '',
+        placeholder: scope.placeholder,
+        onChange: function (html) {
+          scope.$applyAsync(function () { scope.ngModel = html; });
+        },
+      });
+      scope.$watch('ngModel', function (v) {
+        if (v != null &amp;&amp; v !== ed.getContent()) ed.setContent(v);
+      });
+      scope.$on('$destroy', function () { ed.destroy(); });
+    },
+  };
+});</code></pre></div>
+        <div class="step-num">03 — Use it</div>
+        <div class="code"><div class="code-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">index.html</span></div><pre><code>&lt;yjd-editor ng-model="html" placeholder="Write…"&gt;&lt;/yjd-editor&gt;</code></pre></div>
+      </div>
+
+      <div>
+        <div class="step-num">Live</div>
+        <h2>The editor itself</h2>
+        <p class="sec-lead">A real yjd instance (the same one the directive mounts). Type in it, or open the <a href="/examples/angularjs.html" style="color:var(--violet-ink);font-weight:600">running AngularJS example</a>.</p>
+        <div class="live-card">
+          <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="tag">yjd-editor.directive.js — live</span></div>
+          <div id="live"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Notes</h2>
+    <div class="feat-grid">
+      <div class="feat"><h3>$applyAsync, not $apply</h3><p>yjd's <code>onChange</code> fires outside a digest — <code>$applyAsync</code> batches the model update safely.</p></div>
+      <div class="feat"><h3>Cleanup on $destroy</h3><p>The <code>scope.$on('$destroy')</code> handler calls <code>destroy()</code> so nothing leaks when the view unloads.</p></div>
+      <div class="feat"><h3>~17 KB, tree-shakeable</h3><p>Or the all-in-one UMD via <code>&lt;script&gt;</code> — whatever fits a legacy build.</p></div>
+      <div class="feat"><h3>No lock-in</h3><p>Same core in <a href="/site/angular.html" style="color:var(--violet-ink);font-weight:600">Angular</a>, <a href="/site/react.html" style="color:var(--violet-ink);font-weight:600">React</a>, <a href="/site/vue.html" style="color:var(--violet-ink);font-weight:600">Vue</a>.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Next</h2>
+    <p class="sec-lead">
+      <a href="/examples/angularjs.html" style="color:var(--violet-ink);font-weight:600">Running AngularJS example</a> ·
+      <a href="/site/angular.html" style="color:var(--violet-ink);font-weight:600">Modern Angular</a> ·
+      <a href="/site/react.html" style="color:var(--violet-ink);font-weight:600">React</a> ·
+      <a href="/site/vue.html" style="color:var(--violet-ink);font-weight:600">Vue</a> ·
+      <a href="/site/docs.html" style="color:var(--violet-ink);font-weight:600">Docs</a>
+    </p>
+  </section>
+</main>
+
+<footer><div class="wrap foot-in">
+  <div class="logo" style="font-size:17px"><span class="mark" style="width:24px;height:24px;font-size:13px">y</span> yjd<small>.io</small></div>
+  <div style="display:flex;gap:20px"><a href="/site/index.html">Home</a><a href="/site/docs.html">Docs</a><a href="/site/react.html">React</a><a href="https://github.com/nampick/yjd">GitHub</a></div>
+</div></footer>
+
+<script type="module">
+  import yjd from '/dist/rich-editor.esm.js';
+  new yjd('#live', {
+    width: '100%',
+    placeholder: 'Type here…',
+    content: '<p>Hello from <b>yjd</b> in AngularJS 1.x 🅰️</p><ul><li>ng-model</li><li>$applyAsync</li></ul>',
+    toolbar1: [
+      { group: 'text-format', items: ['bold', 'italic', 'underline'] },
+      { group: 'paragraph', items: ['heading'] },
+      { group: 'link', items: ['link'] },
+      { group: 'paragraph-ops', items: ['list'] },
+    ],
+  });
+</script>
+</body>
+</html>

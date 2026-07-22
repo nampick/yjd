@@ -17,9 +17,12 @@
 <body>
 <div class="wrap">
   <h1>yjd — framework integration dev tests</h1>
-  <p class="muted">Local dev pages that mount the editor (from <code>/dist</code>) inside React and Vue. No build step — React/Vue load from a CDN; the wrapper components mirror the README examples.</p>
+  <p class="muted">Local dev pages that mount the editor (from <code>/dist</code>) inside each framework. No build step — the framework loads from a CDN; the wrappers mirror the README and <a href="/site/react.html" style="color:#5a48ee">integration guides</a>.</p>
   <a class="card" href="/examples/react.html"><b>React →</b><br><span class="muted">Hook wrapper, controlled <code>value</code> ⇄ <code>onChange</code>, StrictMode-safe.</span></a>
   <a class="card" href="/examples/vue.html"><b>Vue 3 →</b><br><span class="muted">Composition-API component with <code>v-model</code> two-way binding.</span></a>
+  <a class="card" href="/examples/vue2.html"><b>Vue 2 →</b><br><span class="muted">Options-API component, <code>v-model</code> via <code>value</code> + <code>input</code>.</span></a>
+  <a class="card" href="/examples/angularjs.html"><b>AngularJS 1.x →</b><br><span class="muted">A directive with <code>ng-model</code>, manual bootstrap.</span></a>
+  <p class="muted" style="margin-top:14px">Modern <b>Angular</b> needs a build step, so there's no single-file demo — the standalone component is on the <a href="/site/angular.html" style="color:#5a48ee">Angular guide</a>.</p>
 </div>
 </body>
 </html>
