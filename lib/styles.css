@@ -4062,6 +4062,49 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 }
 @media (prefers-reduced-motion: reduce) { .yjd-ai-bar { animation: none; } }
 
+/* AI diff-edit: an inline word diff awaiting per-word accept/reject. */
+.yjd-ai-diff {
+  border-radius: 4px;
+  padding: 0 1px;
+  background: rgba(109, 94, 252, 0.07);
+  box-shadow: 0 0 0 1px rgba(109, 94, 252, 0.25);
+}
+.yjd-ai-diff del.yjd-ai-del {
+  text-decoration: line-through;
+  color: #c0392b; background: #fdecec;
+  border-radius: 3px; padding: 0 1px; cursor: pointer;
+}
+.yjd-ai-diff ins.yjd-ai-ins {
+  text-decoration: none;
+  color: #1e7e34; background: #e6f7ec;
+  border-radius: 3px; padding: 0 1px; cursor: pointer;
+}
+.yjd-ai-diff del.yjd-ai-off { text-decoration: none; color: inherit; background: transparent; } /* kept original */
+.yjd-ai-diff ins.yjd-ai-off { text-decoration: line-through; color: var(--rte-muted, #9aa0b4); background: transparent; } /* dropped addition */
+.yjd-ai-diffbar {
+  position: absolute;
+  z-index: 2147483000;
+  display: none;
+  gap: 8px;
+  align-items: center;
+  background: var(--rte-bg, #fff);
+  color: var(--rte-ink, #16161d);
+  border: 1px solid var(--rte-border, #e7e7f0);
+  border-radius: 10px;
+  padding: 6px 8px;
+  box-shadow: var(--rte-shadow, 0 12px 32px -8px rgba(20, 24, 46, 0.2));
+  font: 500 13px/1 system-ui, -apple-system, sans-serif;
+}
+.yjd-ai-diffbar .yjd-ai-diffhint { color: var(--rte-muted, #6b6f7e); font-size: 12px; }
+.yjd-ai-diffbar button {
+  border: 1px solid var(--rte-border, #e7e7f0);
+  border-radius: 8px;
+  padding: 5px 11px;
+  font: 600 12.5px system-ui, sans-serif;
+  cursor: pointer;
+  background: var(--rte-chrome, #fff);
+}
+
 /* AI toolbar button — accent-tinted so the assistant reads as "special". */
 .rich-editor-toolbar-btn.ai-btn { color: var(--rte-accent, var(--rte-accent)); }
 .rich-editor-toolbar-btn.ai-btn:hover {

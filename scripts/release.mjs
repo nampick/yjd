@@ -46,7 +46,7 @@ if (fail.length) {
 
 // ---- Build / test gates (mechanical, must pass) ----
 run('npm run build', 'build — dist/ rebuilt');
-run('npm test', 'tests — 44 pass');
+run('npm test', 'unit tests pass');
 run('npm run size', 'size — bundles within budget');
 
 report();

@@ -459,6 +459,7 @@ new yjd('#editor', {
       return (await res.json()).text;
     },
     autocomplete: true,   // optional: inline ghost-text, Tab to accept
+    diff: true,           // default: accept AI edits as an inline word diff
   },
 });
 ```
@@ -469,6 +470,10 @@ new yjd('#editor', {
   spelling & grammar · Shorten · Lengthen · Simplify · Summarize* plus a free-form
   **Ask AI…** box. The result is previewed with **Accept / Retry / Discard** — the
   user always stays in control (nothing overwrites their text until they accept).
+- **Diff-edit** (on by default) — when you Accept an edit of selected text, the
+  change lands as an inline **word-level diff** (green additions, struck-through
+  removals). Click any word to keep/drop it, then **Accept** or **Reject** the
+  whole thing. Set `ai.diff:false` for the old replace-on-accept behaviour.
 - **Ghost-text autocomplete** (opt-in) — a greyed inline suggestion as they type;
   **Tab** accepts, any other key dismisses. Debounced and request-cancelling, so it
   never blocks typing.
