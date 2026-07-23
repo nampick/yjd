@@ -150,6 +150,14 @@ export interface AiOptions {
   actions?: AiAction[];
   /** Inline ghost-text autocomplete (Tab to accept). */
   autocomplete?: boolean | AiAutocompleteOptions;
+  /**
+   * When accepting an AI edit of selected text, show an inline word-level diff
+   * (green additions / struck-through removals) and let the user accept or
+   * reject it word-by-word (click a word to toggle) before applying. On by
+   * default; set `false` for the old replace-on-accept behaviour. Fires the
+   * same `ai:accept` / `ai:discard` events.
+   */
+  diff?: boolean;
 }
 
 /** Streaming sink returned by editor.streamInto(). */

@@ -4,6 +4,16 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [2.8.0] — 2026-07-23
+
+### Added
+- **AI diff-edit** — accepting an AI edit of selected text now lands as an inline
+  word-level diff (green additions, struck-through removals) with per-word
+  keep/drop (click a word) and a floating **Accept / Reject** bar, instead of a
+  blind replace. On by default; `ai.diff:false` restores the old behaviour. New
+  `lib/utils/word-diff.js` (LCS word diff). Fires the same `ai:accept` /
+  `ai:discard` events.
+
 ## [2.7.6] — 2026-07-22
 
 ### Added
@@ -114,6 +124,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.8.0]: https://github.com/nampick/yjd/releases/tag/v2.8.0
 [2.7.6]: https://github.com/nampick/yjd/releases/tag/v2.7.6
 [2.7.5]: https://github.com/nampick/yjd/releases/tag/v2.7.5
 [2.7.4]: https://github.com/nampick/yjd/releases/tag/v2.7.4
