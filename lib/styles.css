@@ -3354,6 +3354,30 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   padding: 0;
 }
 .rte-attach-close:hover { background: rgba(20, 24, 47, 0.82); }
+
+/* Context chip (@file / @selection) — a horizontal pill, not a 56px tile. */
+.rte-attach-chip.rte-attach-context {
+  width: auto; height: auto;
+  flex-direction: row;
+  gap: 5px;
+  padding: 5px 26px 5px 9px;
+  border-radius: 999px;
+  background: var(--rte-accent-weak, rgba(109, 94, 252, 0.1));
+  border-color: var(--rte-accent-ring, rgba(109, 94, 252, 0.35));
+}
+.rte-attach-context .rte-attach-ic { width: auto; height: auto; font: 700 12px/1 var(--rte-mono, monospace); color: var(--rte-accent-ink, #5a48ee); }
+.rte-attach-context .rte-attach-name { max-width: 160px; font-size: 12.5px; color: var(--rte-ink); }
+.rte-attach-context .rte-attach-close { top: 50%; transform: translateY(-50%); right: 5px; width: 16px; height: 16px; font-size: 11px; }
+
+/* Token/cost meter — a quiet counter left of the send button. */
+.rte-token-meter {
+  align-self: center;
+  margin: 0 4px 0 auto;
+  font: 500 11.5px/1 var(--rte-mono, ui-monospace, monospace);
+  color: var(--rte-muted);
+  white-space: nowrap;
+}
+
 .yjd-rich-editor[data-layout="prompt"] .rich-editor-toolbar-1,
 .yjd-rich-editor[data-layout="prompt"] .rich-editor-toolbar-2 {
   background: transparent;

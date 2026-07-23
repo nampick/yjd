@@ -410,6 +410,16 @@ posts `ta.value` gets the attachments without a manual flush. Adding/removing an
 attachment re-syncs the value immediately. Call `editor.clearAttachments()` (or
 `editor.clear()`, which also empties the tray) to reset after posting.
 
+**For AI chat inputs**, the prompt bar can show a live **token/cost meter** and
+carry **context chips** (`@file` / `@selection` references):
+
+```js
+prompt: { tokens: { costPer1k: 0.01 } }   // "~1.2k tokens · $0.012" by the send button
+
+editor.addContext({ label: '@report.md', value: fileId });  // a removable chip in the tray
+submit: { onSubmit: (html, ed) => send(html, ed.getContext()) }  // [{ id, label, value }]
+```
+
 ### @mention / #task
 
 ```js
@@ -492,8 +502,14 @@ Building your own agent UI? The same primitives are public:
 ```js
 editor.getSelection();                 // { text, html, isEmpty, range }
 editor.replaceSelection(text, { asText: true });   // sanitized, undo-aware
-const s = editor.streamInto();         // token-by-token sink
+const s = editor.streamInto();         // token-by-token plain-text sink
 s.append('Hel'); s.append('lo'); s.commit();       // or s.cancel() to undo the stream
+
+// Render an LLM reply as it streams, formatted + partial-safe (needs the
+// serialize methods / all-in-one build):
+const md = editor.streamMarkdown();
+for await (const chunk of res) md.append(chunk);   // **bold**, ```code```, lists…
+md.commit();                                       // finalize the formatted output
 ```
 
 Nothing the module renders ever lives in the editable DOM, so `getContent()` /

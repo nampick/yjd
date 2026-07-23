@@ -223,6 +223,28 @@ export interface PromptOptions {
    * - function: a custom string per attachment (e.g. markdown `![](src)`).
    */
   serializeAttachments?: boolean | ((att: PromptAttachment) => string);
+  /**
+   * Show a live token/cost meter next to the send button (for AI prompt inputs).
+   * `true` estimates ~chars/4. Customise the estimate, label, or cost.
+   */
+  tokens?: boolean | {
+    /** Estimate tokens for the message text (default ~chars/4). */
+    estimate?: (text: string) => number;
+    /** Custom meter label from the token count. */
+    label?: (tokens: number) => string;
+    /** Show an estimated cost at this price per 1k tokens. */
+    costPer1k?: number;
+    /** Currency symbol for the cost (default '$'). */
+    currency?: string;
+  };
+}
+
+/** A prompt context chip (an @file / @selection / URL reference). */
+export interface PromptContext {
+  id: number;
+  label: string;
+  value?: any;
+  meta: Record<string, any>;
 }
 
 /** One tray attachment, as returned by getAttachments() and the attachment events. */
@@ -376,6 +398,14 @@ export class Editor {
   /** Export/import the document as Markdown (mention ids preserved). */
   getMarkdown(): string;
   setMarkdown(markdown: string): void;
+  /**
+   * Stream a Markdown response and render it as formatted HTML token-by-token,
+   * partial-safe (an open **bold or code fence renders cleanly) — for showing an
+   * LLM reply "typing" with real formatting. `commit()` finalizes; `cancel()`
+   * undoes the whole stream. Requires the serialize methods (all-in-one build,
+   * or `applySerializeMethods(Editor)`).
+   */
+  streamMarkdown(): StreamSink;
   getText(): string;
   /** Undo the last change (uses the history module, falls back to execCommand). */
   undo(): void;
@@ -394,6 +424,10 @@ export class Editor {
   getAttachments(): PromptAttachment[];
   /** Empty the prompt attachment tray (text untouched). `clear()` does this too. */
   clearAttachments(): void;
+  /** Add a context chip (@file / @selection / URL) to the prompt tray. */
+  addContext(ctx: { label: string; value?: any; meta?: Record<string, any> }): Promise<number | undefined>;
+  /** Prompt layout: current context chips. Read them in your submit handler. */
+  getContext(): PromptContext[];
   /** Snapshot of the current selection (null when outside the editor). */
   getSelection(): SelectionSnapshot | null;
   /** Replace the current selection with content (sanitized, undo-aware). */

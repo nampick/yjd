@@ -1,7 +1,23 @@
 import './dom-setup.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { htmlToMarkdown, markdownToHtml } from '../lib/serialize.js';
+import { htmlToMarkdown, markdownToHtml, balancePartialMarkdown } from '../lib/serialize.js';
+
+test('balancePartialMarkdown closes an open inline marker so it renders', () => {
+  assert.equal(balancePartialMarkdown('this is **bol'), 'this is **bol**');
+  assert.ok(markdownToHtml(balancePartialMarkdown('this is **bol')).includes('<b>bol</b>'));
+  assert.ok(markdownToHtml(balancePartialMarkdown('a partial `cod')).includes('<code>cod</code>'));
+});
+
+test('balancePartialMarkdown closes an open code fence', () => {
+  const out = balancePartialMarkdown('```js\nconst x = 1');
+  assert.ok(out.endsWith('```'));
+  assert.ok(markdownToHtml(out).includes('<pre>'));
+});
+
+test('balancePartialMarkdown leaves complete markdown untouched', () => {
+  assert.equal(balancePartialMarkdown('done **bold** here'), 'done **bold** here');
+});
 
 test('htmlToMarkdown serializes checklist as GFM task list', () => {
   const html = '<ul class="checklist"><li data-checked="true">Done</li><li data-checked="false">Todo</li></ul>';
