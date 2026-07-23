@@ -594,19 +594,18 @@ dark page.
 
 ```bash
 npm install
-npm run build        # dist/ (UMD + ESM) + bundled /core; regenerates CSS
-npm test             # unit tests (sanitize, exec-command)
-npm run build:demos  # preset demo bundles
-
-# Static site (landing + docs + playground) for Cloudflare Pages
-npm run build:pages  # build + assemble ./public
+npm run build     # dist/ (UMD + ESM) + bundled /core; regenerates CSS
+npm test          # unit tests (node:test + jsdom)
+npm run size      # size-limit — bundles stay within budget
 ```
 
-### Deploy to Cloudflare Pages (yjd.io)
+Releasing: `npm run release -- <x.y.z>` runs the gates and prints the git → tag
+→ publish steps. Pushing the tag runs `.github/workflows/release.yml` (npm
+publish with provenance + GitHub Release). See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
-- **Build command:** `npm run build:pages`
-- **Output directory:** `public`
-- Add `yjd.io` as a custom domain in the Pages project.
+The website (landing, docs, playground, comparisons at **[yjd.io](https://yjd.io)**)
+lives in a separate repo, **[`nampick/yjd-site`](https://github.com/nampick/yjd-site)**,
+which consumes this package.
 
 ## License
 
