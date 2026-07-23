@@ -4121,6 +4121,19 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 }
 .yjd-ai-diffbar .yjd-ai-diffhint { color: var(--rte-muted, #6b6f7e); font-size: 12px; }
 
+/* streamMarkdown: a blinking caret at the end of the reply while it "types". */
+.yjd-md-stream::after {
+  content: '';
+  display: inline-block;
+  width: 2px; height: 1.05em;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  background: var(--rte-accent, #6d5efc);
+  animation: yjd-ai-caret 1s steps(1) infinite;
+}
+@keyframes yjd-ai-caret { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .yjd-md-stream::after { animation: none; } }
+
 /* AI authorship marks (ai.trackAuthorship): invisible until showAiMarks(true). */
 .yjd-rich-editor.yjd-show-ai .yjd-ai-mark {
   background: rgba(109, 94, 252, 0.12);
