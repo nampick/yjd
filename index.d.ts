@@ -158,6 +158,12 @@ export interface AiOptions {
    * same `ai:accept` / `ai:discard` events.
    */
   diff?: boolean;
+  /**
+   * Tag AI-written content with `class="yjd-ai-mark" data-ai` so it can be shown
+   * (editor.showAiMarks), read (getAiRanges) or stripped (stripAiMarks) later.
+   * Off by default.
+   */
+  trackAuthorship?: boolean;
 }
 
 /** Streaming sink returned by editor.streamInto(). */
@@ -428,6 +434,12 @@ export class Editor {
   addContext(ctx: { label: string; value?: any; meta?: Record<string, any> }): Promise<number | undefined>;
   /** Prompt layout: current context chips. Read them in your submit handler. */
   getContext(): PromptContext[];
+  /** Highlight AI-authored spans (needs ai.trackAuthorship). */
+  showAiMarks(on?: boolean): this;
+  /** AI-authored runs currently in the document: [{ text }]. */
+  getAiRanges(): Array<{ text: string }>;
+  /** Remove AI authorship marks (unwrap), leaving the text as normal content. */
+  stripAiMarks(): this;
   /** Snapshot of the current selection (null when outside the editor). */
   getSelection(): SelectionSnapshot | null;
   /** Replace the current selection with content (sanitized, undo-aware). */
