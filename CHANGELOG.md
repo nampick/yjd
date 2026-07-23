@@ -4,6 +4,19 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [2.10.0] — 2026-07-23
+
+### Added
+- **AI authorship marks** — `ai.trackAuthorship` tags AI-written content with
+  `class="yjd-ai-mark" data-ai`. `editor.showAiMarks(on)` highlights it,
+  `getAiRanges()` reads it, `stripAiMarks()` removes it before saving. Applies to
+  diff-edit and `streamMarkdown()` output.
+- **Slash → AI** — with the slash-menu module, `/` now offers **Ask AI…** (when
+  `ai.complete` is set): it selects the current block and opens the ask bar, so
+  the edit lands as a diff.
+- **On-device AI recipe** — README shows a `complete` hook backed by
+  `@huggingface/transformers` (WebGPU), for a fully local, privacy-first editor.
+
 ## [2.9.0] — 2026-07-23
 
 ### Added
@@ -138,6 +151,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.10.0]: https://github.com/nampick/yjd/releases/tag/v2.10.0
 [2.9.0]: https://github.com/nampick/yjd/releases/tag/v2.9.0
 [2.8.0]: https://github.com/nampick/yjd/releases/tag/v2.8.0
 [2.7.6]: https://github.com/nampick/yjd/releases/tag/v2.7.6

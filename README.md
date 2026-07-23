@@ -512,9 +512,35 @@ for await (const chunk of res) md.append(chunk);   // **bold**, ```code```, list
 md.commit();                                       // finalize the formatted output
 ```
 
-Nothing the module renders ever lives in the editable DOM, so `getContent()` /
-`getJSON()` / `onChange` stay clean. Menus portal to `<body>` but inherit the
-editor's `--rte-*` theme.
+Nothing the selection toolbar renders lives in the editable DOM, so
+`getContent()` / `getJSON()` / `onChange` stay clean. Menus portal to `<body>`
+but inherit the editor's `--rte-*` theme.
+
+**More AI-era hooks:**
+
+```js
+ai: { trackAuthorship: true }          // tag AI-written spans (data-ai)
+editor.showAiMarks(true);              // highlight them · getAiRanges() · stripAiMarks()
+
+// Slash → AI: with the slash-menu module, "/" offers "Ask AI…" — it selects the
+// current block and opens the ask bar, so the edit lands as a diff.
+```
+
+**On-device (privacy-first).** `complete` is just a function, so you can run the
+model in the browser — no server, nothing leaves the device:
+
+```js
+import { pipeline } from '@huggingface/transformers';   // WebGPU
+const gen = await pipeline('text-generation', 'onnx-community/Qwen2.5-0.5B-Instruct');
+new yjd('#editor', {
+  ai: {
+    complete: async ({ prompt, text }, onToken) => {
+      const out = await gen(`${prompt}\n\n${text}`, { max_new_tokens: 200 });
+      return out[0].generated_text;
+    },
+  },
+});
+```
 
 ### Toolbar presets
 
