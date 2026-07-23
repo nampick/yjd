@@ -47,7 +47,7 @@ if (fail.length) {
 // ---- Build / test gates (mechanical, must pass) ----
 run('npm run build', 'build — dist/ rebuilt');
 run('npm test', 'tests — 44 pass');
-run('npm run build:pages', 'site — pages + sitemap regenerated');
+run('npm run size', 'size — bundles within budget');
 
 report();
 printNext();
@@ -93,8 +93,10 @@ function printNext() {
   console.log(`   • npm publish --provenance --access public   (needs the NPM_TOKEN secret)`);
   console.log(`   • node scripts/gh-release.mjs ${v}            (GitHub Release from CHANGELOG)`);
   console.log(`   Manual fallback if CI is unavailable: npm publish --access public && npm run release:gh -- ${v}`);
-  console.log(`\n${B}5) Verify (yjd.io auto-deploys from the master push)${X}`);
+  console.log(`\n${B}5) Verify${X}`);
   console.log(`   curl -s https://registry.npmjs.org/@oix1987%2Fyjd | python3 -c "import sys,json;d=json.load(sys.stdin);print('latest:',d['dist-tags']['latest'])"`);
-  console.log(`   curl -s -o /dev/null -w '%{http_code}\\n' https://yjd.io/   # + https://github.com/nampick/yjd/releases`);
+  console.log(`   # + https://github.com/nampick/yjd/releases`);
+  console.log(`\n${B}6) Refresh the website (separate repo nampick/yjd-site → yjd.io)${X}`);
+  console.log(`   in yjd-site: npm i @oix1987/yjd@${v} && git commit -am "chore: yjd ${v}" && git push  (CI redeploys)`);
   console.log(`\nFull rule: memory/release-checklist + gstack learning "version-bump-checklist".`);
 }
