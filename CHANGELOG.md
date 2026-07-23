@@ -4,6 +4,15 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [2.11.0] — 2026-07-23
+
+### Changed
+- **AI diff-edit polish** — a `del`+`ins` replacement is now one hunk: toggling
+  either word flips both, so you switch cleanly between the new word and the
+  original (fixes a missing space when a kept deletion sat next to its addition).
+  **Enter** accepts the open diff, **Esc** rejects it.
+- **streamMarkdown** shows a blinking caret while the reply "types".
+
 ## [2.10.0] — 2026-07-23
 
 ### Added
@@ -151,6 +160,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.11.0]: https://github.com/nampick/yjd/releases/tag/v2.11.0
 [2.10.0]: https://github.com/nampick/yjd/releases/tag/v2.10.0
 [2.9.0]: https://github.com/nampick/yjd/releases/tag/v2.9.0
 [2.8.0]: https://github.com/nampick/yjd/releases/tag/v2.8.0
