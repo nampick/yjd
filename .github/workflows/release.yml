@@ -1,13 +1,30 @@
 name: Release
 
-# Push a tag vX.Y.Z (after merging the release commit) and this publishes to npm
-# with provenance and creates the GitHub Release from the CHANGELOG section.
+# Publishing keys off the GitHub Release "published" event, which fires
+# reliably — unlike the tag-push event, which intermittently failed to trigger
+# (v2.10.0, v2.11.1, v2.11.2 all had to be published manually).
+#
+# Canonical flow:
+#   npm run release -- X.Y.Z        # gates (version, CHANGELOG, build, test, size)
+#   branch → PR → merge → push master
+#   git tag -a vX.Y.Z && git push origin vX.Y.Z
+#   npm run release:gh -- X.Y.Z     # creates the GitHub Release with a user PAT
+#                                   # → fires `release: published` → this workflow
+#                                   # → npm publish --provenance
+#
+# `workflow_dispatch` is a manual escape hatch: publish a given tag on demand
+# (e.g. if a publish failed and you want to retry without re-cutting a release).
 on:
-  push:
-    tags: ['v*']
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to publish, e.g. v2.11.2'
+        required: true
 
 permissions:
-  contents: write   # create the GitHub Release
+  contents: read
   id-token: write   # npm provenance (OIDC)
 
 jobs:
@@ -15,6 +32,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Build/publish the exact tagged commit, not the default-branch tip.
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -30,7 +50,3 @@ jobs:
         run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Create GitHub Release from CHANGELOG
-        run: node scripts/gh-release.mjs "${GITHUB_REF_NAME#v}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
