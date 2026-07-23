@@ -4,6 +4,20 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [2.9.0] — 2026-07-23
+
+### Added
+- **Streaming Markdown renderer** — `editor.streamMarkdown()` renders an LLM
+  response token-by-token as formatted HTML, partial-safe (an open `**bold` or
+  code fence renders cleanly). `commit()` finalizes, `cancel()` undoes. New
+  `balancePartialMarkdown()` in `lib/serialize.js`. Turns yjd into a live
+  AI-output surface.
+- **Prompt token/cost meter** — `prompt.tokens` shows a live `~N tokens` (and
+  optional cost) next to the send button; customise the estimate/label/price.
+- **Prompt context chips** — `editor.addContext({ label, value })` adds an
+  `@file`/`@selection`-style reference chip to the tray; read with
+  `editor.getContext()`. Fires `context:add`.
+
 ## [2.8.0] — 2026-07-23
 
 ### Added
@@ -124,6 +138,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.9.0]: https://github.com/nampick/yjd/releases/tag/v2.9.0
 [2.8.0]: https://github.com/nampick/yjd/releases/tag/v2.8.0
 [2.7.6]: https://github.com/nampick/yjd/releases/tag/v2.7.6
 [2.7.5]: https://github.com/nampick/yjd/releases/tag/v2.7.5
