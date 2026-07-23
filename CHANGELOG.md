@@ -4,6 +4,15 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [2.11.2] — 2026-07-23
+
+### Fixed
+- **`@context` chip double `@`** — the prompt-composer context chip renders a
+  fixed `@` icon, so passing a natural `@file.md` label (the display form) to
+  `editor.addContext({ label })` rendered as `@@file.md`. The renderer now
+  strips a single leading `@` from the label. `getContext()` still returns the
+  label exactly as passed. Found via a live QA pass on `yjd.io/examples/ai`.
+
 ## [2.11.1] — 2026-07-23
 
 ### Fixed
@@ -171,6 +180,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.11.2]: https://github.com/nampick/yjd/releases/tag/v2.11.2
 [2.11.1]: https://github.com/nampick/yjd/releases/tag/v2.11.1
 [2.11.0]: https://github.com/nampick/yjd/releases/tag/v2.11.0
 [2.10.0]: https://github.com/nampick/yjd/releases/tag/v2.10.0
