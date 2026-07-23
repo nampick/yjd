@@ -4,6 +4,17 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [2.11.1] — 2026-07-23
+
+### Fixed
+- **AI diff-edit across paragraphs** — a selection spanning multiple blocks no
+  longer leaves a stray `<span>` floating between paragraphs; multi-block edits
+  fall back to a plain replace (the inline word diff stays within one block).
+- **streamMarkdown block nesting** — the stream target now sits at block level,
+  so headings / lists / code blocks in the reply are siblings instead of being
+  nested illegally inside a `<p>` (which browsers auto-broke). Found via a
+  cross-browser QA pass (Chromium + WebKit).
+
 ## [2.11.0] — 2026-07-23
 
 ### Changed
@@ -160,6 +171,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.11.1]: https://github.com/nampick/yjd/releases/tag/v2.11.1
 [2.11.0]: https://github.com/nampick/yjd/releases/tag/v2.11.0
 [2.10.0]: https://github.com/nampick/yjd/releases/tag/v2.10.0
 [2.9.0]: https://github.com/nampick/yjd/releases/tag/v2.9.0
