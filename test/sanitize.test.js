@@ -32,6 +32,18 @@ test('isSafeUrl handles data: image URIs per options', () => {
   assert.equal(isSafeUrl('data:image/svg+xml,<svg onload=alert(1)>', { allowDataImage: true }), false);
 });
 
+test('isSafeUrl handles data: audio/video URIs per options', () => {
+  // Disallowed by default (uploaded videos become data:video/* URLs)
+  assert.equal(isSafeUrl('data:video/webm;base64,AAAA'), false);
+  assert.equal(isSafeUrl('data:video/mp4;base64,AAAA'), false);
+  // Allowed when allowDataAV is set (inert media, no script execution)
+  assert.equal(isSafeUrl('data:video/webm;base64,AAAA', { allowDataAV: true }), true);
+  assert.equal(isSafeUrl('data:audio/mpeg;base64,AAAA', { allowDataAV: true }), true);
+  // allowDataAV must NOT open the door to scriptable data URIs
+  assert.equal(isSafeUrl('data:text/html,<script>alert(1)</script>', { allowDataAV: true }), false);
+  assert.equal(isSafeUrl('data:image/svg+xml,<svg onload=alert(1)>', { allowDataAV: true }), false);
+});
+
 test('isSafeUrl rejects non-strings and empty values', () => {
   assert.equal(isSafeUrl(''), false);
   assert.equal(isSafeUrl('   '), false);

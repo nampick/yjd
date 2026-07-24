@@ -31,6 +31,16 @@ test('sanitizeHtml strips onerror from images', () => {
   assert.ok(/src="x\.png"/.test(out));
 });
 
+test('sanitizeHtml keeps data:video src on <video> (uploaded clips survive round-trip)', () => {
+  const out = sanitizeHtml('<video src="data:video/webm;base64,AAAA" controls></video>');
+  assert.ok(/data:video\/webm/.test(out), 'video data URL preserved');
+});
+
+test('sanitizeHtml still strips data:video src from non-media tags', () => {
+  const out = sanitizeHtml('<a href="data:video/webm;base64,AAAA">x</a>');
+  assert.ok(!/data:video/.test(out), 'data:video not allowed on <a>');
+});
+
 test('sanitizeNode cleans an in-place subtree', () => {
   const div = document.createElement('div');
   div.innerHTML = '<b onclick="x()">bold</b>';
