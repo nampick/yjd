@@ -214,3 +214,42 @@ test('no video caps leaves the tokens unset (CSS 360px default applies)', () => 
   const ed = new Editor(mount(), {});
   assert.equal(ed.wrapper.style.getPropertyValue('--rte-video-max-h'), '');
 });
+
+test('paste of a video file routes to insertVideoFile', async () => {
+  const { applyEditorInput } = await import('../lib/core/editor-input.js');
+  applyEditorInput(Editor);
+  const ed = new Editor(mount(), {});
+  let got = null;
+  ed.insertVideoFile = (f) => { got = f.name; };
+  const fakeFile = { name: 'pasted.mp4', type: 'video/mp4', size: 10 };
+  let prevented = false;
+  ed.handlePaste({
+    clipboardData: {
+      items: [{ kind: 'file', type: 'video/mp4', getAsFile: () => fakeFile }],
+      getData: () => ''
+    },
+    preventDefault: () => { prevented = true; }
+  });
+  assert.equal(got, 'pasted.mp4', 'the pasted video reached insertVideoFile');
+  assert.equal(prevented, true, 'default paste was prevented');
+});
+
+test('paste still prefers an image when both image and video are present', async () => {
+  const { applyEditorInput } = await import('../lib/core/editor-input.js');
+  applyEditorInput(Editor);
+  const ed = new Editor(mount(), {});
+  let calls = [];
+  ed.insertImageFile = () => calls.push('image');
+  ed.insertVideoFile = () => calls.push('video');
+  ed.handlePaste({
+    clipboardData: {
+      items: [
+        { kind: 'file', type: 'video/mp4', getAsFile: () => ({ name: 'v.mp4', type: 'video/mp4' }) },
+        { kind: 'file', type: 'image/png', getAsFile: () => ({ name: 'i.png', type: 'image/png' }) }
+      ],
+      getData: () => ''
+    },
+    preventDefault: () => {}
+  });
+  assert.deepEqual(calls, ['image'], 'image wins, video not double-inserted');
+});

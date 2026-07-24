@@ -3388,6 +3388,20 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 }
 .rte-attach-close:hover { background: rgba(20, 24, 47, 0.82); }
 
+/* Remove/close affordances draw the shared `close` glyph instead of a text "×",
+   so they follow --rte-icon-size like every other icon. Sized down (0.65) to sit
+   inside the small circular button. */
+.rte-attach-close svg,
+.video-remove-button svg,
+.image-remove-button svg {
+  width: calc(var(--rte-icon-size) * 0.65);
+  height: calc(var(--rte-icon-size) * 0.65);
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+}
+
 /* Context chip (@file / @selection) — a horizontal pill, not a 56px tile. */
 .rte-attach-chip.rte-attach-context {
   width: auto; height: auto;

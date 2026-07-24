@@ -4,6 +4,21 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [2.11.6] — 2026-07-24
+
+### Added
+- **Paste a video file** — pasting a video from the clipboard now inserts an
+  inline `<video controls>` player, the same path as drag-and-drop (honouring
+  `video.upload` / `maxHeight` / `maxSize`). An image in the same paste still wins,
+  so a mixed clipboard never double-inserts.
+
+### Changed
+- **Close buttons use the shared `close` glyph.** The remove/close affordances on
+  the attachment chip and the image/video popups drew a text `×` while a `close`
+  icon already existed in the registry — they now use it, so they follow
+  `--rte-icon-size` like every other icon (sized 0.65× to sit in the small button).
+  Completes the icon normalization started in 2.11.4.
+
 ## [2.11.5] — 2026-07-24
 
 ### Fixed
@@ -233,6 +248,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.11.6]: https://github.com/nampick/yjd/releases/tag/v2.11.6
 [2.11.5]: https://github.com/nampick/yjd/releases/tag/v2.11.5
 [2.11.4]: https://github.com/nampick/yjd/releases/tag/v2.11.4
 [2.11.3]: https://github.com/nampick/yjd/releases/tag/v2.11.3
