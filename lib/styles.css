@@ -1877,7 +1877,7 @@
   color: var(--rte-accent-ink);
 }
 .yjd-rich-editor .yjd-image-align-btn .icon { display: inline-flex; }
-.yjd-rich-editor .yjd-image-align-btn .icon svg { width: 16px; height: 16px; }
+.yjd-rich-editor .yjd-image-align-btn .icon svg { width: var(--rte-icon-size); height: var(--rte-icon-size); }
 
 .yjd-rich-editor .resize-handle {
   position: absolute;
@@ -2377,6 +2377,10 @@
   --rte-shadow-sm: 0 1px 2px rgba(20, 24, 46, 0.06);
   --rte-shadow: 0 12px 32px -8px rgba(20, 24, 46, 0.20), 0 4px 10px -4px rgba(20, 24, 46, 0.10);
   --rte-t: 140ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* One knob for every UI glyph (toolbar, menus, chips, popups). Override at
+     :root, on any ancestor, or per-editor via options.iconSize. */
+  --rte-icon-size: 16px;
 }
 
 .yjd-rich-editor {
@@ -2863,8 +2867,8 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .block-toolbar-btn .icon svg,
 .yjd-rich-editor .table-toolbar-btn .icon svg {
   width: auto !important;
-  height: 16px !important;
-  max-width: 18px;
+  height: var(--rte-icon-size) !important;
+  max-width: calc(var(--rte-icon-size) + 2px);
   display: block;
 }
 
@@ -3052,8 +3056,8 @@ body.yjd-fullscreen-lock { overflow: hidden; }
    ===================================================================== */
 .yjd-rich-editor .icon svg {
   width: auto !important;
-  height: 16px !important;
-  max-width: 20px;
+  height: var(--rte-icon-size) !important;
+  max-width: calc(var(--rte-icon-size) + 4px);
   display: block;
   fill: none !important;
   stroke: currentColor;
@@ -3214,8 +3218,8 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 
 /* Upload affordance icon (outline) → accent, matches the dashed accent button */
 .yjd-rich-editor .yjd-custom-upload-button svg {
-  width: 17px;
-  height: 17px;
+  width: var(--rte-icon-size);
+  height: var(--rte-icon-size);
   fill: none;
   stroke: var(--rte-accent-ink);
 }
@@ -3342,7 +3346,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 }
 .rte-attach-play svg { width: 13px; height: 13px; margin-left: 1px; fill: currentColor; stroke: none; color: inherit; }
 .rte-attach-ic { width: 22px; height: 22px; color: var(--rte-muted); display: inline-flex; }
-.rte-attach-ic svg { width: 22px; height: 22px; fill: none; stroke: currentColor; color: inherit; }
+.rte-attach-ic svg { width: var(--rte-icon-size); height: var(--rte-icon-size); fill: none; stroke: currentColor; color: inherit; }
 .rte-attach-name {
   max-width: 52px;
   padding: 0 4px;
@@ -3503,7 +3507,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   display: inline-flex;
   color: var(--rte-muted);
 }
-.rte-add-ic svg { width: 20px; height: 20px; fill: none; stroke: currentColor; color: inherit; }
+.rte-add-ic svg { width: var(--rte-icon-size); height: var(--rte-icon-size); fill: none; stroke: currentColor; color: inherit; }
 .rte-add-sep { height: 1px; background: var(--rte-border, var(--rte-table-border)); margin: 5px 8px; }
 
 /* =====================================================================
@@ -3562,7 +3566,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-slash-item.active .yjd-slash-icon { background: var(--rte-bg, var(--rte-bg)); }
 .yjd-slash-icon svg {
   width: auto;
-  height: 16px;
+  height: var(--rte-icon-size);
   fill: none;
   stroke: currentColor;
   stroke-width: 2;
@@ -3887,8 +3891,8 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   margin-right: 4px;
 }
 .yjd-rich-editor .custom-select-button .select-lead-icon svg {
-  width: 16px;
-  height: 16px;
+  width: var(--rte-icon-size);
+  height: var(--rte-icon-size);
   display: block;
   stroke: currentColor;
   fill: none;
@@ -3948,8 +3952,8 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 }
 .yjd-rich-editor .yjd-find-icon .icon,
 .yjd-rich-editor .yjd-find-icon .icon svg {
-  width: 16px;
-  height: 16px;
+  width: var(--rte-icon-size);
+  height: var(--rte-icon-size);
   display: block;
 }
 .yjd-rich-editor .yjd-find-icon .icon svg {
@@ -4020,7 +4024,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   display: inline-flex; align-items: center; justify-content: center;
   border-radius: 50%; background: var(--rte-accent-weak, var(--rte-accent-weak)); color: var(--rte-accent-ink, var(--rte-accent-ink));
 }
-.yjd-mention-ico svg { width: 16px; height: 16px; stroke: currentColor; fill: none; }
+.yjd-mention-ico svg { width: var(--rte-icon-size); height: var(--rte-icon-size); stroke: currentColor; fill: none; }
 .yjd-mention-name { font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (prefers-reduced-motion: reduce) { .yjd-mention-menu { animation: none; } }
 
@@ -4268,7 +4272,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-file-chip:hover { border-color: var(--rte-accent); background: var(--rte-accent-weak); }
 .yjd-file-chip[data-state="uploading"] { opacity: 0.6; }
 .yjd-file-ico { display: inline-flex; flex: 0 0 auto; color: var(--rte-accent-ink); }
-.yjd-file-ico svg { width: 15px; height: 15px; stroke: currentColor; fill: none; }
+.yjd-file-ico svg { width: var(--rte-icon-size); height: var(--rte-icon-size); stroke: currentColor; fill: none; }
 .yjd-file-name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; max-width: 22em; }
 .yjd-file-size { color: var(--rte-muted); font-variant-numeric: tabular-nums; }
 

@@ -296,6 +296,28 @@ new yjd('#editor', {
 
 Omit `upload` to keep the base64 fallback.
 
+### Video
+
+Insert video from the toolbar (`video` button → URL / YouTube / file upload), or
+just **drag-and-drop a video file** onto the editor — it inserts an inline
+`<video controls>` player (parallel to images). Provide `video.upload` to send the
+file to your server/CDN instead of inlining a data URL; omit it for the data-URL
+fallback.
+
+```js
+new yjd('#editor', {
+  video: {
+    upload: async (file) => (await api.upload(file)).url,   // return the URL
+    accept: 'video/mp4,video/webm',
+    maxSize: 50 * 1024 * 1024,
+  },
+});
+// events: editor.on('video:upload'|'video:uploaded'|'video:error', cb)
+```
+
+In the **prompt layout**, a video added via the `+` menu rides along as an
+attachment chip (with a first-frame preview + play badge), read via `getAttachments()`.
+
 ### File attachments
 
 Like `image`, but for any file. Uploads via `file.upload` and inserts a **file chip**
@@ -578,7 +600,8 @@ renderStatic(post.body_html, document.querySelector('#post'));
 ### Events & API notes
 
 - **Events** (via `editor.on(name, cb)` / `editor.off(name, cb)`): `change`,
-  `image:upload` · `image:uploaded` · `image:error`, `file:upload` · `file:uploaded`
+  `image:upload` · `image:uploaded` · `image:error`, `video:upload` · `video:uploaded`
+  · `video:error`, `file:upload` · `file:uploaded`
   · `file:error`, `mention:select`, `ai:start` · `ai:done` · `ai:accept` · `ai:discard`
   · `ai:error`, `content:overflow` (when `maxContentSize` exceeded).
 - `editor.editor` is the public contentEditable element (attach your own listeners).
@@ -608,6 +631,18 @@ theme — with **no `!important` and no specificity battles**:
   --rte-border: #ece4d6;
   --rte-radius: 10px;
 }
+```
+
+**Icons.** Every UI glyph shares one size token, `--rte-icon-size` (default
+`16px`) — set it at `:root`/`.yjd-rich-editor`, or per-editor via `iconSize`. Swap
+any glyph (or add your own) with `icons`, the `registerIcons` export, or the static
+`RichEditor.registerIcons` — pass `{ name: '<svg …>' }` (the registry is global):
+
+```js
+new yjd('#editor', {
+  iconSize: 18,                                   // one knob → toolbar, menus, chips
+  icons: { bold: '<svg …>★</svg>' },              // replace a built-in, or add new names
+});
 ```
 
 > **Token reference** — surfaces: `--rte-bg` (editor/popups), `--rte-chrome`

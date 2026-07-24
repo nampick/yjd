@@ -4,6 +4,28 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [2.11.4] — 2026-07-24
+
+### Added
+- **One icon-size scale + custom icons.** Every UI glyph (toolbar, `+` add-menu,
+  attachment chips, popups) now renders through a single `--rte-icon-size` token
+  (default 16px) instead of drifting per-surface (was 16/17/20/22px). Set it with
+  the new `iconSize` option (number → px, or any CSS length), at `:root`, or on
+  `.yjd-rich-editor`. Override or add glyphs with the new `icons` option
+  (`{ name: '<svg …>' }`), the exported `registerIcons`, or the static
+  `RichEditor.registerIcons` — the icon registry is global.
+- **Drag-and-drop video.** Dropping a video file onto the editor now inserts an
+  inline `<video controls>` player (parallel to images), honouring a new
+  `video.upload` hook (with `accept` / `maxSize`) and emitting
+  `video:upload` / `video:uploaded` / `video:error`. Without the hook it inlines a
+  data URL. A Minimal `/core` build without the input-path add-on falls back to the
+  prior behaviour.
+
+### Changed
+- The two popup upload buttons (image + video) now draw the shared `upload` glyph
+  from the icon registry instead of a duplicated inline SVG, so they track
+  `--rte-icon-size` like every other icon.
+
 ## [2.11.3] — 2026-07-24
 
 ### Added
@@ -200,6 +222,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.11.4]: https://github.com/nampick/yjd/releases/tag/v2.11.4
 [2.11.3]: https://github.com/nampick/yjd/releases/tag/v2.11.3
 [2.11.2]: https://github.com/nampick/yjd/releases/tag/v2.11.2
 [2.11.1]: https://github.com/nampick/yjd/releases/tag/v2.11.1
