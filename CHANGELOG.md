@@ -4,6 +4,26 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [2.11.3] — 2026-07-24
+
+### Added
+- **Video attachment preview** — in the prompt layout, a video added via the
+  `+` menu now shows its first frame (a real `<video>` preview) with a play
+  badge, instead of just an icon and the file name. The preview uses a
+  lightweight object URL that is revoked on remove/clear, so large clips don't
+  bloat memory. `getAttachments()` is unchanged (a not-yet-uploaded video still
+  reports `src: undefined`).
+
+### Fixed
+- **Video upload in the standard editor was silently blocked** — uploaded clips
+  arrive as `data:video/*` URLs, which `Video.create` rejected via `isSafeUrl`
+  (only `data:image/*` was allowed), so nothing was inserted (just a console
+  warning). `isSafeUrl` now accepts inert `data:video/*` and `data:audio/*`
+  media (opt-in via `allowDataAV`), `sanitizeHtml` preserves such `src` on
+  `<video>` / `<audio>` / `<source>` (so uploaded clips survive a save/reload
+  round-trip while non-media tags still reject them), and `Video.create` opts
+  in. Uploaded videos now insert as an inline `<video controls>` player.
+
 ## [2.11.2] — 2026-07-23
 
 ### Fixed
@@ -180,6 +200,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.11.3]: https://github.com/nampick/yjd/releases/tag/v2.11.3
 [2.11.2]: https://github.com/nampick/yjd/releases/tag/v2.11.2
 [2.11.1]: https://github.com/nampick/yjd/releases/tag/v2.11.1
 [2.11.0]: https://github.com/nampick/yjd/releases/tag/v2.11.0

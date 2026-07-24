@@ -3324,6 +3324,23 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   gap: 2px;
 }
 .rte-attach-chip img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.rte-attach-chip video { width: 100%; height: 100%; object-fit: cover; display: block; background: #000; }
+.rte-attach-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: rgba(20, 24, 47, 0.55);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.rte-attach-play svg { width: 13px; height: 13px; margin-left: 1px; fill: currentColor; stroke: none; color: inherit; }
 .rte-attach-ic { width: 22px; height: 22px; color: var(--rte-muted); display: inline-flex; }
 .rte-attach-ic svg { width: 22px; height: 22px; fill: none; stroke: currentColor; color: inherit; }
 .rte-attach-name {
