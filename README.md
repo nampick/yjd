@@ -299,7 +299,7 @@ Omit `upload` to keep the base64 fallback.
 ### Video
 
 Insert video from the toolbar (`video` button → URL / YouTube / file upload), or
-just **drag-and-drop a video file** onto the editor — it inserts an inline
+just **drag-and-drop or paste a video file** onto the editor — it inserts an inline
 `<video controls>` player (parallel to images). Provide `video.upload` to send the
 file to your server/CDN instead of inlining a data URL; omit it for the data-URL
 fallback. A tall/portrait clip is capped to `maxHeight` (default **360px**) on

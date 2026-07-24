@@ -1,6 +1,6 @@
 {
   "name": "@oix1987/yjd",
-  "version": "2.11.5",
+  "version": "2.11.6",
   "description": "Dependency-free, tree-shakeable rich text editor & WYSIWYG for the web — with a chat/prompt input layout, bring-your-own-model AI (selection toolbar + ghost-text), @mentions, image/file upload, and HTML/Markdown/JSON export. Ship ~17 KB, not the whole library.",
   "keywords": [
     "rich-text-editor",
