@@ -203,3 +203,14 @@ test('insertVideoFile with an upload hook emits video:upload and calls the hook'
   assert.equal(started, true, 'video:upload fired');
   assert.equal(uploaded, 'clip.mp4', 'the upload hook received the file');
 });
+
+test('video.maxHeight/maxWidth set the --rte-video-max-* tokens on the wrapper', () => {
+  const ed = new Editor(mount(), { video: { maxHeight: 300, maxWidth: '80%' } });
+  assert.equal(ed.wrapper.style.getPropertyValue('--rte-video-max-h'), '300px');
+  assert.equal(ed.wrapper.style.getPropertyValue('--rte-video-max-w'), '80%');
+});
+
+test('no video caps leaves the tokens unset (CSS 360px default applies)', () => {
+  const ed = new Editor(mount(), {});
+  assert.equal(ed.wrapper.style.getPropertyValue('--rte-video-max-h'), '');
+});

@@ -1492,6 +1492,18 @@
 .yjd-rich-editor .rich-editor-area img,
 .yjd-content img { max-width: var(--rte-img-max-w, 100%); }
 
+/* Display cap for inserted videos so a tall/portrait clip doesn't blow out the
+   frame on insert. Default 360px; override via options.video.maxHeight/maxWidth
+   (writes --rte-video-max-h / --rte-video-max-w) or the tokens at :root. The
+   resize module clears these inline (max-*: none) once the user drags a size,
+   so dragging larger than the cap still works. */
+.yjd-rich-editor .inserted-video,
+.yjd-content .inserted-video,
+.yjd-content video {
+  max-height: var(--rte-video-max-h, 360px);
+  max-width: var(--rte-video-max-w, 100%);
+}
+
 .yjd-rich-editor .inserted-video {
   background: #000;
 }

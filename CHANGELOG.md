@@ -4,6 +4,17 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [2.11.5] — 2026-07-24
+
+### Fixed
+- **Tall videos blew out the frame.** An inserted/dropped video only capped its
+  width, so a portrait (9:16) or tall clip stretched the whole editor. Inline
+  videos now cap their height on insert — default **360px** via the new
+  `--rte-video-max-h` token, overridable with `video.maxHeight` / `video.maxWidth`
+  (mirrors `image.maxHeight/maxWidth`) or the token at `:root`. Aspect ratio is
+  preserved; the resize handles clear the cap inline once the user drags a size,
+  so enlarging past the cap still works.
+
 ## [2.11.4] — 2026-07-24
 
 ### Added
@@ -222,6 +233,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.11.5]: https://github.com/nampick/yjd/releases/tag/v2.11.5
 [2.11.4]: https://github.com/nampick/yjd/releases/tag/v2.11.4
 [2.11.3]: https://github.com/nampick/yjd/releases/tag/v2.11.3
 [2.11.2]: https://github.com/nampick/yjd/releases/tag/v2.11.2

@@ -302,7 +302,8 @@ Insert video from the toolbar (`video` button → URL / YouTube / file upload), 
 just **drag-and-drop a video file** onto the editor — it inserts an inline
 `<video controls>` player (parallel to images). Provide `video.upload` to send the
 file to your server/CDN instead of inlining a data URL; omit it for the data-URL
-fallback.
+fallback. A tall/portrait clip is capped to `maxHeight` (default **360px**) on
+insert so it doesn't blow out the frame — the user can still drag-resize larger.
 
 ```js
 new yjd('#editor', {
@@ -310,6 +311,7 @@ new yjd('#editor', {
     upload: async (file) => (await api.upload(file)).url,   // return the URL
     accept: 'video/mp4,video/webm',
     maxSize: 50 * 1024 * 1024,
+    maxHeight: 360,                                          // display cap (px or CSS length)
   },
 });
 // events: editor.on('video:upload'|'video:uploaded'|'video:error', cb)

@@ -89,6 +89,14 @@ export interface VideoOptions {
   accept?: string;
   /** Maximum file size in bytes; larger files emit 'video:error'. */
   maxSize?: number;
+  /**
+   * Display cap for the inline player so a tall/portrait clip doesn't blow out
+   * the frame (px or any CSS length, e.g. '60vh'). Defaults to 360px; the user
+   * can still drag-resize larger. Sets `--rte-video-max-h`.
+   */
+  maxHeight?: number | string;
+  /** Display width cap for the inline player (px or any CSS length). Sets `--rte-video-max-w`. */
+  maxWidth?: number | string;
 }
 
 /** Enter-to-submit behaviour (e.g. a comment box). */
