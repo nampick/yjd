@@ -129,3 +129,77 @@ test('toolbar overflow:false disables the more split', () => {
   assert.equal(ed.wrapper.querySelectorAll('.more-btn').length, 0);
   assert.equal(tb.toolbar2.style.display, 'none');
 });
+
+test('iconSize sets the --rte-icon-size token on the wrapper (number → px)', () => {
+  const ed = new Editor(mount(), { iconSize: 20 });
+  assert.equal(ed.wrapper.style.getPropertyValue('--rte-icon-size'), '20px');
+});
+
+test('iconSize passes a string value verbatim', () => {
+  const ed = new Editor(mount(), { iconSize: '1.25rem' });
+  assert.equal(ed.wrapper.style.getPropertyValue('--rte-icon-size'), '1.25rem');
+});
+
+test('no iconSize leaves the token unset (CSS default applies)', () => {
+  const ed = new Editor(mount(), {});
+  assert.equal(ed.wrapper.style.getPropertyValue('--rte-icon-size'), '');
+});
+
+test('options.icons overrides a built-in glyph globally', async () => {
+  const { IconUtils } = await import('../lib/ui/icons.js');
+  new Editor(mount(), { icons: { bold: '<svg id="custom-bold"></svg>' } });
+  assert.equal(IconUtils.getIcon('bold'), '<svg id="custom-bold"></svg>');
+});
+
+test('Editor.registerIcons registers without constructing an editor', async () => {
+  const { IconUtils } = await import('../lib/ui/icons.js');
+  Editor.registerIcons({ 'my-glyph': '<svg id="mg"></svg>' });
+  assert.equal(IconUtils.getIcon('my-glyph'), '<svg id="mg"></svg>');
+});
+
+test('upload icon is registered in the core set', async () => {
+  const { IconUtils } = await import('../lib/ui/icons.js');
+  assert.ok(IconUtils.getIcon('upload').includes('<svg'), 'upload glyph present');
+});
+
+test('insertVideoFile rejects a non-video file (no throw, emits nothing bad)', async () => {
+  const { applyEditorInput } = await import('../lib/core/editor-input.js');
+  applyEditorInput(Editor);
+  const ed = new Editor(mount(), {});
+  let events = [];
+  ed.on('video:error', (d) => events.push(d.reason));
+  ed.insertVideoFile({ name: 'a.txt', type: 'text/plain', size: 10 });
+  assert.deepEqual(events, [], 'a non-video is ignored, not an error');
+});
+
+test('insertVideoFile emits video:error on oversize', async () => {
+  const { applyEditorInput } = await import('../lib/core/editor-input.js');
+  applyEditorInput(Editor);
+  const ed = new Editor(mount(), { video: { maxSize: 100 } });
+  let reasons = [];
+  ed.on('video:error', (d) => reasons.push(d.reason));
+  ed.insertVideoFile({ name: 'big.mp4', type: 'video/mp4', size: 5000 });
+  assert.deepEqual(reasons, ['size']);
+});
+
+test('insertVideoFile emits video:error when accept excludes the type', async () => {
+  const { applyEditorInput } = await import('../lib/core/editor-input.js');
+  applyEditorInput(Editor);
+  const ed = new Editor(mount(), { video: { accept: 'video/mp4' } });
+  let reasons = [];
+  ed.on('video:error', (d) => reasons.push(d.reason));
+  ed.insertVideoFile({ name: 'clip.webm', type: 'video/webm', size: 10 });
+  assert.deepEqual(reasons, ['type']);
+});
+
+test('insertVideoFile with an upload hook emits video:upload and calls the hook', async () => {
+  const { applyEditorInput } = await import('../lib/core/editor-input.js');
+  applyEditorInput(Editor);
+  let uploaded = null;
+  const ed = new Editor(mount(), { video: { upload: (f) => { uploaded = f.name; return 'https://cdn/x.mp4'; } } });
+  let started = false;
+  ed.on('video:upload', () => { started = true; });
+  ed.insertVideoFile({ name: 'clip.mp4', type: 'video/mp4', size: 10 });
+  assert.equal(started, true, 'video:upload fired');
+  assert.equal(uploaded, 'clip.mp4', 'the upload hook received the file');
+});

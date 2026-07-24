@@ -58,7 +58,7 @@ import ResizeHandles from './lib/modules/resize-handles.js';
 
 // Import UI components
 import ColorPicker from './lib/ui/color-picker.js';
-import IconUtils from './lib/ui/icons.js';
+import IconUtils, { registerIcons } from './lib/ui/icons.js';
 import LinkPopup from './lib/ui/link-popup.js';
 import TablePopup from './lib/ui/table-popup.js';
 import TextAlignPicker from './lib/ui/text-align-picker.js';
@@ -228,6 +228,7 @@ export {
 export {
   ColorPicker,
   IconUtils,
+  registerIcons,
   LinkPopup,
   TablePopup,
   TextAlignPicker,

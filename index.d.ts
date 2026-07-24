@@ -77,6 +77,20 @@ export interface FileOptions {
   maxSize?: number;
 }
 
+/** Video drop/insert config (inline <video> player, parallel to images). */
+export interface VideoOptions {
+  /**
+   * Upload a dropped video and resolve to its URL (string, or { url }). While
+   * pending a placeholder is shown; on resolve an inline <video controls> is
+   * inserted. Omit to inline a data: URL.
+   */
+  upload?: (file: File) => string | { url?: string } | Promise<string | { url?: string }>;
+  /** Accepted video MIME types (default 'video/*'). */
+  accept?: string;
+  /** Maximum file size in bytes; larger files emit 'video:error'. */
+  maxSize?: number;
+}
+
 /** Enter-to-submit behaviour (e.g. a comment box). */
 export interface SubmitOptions {
   /**
@@ -324,6 +338,8 @@ export interface EditorOptions {
   image?: ImageOptions | boolean;
   /** Attachment (non-image file) upload hook → inserts a file chip. */
   file?: FileOptions;
+  /** Dropped-video handling (inline <video> player + optional upload hook). */
+  video?: VideoOptions;
   /** @mention / #task autocomplete. Inert until a `source` is given. */
   mention?: MentionOptions;
   /** Enter-to-submit behaviour for comment-style editors. */
@@ -342,6 +358,20 @@ export interface EditorOptions {
   prompt?: PromptOptions;
   /** Warn (emit 'content:overflow') when serialized HTML exceeds this many chars. */
   maxContentSize?: number;
+  /**
+   * One size for every UI glyph (toolbar, add-menu, attachment chips, popups).
+   * Number → px, string passed verbatim. Sets the `--rte-icon-size` CSS token on
+   * this editor (default 16px). Override globally at `:root` instead if you want
+   * every editor to change.
+   */
+  iconSize?: number | string;
+  /**
+   * Override or add icons. Map of `{ name: '<svg …>' }` — match a built-in name
+   * (e.g. 'bold', 'video', 'upload', 'close') to replace it, or use a new name
+   * for a custom glyph. The icon registry is global (shared by every editor on
+   * the page); see also the exported `registerIcons` and `RichEditor.registerIcons`.
+   */
+  icons?: Record<string, string>;
   features?: {
     emoji?: boolean;
     image?: boolean;
@@ -379,6 +409,12 @@ export class Editor {
     textarea: HTMLTextAreaElement | string,
     options?: EditorOptions & { format?: 'html' | 'markdown' }
   ): TextareaEditor;
+  /**
+   * Register or override icons globally (shared by every editor on the page).
+   * Map of `{ name: '<svg …>' }`; match a built-in name to replace it, or use a
+   * new name for a custom glyph. Same as the exported `registerIcons`.
+   */
+  static registerIcons(icons: Record<string, string>): void;
   /** The contentEditable element (public — apps may attach listeners to it). */
   editor: HTMLElement;
   /** The AI module, present when `ai.complete` was configured. */
@@ -558,6 +594,12 @@ export const ResizeHandles: any;
 // UI components
 export const ColorPicker: any;
 export const IconUtils: any;
+/**
+ * Register or override icons globally (shared by every editor on the page).
+ * Map of `{ name: '<svg …>' }`; match a built-in name (e.g. 'bold', 'video',
+ * 'upload', 'close') to replace it, or use a new name for a custom glyph.
+ */
+export function registerIcons(icons: Record<string, string>): void;
 export const LinkPopup: any;
 export const TablePopup: any;
 export const TextAlignPicker: any;
