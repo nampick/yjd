@@ -492,6 +492,12 @@ export class Editor {
   streamInto(): StreamSink;
   clearFormatting(): void;
   insertHorizontalRule(): void;
+  /** Insert an inline date chip at the caret (`data-date` carries the ISO date). */
+  insertDateChip(date?: Date): void;
+  /** Print the document via a hidden iframe styled with the read-view CSS. */
+  printContent(): void;
+  /** Download the document as a styled HTML file, or Markdown with `'md'`. */
+  downloadContent(format?: 'html' | 'md'): void;
   insertImageFile(file: File): void;
   /** Insert a non-image File as a file chip (uses options.file.upload). */
   insertFileAttachment(file: File): void;

@@ -4750,6 +4750,101 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   background: var(--rte-accent-weak);
 }
 
+/* ---------- Code-block tools: language label + Copy chip ---------- */
+.yjd-rich-editor .yjd-codeblock-bar {
+  position: absolute;
+  z-index: 1000;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: auto;
+}
+.yjd-rich-editor .yjd-codeblock-lang {
+  font-family: var(--rte-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--rte-code-block-ink);
+  opacity: 0.45;
+}
+.yjd-rich-editor .yjd-codeblock-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--rte-radius-sm);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--rte-code-block-ink);
+  font-family: var(--rte-mono);
+  font-size: 11px;
+  cursor: pointer;
+  opacity: 0.75;
+  transition: opacity var(--rte-t), background var(--rte-t);
+}
+.yjd-rich-editor .yjd-codeblock-copy:hover { opacity: 1; background: rgba(255, 255, 255, 0.12); }
+.yjd-rich-editor .yjd-codeblock-copy.copied { color: var(--rte-success); opacity: 1; }
+.yjd-rich-editor .yjd-codeblock-copy svg { width: 12px; height: 12px; }
+
+/* ---------- Date chip ---------- */
+.yjd-rich-editor .yjd-date-chip,
+.yjd-content .yjd-date-chip {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: baseline;
+  padding: 1px 8px;
+  border-radius: 20px;
+  background: var(--rte-info-weak);
+  color: var(--rte-info);
+  font-size: 0.88em;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ---------- Loading skeleton (States · Loading) ----------
+   Mirrors the real chrome heights (44px bar + body) so swapping the skeleton
+   for the mounted editor causes zero layout shift. Markup:
+   <div class="yjd-skeleton">
+     <div class="yjd-skeleton-bar"><span class="yjd-skeleton-chip"></span> …
+       <span class="yjd-skeleton-chip yjd-skeleton-chip--wide"></span></div>
+     <div class="yjd-skeleton-body"><span class="yjd-skeleton-line" style="width:70%"></span> …</div>
+   </div> */
+.yjd-skeleton {
+  border: 1px solid var(--rte-border, #e3e5ea);
+  border-radius: var(--rte-radius, 10px);
+  background: var(--rte-bg, #fff);
+  overflow: hidden;
+}
+.yjd-skeleton-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 12px;
+  background: var(--rte-chrome, #fcfcfd);
+  border-bottom: 1px solid var(--rte-border, #e3e5ea);
+}
+.yjd-skeleton-chip,
+.yjd-skeleton-line {
+  display: block;
+  border-radius: var(--rte-radius-sm, 6px);
+  background: linear-gradient(90deg, var(--rte-chrome-2, #f3f4f6) 25%, var(--rte-chrome-3, #eceef1) 37%, var(--rte-chrome-2, #f3f4f6) 63%);
+  background-size: 400% 100%;
+  animation: yjd-skeleton-shimmer 1.3s ease infinite;
+}
+.yjd-skeleton-chip { width: 26px; height: 26px; flex: 0 0 auto; }
+.yjd-skeleton-chip--wide { width: 86px; }
+.yjd-skeleton-body { padding: 20px; }
+.yjd-skeleton-line { height: 13px; border-radius: 5px; margin-bottom: 12px; width: 80%; }
+@keyframes yjd-skeleton-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .yjd-skeleton-chip, .yjd-skeleton-line { animation: none; }
+}
+
 /* ---------- Error states (UI 2.0 input-error recipe) ---------- */
 .yjd-rich-editor .yjd-input.yjd-input--error {
   border-color: var(--rte-danger);

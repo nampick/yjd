@@ -79,6 +79,32 @@ component layouts and redrawn glyphs on top of the 2.12.0 token pass.
   and group spacing tightens to the design's 4px rhythm (reflow packer
   constants updated to match).
 
+- **Phase A of the design-feature roadmap** (docs/UI2-FEATURE-ROADMAP.md):
+  - **Inline `code` format** — toolbar button in the text cluster wraps the
+    selection in `<code>` (toggles off by unwrapping the chip; never nests
+    inside a `<pre>`).
+  - **Code-block tools** — a floating chip bar over the code block at the
+    caret: language label (from `data-lang`) + one-click **Copy**, exactly the
+    design's code card header. New default module `code-block-tools`.
+  - **"+" insert menu in the standard toolbar** — the design's single plus
+    replaces the separate image/table buttons and opens the insert menu
+    (image / file / video / table by default, `prompt.add`-style configurable).
+  - **`print` / `download` commands** — `printContent()` renders the document
+    with read-view styles in a hidden iframe and opens the print dialog;
+    `downloadContent('html'|'md')` saves a styled HTML file or Markdown.
+  - **Letter-spacing format** — Tight/Normal/Wide/Wider picker applying
+    tracking to the selected block(s) (design's `letter-spacing` icon), in the
+    overflow row's script cluster.
+  - **Table header column** — `header-col` toggle in the table toolbar turns
+    the first column into `<th>` cells (sibling of the header-row toggle).
+  - **Loading skeleton CSS** — `.yjd-skeleton` (+`-bar`/`-chip`/`-body`/`-line`)
+    mirrors the 44px chrome so mounting the editor causes zero layout shift.
+  - **Date chip** — `insertDateChip()` / the `date` command inserts an inline
+    chip with `data-date` (info-wash styling, non-editable).
+  - Size ceilings raised for the feature set: all-in-one bundles 75 → 78 KB
+    (actual ~75.2), stylesheet 13 → 13.5 KB (actual 13.09). Tree-shaken presets
+    (Minimal ~17 KB) are unaffected — none of the new modules load unless used.
+
 ### Fixed
 - **Dark mode: native white buttons in find & replace.** A legacy
   `background: 0 0` let Chromium paint the UA's native button face (white) on
