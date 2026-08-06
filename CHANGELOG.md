@@ -37,6 +37,30 @@ component layouts and redrawn glyphs on top of the 2.12.0 token pass.
 - **Live resize badge**: dragging a resize handle shows a "376 × 212" size chip
   pinned to the element's top-right corner; handles are now 8px accent-bordered
   squares per the design.
+- **Link view bar**: clicking a link inside the editor now shows a floating
+  bar — shortened href · edit · copy · unlink. Edit reopens the link popup
+  prefilled and updates the element **in place** (no nested `<a>`); unlink
+  unwraps in one undoable step.
+- **Find & replace options**: "Whole word" and regex (`.*`) toggles join the
+  match-case chip on their own options row; regex mode uses the term verbatim,
+  whole-word wraps it in `\b` boundaries.
+- **Emoji picker chrome (UI 2.0)**: search field (name-based), a "Frequently
+  used" section backed by localStorage recents, and 7 category tabs replace the
+  flat grid + OS-shortcut footer. A custom `emojis: []` option still renders as
+  a single grid.
+- **AI selection menu**: the actions render as a vertical menu — "EDIT
+  SELECTION" mono header, per-action icons, and an "Ask AI…" input row with an
+  accent sparkle and ↵ hint (was a wrapped row of text buttons).
+- **Colour picker headers**: "Text colour" / "Background" / "Cell background"
+  mono headers via the new `title` option.
+- **Friendly breadcrumb**: the status bar now reads "H2 · Patch pipeline" in a
+  heading and "Body › Paragraph" elsewhere, instead of the raw CSS selector
+  path.
+- **Table toolbar polish**: hairline dividers between button groups; the
+  delete-table/row/column commands render in danger ink with a danger-weak
+  hover wash.
+- Stylesheet size budget raised 12 → 13 KB (brotli) for the new component
+  chrome; JS bundles remain under their 75 KB ceilings.
 
 ## [2.12.0] — 2026-08-06
 

@@ -708,7 +708,7 @@
   max-width: 100%;
   max-height: 37px;
   border-radius: 10px;
-  border: 1px solid var(--rte-border-strong, var(--rte-border));
+  border: 1px solid var(--rte-border-strong);
   box-sizing: border-box;
   background: var(--rte-bg, var(--rte-bg));
   color: var(--rte-ink, var(--rte-ink));
@@ -720,7 +720,7 @@
   /* Allow interaction with inputs */
   pointer-events: auto;
 }
-.yjd-rich-editor .yjd-input::placeholder { color: var(--rte-muted, #6d7480); }
+.yjd-rich-editor .yjd-input::placeholder { color: var(--rte-muted); }
 /* Same ellipsis-not-cut treatment for every other popup text input that can
    hold a long value (URLs, tag values, file names, hex colours). */
 .yjd-rich-editor .yjd-select-input,
@@ -994,8 +994,8 @@
   min-width: 150px;
   padding: 10px 12px;
   background: var(--rte-bg, #fff);
-  color: var(--rte-ink, #15171c);
-  border: 1px solid var(--rte-border, #e3e5ea);
+  color: var(--rte-ink);
+  border: 1px solid var(--rte-border);
   border-radius: var(--rte-radius-sm, 8px);
   box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.20), 0 2px 6px rgba(16, 18, 23, 0.06));
   font: 500 13px/1.5 system-ui, -apple-system, sans-serif;
@@ -1003,7 +1003,7 @@
 .yjd-table-profile-title {
   font-weight: 600;
   margin-bottom: 6px;
-  color: var(--rte-muted, #6d7480);
+  color: var(--rte-muted);
   text-transform: uppercase;
   font-size: 11px;
   letter-spacing: 0.04em;
@@ -1014,7 +1014,7 @@
   gap: 24px;
   padding: 2px 0;
 }
-.yjd-table-profile-row span { color: var(--rte-muted, #6d7480); }
+.yjd-table-profile-row span { color: var(--rte-muted); }
 
 .yjd-rich-editor .rich-editor-table td:focus {
   outline: 2px solid var(--rte-focus);
@@ -1355,16 +1355,6 @@
   max-height: 240px;
   overflow-y: auto;
 }
-.yjd-rich-editor .emoji-text-message{
-  margin-top: 4px;
-  color: #71787C;
-  text-align: center;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  font-size: 12px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
-}
 .yjd-rich-editor .emoji-button {
   width: 28px;
   height: 28px;
@@ -1568,18 +1558,18 @@
 }
 
 .yjd-rich-editor .custom-tag.tag-mention {
-  background: var(--rte-info-weak, #ebf3fd);
-  color: var(--rte-info, #1f6fdc);
+  background: var(--rte-info-weak);
+  color: var(--rte-info);
 }
 
 .yjd-rich-editor .custom-tag.tag-hashtag {
-  background: var(--rte-success-weak, #e7f5ef);
-  color: var(--rte-success, #0f8a5f);
+  background: var(--rte-success-weak);
+  color: var(--rte-success);
 }
 
 .yjd-rich-editor .custom-tag.tag-custom {
-  background: var(--rte-warning-weak, #fdf3e0);
-  color: var(--rte-warning, #a86500);
+  background: var(--rte-warning-weak);
+  color: var(--rte-warning);
 }
 
 .yjd-rich-editor .custom-tag:hover {
@@ -1749,18 +1739,18 @@
 }
 
 .yjd-rich-editor .imported-content.html-content {
-  border-color: var(--rte-info, #1f6fdc);
-  background-color: var(--rte-info-weak, #ebf3fd);
+  border-color: var(--rte-info);
+  background-color: var(--rte-info-weak);
 }
 
 .yjd-rich-editor .imported-content.excel-content {
-  border-color: var(--rte-success, #0f8a5f);
-  background-color: var(--rte-success-weak, #e7f5ef);
+  border-color: var(--rte-success);
+  background-color: var(--rte-success-weak);
 }
 
 .yjd-rich-editor .imported-content.text-content {
-  border-color: var(--rte-warning, #a86500);
-  background-color: var(--rte-warning-weak, #fdf3e0);
+  border-color: var(--rte-warning);
+  background-color: var(--rte-warning-weak);
 }
 
 .yjd-rich-editor .imported-table {
@@ -2579,7 +2569,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .rich-editor-breadcrumb,
 .yjd-rich-editor .wordcount {
   color: var(--rte-muted);
-  font-family: var(--rte-mono, ui-monospace, monospace);
+  font-family: var(--rte-mono);
   font-size: 11px;
   letter-spacing: 0.01em;
   font-variant-numeric: tabular-nums;
@@ -2596,7 +2586,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
    remote-peer highlights all read as the same system. */
 .yjd-rich-editor .rich-editor-area ::selection,
 .yjd-content ::selection {
-  background: var(--rte-sel, rgba(91, 91, 214, 0.16));
+  background: var(--rte-sel);
 }
 .yjd-rich-editor .rich-editor-area a {
   color: var(--rte-link);
@@ -2615,7 +2605,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .rich-editor-area code {
   background: var(--rte-code-bg);
   color: var(--rte-code-ink);
-  border-radius: var(--rte-radius-xs, 4px);
+  border-radius: var(--rte-radius-xs);
   padding: 2px 5px;
   font-size: 0.88em;
 }
@@ -2711,7 +2701,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   transition: background var(--rte-t);
 }
 .yjd-rich-editor .yjd-button-cancel:hover {
-  background: var(--rte-chrome-3, #eceef1);
+  background: var(--rte-chrome-3);
 }
 .yjd-rich-editor .yjd-custom-upload-button {
   border-radius: var(--rte-radius-sm);
@@ -2791,7 +2781,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   border: 1px solid var(--rte-border-strong);
   border-radius: var(--rte-radius-md);
   box-shadow: var(--rte-shadow);
-  font: 13px/1.4 var(--rte-ui, system-ui, -apple-system, sans-serif);
+  font: 13px/1.4 var(--rte-ui);
   max-width: calc(100% - 20px);
 }
 .yjd-rich-editor .yjd-find-replace.open {
@@ -2928,7 +2918,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .rich-editor-toolbar-btn .icon svg path {
   fill: currentColor;
 }
-.yjd-rich-editor .rich-editor-toolbar-btn { color: var(--rte-muted, #6d7480); }
+.yjd-rich-editor .rich-editor-toolbar-btn { color: var(--rte-muted); }
 .yjd-rich-editor .rich-editor-toolbar-btn:hover { color: var(--rte-ink); }
 .yjd-rich-editor .rich-editor-toolbar-btn.active,
 .yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg,
@@ -3312,7 +3302,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
    ===================================================================== */
 .yjd-rich-editor[data-layout="prompt"] {
   border-radius: 26px !important; /* beat the `border-radius: var(--rte-radius) !important` base */
-  border: 1px solid var(--rte-border-strong, var(--rte-border));
+  border: 1px solid var(--rte-border-strong);
   box-shadow: 0 1px 2px rgba(20, 24, 47, 0.04), 0 8px 24px rgba(20, 24, 47, 0.06);
   overflow: visible;
   /* The base rule isolates the editor's stacking context; a prompt input's "+"
@@ -3448,7 +3438,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .rte-token-meter {
   align-self: center;
   margin: 0 4px 0 auto;
-  font: 500 11.5px/1 var(--rte-mono, ui-monospace, monospace);
+  font: 500 11.5px/1 var(--rte-mono);
   color: var(--rte-muted);
   white-space: nowrap;
 }
@@ -3584,7 +3574,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   overflow-y: auto;
   padding: 6px;
   background: var(--rte-bg, var(--rte-bg));
-  border: 1px solid var(--rte-border-strong, var(--rte-border));
+  border: 1px solid var(--rte-border-strong);
   border-radius: var(--rte-radius-md, 12px);
   box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.20), 0 2px 6px rgba(16, 18, 23, 0.06));
   font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -3649,7 +3639,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   width: 16px;
   height: 3px;
   border-radius: 2px;
-  background: var(--rte-ink, #15171c);
+  background: var(--rte-ink);
   pointer-events: none;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
 }
@@ -4034,8 +4024,8 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   white-space: nowrap;
 }
 .mention[data-trigger="#"] {
-  background: var(--rte-info-weak, #ebf3fd);
-  color: var(--rte-info, #1f6fdc);
+  background: var(--rte-info-weak);
+  color: var(--rte-info);
 }
 
 /* ── @mention autocomplete menu (v2.24) ───────────────────────────────────
@@ -4049,7 +4039,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   overflow-y: auto;
   padding: 6px;
   background: var(--rte-bg, var(--rte-bg));
-  border: 1px solid var(--rte-border-strong, var(--rte-border));
+  border: 1px solid var(--rte-border-strong);
   border-radius: var(--rte-radius-md, 12px);
   box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.20), 0 2px 6px rgba(16, 18, 23, 0.06));
   font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -4091,46 +4081,97 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-ai-bar {
   position: absolute;
   z-index: 2100;
-  width: 320px;
+  width: 232px;
   max-width: calc(100vw - 16px);
-  padding: 8px;
+  padding: 5px;
   background: var(--rte-bg, var(--rte-bg));
-  border: 1px solid var(--rte-border-strong, var(--rte-border));
-  border-radius: var(--rte-radius-md, 12px);
+  border: 1px solid var(--rte-border-strong);
+  border-radius: var(--rte-radius-md);
   box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.20), 0 2px 6px rgba(16, 18, 23, 0.06));
-  font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font: 13px/1.4 var(--rte-ui);
   color: var(--rte-ink, var(--rte-ink));
   animation: yjd-slash-in 90ms ease-out;
 }
-.yjd-ai-actions { display: flex; flex-wrap: wrap; gap: 4px; }
+/* Vertical menu list (UI 2.0): icon + label rows under a mono header. */
+.yjd-ai-head {
+  padding: 5px 8px 6px;
+  font-family: var(--rte-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rte-faint);
+}
+.yjd-ai-actions { display: flex; flex-direction: column; gap: 1px; }
 .yjd-ai-act {
-  flex: 1 1 auto;
-  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 9px;
   border: none;
   background: transparent;
-  border-radius: 8px;
+  border-radius: var(--rte-radius-sm);
   cursor: pointer;
   text-align: left;
   white-space: nowrap;
-  color: var(--rte-ink, var(--rte-ink));
+  color: var(--rte-ink-2);
   font: inherit;
+  font-size: 12.5px;
 }
-.yjd-ai-act:hover { background: var(--rte-accent-weak, var(--rte-accent-weak)); color: var(--rte-accent-ink, var(--rte-accent-ink)); }
-.yjd-ai-ask { margin-top: 6px; }
-.yjd-ai-input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 8px 10px;
-  border: 1px solid var(--rte-border-strong, var(--rte-border));
-  border-radius: 8px;
-  font: inherit;
-  color: var(--rte-ink, var(--rte-ink));
-  background: var(--rte-bg, var(--rte-bg));
+.yjd-ai-act:hover { background: var(--rte-chrome-2); color: var(--rte-ink, var(--rte-ink)); }
+.yjd-ai-act-ic {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  color: var(--rte-muted);
 }
-.yjd-ai-input:focus {
-  outline: none;
+.yjd-ai-act-ic svg { width: 14px; height: 14px; }
+.yjd-ai-act:hover .yjd-ai-act-ic { color: var(--rte-accent-ink, var(--rte-accent)); }
+.yjd-ai-act-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.yjd-ai-ask {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 5px;
+  padding: 6px 8px;
+  border: 1px solid var(--rte-border, var(--rte-border));
+  border-radius: var(--rte-radius-sm);
+  background: var(--rte-chrome, var(--rte-bg));
+  transition: border-color var(--rte-t), box-shadow var(--rte-t);
+}
+.yjd-ai-ask:focus-within {
   border-color: var(--rte-accent, var(--rte-accent));
-  box-shadow: 0 0 0 3px var(--rte-accent-ring, rgba(91, 91, 214, 0.24));
+  box-shadow: 0 0 0 3px var(--rte-accent-ring);
+  background: var(--rte-bg, #fff);
+}
+.yjd-ai-ask-ic {
+  flex: 0 0 auto;
+  display: inline-flex;
+  color: var(--rte-accent-ink, var(--rte-accent));
+}
+.yjd-ai-ask-ic svg { width: 13px; height: 13px; }
+.yjd-ai-input {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--rte-ink, var(--rte-ink));
+  background: transparent;
+}
+.yjd-ai-kbd {
+  flex: 0 0 auto;
+  font-family: var(--rte-mono);
+  font-size: 10.5px;
+  color: var(--rte-faint);
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-xs);
+  padding: 1px 5px;
 }
 .yjd-ai-result {
   max-height: 220px;
@@ -4142,13 +4183,13 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   white-space: pre-wrap;
   word-break: break-word;
 }
-.yjd-ai-result.is-error { background: var(--rte-danger-weak, #fdecec); color: var(--rte-danger, #d0343a); }
+.yjd-ai-result.is-error { background: var(--rte-danger-weak); color: var(--rte-danger); }
 .yjd-ai-foot { display: flex; gap: 6px; margin-top: 8px; }
 .yjd-ai-foot button {
   flex: 1 1 auto;
   padding: 6px 10px;
   border-radius: 8px;
-  border: 1px solid var(--rte-border-strong, var(--rte-border));
+  border: 1px solid var(--rte-border-strong);
   background: var(--rte-bg, var(--rte-bg));
   color: var(--rte-ink, var(--rte-ink));
   cursor: pointer;
@@ -4160,7 +4201,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   position: absolute;
   z-index: 1;
   pointer-events: none;
-  color: var(--rte-muted, #6d7480);
+  color: var(--rte-muted);
   white-space: pre;
   font: inherit;
 }
@@ -4175,16 +4216,16 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 }
 .yjd-ai-diff del.yjd-ai-del {
   text-decoration: line-through;
-  color: var(--rte-danger, #d0343a); background: var(--rte-danger-weak, #fdecec);
+  color: var(--rte-danger); background: var(--rte-danger-weak);
   border-radius: 3px; padding: 0 1px; cursor: pointer;
 }
 .yjd-ai-diff ins.yjd-ai-ins {
   text-decoration: none;
-  color: var(--rte-success, #0f8a5f); background: var(--rte-success-weak, #e7f5ef);
+  color: var(--rte-success); background: var(--rte-success-weak);
   border-radius: 3px; padding: 0 1px; cursor: pointer;
 }
 .yjd-ai-diff del.yjd-ai-off { text-decoration: none; color: inherit; background: transparent; } /* kept original */
-.yjd-ai-diff ins.yjd-ai-off { text-decoration: line-through; color: var(--rte-muted, #6d7480); background: transparent; } /* dropped addition */
+.yjd-ai-diff ins.yjd-ai-off { text-decoration: line-through; color: var(--rte-muted); background: transparent; } /* dropped addition */
 .yjd-ai-diffbar {
   position: absolute;
   z-index: 2147483000;
@@ -4192,14 +4233,14 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   gap: 8px;
   align-items: center;
   background: var(--rte-bg, #fff);
-  color: var(--rte-ink, #15171c);
-  border: 1px solid var(--rte-border-strong, #ced2d9);
-  border-radius: var(--rte-radius-md, 8px);
+  color: var(--rte-ink);
+  border: 1px solid var(--rte-border-strong);
+  border-radius: var(--rte-radius-md);
   padding: 6px 8px;
   box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.20), 0 2px 6px rgba(16, 18, 23, 0.06));
   font: 500 13px/1 system-ui, -apple-system, sans-serif;
 }
-.yjd-ai-diffbar .yjd-ai-diffhint { color: var(--rte-muted, #6d7480); font-size: 12px; }
+.yjd-ai-diffbar .yjd-ai-diffhint { color: var(--rte-muted); font-size: 12px; }
 
 /* streamMarkdown: a blinking caret at the end of the reply while it "types". */
 .yjd-md-stream::after {
@@ -4221,7 +4262,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   border-radius: 2px;
 }
 .yjd-ai-diffbar button {
-  border: 1px solid var(--rte-border, #e3e5ea);
+  border: 1px solid var(--rte-border);
   border-radius: 8px;
   padding: 5px 11px;
   font: 600 12.5px system-ui, sans-serif;
@@ -4319,8 +4360,8 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   vertical-align: baseline;
   padding: 3px 10px 3px 8px;
   margin: 0 1px;
-  border: 1px solid var(--rte-border, #e3e5ea);
-  border-radius: var(--rte-radius-md, 8px);
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-md);
   background: var(--rte-chrome-2);
   color: var(--rte-ink);
   text-decoration: none;
@@ -4416,11 +4457,11 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 /* ---------- Slash menu: header, icon tiles, shortcut chips ---------- */
 .yjd-slash-head {
   padding: 6px 8px 8px;
-  font-family: var(--rte-mono, ui-monospace, monospace);
+  font-family: var(--rte-mono);
   font-size: 10.5px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--rte-faint, var(--rte-muted));
+  color: var(--rte-faint);
 }
 .yjd-slash-item {
   gap: 10px;
@@ -4433,7 +4474,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   width: 26px;
   height: 26px;
   border: 1px solid var(--rte-border);
-  border-radius: var(--rte-radius-sm, 6px);
+  border-radius: var(--rte-radius-sm);
   background: var(--rte-bg);
   color: var(--rte-muted);
 }
@@ -4452,11 +4493,11 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-slash-key {
   flex: 0 0 auto;
   margin-left: auto;
-  font-family: var(--rte-mono, ui-monospace, monospace);
+  font-family: var(--rte-mono);
   font-size: 10.5px;
-  color: var(--rte-faint, var(--rte-muted));
+  color: var(--rte-faint);
   border: 1px solid var(--rte-border);
-  border-radius: var(--rte-radius-xs, 4px);
+  border-radius: var(--rte-radius-xs);
   padding: 1px 5px;
 }
 
@@ -4472,6 +4513,18 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   border-radius: 50%;
   object-fit: cover;
   flex: 0 0 auto;
+}
+.yjd-mention-initial {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 9.5px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 .yjd-mention-text {
   display: flex;
@@ -4491,6 +4544,18 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 }
 
 /* ---------- Colour picker: 8-col swatch grid + menu rows ---------- */
+.yjd-rich-editor .color-picker-popup {
+  width: 200px;
+  box-sizing: border-box;
+}
+.yjd-rich-editor .color-picker-head {
+  padding: 2px 2px 8px;
+  font-family: var(--rte-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rte-faint);
+}
 .yjd-rich-editor .color-grid {
   grid-template-columns: repeat(8, 1fr);
   gap: 4px;
@@ -4501,7 +4566,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   height: auto;
   aspect-ratio: 1;
   border: 1px solid var(--rte-border);
-  border-radius: var(--rte-radius-xs, 4px);
+  border-radius: var(--rte-radius-xs);
 }
 .yjd-rich-editor .color-button:hover {
   transform: none;
@@ -4522,10 +4587,10 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   gap: 9px;
   padding: 7px 9px;
   border: 0;
-  border-radius: var(--rte-radius-sm, 6px);
+  border-radius: var(--rte-radius-sm);
   background: transparent;
-  color: var(--rte-ink-2, var(--rte-ink));
-  font-family: var(--rte-ui, system-ui, sans-serif);
+  color: var(--rte-ink-2);
+  font-family: var(--rte-ui);
   font-size: 12.5px;
   cursor: pointer;
   transition: background var(--rte-t);
@@ -4560,7 +4625,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 }
 .yjd-rich-editor .table-size-display {
   margin-top: 8px;
-  font-family: var(--rte-mono, ui-monospace, monospace) !important;
+  font-family: var(--rte-mono) !important;
   font-size: 11px;
   color: var(--rte-muted) !important;
 }
@@ -4579,11 +4644,11 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   top: 4px;
   right: 4px;
   z-index: 1000;
-  font-family: var(--rte-mono, ui-monospace, monospace);
+  font-family: var(--rte-mono);
   font-size: 10px;
   color: var(--rte-accent-ink-on);
   background: var(--rte-accent);
-  border-radius: var(--rte-radius-xs, 4px);
+  border-radius: var(--rte-radius-xs);
   padding: 1px 5px;
   pointer-events: none;
   white-space: nowrap;
@@ -4607,12 +4672,148 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   border-radius: 20px;
   font-size: 11px;
   padding: 0 9px;
-  color: var(--rte-ink-2, var(--rte-ink));
+  color: var(--rte-ink-2);
 }
 .yjd-rich-editor .yjd-find-toggle.active {
   border-color: var(--rte-accent);
   background: var(--rte-accent-weak);
   color: var(--rte-accent-ink);
+}
+.yjd-rich-editor .yjd-find-opts { gap: 5px; }
+.yjd-rich-editor .yjd-find-regex { font-family: var(--rte-mono); }
+
+/* ---------- Link view bar: href · edit · copy · unlink ---------- */
+.link-bar {
+  position: absolute;
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 5px;
+  background: var(--rte-bg, #fff);
+  border: 1px solid var(--rte-border-strong);
+  border-radius: var(--rte-radius-md);
+  box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.20));
+  font-family: var(--rte-ui);
+}
+.link-bar.visible { display: inline-flex; }
+/* Popup containers are pointer-events:none by default; the bar re-enables. */
+.link-bar, .link-bar * { pointer-events: auto; }
+.link-bar-url {
+  font-size: 12px;
+  color: var(--rte-link);
+  text-decoration: none;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 6px;
+}
+.link-bar-url:hover { text-decoration: underline; }
+.link-bar-sep {
+  width: 1px;
+  height: 16px;
+  background: var(--rte-border);
+  margin: 0 2px;
+}
+.link-bar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: var(--rte-radius-sm);
+  background: transparent;
+  color: var(--rte-muted);
+  cursor: pointer;
+  transition: background var(--rte-t), color var(--rte-t);
+}
+.link-bar-btn svg { width: 14px; height: 14px; }
+.link-bar-btn:hover { background: var(--rte-chrome-2); color: var(--rte-ink); }
+.link-bar-copy.copied { color: var(--rte-success); }
+.link-bar-unlink { color: var(--rte-danger); }
+.link-bar-unlink:hover { background: var(--rte-danger-weak); color: var(--rte-danger); }
+
+/* ---------- Emoji picker: search + sections + category tabs ---------- */
+.yjd-rich-editor .emoji-picker-popup {
+  width: 264px;
+  box-sizing: border-box;
+  padding: 5px;
+}
+.yjd-rich-editor .emoji-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px 7px;
+  margin-bottom: 2px;
+  border-bottom: 1px solid var(--rte-border);
+  color: var(--rte-faint);
+  pointer-events: auto;
+}
+.yjd-rich-editor .emoji-search svg { width: 13px; height: 13px; flex: 0 0 auto; }
+.yjd-rich-editor .emoji-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-family: var(--rte-ui);
+  font-size: 12px;
+  color: var(--rte-ink);
+}
+.yjd-rich-editor .emoji-search input::placeholder { color: var(--rte-faint); }
+.yjd-rich-editor .emoji-head {
+  padding: 5px 8px 6px;
+  font-family: var(--rte-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rte-faint);
+}
+.yjd-rich-editor .emoji-picker-popup .emoji-grid {
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+  padding: 0 3px 4px;
+  max-height: 208px;
+}
+.yjd-rich-editor .emoji-picker-popup .emoji-button {
+  width: 100%;
+  height: 28px;
+  border-radius: var(--rte-radius-xs);
+}
+.yjd-rich-editor .emoji-empty {
+  grid-column: 1 / -1;
+  padding: 14px 0 16px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--rte-muted);
+}
+.yjd-rich-editor .emoji-cats {
+  display: flex;
+  justify-content: space-between;
+  gap: 2px;
+  padding: 5px 4px 1px;
+  border-top: 1px solid var(--rte-border);
+  pointer-events: auto;
+}
+.yjd-rich-editor .emoji-cat {
+  border: 0;
+  background: transparent;
+  font-size: 14px;
+  line-height: 1;
+  padding: 4px 5px;
+  border-radius: var(--rte-radius-xs);
+  cursor: pointer;
+  filter: grayscale(1);
+  opacity: 0.6;
+  transition: opacity var(--rte-t), background var(--rte-t);
+}
+.yjd-rich-editor .emoji-cat:hover { background: var(--rte-chrome-2); opacity: 0.9; }
+.yjd-rich-editor .emoji-cat.active {
+  background: var(--rte-accent-weak);
+  filter: none;
+  opacity: 1;
 }
 
 /* ---------- Floating bars: 28px buttons (design bubble metrics) ---------- */
@@ -4625,6 +4826,29 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+/* Table bar groups read as clusters: hairline divider between groups, and the
+   destructive commands carry the danger ink (UI 2.0). */
+.yjd-rich-editor .table-toolbar-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.yjd-rich-editor .table-toolbar-group + .table-toolbar-group {
+  border-left: 1px solid var(--rte-border);
+  margin-left: 5px;
+  padding-left: 5px;
+}
+.yjd-rich-editor .table-toolbar-btn[data-command="deleteTable"],
+.yjd-rich-editor .table-toolbar-btn[data-command="deleteRow"],
+.yjd-rich-editor .table-toolbar-btn[data-command="deleteCol"] {
+  color: var(--rte-danger);
+}
+.yjd-rich-editor .table-toolbar-btn[data-command="deleteTable"]:hover,
+.yjd-rich-editor .table-toolbar-btn[data-command="deleteRow"]:hover,
+.yjd-rich-editor .table-toolbar-btn[data-command="deleteCol"]:hover {
+  background: var(--rte-danger-weak);
+  color: var(--rte-danger);
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
