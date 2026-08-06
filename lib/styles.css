@@ -2510,7 +2510,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   padding: 0;
 }
 .yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group + .toolbar-group {
-  margin-left: 4px;
+  margin-left: var(--rte-gap, 6px);
 }
 /* Overflow rows: spacing comes ONLY from the row's flex gap (the packer's
    invariant) — the divider rides inside the group, no extra margin. */
@@ -2522,8 +2522,9 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   width: 1px;
   height: 20px;
   background: var(--rte-border);
-  /* + the group's own 2px gap = 4px on the trailing side, matching the lead. */
-  margin-right: 2px;
+  /* Trailing side = this margin + the group's own 2px flex gap, so it lands on
+     exactly --rte-gap — matching the token-driven lead side. */
+  margin-right: max(0px, calc(var(--rte-gap, 6px) - 2px));
 }
 /* No divider before the right-aligned AI cluster — the spacer separates it. */
 .yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group:has(> .ai-btn)::before {
@@ -3834,7 +3835,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
     flex: 0 0 auto;
   }
   .yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group + .toolbar-group {
-    margin-left: 8px;
+    margin-left: var(--rte-gap, 6px);
   }
   .yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group + .toolbar-group::before {
     content: none;
@@ -3929,7 +3930,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
      pathologically narrow editors where a single group is wider than the row —
      the group drops to a second line instead of scrolling sideways. */
   flex-wrap: wrap;
-  gap: 4px;                  /* group spacing; the JS packer budgets this exact value
+  gap: var(--rte-gap, 6px);  /* group spacing; the JS packer reads the same token
                                 (dividers live inside the groups as ::before) */
   padding: 8px 16px;         /* horizontal padding is overwritten inline to match row 1 */
   min-height: 48px;
