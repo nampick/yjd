@@ -4465,13 +4465,20 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   color: var(--rte-bg) !important;
   border-color: transparent;
 }
+/* Pressed glyphs: paper-coloured STROKES — outline icons must keep fill:none
+   (a blanket fill turned B/U into solid blobs). Dot glyphs (fill=currentColor)
+   are re-filled separately below. */
 .yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg,
 .yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg path,
-.yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg [fill],
 .yjd-rich-editor .block-toolbar-btn.active .icon svg,
 .yjd-rich-editor .block-toolbar-btn.active .icon svg path {
   color: var(--rte-bg) !important;
+  fill: none !important;
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg [fill="currentColor"],
+.yjd-rich-editor .block-toolbar-btn.active .icon svg [fill="currentColor"] {
   fill: var(--rte-bg) !important;
+  stroke: none !important;
 }
 
 /* Hover = chrome-3 (v2) for icon buttons in the chrome + floating bars. */
