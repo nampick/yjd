@@ -118,6 +118,33 @@ component layouts and redrawn glyphs on top of the 2.12.0 token pass.
   `<details class="yjd-toggle"><summary>` — the collapse state serializes and
   works in the read view for free; chevron rotates on open.
 
+- **Design revision v2 sync** (the updated claude.ai/design spec):
+  - **Toolbar recomposed**: sixteen primary tools (history · heading ·
+    B I U S · colour + highlight · list + align · link/image/table); everything
+    else folds into a **counted overflow** — the "⋯ +N" bordered toggle shows
+    how many tools are behind it and stays pressed while open. The overflow is
+    ONE horizontally-scrollable chrome-2 row with a mono "⌄ OVERFLOW" label
+    (never a multi-row stack). Right cluster order: ⋯ +N · divider · Ask AI.
+  - **Active state = ink fill**: pressed toolbar/bubble buttons now invert
+    (ink background, paper glyph) instead of the accent wash; hover moves to
+    `--rte-chrome-3`; toolbar glyphs render at 1.9 stroke (registry family
+    stays 1.75 for menus/pickers).
+  - **14 icons redrawn** to the revision (undo/redo corner-arrows, image,
+    video, emoji, file, superscript/subscript, clear-format, capitalization,
+    line-height, indents) + a dedicated `text-align` trigger glyph; titles
+    carry shortcuts (Undo · ⌘Z, Bold · ⌘B, Link · ⌘K, …).
+  - **Selects per the new spec**: toolbar triggers 13px/400 with fixed hug
+    widths (heading 112px, font 106px, size 58px), no lead icons, pressed
+    `.open` state while their popup is showing; popups use the 4px listbox
+    shell with a mono group header, chrome-3 hover and accent-weak current.
+  - **Colour picker rebuilt to the revision**: the classic 30-colour 6-column
+    grid returns, with a bottom utility row — no-colour · white · black ·
+    custom — plus a mono hex readout of the last pick; 236px shell,
+    strong-border popover, accent ring on hover.
+- **Real-browser QA fixes** (headed Chromium): letter-spacing picker had an
+  unstyled bespoke popup class and lost the selection before applying — now
+  reuses the styled shell and applies to blocks captured at open.
+
 ### Fixed
 - **Dark mode: native white buttons in find & replace.** A legacy
   `background: 0 0` let Chromium paint the UA's native button face (white) on

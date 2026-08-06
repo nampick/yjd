@@ -2526,14 +2526,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
      exactly --rte-gap — matching the token-driven lead side. */
   margin-right: max(0px, calc(var(--rte-gap, 6px) - 2px));
 }
-/* No divider before the right-aligned AI cluster — the spacer separates it. */
-.yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group:has(> .ai-btn)::before {
-  content: none;
-}
-.yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group:has(> .ai-btn) {
-  border-left: 0;
-  padding-left: 0;
-}
+
 
 /* ---------- Buttons (toolbar + dropdown triggers) ---------- */
 .yjd-rich-editor .rich-editor-toolbar-btn,
@@ -4456,6 +4449,99 @@ body.yjd-fullscreen-lock { overflow: hidden; }
    Appended after the earlier sections so these rules win.
    ===================================================================== */
 
+/* =====================================================================
+   UI 2.0 v2 — design revision (colour setup, counted overflow, states)
+   ===================================================================== */
+
+/* Toolbar icons render at 1.9 stroke in the chrome bar (the registry family
+   stays 1.75 for menus/slash/pickers per the iconography spec). */
+.yjd-rich-editor .rich-editor-toolbar-btn .icon svg {
+  stroke-width: 1.9;
+}
+
+/* Active toolbar state = ink fill (v2), not the accent wash. */
+.yjd-rich-editor .rich-editor-toolbar-btn.active,
+.yjd-rich-editor .block-toolbar-btn.active {
+  background: var(--rte-ink) !important;
+  color: var(--rte-bg) !important;
+  border-color: transparent;
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg,
+.yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg path,
+.yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg [fill],
+.yjd-rich-editor .block-toolbar-btn.active .icon svg,
+.yjd-rich-editor .block-toolbar-btn.active .icon svg path {
+  color: var(--rte-bg) !important;
+  fill: var(--rte-bg) !important;
+}
+
+/* Hover = chrome-3 (v2) for icon buttons in the chrome + floating bars. */
+.yjd-rich-editor .rich-editor-toolbar-btn:hover {
+  background: var(--rte-chrome-3) !important;
+}
+.yjd-rich-editor .block-toolbar-btn:hover,
+.yjd-rich-editor .table-toolbar-btn:hover {
+  background: var(--rte-chrome-3);
+}
+.yjd-rich-editor .block-toolbar-btn,
+.yjd-rich-editor .table-toolbar-btn { color: var(--rte-ink-2); }
+
+/* Counted overflow toggle: bordered pill "⋯ +N"; pressed while open. */
+.yjd-rich-editor .rich-editor-toolbar-btn.more-btn {
+  width: auto;
+  min-width: var(--rte-ctl, 30px);
+  padding: 0 8px;
+  gap: 5px;
+  border: 1px solid var(--rte-border);
+  color: var(--rte-muted);
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.more-btn .rte-more-count {
+  font-family: var(--rte-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.more-btn .rte-more-count:empty { display: none; }
+.yjd-rich-editor .rich-editor-toolbar-btn.more-btn.open,
+.yjd-rich-editor .rich-editor-toolbar-btn.more-btn.active {
+  background: var(--rte-chrome-2) !important;
+  color: var(--rte-ink) !important;
+  border-color: var(--rte-border-strong);
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.more-btn.active .icon svg {
+  color: var(--rte-ink) !important;
+  fill: var(--rte-ink) !important;
+}
+
+/* Overflow row (v2): ONE horizontal-scroll row on chrome-2 with a label. */
+.yjd-rich-editor .rich-editor-toolbar-2 { background: var(--rte-chrome-2); }
+.yjd-rich-editor .rich-editor-toolbar-2-row.yjd-noscroll {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.yjd-rich-editor .rich-editor-toolbar-2-row.yjd-noscroll::-webkit-scrollbar { display: none; }
+.yjd-rich-editor .rich-editor-toolbar-2-row .toolbar-group { flex: 0 0 auto; }
+.yjd-rich-editor .rte-overflow-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  margin-right: 6px;
+  font-family: var(--rte-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rte-faint);
+  white-space: nowrap;
+}
+.yjd-rich-editor .rte-overflow-label svg { width: 12px; height: 12px; }
+/* Overflow buttons hover on chrome-3; dividers use the strong border there. */
+.yjd-rich-editor .rich-editor-toolbar-2-row .toolbar-group + .toolbar-group::before {
+  background: var(--rte-border-strong);
+}
+
 /* ---------- Toolbar selects: quiet by default (design recipe) ----------
    The design's chrome-bar select has NO border and NO fill at rest — the
    chrome-2 wash and hairline border only appear on hover. */
@@ -4463,15 +4549,55 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   border-color: transparent;
   background: transparent;
   color: var(--rte-ink);
-  font-size: 12.5px;
-  font-weight: 450;
-  gap: 8px;
+  font-size: 13px;
+  font-weight: 400;
+  gap: 6px;
+  padding: 0 5px 0 8px;
+  justify-content: space-between;
 }
 .yjd-rich-editor .rich-editor-toolbar-container .custom-select-button:hover {
   background: var(--rte-chrome-2);
   border-color: var(--rte-border);
 }
-.yjd-rich-editor .custom-select-button .dropdown-icon { color: var(--rte-faint); }
+/* Trigger stays pressed while its popup is open (v2 select spec). */
+.yjd-rich-editor .rich-editor-toolbar-container .custom-select-button.open {
+  background: var(--rte-chrome-2);
+  border-color: var(--rte-border-strong);
+}
+.yjd-rich-editor .custom-select-button .dropdown-icon { color: var(--rte-muted); }
+
+/* Select popup (v2 listbox recipe): 4px padding, mono group header, compact
+   options — hover chrome-3, current = accent wash + 500 with the check right. */
+.yjd-rich-editor .custom-select-popup,
+.yjd-rich-editor .heading-select-popup,
+.yjd-rich-editor .capitalization-select-popup,
+.yjd-rich-editor .font-family-select-popup,
+.yjd-rich-editor .line-height-select-popup,
+.yjd-rich-editor .text-size-select-popup {
+  padding: 4px;
+}
+.yjd-rich-editor .custom-select-header {
+  padding: 6px 8px 5px;
+  font-family: var(--rte-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rte-faint);
+}
+.yjd-rich-editor .custom-select-item-button {
+  padding: 6px 8px;
+  font-size: 12.5px;
+  color: var(--rte-ink-2);
+}
+.yjd-rich-editor .custom-select-item-button:hover {
+  background: var(--rte-chrome-3);
+  color: var(--rte-ink);
+}
+.yjd-rich-editor .custom-select-item-button.current {
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
+  font-weight: 500;
+}
 
 /* ---------- Ask AI pill (toolbar) ---------- */
 .yjd-rich-editor .rich-editor-toolbar-btn .rte-btn-label {
@@ -4492,14 +4618,20 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   color: var(--rte-accent-ink);
   border-color: var(--rte-accent);
 }
-/* The AI group is right-aligned (design: AI affordances live on the right).
-   It takes over the auto margin, so the "More" button after it collapses to a
-   tight gap — otherwise two auto margins would split the free space. */
-.yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group:has(> .ai-btn) {
-  margin-left: auto;
+/* v2 right cluster: the "⋯ +N" toggle carries the auto margin; the AI group
+   follows it with a hairline divider and sits outermost right. */
+.yjd-rich-editor .rich-editor-toolbar-1 .more-btn + .toolbar-group:has(> .ai-btn) {
+  display: inline-flex;
+  margin-left: 0;
 }
-.yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group:has(> .ai-btn) ~ .more-btn {
-  margin-left: 12px !important;
+.yjd-rich-editor .rich-editor-toolbar-1 .more-btn + .toolbar-group:has(> .ai-btn)::before {
+  content: '';
+  flex: 0 0 auto;
+  align-self: center;
+  width: 1px;
+  height: 20px;
+  background: var(--rte-border);
+  margin: 0 max(0px, calc(var(--rte-gap, 6px) - 2px)) 0 var(--rte-gap, 6px);
 }
 
 /* ---------- Slash menu: header, icon tiles, shortcut chips ---------- */
@@ -4591,10 +4723,12 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   white-space: nowrap;
 }
 
-/* ---------- Colour picker: 8-col swatch grid + menu rows ---------- */
+/* ---------- Colour picker (UI 2.0 v2): 6-col grid + utility row + hex ---------- */
 .yjd-rich-editor .color-picker-popup {
-  width: 200px;
+  width: 236px;
   box-sizing: border-box;
+  padding: 8px;
+  border: 1px solid var(--rte-border-strong);
 }
 .yjd-rich-editor .color-picker-head {
   padding: 2px 2px 8px;
@@ -4605,48 +4739,60 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   color: var(--rte-faint);
 }
 .yjd-rich-editor .color-grid {
-  grid-template-columns: repeat(8, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 4px;
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 .yjd-rich-editor .color-button {
   width: 100%;
   height: auto;
   aspect-ratio: 1;
-  border: 1px solid var(--rte-border);
+  border: 1px solid rgba(21, 23, 28, 0.16);
   border-radius: var(--rte-radius-xs);
 }
 .yjd-rich-editor .color-button:hover {
   transform: none;
   border-color: var(--rte-border-strong);
-  box-shadow: 0 0 0 2px var(--rte-accent-ring);
+  box-shadow: 0 0 0 2px var(--rte-bg), 0 0 0 3.5px var(--rte-accent);
 }
+/* Bottom utility row: no-colour · white · black · custom · spacer · hex. */
 .yjd-rich-editor .custom-color-container {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 1px;
-  padding-top: 6px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
   border-top: 1px solid var(--rte-border);
 }
 .yjd-rich-editor .custom-color-container::before { content: none; }
-.yjd-rich-editor .color-menu-row {
+.yjd-rich-editor .custom-color-container .color-button {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  aspect-ratio: auto;
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 7px 9px;
-  border: 0;
+  justify-content: center;
+  border: 1px solid var(--rte-border-strong);
   border-radius: var(--rte-radius-sm);
   background: transparent;
-  color: var(--rte-ink-2);
-  font-family: var(--rte-ui);
-  font-size: 12.5px;
-  cursor: pointer;
-  transition: background var(--rte-t);
-  text-align: start;
+  color: var(--rte-muted);
+  padding: 0;
 }
-.yjd-rich-editor .color-menu-row:hover { background: var(--rte-chrome-2); }
-.yjd-rich-editor .color-menu-row .icon { color: var(--rte-muted); }
-/* The hidden <input type=color> must not take layout space in the row list. */
+.yjd-rich-editor .custom-color-container .white-button { background: #ffffff; }
+.yjd-rich-editor .custom-color-container .black-button {
+  background: #000000;
+  border-color: rgba(21, 23, 28, 0.22);
+}
+.yjd-rich-editor .custom-color-container .custom-color-button { color: var(--rte-ink-2); }
+.yjd-rich-editor .color-row-spacer { flex: 1; }
+.yjd-rich-editor .color-hex-readout {
+  font-family: var(--rte-mono);
+  font-size: 10px;
+  color: var(--rte-faint);
+}
+/* The hidden <input type=color> must not take layout space in the row. */
 .yjd-rich-editor .custom-color-input {
   position: absolute;
   width: 0;
