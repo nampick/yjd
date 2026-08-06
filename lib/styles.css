@@ -90,6 +90,10 @@
   .yjd-rich-editor .rich-editor-toolbar-container .ai-btn {
     font: normal 500 12.5px/1.4 var(--rte-ui) !important;
   }
+  /* Toolbar select triggers (heading / font / size): 13px/400 per design. */
+  .yjd-rich-editor .rich-editor-toolbar-container .custom-select-button {
+    font: normal 400 13px/1.4 var(--rte-ui) !important;
+  }
   .yjd-rich-editor .rich-editor-popup-container .yjd-button-confirm,
   .yjd-rich-editor .rich-editor-popup-container .yjd-button-cancel,
   .yjd-rich-editor .rich-editor-popup-container .link-popup-apply {
