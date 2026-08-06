@@ -145,6 +145,14 @@ component layouts and redrawn glyphs on top of the 2.12.0 token pass.
   unstyled bespoke popup class and lost the selection before applying — now
   reuses the styled shell and applies to blocks captured at open.
 
+- **Side panel (the design's right rail)** — new opt-in module `side-panel`
+  (`sidePanel: true`): **Outline** (live H1–H3 tree, click-to-scroll),
+  **Comments** (selection-anchored `data-comment-id` marks + thread cards;
+  `addComment()/removeComment()/get/setComments()` and
+  `comment:add/remove/click` events) and **Versions** (manual snapshots via
+  `saveVersion(label)`, one-click restore, `get/setVersions()`). The rail
+  lives outside the content DOM; only the comment marks serialize.
+
 ### Fixed
 - **Dark mode: native white buttons in find & replace.** A legacy
   `background: 0 0` let Chromium paint the UA's native button face (white) on

@@ -4481,13 +4481,38 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   stroke: none !important;
 }
 
-/* Hover = chrome-3 (v2) for icon buttons in the chrome + floating bars. */
-.yjd-rich-editor .rich-editor-toolbar-btn:hover {
+/* Hover = chrome-3 (v2) for icon buttons in the chrome + floating bars.
+   An ACTIVE tool ignores hover entirely — it's already in its pressed state. */
+.yjd-rich-editor .rich-editor-toolbar-btn:not(.active):hover {
   background: var(--rte-chrome-3) !important;
 }
-.yjd-rich-editor .block-toolbar-btn:hover,
-.yjd-rich-editor .table-toolbar-btn:hover {
+.yjd-rich-editor .block-toolbar-btn:not(.active):hover,
+.yjd-rich-editor .table-toolbar-btn:not(.active):hover {
   background: var(--rte-chrome-3);
+}
+/* Pin the pressed look through hover (beats every legacy :hover rule). */
+.yjd-rich-editor .rich-editor-toolbar-btn.active:not(.more-btn):hover,
+.yjd-rich-editor .block-toolbar-btn.active:hover {
+  background: var(--rte-ink) !important;
+  color: var(--rte-bg) !important;
+  border-color: transparent !important;
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.active:not(.more-btn):hover .icon svg,
+.yjd-rich-editor .rich-editor-toolbar-btn.active:not(.more-btn):hover .icon svg path,
+.yjd-rich-editor .block-toolbar-btn.active:hover .icon svg,
+.yjd-rich-editor .block-toolbar-btn.active:hover .icon svg path {
+  color: var(--rte-bg) !important;
+  stroke: var(--rte-bg) !important;
+  fill: none !important;
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.active:not(.more-btn):hover .icon svg [fill="currentColor"] {
+  fill: var(--rte-bg) !important;
+  stroke: none !important;
+}
+/* The open "⋯ N" toggle keeps its own pressed chrome on hover. */
+.yjd-rich-editor .rich-editor-toolbar-btn.more-btn.active:hover {
+  background: var(--rte-chrome-2) !important;
+  color: var(--rte-ink) !important;
 }
 .yjd-rich-editor .block-toolbar-btn,
 .yjd-rich-editor .table-toolbar-btn { color: var(--rte-ink-2); }
@@ -4989,6 +5014,192 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .rich-editor-area .yjd-toggle > :not(summary),
 .yjd-content .yjd-toggle > :not(summary) {
   margin-left: 22px;
+}
+
+/* ---------- Side panel: Outline · Comments · Versions (UI 2.0 rail) ---------- */
+.yjd-rich-editor .yjd-side-layout {
+  display: flex;
+  align-items: stretch;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.yjd-rich-editor .yjd-side-layout > .rich-editor-area { flex: 1 1 auto; min-width: 0; }
+.yjd-rich-editor .yjd-side-panel {
+  flex: 0 0 268px;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--rte-border);
+  background: var(--rte-chrome);
+  min-height: 0;
+}
+.yjd-rich-editor .yjd-side-tabs {
+  display: flex;
+  gap: 1px;
+  padding: 8px;
+  border-bottom: 1px solid var(--rte-border);
+}
+.yjd-rich-editor .yjd-side-tab {
+  flex: 1;
+  height: 26px;
+  border: 0;
+  border-radius: var(--rte-radius-sm);
+  background: transparent;
+  color: var(--rte-muted);
+  font-family: var(--rte-ui);
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--rte-t);
+}
+.yjd-rich-editor .yjd-side-tab:hover { background: var(--rte-chrome-2); }
+.yjd-rich-editor .yjd-side-tab.active {
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
+}
+.yjd-rich-editor .yjd-side-body {
+  flex: 1;
+  padding: 12px 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.yjd-rich-editor .yjd-side-empty {
+  padding: 18px 8px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--rte-faint);
+  text-align: center;
+}
+/* Outline rows */
+.yjd-rich-editor .yjd-side-outline-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: var(--rte-radius-sm);
+  background: transparent;
+  color: var(--rte-muted);
+  font-family: var(--rte-ui);
+  font-size: 12px;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.yjd-rich-editor .yjd-side-outline-row.lvl-1 { color: var(--rte-ink); font-weight: 500; font-size: 12.5px; }
+.yjd-rich-editor .yjd-side-outline-row.lvl-2 { padding-left: 21px; }
+.yjd-rich-editor .yjd-side-outline-row.lvl-3 { padding-left: 34px; }
+.yjd-rich-editor .yjd-side-outline-row:hover { background: var(--rte-chrome-2); }
+.yjd-rich-editor .yjd-side-tag {
+  flex: 0 0 auto;
+  font-family: var(--rte-mono);
+  font-size: 9.5px;
+  color: var(--rte-faint);
+}
+.yjd-rich-editor .yjd-side-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Comment cards */
+.yjd-rich-editor .yjd-side-comment {
+  padding: 10px;
+  margin-bottom: 8px;
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-md);
+  background: var(--rte-bg);
+  cursor: pointer;
+}
+.yjd-rich-editor .yjd-side-comment.focus {
+  border-color: var(--rte-border-strong);
+  box-shadow: var(--rte-shadow-sm);
+}
+.yjd-rich-editor .yjd-side-comment-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 7px;
+}
+.yjd-rich-editor .yjd-side-avatar {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--rte-accent);
+  color: var(--rte-accent-ink-on);
+  font-size: 8.5px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.yjd-rich-editor .yjd-side-who { font-size: 12px; font-weight: 500; color: var(--rte-ink); flex: 1; }
+.yjd-rich-editor .yjd-side-time { font-size: 10.5px; color: var(--rte-faint); }
+.yjd-rich-editor .yjd-side-x {
+  border: 0;
+  background: transparent;
+  color: var(--rte-faint);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: var(--rte-radius-xs);
+}
+.yjd-rich-editor .yjd-side-x:hover { background: var(--rte-danger-weak); color: var(--rte-danger); }
+.yjd-rich-editor .yjd-side-quote {
+  font-size: 11.5px;
+  color: var(--rte-muted);
+  border-left: 2px solid var(--rte-quote-border);
+  padding-left: 7px;
+  margin-bottom: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.yjd-rich-editor .yjd-side-text { font-size: 12px; line-height: 1.5; color: var(--rte-ink-2); }
+/* Version rows */
+.yjd-rich-editor .yjd-side-version {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 8px;
+  border: 0;
+  border-top: 1px solid var(--rte-hairline);
+  background: transparent;
+  border-radius: var(--rte-radius-sm);
+  font-family: var(--rte-ui);
+  cursor: pointer;
+  text-align: left;
+}
+.yjd-rich-editor .yjd-side-version:first-child { border-top: 0; }
+.yjd-rich-editor .yjd-side-version:hover { background: var(--rte-chrome-2); }
+.yjd-rich-editor .yjd-side-version.current { background: var(--rte-accent-weak); }
+.yjd-rich-editor .yjd-side-v { font-family: var(--rte-mono); font-size: 11px; color: var(--rte-muted); }
+.yjd-rich-editor .yjd-side-version.current .yjd-side-v { color: var(--rte-accent-ink); }
+.yjd-rich-editor .yjd-side-vwho { font-size: 12px; color: var(--rte-ink-2); }
+.yjd-rich-editor .yjd-side-spacer { flex: 1; }
+.yjd-rich-editor .yjd-side-vtag {
+  font-size: 10px;
+  color: var(--rte-muted);
+  border: 1px solid var(--rte-border);
+  border-radius: 20px;
+  padding: 1px 6px;
+}
+.yjd-rich-editor .yjd-side-vtime { font-size: 10.5px; color: var(--rte-faint); font-family: var(--rte-mono); }
+/* Comment marks in the content */
+.yjd-rich-editor .yjd-comment-mark,
+.yjd-content .yjd-comment-mark {
+  background: var(--rte-warning-weak);
+  border-bottom: 1.5px solid var(--rte-warning);
+  border-radius: 2px 2px 0 0;
+  padding: 1px 0;
+  cursor: pointer;
+}
+/* The rail collapses on narrow editors. */
+@media (max-width: 720px) {
+  .yjd-rich-editor .yjd-side-panel { display: none; }
 }
 
 /* ---------- Block gutter: drag handle + plus (UI 2.0 editor surface) ---------- */

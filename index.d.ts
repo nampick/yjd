@@ -380,6 +380,11 @@ export interface EditorOptions {
    * the page); see also the exported `registerIcons` and `RichEditor.registerIcons`.
    */
   icons?: Record<string, string>;
+  /**
+   * Right rail with Outline · Comments · Versions tabs (UI 2.0). `true` for
+   * all three, or pick tabs: { tabs: ['outline','comments'] }. Off by default.
+   */
+  sidePanel?: boolean | { tabs?: Array<'outline' | 'comments' | 'versions'> };
   features?: {
     emoji?: boolean;
     image?: boolean;
@@ -498,6 +503,17 @@ export class Editor {
   printContent(): void;
   /** Download the document as a styled HTML file, or Markdown with `'md'`. */
   downloadContent(format?: 'html' | 'md'): void;
+  /** Headings (H1–H3) in document order — needs the side-panel module. */
+  getOutline(): Array<{ level: number; text: string; el: HTMLElement }>;
+  /** Wrap the selection in a comment mark and store the thread. Returns the id. */
+  addComment(body: string, author?: string): string | null;
+  removeComment(id: string): void;
+  getComments(): Array<{ id: string; body: string; author: string; quote: string; time: number }>;
+  setComments(list: Array<{ id: string; body: string; author: string; quote: string; time: number }>): void;
+  /** Snapshot the current document into the Versions tab. */
+  saveVersion(label?: string): { v: string; label: string; html: string; words: number; time: number };
+  getVersions(): Array<{ v: string; label: string; html: string; words: number; time: number }>;
+  setVersions(list: Array<{ v: string; label: string; html: string; words: number; time: number }>): void;
   insertImageFile(file: File): void;
   /** Insert a non-image File as a file chip (uses options.file.upload). */
   insertFileAttachment(file: File): void;
