@@ -4456,6 +4456,23 @@ body.yjd-fullscreen-lock { overflow: hidden; }
    Appended after the earlier sections so these rules win.
    ===================================================================== */
 
+/* ---------- Toolbar selects: quiet by default (design recipe) ----------
+   The design's chrome-bar select has NO border and NO fill at rest — the
+   chrome-2 wash and hairline border only appear on hover. */
+.yjd-rich-editor .rich-editor-toolbar-container .custom-select-button {
+  border-color: transparent;
+  background: transparent;
+  color: var(--rte-ink);
+  font-size: 12.5px;
+  font-weight: 450;
+  gap: 8px;
+}
+.yjd-rich-editor .rich-editor-toolbar-container .custom-select-button:hover {
+  background: var(--rte-chrome-2);
+  border-color: var(--rte-border);
+}
+.yjd-rich-editor .custom-select-button .dropdown-icon { color: var(--rte-faint); }
+
 /* ---------- Ask AI pill (toolbar) ---------- */
 .yjd-rich-editor .rich-editor-toolbar-btn .rte-btn-label {
   font-size: 12.5px;
