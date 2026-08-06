@@ -1434,8 +1434,10 @@
 .yjd-rich-editor .image-popup-content {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 16px;
+  /* The popup shell itself carries the design's 14px padding; element
+     margins (title 12px, labels 5px, button row 14px) set the rhythm. */
+  gap: 0;
+  padding: 0;
 }
 
 
@@ -1477,8 +1479,10 @@
 .yjd-rich-editor .video-popup-content {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 16px;
+  /* The popup shell itself carries the design's 14px padding; element
+     margins (title 12px, labels 5px, button row 14px) set the rhythm. */
+  gap: 0;
+  padding: 0;
 }
 
 .yjd-rich-editor .video-input-container {
@@ -1562,8 +1566,10 @@
 .yjd-rich-editor .tag-popup-content {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 16px;
+  /* The popup shell itself carries the design's 14px padding; element
+     margins (title 12px, labels 5px, button row 14px) set the rhythm. */
+  gap: 0;
+  padding: 0;
 }
 
 
@@ -1627,7 +1633,7 @@
 }
 
 .yjd-rich-editor .import-popup-content {
-  padding: 20px;
+  padding: 0;
 }
 
 .yjd-rich-editor .import-popup-title {
