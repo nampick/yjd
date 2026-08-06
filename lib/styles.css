@@ -4750,6 +4750,134 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   background: var(--rte-accent-weak);
 }
 
+/* ---------- Callout block (UI 2.0) ---------- */
+.yjd-rich-editor .rich-editor-area .yjd-callout,
+.yjd-content .yjd-callout {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  margin: 12px 0;
+  border: 1px solid rgba(31, 111, 220, 0.22);
+  border-radius: var(--rte-radius-md);
+  background: var(--rte-info-weak);
+}
+.yjd-rich-editor .rich-editor-area .yjd-callout::before,
+.yjd-content .yjd-callout::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 17px;
+  height: 17px;
+  margin-top: 3px;
+  background: var(--rte-info);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Ccircle%20cx='12'%20cy='12'%20r='9'/%3E%3Cpath%20d='M12%2016v-5'/%3E%3Cpath%20d='M12%208h.01'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Ccircle%20cx='12'%20cy='12'%20r='9'/%3E%3Cpath%20d='M12%2016v-5'/%3E%3Cpath%20d='M12%208h.01'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.yjd-rich-editor .rich-editor-area .yjd-callout > p,
+.yjd-content .yjd-callout > p {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  font-size: 0.92em;
+  line-height: 1.6;
+  color: var(--rte-ink-2);
+}
+.yjd-callout[data-callout="success"] { background: var(--rte-success-weak) !important; border-color: rgba(15, 138, 95, 0.24) !important; }
+.yjd-callout[data-callout="success"]::before { background: var(--rte-success) !important; }
+.yjd-callout[data-callout="warning"] { background: var(--rte-warning-weak) !important; border-color: rgba(168, 101, 0, 0.26) !important; }
+.yjd-callout[data-callout="warning"]::before { background: var(--rte-warning) !important; }
+.yjd-callout[data-callout="danger"] { background: var(--rte-danger-weak) !important; border-color: rgba(208, 52, 58, 0.26) !important; }
+.yjd-callout[data-callout="danger"]::before { background: var(--rte-danger) !important; }
+
+/* ---------- Toggle block (UI 2.0, native details/summary) ---------- */
+.yjd-rich-editor .rich-editor-area .yjd-toggle,
+.yjd-content .yjd-toggle {
+  margin: 12px 0;
+  padding: 2px 0;
+}
+.yjd-rich-editor .rich-editor-area .yjd-toggle > summary,
+.yjd-content .yjd-toggle > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+  border-radius: var(--rte-radius-sm);
+  padding: 2px 4px;
+}
+.yjd-rich-editor .rich-editor-area .yjd-toggle > summary::-webkit-details-marker { display: none; }
+.yjd-rich-editor .rich-editor-area .yjd-toggle > summary::before,
+.yjd-content .yjd-toggle > summary::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  background: var(--rte-faint);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='m9%2018%206-6-6-6'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='m9%2018%206-6-6-6'/%3E%3C/svg%3E") center / contain no-repeat;
+  transition: transform var(--rte-t);
+}
+.yjd-rich-editor .rich-editor-area .yjd-toggle[open] > summary::before,
+.yjd-content .yjd-toggle[open] > summary::before {
+  transform: rotate(90deg);
+}
+.yjd-rich-editor .rich-editor-area .yjd-toggle > :not(summary),
+.yjd-content .yjd-toggle > :not(summary) {
+  margin-left: 22px;
+}
+
+/* ---------- Block gutter: drag handle + plus (UI 2.0 editor surface) ---------- */
+/* The design reserves a left gutter for the handles — widen the content's
+   left padding while the module is active (desktop pointers only). */
+@media (hover: hover) and (pointer: fine) {
+  .yjd-rich-editor.yjd-has-block-handles .rich-editor-area {
+    padding-left: 64px;
+  }
+}
+.yjd-rich-editor .yjd-block-gutter {
+  position: absolute;
+  z-index: 998;
+  display: inline-flex;
+  gap: 1px;
+  opacity: 0.55;
+  transition: opacity var(--rte-t);
+  pointer-events: auto;
+}
+.yjd-rich-editor .yjd-block-gutter:hover { opacity: 1; }
+.yjd-rich-editor .yjd-block-gutter.dragging { opacity: 1; }
+.yjd-rich-editor .yjd-block-drag,
+.yjd-rich-editor .yjd-block-plus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 20px;
+  border: 0;
+  border-radius: var(--rte-radius-xs);
+  background: transparent;
+  color: var(--rte-faint);
+  cursor: pointer;
+  padding: 0;
+}
+.yjd-rich-editor .yjd-block-drag { cursor: grab; }
+.yjd-rich-editor .yjd-block-gutter.dragging .yjd-block-drag { cursor: grabbing; }
+.yjd-rich-editor .yjd-block-drag:hover,
+.yjd-rich-editor .yjd-block-plus:hover {
+  background: var(--rte-chrome-2);
+  color: var(--rte-muted);
+}
+.yjd-rich-editor .yjd-block-drag svg,
+.yjd-rich-editor .yjd-block-plus svg { width: 14px; height: 14px; }
+.yjd-rich-editor .yjd-drop-indicator {
+  position: absolute;
+  z-index: 999;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--rte-accent);
+  pointer-events: none;
+}
+.yjd-rich-editor .yjd-block-dragging { opacity: 0.4; }
+
 /* ---------- Code-block tools: language label + Copy chip ---------- */
 .yjd-rich-editor .yjd-codeblock-bar {
   position: absolute;

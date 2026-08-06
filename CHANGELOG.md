@@ -104,6 +104,19 @@ component layouts and redrawn glyphs on top of the 2.12.0 token pass.
   - Size ceilings raised for the feature set: all-in-one bundles 75 → 78 KB
     (actual ~75.2), stylesheet 13 → 13.5 KB (actual 13.09). Tree-shaken presets
     (Minimal ~17 KB) are unaffected — none of the new modules load unless used.
+- **Phase C1 — block handles** (the design's editor-surface signature): hover a
+  block to reveal the left-gutter pair — **⠿ drag to reorder** (accent drop
+  indicator, one undo step) and **+** (inserts a paragraph below and opens the
+  slash menu). New default module `block-handles`; reserves the design's left
+  gutter (desktop pointers only), off in the prompt layout, and nothing extra
+  ever serializes.
+- **Phase B1 — Callout block**: `/callout` inserts a tinted note with a
+  CSS-drawn leading icon; variants via `data-callout="info|success|warning|
+  danger"` on the semantic tokens. Serializes as a plain
+  `<div class="yjd-callout">` and renders identically in the read view.
+- **Phase B2 — Toggle block**: `/toggle` inserts a native
+  `<details class="yjd-toggle"><summary>` — the collapse state serializes and
+  works in the read view for free; chevron rotates on open.
 
 ### Fixed
 - **Dark mode: native white buttons in find & replace.** A legacy
