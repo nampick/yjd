@@ -2496,7 +2496,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .rich-editor-toolbar-2.visible {
   border-top: 1px solid var(--rte-border);
 }
-/* Group by spacing, not dividers: tight within a group, airy between groups. */
+/* UI 2.0: clusters separated by hairline dividers (the design's chrome bar). */
 .yjd-rich-editor .toolbar-group {
   display: flex;
   align-items: center;
@@ -2505,7 +2505,18 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   margin: 0;
   padding: 0;
 }
-.yjd-rich-editor .toolbar-group + .toolbar-group {
+.yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group + .toolbar-group {
+  border-left: 1px solid var(--rte-border);
+  padding-left: 5px;
+  margin-left: 6px;
+}
+/* No divider before the right-aligned AI cluster — the spacer separates it. */
+.yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group:has(> .ai-btn) {
+  border-left: 0;
+  padding-left: 0;
+}
+/* Overflow rows keep the quiet, divider-less spacing. */
+.yjd-rich-editor .rich-editor-toolbar-2 .toolbar-group + .toolbar-group {
   margin-left: 12px;
 }
 
@@ -3803,11 +3814,14 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   .yjd-rich-editor .rich-editor-toolbar-1 .more-btn {
     display: none !important;
   }
-  /* Keep every group/button on one line and let the row scroll. */
+  /* Keep every group/button on one line and let the row scroll. No dividers
+     on mobile — the design's swipe-row is a single uninterrupted strip. */
   .yjd-rich-editor .toolbar-group {
     flex: 0 0 auto;
   }
-  .yjd-rich-editor .toolbar-group + .toolbar-group {
+  .yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group + .toolbar-group {
+    border-left: 0;
+    padding-left: 0;
     margin-left: 8px;
   }
   /* 44px touch targets (UI 2.0) — the row swipes, so bigger buttons cost

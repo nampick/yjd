@@ -69,6 +69,13 @@ component layouts and redrawn glyphs on top of the 2.12.0 token pass.
   placeholder becomes the design's empty state ("Start writing, or press / to
   insert a block…").
 
+- **Toolbar clusters match the design bar**: hairline dividers between groups
+  (row 1 only — overflow rows and the mobile swipe-row stay divider-less), the
+  colour/background buttons join the inline-formatting cluster, and a new
+  **Quote** toolbar button (toggles blockquote ↔ paragraph) sits with
+  list/link per the design. Alignment + indent buttons move to the overflow
+  row like the design's Standard preset.
+
 ### Fixed
 - **Dark mode: native white buttons in find & replace.** A legacy
   `background: 0 0` let Chromium paint the UA's native button face (white) on
