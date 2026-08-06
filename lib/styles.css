@@ -4681,6 +4681,94 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 }
 .yjd-rich-editor .yjd-find-opts { gap: 5px; }
 .yjd-rich-editor .yjd-find-regex { font-family: var(--rte-mono); }
+/* Kill the UA-native button face (a legacy `background: 0 0` let Chromium
+   paint white native buttons in dark mode) — same specificity, later wins. */
+.yjd-rich-editor .yjd-find-btn:not(.yjd-find-icon):not(.yjd-find-toggle) {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--rte-chrome);
+  color: var(--rte-ink);
+  border: 1px solid var(--rte-border);
+}
+.yjd-rich-editor .yjd-find-btn:not(.yjd-find-icon):not(.yjd-find-toggle):hover {
+  background: var(--rte-chrome-2);
+}
+.yjd-rich-editor .yjd-find-btn.yjd-find-toggle:not(.yjd-find-icon) {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--rte-bg);
+}
+.yjd-rich-editor .yjd-find-btn.yjd-find-toggle.active:not(.yjd-find-icon) {
+  background: var(--rte-accent-weak);
+}
+
+/* ---------- Error states (UI 2.0 input-error recipe) ---------- */
+.yjd-rich-editor .yjd-input.yjd-input--error {
+  border-color: var(--rte-danger);
+  box-shadow: 0 0 0 3px rgba(208, 52, 58, 0.18);
+}
+.yjd-rich-editor .yjd-input.yjd-input--error:focus {
+  border-color: var(--rte-danger);
+  box-shadow: 0 0 0 3px rgba(208, 52, 58, 0.18);
+}
+.yjd-rich-editor .link-popup-error {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: var(--rte-danger);
+}
+.yjd-rich-editor .link-popup-error svg { width: 12px; height: 12px; flex: 0 0 auto; }
+
+/* Attachment chip upload status: progress bar while pending, danger ring +
+   "!" badge on failure (chip keeps the file so the user can retry/remove). */
+.rte-attach-chip { position: relative; }
+.rte-attach-chip[data-status="error"] {
+  border-color: var(--rte-danger) !important;
+  box-shadow: 0 0 0 2px rgba(208, 52, 58, 0.18);
+}
+.rte-attach-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  border-radius: 0 0 var(--rte-radius-md) var(--rte-radius-md);
+  background: var(--rte-chrome-3);
+  overflow: hidden;
+}
+.rte-attach-progress span {
+  display: block;
+  width: 40%;
+  height: 100%;
+  background: var(--rte-accent);
+  animation: yjd-attach-progress 1.1s ease-in-out infinite;
+}
+@keyframes yjd-attach-progress {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rte-attach-progress span { animation: none; width: 100%; opacity: 0.5; }
+}
+.rte-attach-error-badge {
+  position: absolute;
+  top: -5px;
+  left: -5px; /* top-right belongs to the remove (×) button */
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--rte-danger);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
 
 /* ---------- Link view bar: href · edit · copy · unlink ---------- */
 .link-bar {
