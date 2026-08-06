@@ -51,6 +51,16 @@ component layouts and redrawn glyphs on top of the 2.12.0 token pass.
   unhandled-drop path, available to integrators.
 
 ### Fixed (this pass)
+- **Block handles**: the ⠿/+ gutter now centres on the block's FIRST LINE
+  (an H1's tall line box left it floating above the text) and no longer
+  vanishes while the pointer crosses the gutter band on the way to the
+  buttons (blocks are resolved by row when the target isn't inside one).
+  Buttons grew to 22px with 16px glyphs.
+- **Toolbar selects size to content**: heading / font-family / text-size
+  triggers use auto width, so "X-Large" or a long font name widens the
+  trigger instead of truncating to "X…".
+- The overflow row's mono "⌄ OVERFLOW" label is gone — the second row now
+  starts flush with its first control.
 - Import popup no longer closes when clearing the picked file (the ✕ detached
   from the DOM before the click-outside handler ran).
 - The popup upload button can hide again (`display` was pinned by an

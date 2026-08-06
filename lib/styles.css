@@ -4618,20 +4618,6 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 }
 .yjd-rich-editor .rich-editor-toolbar-2-row.yjd-noscroll::-webkit-scrollbar { display: none; }
 .yjd-rich-editor .rich-editor-toolbar-2-row .toolbar-group { flex: 0 0 auto; }
-.yjd-rich-editor .rte-overflow-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  flex: 0 0 auto;
-  margin-right: 6px;
-  font-family: var(--rte-mono);
-  font-size: 9.5px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--rte-faint);
-  white-space: nowrap;
-}
-.yjd-rich-editor .rte-overflow-label svg { width: 12px; height: 12px; }
 /* Overflow buttons hover on chrome-3; dividers use the strong border there. */
 .yjd-rich-editor .rich-editor-toolbar-2-row .toolbar-group + .toolbar-group::before {
   background: var(--rte-border-strong);
@@ -5671,8 +5657,8 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   position: absolute;
   z-index: 998;
   display: inline-flex;
-  gap: 1px;
-  opacity: 0.55;
+  gap: 2px;
+  opacity: 0.65;
   transition: opacity var(--rte-t);
   pointer-events: auto;
 }
@@ -5683,8 +5669,8 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border: 0;
   border-radius: var(--rte-radius-xs);
   background: transparent;
@@ -5700,7 +5686,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   color: var(--rte-muted);
 }
 .yjd-rich-editor .yjd-block-drag svg,
-.yjd-rich-editor .yjd-block-plus svg { width: 14px; height: 14px; }
+.yjd-rich-editor .yjd-block-plus svg { width: 16px; height: 16px; }
 .yjd-rich-editor .yjd-drop-indicator {
   position: absolute;
   z-index: 999;
