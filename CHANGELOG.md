@@ -51,6 +51,11 @@ component layouts and redrawn glyphs on top of the 2.12.0 token pass.
   unhandled-drop path, available to integrators.
 
 ### Fixed (this pass)
+- **More-toggle dots**: the ⋯ glyph's `[fill="currentColor"]` circles were
+  painted paper by the ink-fill active recipe — invisible on the toggle's
+  LIGHT pressed chrome. Re-inked while open.
+- **Stuck pressed select**: re-showing a shared select against a different
+  trigger left the previous trigger's `.open` chrome behind.
 - **Block handles**: the ⠿/+ gutter now centres on the block's FIRST LINE
   (an H1's tall line box left it floating above the text) and no longer
   vanishes while the pointer crosses the gutter band on the way to the

@@ -21,6 +21,16 @@ const editor = new RichEditor('#editor-container', {
   theme: 'light',
   // UI 2.0 right rail: Outline · Comments · Versions.
   sidePanel: true,
+  // Demo AI hook so the "Ask AI" pill and selection actions render like the
+  // design. Echoes a canned rewrite after a short delay — BYO model in a real
+  // app (see docs/THEMING.md and the ai option in index.d.ts).
+  ai: {
+    complete: async ({ action, prompt, text }) => {
+      await new Promise((r) => setTimeout(r, 600));
+      if (action === 'autocomplete') return ' — and the diff replays in order.';
+      return `${text ? text.trim() : ''}${text ? ' ' : ''}(rewritten by the demo AI: ${action || prompt || 'ask'})`;
+    }
+  },
   onChange: (content) => {
     // Update the output container with new content
     contentContainer.innerHTML = content;

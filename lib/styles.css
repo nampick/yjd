@@ -4606,6 +4606,16 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   color: var(--rte-ink) !important;
   fill: var(--rte-ink) !important;
 }
+/* The ⋯ dots are [fill="currentColor"] circles — the ink-fill active recipe
+   paints those paper (for dark pressed tools), which vanishes on the
+   more-btn's LIGHT pressed chrome. Re-ink them. */
+.yjd-rich-editor .rich-editor-toolbar-btn.more-btn.active .icon svg [fill="currentColor"],
+.yjd-rich-editor .rich-editor-toolbar-btn.more-btn.active:hover .icon svg [fill="currentColor"],
+.yjd-rich-editor .rich-editor-toolbar-btn.more-btn.active .icon svg path,
+.yjd-rich-editor .rich-editor-toolbar-btn.more-btn.active:hover .icon svg path {
+  fill: var(--rte-ink) !important;
+  stroke: none !important;
+}
 
 /* Overflow row (v2): ONE horizontal-scroll row on chrome-2 with a label. */
 .yjd-rich-editor .rich-editor-toolbar-2 { background: var(--rte-chrome-2); }
