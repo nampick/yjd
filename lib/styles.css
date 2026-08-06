@@ -4602,6 +4602,34 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .block-toolbar-btn,
 .yjd-rich-editor .table-toolbar-btn { color: var(--rte-ink-2); }
 
+/* Bubble "✦ AI" entry (design bubbleAi) + hairline divider after it. */
+.yjd-rich-editor .block-toolbar-btn.block-toolbar-ai {
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: var(--rte-radius-sm);
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
+  font-family: var(--rte-ui);
+  font-size: 12px;
+  font-weight: 500;
+}
+.yjd-rich-editor .block-toolbar-btn.block-toolbar-ai:hover {
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
+  filter: brightness(0.97);
+}
+.yjd-rich-editor .block-toolbar-sep {
+  width: 1px;
+  height: 18px;
+  background: var(--rte-border);
+  margin: 0 3px;
+  flex: 0 0 auto;
+}
+
 /* Counted overflow toggle: bordered pill "⋯ +N"; pressed while open. */
 .yjd-rich-editor .rich-editor-toolbar-btn.more-btn {
   width: auto;

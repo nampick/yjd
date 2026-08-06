@@ -61,6 +61,15 @@ component layouts and redrawn glyphs on top of the 2.12.0 token pass.
   unhandled-drop path, available to integrators.
 
 ### Fixed (this pass)
+- **Selection chrome no longer stacks**: selecting text used to pop BOTH the
+  formatting bubble and the AI "Edit selection" menu on top of each other.
+  Per the design, selection now shows only the bubble, which leads with a
+  "✦ AI" accent entry (shown when a model is wired) that opens the AI menu
+  pinned at the selection. Auto-open is still available via
+  `ai.openOnSelect: true`.
+- **List picker sync**: the picker's active row now recognises checklists
+  (its stale duplicate of getListType flagged `ul.checklist` as Bullet while
+  the toolbar icon said Checklist).
 - **Font weights (post-font-fix sweep)**: popup text now defaults to 400 —
   500 is opted in per control. Select options run the design's 12.5px/400
   (current row 500), find & replace actions 11.5px/500, Ask AI pill

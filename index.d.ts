@@ -186,6 +186,12 @@ export interface AiOptions {
    * Off by default.
    */
   trackAuthorship?: boolean;
+  /**
+   * Auto-open the selection AI menu whenever text is selected. Off by default —
+   * the selection shows the formatting bubble, whose "✦ AI" entry (and the
+   * toolbar pill) opens this menu.
+   */
+  openOnSelect?: boolean;
 }
 
 /** Streaming sink returned by editor.streamInto(). */
