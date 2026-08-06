@@ -63,6 +63,18 @@
     .yjd-rich-editor .emoji-picker-popup button.emoji-button {
       font-size: 20px !important;
     }
+  /* v2 form popups run compact 12px controls; must live in this base layer —
+     !important in an earlier sublayer beats any later-layer !important. */
+  .yjd-rich-editor .rich-editor-popup-container .yjd-input,
+  .yjd-rich-editor .rich-editor-popup-container .yjd-select-input,
+  .yjd-rich-editor .rich-editor-popup-container .yjd-find-input {
+    font: normal 400 12px/1.4 "Inter", Arial, sans-serif !important;
+  }
+  .yjd-rich-editor .rich-editor-popup-container .yjd-button-confirm,
+  .yjd-rich-editor .rich-editor-popup-container .yjd-button-cancel,
+  .yjd-rich-editor .rich-editor-popup-container .link-popup-apply {
+    font: normal 500 12px/1.4 "Inter", Arial, sans-serif !important;
+  }
 }
 
 .yjd-rich-editor .rich-editor-area {
@@ -736,7 +748,7 @@
 .yjd-rich-editor .yjd-input:focus {
   outline: none;
     border-color: var(--rte-accent, var(--rte-focus));
-    box-shadow: 0 0 0 3px var(--rte-accent-ring, rgba(59, 130, 246, 0.1));
+    box-shadow: 0 0 0 2px var(--rte-accent-ring, rgba(59, 130, 246, 0.1));
 }
 .yjd-rich-editor .yjd-button-container{
   display: flex ;
@@ -3682,19 +3694,19 @@ body.yjd-fullscreen-lock { overflow: hidden; }
    Compact link input anchored right at the selected text. */
 .yjd-rich-editor .link-popup.link-popup--inline {
   width: auto;
-  min-width: 320px;
-  max-width: min(92vw, 420px);
-  padding: 10px;
+  min-width: 262px;
+  max-width: min(92vw, 320px);
+  padding: 9px;
 }
 .yjd-rich-editor .link-popup--inline .link-popup-content {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 .yjd-rich-editor .link-popup--inline .link-popup-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 .yjd-rich-editor .link-popup--inline .link-popup-row .yjd-input {
   flex: 1;
@@ -3704,7 +3716,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .link-popup--inline .link-popup-apply {
   flex: 0 0 auto;
   white-space: nowrap;
-  padding: 8px 16px;
+  padding: 0 10px;
   margin: 0;
 }
 
@@ -4618,7 +4630,9 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   height: 26px;
   min-height: 26px;
   padding: 0 8px;
-  font-size: 12px;
+  /* !important: the @layer base font shorthand pins 14px otherwise. */
+  font-size: 12px !important;
+  font-weight: 400 !important;
   border-radius: var(--rte-radius-sm);
 }
 .yjd-rich-editor .yjd-find-btn:not(.yjd-find-icon):not(.yjd-find-toggle) {
@@ -4640,12 +4654,75 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .link-popup-apply {
   height: 26px;
   padding: 0 10px;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 12px !important;
+  font-weight: 500 !important;
 }
-.yjd-rich-editor .link-popup { padding: 9px; }
+.yjd-rich-editor .link-popup {
+  padding: 9px;
+  width: 262px;
+  box-sizing: border-box;
+}
 .yjd-rich-editor .link-popup .link-popup-row { gap: 6px; margin-bottom: 7px; }
 .yjd-rich-editor .link-popup .link-popup-row:last-child { margin-bottom: 0; }
+.yjd-rich-editor .link-popup .yjd-input { flex: 1; min-width: 0; }
+
+/* ---------- Form popups (image / video / tag / import): v2 shell ----------
+   Mono uppercase head, 11.5px labels, compact 26px controls, 262px card —
+   the same recipe as the design's popovers instead of the legacy h3 shell. */
+.yjd-rich-editor .image-popup,
+.yjd-rich-editor .video-popup,
+.yjd-rich-editor .tag-popup,
+.yjd-rich-editor .import-popup {
+  width: 262px;
+  box-sizing: border-box;
+  padding: 10px;
+}
+.yjd-rich-editor .rich-editor-popup-container .yjd-input-title {
+  margin: 0 0 8px;
+  font-family: var(--rte-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rte-faint);
+}
+.yjd-rich-editor .rich-editor-popup-container .yjd-input-label {
+  margin: 0 0 5px;
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--rte-muted);
+}
+.yjd-rich-editor .yjd-input-upload-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.yjd-rich-editor .yjd-input-upload-group .yjd-input { flex: 1; min-width: 0; }
+.yjd-rich-editor .rich-editor-popup-container .yjd-custom-upload-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  padding: 0;
+  border-radius: var(--rte-radius-sm);
+}
+.yjd-rich-editor .rich-editor-popup-container .yjd-custom-upload-button svg {
+  width: 14px;
+  height: 14px;
+}
+.yjd-rich-editor .yjd-button-container {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 9px;
+}
+.yjd-rich-editor .rich-editor-popup-container .image-preview-container img,
+.yjd-rich-editor .rich-editor-popup-container .video-preview-container video {
+  border-radius: var(--rte-radius-sm);
+  max-width: 100%;
+}
 
 /* ---------- Toolbar selects: quiet by default (design recipe) ----------
    The design's chrome-bar select has NO border and NO fill at rest — the
