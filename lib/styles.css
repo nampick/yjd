@@ -594,7 +594,8 @@
 
 .yjd-rich-editor .custom-select-item-button.current {
   font-weight: 500;
-  background: var(--rte-chrome-2) !important;
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
 }
 .yjd-rich-editor .custom-select-item-button .item-checkmark{
   display:none;
@@ -3817,11 +3818,8 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   .yjd-rich-editor .rich-editor-toolbar-1::-webkit-scrollbar {
     display: none;                    /* WebKit/Blink */
   }
-  /* The overflow row + "More" button aren't used on mobile. */
-  .yjd-rich-editor .rich-editor-toolbar-2,
-  .yjd-rich-editor .rich-editor-toolbar-1 .more-btn {
-    display: none !important;
-  }
+  /* v2: the counted overflow works on mobile too — the toggle stays and the
+     overflow row swipe-scrolls like the primary row. */
   /* Keep every group/button on one line and let the row scroll. No dividers
      on mobile — the design's swipe-row is a single uninterrupted strip. */
   .yjd-rich-editor .toolbar-group {
@@ -4584,14 +4582,29 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   text-transform: uppercase;
   color: var(--rte-faint);
 }
+/* Higher specificity than the legacy per-popup rules (min-height 34 / 14px). */
+.yjd-rich-editor .rich-editor-popup-container .custom-select-item-button,
 .yjd-rich-editor .custom-select-item-button {
+  min-height: 0;
   padding: 6px 8px;
-  font-size: 12.5px;
+  font-size: 12.5px !important;
   color: var(--rte-ink-2);
 }
+.yjd-rich-editor .rich-editor-popup-container .custom-select-item-button:hover,
 .yjd-rich-editor .custom-select-item-button:hover {
   background: var(--rte-chrome-3);
   color: var(--rte-ink);
+}
+/* Current row's checkmark: 15px accent-inked, right-aligned (v2 spec). */
+.yjd-rich-editor .custom-select-item-button .item-checkmark svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2.4;
+}
+.yjd-rich-editor .custom-select-item-button.current .item-checkmark {
+  display: inline-flex;
+  align-items: center;
+  color: var(--rte-accent-ink);
 }
 .yjd-rich-editor .custom-select-item-button.current {
   background: var(--rte-accent-weak);
