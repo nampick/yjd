@@ -44,6 +44,16 @@ component layouts and redrawn glyphs on top of the 2.12.0 token pass.
   (brotli), covering the new popup states, drop UX and tray CSS.
 
 ### Added (this pass)
+- **Code-block language detection**: with no `data-lang`, the header label is
+  DETECTED from the block's content (14 languages, regex heuristics — exported
+  as `detectLanguage`, test-covered). `data-filename` renders the design's
+  "javascript · word-diff.js" form. The label/Copy line is now a full-width
+  header strip inside the block (lang left, Copy right) with reserved top
+  padding so it never overlaps code.
+- **IBM Plex font stacks**: `--rte-ui`/`--rte-mono` now lead with IBM Plex
+  Sans/Mono per the design (system stacks as fallback — the host app loads the
+  webfont; the demo pulls it from Google Fonts). Every hardcoded Lato /
+  system-ui / Consolas stack now routes through the tokens.
 - **Popup drop zones**: the image and video popups accept file drops — while
   files are dragged over them the input group swaps for a dashed "Drop your
   video/image here" target that feeds the same path as the upload button.
@@ -51,6 +61,10 @@ component layouts and redrawn glyphs on top of the 2.12.0 token pass.
   unhandled-drop path, available to integrators.
 
 ### Fixed (this pass)
+- **Toolbar fonts never applied**: the font reset targeted `.toolbar-container`
+  but the DOM class is `.rich-editor-toolbar-container` — toolbar buttons had
+  rendered in the browser's default font (Arial) all along. Size ceilings
+  ESM/UMD 82→83 KB for the detector + font pass.
 - **Ask AI first open**: with no caret in the document, the panel anchored to
   the EDITOR BOX and dropped below the whole document on the first click. It
   now opens right-aligned under the toolbar pill. A first-open positioning

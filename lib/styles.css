@@ -22,19 +22,19 @@
      and statusbar bottom (see design-system layer). */
   overflow: visible;
   margin: 0 auto;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--rte-ui);
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
 }
 @layer base {
-  .yjd-rich-editor .toolbar-container button,
-  .yjd-rich-editor .toolbar-container input,
-  .yjd-rich-editor .toolbar-container select,
-  .yjd-rich-editor .toolbar-container optgroup,
-  .yjd-rich-editor .toolbar-container textarea,
-  .yjd-rich-editor .toolbar-container ::file-selector-button {
-    font: normal 500 14px/1.4 "Inter", Arial, sans-serif !important;
+  .yjd-rich-editor .rich-editor-toolbar-container button,
+  .yjd-rich-editor .rich-editor-toolbar-container input,
+  .yjd-rich-editor .rich-editor-toolbar-container select,
+  .yjd-rich-editor .rich-editor-toolbar-container optgroup,
+  .yjd-rich-editor .rich-editor-toolbar-container textarea,
+  .yjd-rich-editor .rich-editor-toolbar-container ::file-selector-button {
+    font: normal 500 14px/1.4 var(--rte-ui) !important;
     letter-spacing: normal !important;
     font-feature-settings: normal !important;
     font-variation-settings: normal !important;
@@ -53,7 +53,7 @@
   .yjd-rich-editor .rich-editor-popup-container optgroup,
   .yjd-rich-editor .rich-editor-popup-container textarea,
   .yjd-rich-editor .rich-editor-popup-container ::file-selector-button {
-    font: normal 500 14px/1.4 "Inter", Arial, sans-serif !important;
+    font: normal 500 14px/1.4 var(--rte-ui) !important;
     letter-spacing: normal !important;
     font-feature-settings: normal !important;
     font-variation-settings: normal !important;
@@ -68,18 +68,18 @@
      any later-layer !important. */
   .yjd-rich-editor .rich-editor-popup-container .yjd-input,
   .yjd-rich-editor .rich-editor-popup-container .yjd-select-input {
-    font: normal 400 13px/1.4 "Inter", Arial, sans-serif !important;
+    font: normal 400 13px/1.4 var(--rte-ui) !important;
   }
   .yjd-rich-editor .rich-editor-popup-container .yjd-find-input {
-    font: normal 400 12px/1.4 "Inter", Arial, sans-serif !important;
+    font: normal 400 12px/1.4 var(--rte-ui) !important;
   }
   .yjd-rich-editor .rich-editor-popup-container .yjd-button-confirm,
   .yjd-rich-editor .rich-editor-popup-container .yjd-button-cancel,
   .yjd-rich-editor .rich-editor-popup-container .link-popup-apply {
-    font: normal 500 12px/1.4 "Inter", Arial, sans-serif !important;
+    font: normal 500 12px/1.4 var(--rte-ui) !important;
   }
   .yjd-rich-editor .rich-editor-popup-container .yjd-suggestion-button {
-    font: normal 400 12px/1.4 "Inter", Arial, sans-serif !important;
+    font: normal 400 12px/1.4 var(--rte-ui) !important;
   }
 }
 
@@ -226,7 +226,7 @@
 /* code & pre */
 .yjd-rich-editor .rich-editor-area pre,
 .yjd-rich-editor .rich-editor-area code {
-  font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
+  font-family: var(--rte-mono);
   background: var(--rte-code-bg, var(--rte-code-bg));
   color: var(--rte-code-ink, inherit);
   padding: 4px 6px;
@@ -271,7 +271,7 @@
   background-color: var(--rte-code-block-bg, var(--rte-code-bg));
   width: 96%;
   padding: 10px 2% 10px 2%;
-  font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
+  font-family: var(--rte-mono);
   overflow-x: auto;
   white-space: pre;
   word-wrap: normal;
@@ -802,7 +802,7 @@
 .yjd-rich-editor .link-popup {
   position: absolute;
   background: var(--rte-bg);
-  font-family: 'Lato', sans-serif;
+  font-family: var(--rte-ui);
   display: none;
   border: none;
   border-radius: 10px;
@@ -895,7 +895,7 @@
 .yjd-rich-editor .table-popup {
   position: absolute;
   background: var(--rte-bg);
-  font-family: 'Lato', sans-serif;
+  font-family: var(--rte-ui);
   display: none;
   border: 1px solid var(--rte-table-border);
   border-radius: 6.9px;
@@ -951,7 +951,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Lato', sans-serif;
+  font-family: var(--rte-ui);
   color: var(--rte-ink) !important;
   font-size: 12px;
   font-style: normal;
@@ -1025,7 +1025,7 @@
   border: 1px solid var(--rte-border);
   border-radius: var(--rte-radius-sm, 8px);
   box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.20), 0 2px 6px rgba(16, 18, 23, 0.06));
-  font: 500 13px/1.5 system-ui, -apple-system, sans-serif;
+  font: 500 13px/1.5 var(--rte-ui);
 }
 .yjd-table-profile-title {
   font-weight: 600;
@@ -1413,7 +1413,7 @@
   position: absolute;
   z-index: 10000;
   background: var(--rte-bg);
-  font-family: 'Lato', sans-serif;
+  font-family: var(--rte-ui);
   border-radius: 10px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   display: none;
@@ -1458,7 +1458,7 @@
   position: absolute;
   z-index: 10000;
   background: var(--rte-bg);
-  font-family: 'Lato', sans-serif;
+  font-family: var(--rte-ui);
   border-radius: 10px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   display: none;
@@ -1534,7 +1534,7 @@
   position: absolute;
   z-index: 10000;
   background: var(--rte-bg);
-  font-family: 'Lato', sans-serif;
+  font-family: var(--rte-ui);
   border-radius: 10px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   display: none;
@@ -1831,7 +1831,7 @@
 .yjd-rich-editor .code-view-textarea {
   width: 100%;
   height: 500px;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-family: var(--rte-mono);
   font-size: 14px;
   line-height: 1.5;
   padding: 16px;
@@ -2436,8 +2436,8 @@
 
   /* UI font for the chrome (toolbar, menus, popups). Content keeps the host
      app's font via `font-family: inherit` on the editor area. */
-  --rte-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Roboto, sans-serif;
-  --rte-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --rte-ui: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Roboto, sans-serif;
+  --rte-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   /* One knob for every UI glyph (toolbar, menus, chips, popups). Override at
      :root, on any ancestor, or per-editor via options.iconSize. */
@@ -2474,10 +2474,10 @@
 body.yjd-fullscreen-lock { overflow: hidden; }
 
 /* Use a friendly system stack everywhere (overrides the forced "Inter") */
-.yjd-rich-editor .toolbar-container button,
-.yjd-rich-editor .toolbar-container input,
-.yjd-rich-editor .toolbar-container select,
-.yjd-rich-editor .toolbar-container textarea,
+.yjd-rich-editor .rich-editor-toolbar-container button,
+.yjd-rich-editor .rich-editor-toolbar-container input,
+.yjd-rich-editor .rich-editor-toolbar-container select,
+.yjd-rich-editor .rich-editor-toolbar-container textarea,
 .yjd-rich-editor .rich-editor-popup-container button,
 .yjd-rich-editor .rich-editor-popup-container input,
 .yjd-rich-editor .rich-editor-popup-container select,
@@ -3452,7 +3452,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .rte-attach-row .rte-attach-ic svg { width: 12px; height: 12px; fill: none; stroke: currentColor; color: inherit; }
 .rte-attach-row .rte-attach-name {
   max-width: 118px;
-  font: 400 12px/1.2 system-ui, sans-serif;
+  font: 400 12px/1.2 var(--rte-ui);
   color: var(--rte-ink);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3660,7 +3660,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   border: 1px solid var(--rte-border-strong);
   border-radius: var(--rte-radius-md, 12px);
   box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.20), 0 2px 6px rgba(16, 18, 23, 0.06));
-  font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font: 14px/1.4 var(--rte-ui);
   animation: yjd-slash-in 90ms ease-out;
 }
 @keyframes yjd-slash-in { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: none; } }
@@ -3807,7 +3807,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   width: 100%;
   box-sizing: border-box;
   padding: 10px 36px 10px 12px;
-  font: 500 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font: 500 14px/1.4 var(--rte-ui);
   color: var(--rte-ink);
   background-color: var(--rte-bg);
   background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='16'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%236d7480'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='m6%209%206%206%206-6'/%3E%3C/svg%3E");
@@ -4127,7 +4127,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   border: 1px solid var(--rte-border-strong);
   border-radius: var(--rte-radius-md, 12px);
   box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.20), 0 2px 6px rgba(16, 18, 23, 0.06));
-  font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font: 14px/1.4 var(--rte-ui);
   animation: yjd-slash-in 90ms ease-out;
 }
 .yjd-mention-item {
@@ -4323,7 +4323,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   border-radius: var(--rte-radius-md);
   padding: 6px 8px;
   box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.20), 0 2px 6px rgba(16, 18, 23, 0.06));
-  font: 500 13px/1 system-ui, -apple-system, sans-serif;
+  font: 500 13px/1 var(--rte-ui);
 }
 .yjd-ai-diffbar .yjd-ai-diffhint { color: var(--rte-muted); font-size: 12px; }
 
@@ -4350,7 +4350,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   border: 1px solid var(--rte-border);
   border-radius: 8px;
   padding: 5px 11px;
-  font: 600 12.5px system-ui, sans-serif;
+  font: 600 12.5px var(--rte-ui);
   cursor: pointer;
   background: var(--rte-chrome, #fff);
 }
@@ -4367,7 +4367,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
    editor's content typography so a saved post renders identically without an
    editor instance. Kept self-contained (not scoped under .yjd-rich-editor). */
 .yjd-content {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--rte-ui);
   font-size: 16px;
   line-height: 1.6;
   color: var(--rte-ink);
@@ -4386,11 +4386,11 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-content li { margin: 0.25em 0; }
 .yjd-content a { color: var(--rte-link); text-decoration: underline; }
 .yjd-content code {
-  font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
+  font-family: var(--rte-mono);
   background: var(--rte-code-bg); padding: 2px 6px; border-radius: 4px;
 }
 .yjd-content pre {
-  font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
+  font-family: var(--rte-mono);
   background: var(--rte-code-bg); padding: 12px 14px; border-radius: 6px;
   margin: 1em 0; overflow-x: auto; white-space: pre;
 }
@@ -5711,10 +5711,18 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .yjd-codeblock-bar {
   position: absolute;
   z-index: 1000;
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
+  padding: 0 12px;
+  box-sizing: border-box;
   pointer-events: auto;
+}
+/* Reserve the design's header strip inside code blocks so the lang/Copy line
+   never overlaps the first line of code (module adds the wrapper class). */
+.yjd-rich-editor.yjd-has-codetools .rich-editor-area pre {
+  padding-top: 38px;
 }
 .yjd-rich-editor .yjd-codeblock-lang {
   font-family: var(--rte-mono);
