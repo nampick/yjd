@@ -61,6 +61,19 @@ component layouts and redrawn glyphs on top of the 2.12.0 token pass.
   hover wash.
 - Stylesheet size budget raised 12 → 13 KB (brotli) for the new component
   chrome; JS bundles remain under their 75 KB ceilings.
+- **Error-state UX (design "States" section)**: the link popup shows the
+  input-error recipe (danger border/ring + "Enter a valid URL" + icon) for an
+  invalid or unsafe URL instead of silently console.warning; attachment chips
+  reflect upload status (indeterminate progress bar while pending, danger ring
+  + "!" badge on failure, integrator-set statuses included); the default
+  placeholder becomes the design's empty state ("Start writing, or press / to
+  insert a block…").
+
+### Fixed
+- **Dark mode: native white buttons in find & replace.** A legacy
+  `background: 0 0` let Chromium paint the UA's native button face (white) on
+  the dark panel — Replace/Replace all now set `appearance: none` plus token
+  backgrounds explicitly.
 
 ## [2.12.0] — 2026-08-06
 
