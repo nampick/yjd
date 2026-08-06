@@ -61,6 +61,11 @@ component layouts and redrawn glyphs on top of the 2.12.0 token pass.
   unhandled-drop path, available to integrators.
 
 ### Fixed (this pass)
+- **Font weights (post-font-fix sweep)**: popup text now defaults to 400 —
+  500 is opted in per control. Select options run the design's 12.5px/400
+  (current row 500), find & replace actions 11.5px/500, Ask AI pill
+  12.5px/500. Previously the popup reset forced 14px/500 over everything,
+  which the never-matching toolbar selector had been masking.
 - **Enter inside a code block**: browsers split every line into its OWN
   `<pre>` — multi-line code was impossible and language detection never had
   enough signal. Enter now inserts a newline in the same block; Enter on an

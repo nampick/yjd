@@ -53,7 +53,9 @@
   .yjd-rich-editor .rich-editor-popup-container optgroup,
   .yjd-rich-editor .rich-editor-popup-container textarea,
   .yjd-rich-editor .rich-editor-popup-container ::file-selector-button {
-    font: normal 500 14px/1.4 var(--rte-ui) !important;
+    /* Design default for popup text is 400; 500 is opted into per control
+       (confirm/cancel buttons, current option) below. */
+    font: normal 400 14px/1.4 var(--rte-ui) !important;
     letter-spacing: normal !important;
     font-feature-settings: normal !important;
     font-variation-settings: normal !important;
@@ -70,8 +72,23 @@
   .yjd-rich-editor .rich-editor-popup-container .yjd-select-input {
     font: normal 400 13px/1.4 var(--rte-ui) !important;
   }
-  .yjd-rich-editor .rich-editor-popup-container .yjd-find-input {
+  .yjd-rich-editor .yjd-find-input {
     font: normal 400 12px/1.4 var(--rte-ui) !important;
+  }
+  /* Select popups: plain 12.5px/400 options; the active row carries 500. */
+  .yjd-rich-editor .rich-editor-popup-container [class*="select-popup"] button {
+    font: normal 400 12.5px/1.4 var(--rte-ui) !important;
+  }
+  .yjd-rich-editor .rich-editor-popup-container [class*="select-popup"] button.current {
+    font-weight: 500 !important;
+  }
+  /* Find & replace: compact 11.5px/500 action buttons and toggle chips. */
+  .yjd-rich-editor .yjd-find-replace button {
+    font: normal 500 11.5px/1.4 var(--rte-ui) !important;
+  }
+  /* Ask AI pill runs the design's 12.5px/500. */
+  .yjd-rich-editor .rich-editor-toolbar-container .ai-btn {
+    font: normal 500 12.5px/1.4 var(--rte-ui) !important;
   }
   .yjd-rich-editor .rich-editor-popup-container .yjd-button-confirm,
   .yjd-rich-editor .rich-editor-popup-container .yjd-button-cancel,
