@@ -61,6 +61,21 @@ component layouts and redrawn glyphs on top of the 2.12.0 token pass.
   unhandled-drop path, available to integrators.
 
 ### Fixed (this pass)
+- **App-wide token sweep (audit-driven)**: one audit pass normalised every
+  hardcoded style that duplicated or fought a token. Buttons: AI panel
+  Accept/Retry/Discard and the word-diff Accept/Reject now run the spec's
+  12px/500 · 28px · radius-sm (were `font:inherit` / 600 12.5px with 8px
+  radii); legacy confirm/cancel drop `#181616`/`#2A2727`/700-weight for
+  accent/ink/500; the stacked 36px input/button generation collapses to
+  `--rte-ctl`/28px. Radii: every `6.9px`/`3.456px`/`3.46px` Figma artifact
+  and bare 4/6/8/10px on component chrome now uses `--rte-radius-*`. Colors:
+  bare hex duplicating tokens (`#fdecec`, `#111827`, accent rgba washes,
+  `#ddd` table cell borders and the white popover arrow in JS inline styles)
+  route through their tokens with fallbacks. Base-layer defaults drop from
+  14px to the spec's 12/12.5px. Theming: portaled surfaces (AI bar, slash
+  menu, toast) now copy the full token set — including `--rte-accent-ink-on`
+  and `--rte-t` — so wrapper-scoped themes reach them; select-button's inert
+  inline font overrides removed.
 - **Selection chrome no longer stacks**: selecting text used to pop BOTH the
   formatting bubble and the AI "Edit selection" menu on top of each other.
   Per the design, selection now shows only the bubble, which leads with a
