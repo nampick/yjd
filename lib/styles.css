@@ -63,10 +63,13 @@
     .yjd-rich-editor .emoji-picker-popup button.emoji-button {
       font-size: 20px !important;
     }
-  /* v2 form popups run compact 12px controls; must live in this base layer —
-     !important in an earlier sublayer beats any later-layer !important. */
+  /* v2 form popups run 13px inputs (find & replace stays compact at 12px);
+     must live in this base layer — !important in an earlier sublayer beats
+     any later-layer !important. */
   .yjd-rich-editor .rich-editor-popup-container .yjd-input,
-  .yjd-rich-editor .rich-editor-popup-container .yjd-select-input,
+  .yjd-rich-editor .rich-editor-popup-container .yjd-select-input {
+    font: normal 400 13px/1.4 "Inter", Arial, sans-serif !important;
+  }
   .yjd-rich-editor .rich-editor-popup-container .yjd-find-input {
     font: normal 400 12px/1.4 "Inter", Arial, sans-serif !important;
   }
@@ -74,6 +77,9 @@
   .yjd-rich-editor .rich-editor-popup-container .yjd-button-cancel,
   .yjd-rich-editor .rich-editor-popup-container .link-popup-apply {
     font: normal 500 12px/1.4 "Inter", Arial, sans-serif !important;
+  }
+  .yjd-rich-editor .rich-editor-popup-container .yjd-suggestion-button {
+    font: normal 400 12px/1.4 "Inter", Arial, sans-serif !important;
   }
 }
 
@@ -786,6 +792,11 @@
 }
 .yjd-rich-editor .button-disable{
   cursor: not-allowed;
+  /* Design btnPrimaryDisabled: quiet chrome fill, faint label. */
+  border-color: var(--rte-border) !important;
+  background: var(--rte-chrome-2) !important;
+  color: var(--rte-faint) !important;
+  box-shadow: none !important;
 }
 /* === LINK POPUP === */
 .yjd-rich-editor .link-popup {
@@ -822,7 +833,9 @@
   gap: 4px;
 }
 .yjd-rich-editor .yjd-custom-upload-button {
-  display: flex !important;
+  /* no !important: the video popup hides this button inline while a URL is
+     typed (a URL and a file are mutually exclusive). */
+  display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
@@ -2737,9 +2750,9 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 }
 .yjd-rich-editor .yjd-custom-upload-button {
   border-radius: var(--rte-radius-sm);
-  border: 1px dashed var(--rte-border-strong);
-  color: var(--rte-accent-ink);
-  background: var(--rte-accent-weak);
+  border: 1px solid var(--rte-border-strong);
+  color: var(--rte-ink-2);
+  background: var(--rte-chrome);
   transition: background var(--rte-t), border-color var(--rte-t);
 }
 .yjd-rich-editor .yjd-custom-upload-button:hover {
@@ -3295,7 +3308,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   width: var(--rte-icon-size);
   height: var(--rte-icon-size);
   fill: none;
-  stroke: var(--rte-accent-ink);
+  stroke: currentColor;
 }
 
 /* keep align-picker labels on one line */
@@ -3375,69 +3388,98 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   padding: 4px 18px 6px;
 }
 .yjd-rich-editor[data-layout="prompt"] .rte-prompt-attachments.has-items { display: flex; }
+/* Media tiles: 48px squares (design attachTile). Non-media: 32px rows. */
 .rte-attach-chip {
   position: relative;
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  border: 1px solid var(--rte-border, var(--rte-table-border));
-  background: var(--rte-chrome-2);
-  overflow: hidden;
   flex: 0 0 auto;
+  border: 1px solid var(--rte-border, var(--rte-table-border));
+  overflow: hidden;
+}
+.rte-attach-chip.rte-attach-tile {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--rte-radius-sm, 6px);
+  background: var(--rte-chrome-2);
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+}
+.rte-attach-chip.rte-attach-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 6px;
+  border-radius: var(--rte-radius-sm, 6px);
+  background: var(--rte-bg);
+  color: var(--rte-ink-2);
 }
 .rte-attach-chip img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .rte-attach-chip video { width: 100%; height: 100%; object-fit: cover; display: block; background: #000; }
+/* Play badge sits bottom-left on video tiles (close occupies top-right). */
 .rte-attach-play {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 22px;
-  height: 22px;
+  left: 4px;
+  bottom: 4px;
+  width: 16px;
+  height: 16px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  background: rgba(20, 24, 47, 0.55);
+  background: rgba(0, 0, 0, 0.66);
   border-radius: 50%;
   pointer-events: none;
 }
-.rte-attach-play svg { width: 13px; height: 13px; margin-left: 1px; fill: currentColor; stroke: none; color: inherit; }
-.rte-attach-ic { width: 22px; height: 22px; color: var(--rte-muted); display: inline-flex; }
-.rte-attach-ic svg { width: var(--rte-icon-size); height: var(--rte-icon-size); fill: none; stroke: currentColor; color: inherit; }
-.rte-attach-name {
-  max-width: 52px;
-  padding: 0 4px;
-  font: 500 9px/1.1 system-ui, sans-serif;
+.rte-attach-play svg { width: 11px; height: 11px; margin-left: 1px; fill: currentColor; stroke: none; color: inherit; }
+.rte-attach-row .rte-attach-ic {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--rte-radius-xs, 4px);
+  background: var(--rte-chrome-2);
   color: var(--rte-muted);
-  text-align: center;
+}
+.rte-attach-row .rte-attach-ic svg { width: 12px; height: 12px; fill: none; stroke: currentColor; color: inherit; }
+.rte-attach-row .rte-attach-name {
+  max-width: 118px;
+  font: 400 12px/1.2 system-ui, sans-serif;
+  color: var(--rte-ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* Close: overlay circle on tiles, quiet inline X on rows. */
 .rte-attach-close {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 18px;
-  height: 18px;
   border: 0;
-  border-radius: 50%;
-  background: rgba(20, 24, 47, 0.62);
-  color: #fff;
-  font: 600 13px/1 system-ui, sans-serif;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
 }
-.rte-attach-close:hover { background: rgba(20, 24, 47, 0.82); }
+.rte-attach-tile .rte-attach-close {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.66);
+  color: #fff;
+}
+.rte-attach-tile .rte-attach-close:hover { background: rgba(0, 0, 0, 0.82); }
+.rte-attach-row .rte-attach-close {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  background: transparent;
+  color: var(--rte-faint);
+}
+.rte-attach-row .rte-attach-close:hover { color: var(--rte-ink); }
 
 /* Remove/close affordances draw the shared `close` glyph instead of a text "×",
    so they follow --rte-icon-size like every other icon. Sized down (0.65) to sit
@@ -3453,19 +3495,12 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   stroke-width: 2.5;
 }
 
-/* Context chip (@file / @selection) — a horizontal pill, not a 56px tile. */
-.rte-attach-chip.rte-attach-context {
-  width: auto; height: auto;
-  flex-direction: row;
-  gap: 5px;
-  padding: 5px 26px 5px 9px;
-  border-radius: 999px;
+/* Context chip (@file / @selection) — same row shape, accent @ tile. */
+.rte-attach-context .rte-attach-ic {
+  font: 500 12px/1 var(--rte-mono, monospace);
   background: var(--rte-accent-weak, rgba(91, 91, 214, 0.1));
-  border-color: var(--rte-accent-ring, rgba(91, 91, 214, 0.28));
+  color: var(--rte-accent-ink, #4a49cf);
 }
-.rte-attach-context .rte-attach-ic { width: auto; height: auto; font: 700 12px/1 var(--rte-mono, monospace); color: var(--rte-accent-ink, #4a49cf); }
-.rte-attach-context .rte-attach-name { max-width: 160px; font-size: 12.5px; color: var(--rte-ink); }
-.rte-attach-context .rte-attach-close { top: 50%; transform: translateY(-50%); right: 5px; width: 16px; height: 16px; font-size: 11px; }
 
 /* Token/cost meter — a quiet counter left of the send button. */
 .rte-token-meter {
@@ -3557,35 +3592,44 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   border: 1px solid var(--rte-border, var(--rte-table-border));
   border-radius: var(--rte-radius-md, 14px);
   box-shadow: 0 8px 28px rgba(20, 24, 47, 0.14);
-  padding: 6px;
-  min-width: 196px;
+  padding: 5px;
+  width: 186px;
+  box-sizing: border-box;
   pointer-events: auto;
 }
 .rte-add-menu-popup.visible { display: block; }
+.rte-add-head {
+  padding: 5px 8px 6px;
+  font-family: var(--rte-mono, monospace);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rte-faint, #98a0ac);
+}
 .rte-add-item {
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 9px;
   width: 100%;
-  padding: 9px 12px;
+  padding: 7px 9px;
   border: 0;
-  border-radius: 9px;
+  border-radius: var(--rte-radius-sm, 6px);
   background: transparent;
-  color: var(--rte-ink);
-  font: 500 14px/1.2 inherit;
+  color: var(--rte-ink-2, #3c424d);
+  font: 400 12.5px/1.2 inherit;
   text-align: left;
   cursor: pointer;
 }
-.rte-add-item:hover { background: var(--rte-chrome-2); }
+.rte-add-item:hover { background: var(--rte-chrome-2); color: var(--rte-ink); }
 .rte-add-ic {
-  width: 20px;
-  height: 20px;
+  width: 15px;
+  height: 15px;
   flex: 0 0 auto;
   display: inline-flex;
-  color: var(--rte-muted);
+  color: inherit;
 }
-.rte-add-ic svg { width: var(--rte-icon-size); height: var(--rte-icon-size); fill: none; stroke: currentColor; color: inherit; }
-.rte-add-sep { height: 1px; background: var(--rte-border, var(--rte-table-border)); margin: 5px 8px; }
+.rte-add-ic svg { width: 15px; height: 15px; fill: none; stroke: currentColor; color: inherit; }
+.rte-add-sep { height: 1px; background: var(--rte-border, var(--rte-table-border)); margin: 4px 0; }
 
 /* =====================================================================
    DESIGN SYSTEM v2.8 — remove the triangle pointer on floating toolbars
@@ -4448,9 +4492,11 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 
 /* Drag-and-drop target highlight (image or file dragged over the editor). */
 .rich-editor-area.yjd-drag-over {
-  outline: 2px dashed var(--rte-accent, var(--rte-accent));
+  position: relative; /* anchors the drop pill */
+  outline: 1.5px dashed var(--rte-accent);
   outline-offset: -4px;
-  background: var(--rte-accent-weak, #f6f5ff);
+  /* accent at ~5% over the canvas (fixed rgba — no color-mix). */
+  background: rgba(91, 91, 214, 0.05);
 }
 
 /* =====================================================================
@@ -4625,14 +4671,17 @@ body.yjd-fullscreen-lock { overflow: hidden; }
    The design's popovers (link, find & replace) use compact 26px controls at
    12px type — noticeably smaller than the 30px chrome controls. */
 .yjd-rich-editor .rich-editor-popup-container .yjd-input,
-.yjd-rich-editor .rich-editor-popup-container .yjd-select-input,
+.yjd-rich-editor .rich-editor-popup-container .yjd-select-input {
+  height: var(--rte-ctl, 30px);
+  min-height: var(--rte-ctl, 30px);
+  padding: 0 10px;
+  border-color: var(--rte-border-strong);
+  border-radius: var(--rte-radius-sm);
+}
 .yjd-rich-editor .yjd-find-input {
   height: 26px;
   min-height: 26px;
   padding: 0 8px;
-  /* !important: the @layer base font shorthand pins 14px otherwise. */
-  font-size: 12px !important;
-  font-weight: 400 !important;
   border-radius: var(--rte-radius-sm);
 }
 .yjd-rich-editor .yjd-find-btn:not(.yjd-find-icon):not(.yjd-find-toggle) {
@@ -4652,10 +4701,8 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .rich-editor-popup-container .yjd-button-confirm,
 .yjd-rich-editor .rich-editor-popup-container .yjd-button-cancel,
 .yjd-rich-editor .link-popup-apply {
-  height: 26px;
-  padding: 0 10px;
-  font-size: 12px !important;
-  font-weight: 500 !important;
+  height: 28px;
+  padding: 0 12px;
 }
 .yjd-rich-editor .link-popup {
   padding: 9px;
@@ -4667,30 +4714,31 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .link-popup .yjd-input { flex: 1; min-width: 0; }
 
 /* ---------- Form popups (image / video / tag / import): v2 shell ----------
-   Mono uppercase head, 11.5px labels, compact 26px controls, 262px card —
-   the same recipe as the design's popovers instead of the legacy h3 shell. */
+   Design cards "Video popup" / "Import popup" / "Tag popup": 14px card
+   padding, h3 title 13.5/600, 11.5/500 labels, 30px inputs, 28px buttons. */
 .yjd-rich-editor .image-popup,
 .yjd-rich-editor .video-popup,
 .yjd-rich-editor .tag-popup,
 .yjd-rich-editor .import-popup {
-  width: 262px;
+  width: 300px;
   box-sizing: border-box;
-  padding: 10px;
+  padding: 14px;
 }
-.yjd-rich-editor .rich-editor-popup-container .yjd-input-title {
-  margin: 0 0 8px;
-  font-family: var(--rte-mono);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--rte-faint);
+.yjd-rich-editor .rich-editor-popup-container .yjd-input-title,
+.yjd-rich-editor .import-popup-title {
+  margin: 0 0 12px;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--rte-ink);
 }
-.yjd-rich-editor .rich-editor-popup-container .yjd-input-label {
+.yjd-rich-editor .rich-editor-popup-container .yjd-input-label,
+.yjd-rich-editor .import-input-label {
+  display: block;
   margin: 0 0 5px;
   font-size: 11.5px;
-  font-weight: 400;
-  color: var(--rte-muted);
+  font-weight: 500;
+  color: var(--rte-ink-2);
 }
 .yjd-rich-editor .yjd-input-upload-group {
   display: flex;
@@ -4702,26 +4750,278 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: var(--rte-ctl, 30px);
+  height: var(--rte-ctl, 30px);
   flex: 0 0 auto;
   padding: 0;
+  border: 1px solid var(--rte-border-strong);
   border-radius: var(--rte-radius-sm);
+  background: var(--rte-chrome);
+  color: var(--rte-ink-2);
 }
 .yjd-rich-editor .rich-editor-popup-container .yjd-custom-upload-button svg {
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
 }
 .yjd-rich-editor .yjd-button-container {
   display: flex;
   justify-content: flex-end;
-  gap: 6px;
-  margin-top: 9px;
+  gap: 7px;
+  margin-top: 14px;
 }
 .yjd-rich-editor .rich-editor-popup-container .image-preview-container img,
 .yjd-rich-editor .rich-editor-popup-container .video-preview-container video {
-  border-radius: var(--rte-radius-sm);
+  border-radius: var(--rte-radius-md);
   max-width: 100%;
+}
+/* File preview gets a bottom scrim so the white controls stay legible. */
+.yjd-rich-editor .rich-editor-popup-container .video-preview-container::after,
+.yjd-rich-editor .rich-editor-popup-container .image-preview-container::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 26px;
+  border-radius: 0 0 7px 7px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.45));
+  pointer-events: none;
+}
+/* Inline URL check under the video field: "Recognised host — …". */
+.yjd-rich-editor .yjd-url-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: var(--rte-success);
+}
+.yjd-rich-editor .yjd-url-check svg { flex: 0 0 auto; }
+/* Drop zone inside the video/image popups while files are dragged over. */
+.yjd-rich-editor .yjd-popup-dropzone {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 20px 14px;
+  border: 1.5px dashed var(--rte-accent);
+  border-radius: var(--rte-radius-sm);
+  background: rgba(91, 91, 214, 0.06);
+  color: var(--rte-accent-ink);
+  text-align: center;
+}
+.yjd-rich-editor .yjd-popup-dropzone.active { display: flex; }
+.yjd-rich-editor .yjd-popup-dropzone .yjd-dropzone-main { font-size: 12.5px; font-weight: 500; }
+.yjd-rich-editor .yjd-popup-dropzone .yjd-dropzone-sub { font-size: 11px; color: var(--rte-muted); }
+
+/* ---------- Import popup: type select, drop area, file row, notice ------- */
+.yjd-rich-editor .import-popup .import-type-select {
+  display: block;
+  width: 100%;
+  height: var(--rte-ctl, 30px);
+  margin-bottom: 9px;
+  padding: 0 9px;
+  border: 1px solid var(--rte-border-strong);
+  border-radius: var(--rte-radius-sm);
+  background: var(--rte-bg);
+  color: var(--rte-ink);
+  font-size: 12.5px !important;
+  cursor: pointer;
+}
+.yjd-rich-editor .import-drop-area {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 14px;
+  border: 1px dashed var(--rte-border);
+  border-radius: var(--rte-radius-sm);
+  background: var(--rte-chrome-2);
+  color: var(--rte-faint);
+  font-size: 12px;
+  line-height: 1.5;
+  cursor: not-allowed;
+}
+.yjd-rich-editor .import-drop-area.ready {
+  color: var(--rte-muted);
+  cursor: pointer;
+}
+.yjd-rich-editor .import-drop-area.drag {
+  border-color: var(--rte-accent);
+  border-style: dashed;
+  background: rgba(91, 91, 214, 0.06);
+  color: var(--rte-accent-ink);
+}
+.yjd-rich-editor .import-drop-ic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-sm);
+  background: var(--rte-bg);
+}
+.yjd-rich-editor .import-file-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 11px;
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-sm);
+  background: var(--rte-chrome);
+}
+.yjd-rich-editor .import-file-ic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-sm);
+  background: var(--rte-bg);
+  color: var(--rte-muted);
+}
+.yjd-rich-editor .import-file-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.yjd-rich-editor .import-file-name {
+  font-size: 12.5px;
+  color: var(--rte-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.yjd-rich-editor .import-file-size {
+  font-family: var(--rte-mono);
+  font-size: 10.5px;
+  color: var(--rte-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.yjd-rich-editor .import-file-x {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  padding: 0;
+  border: none;
+  border-radius: var(--rte-radius-sm);
+  background: transparent;
+  color: var(--rte-faint);
+  cursor: pointer;
+}
+.yjd-rich-editor .import-file-x:hover { color: var(--rte-ink); background: var(--rte-chrome-2); }
+/* Inline "needs extra libraries" notice — replaces the post-pick alert(). */
+.yjd-rich-editor .yjd-popup-notice {
+  display: flex;
+  gap: 9px;
+  margin-top: 9px;
+  padding: 10px 12px;
+  border: 1px solid rgba(168, 101, 0, 0.26);
+  border-radius: var(--rte-radius-md);
+  background: var(--rte-warning-weak);
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--rte-ink-2);
+}
+.yjd-rich-editor .yjd-popup-notice svg { flex: 0 0 auto; margin-top: 1px; color: var(--rte-warning); }
+
+/* ---------- Tag popup: suggestion chips ---------- */
+.yjd-rich-editor .tag-popup .yjd-suggestions-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.yjd-rich-editor .tag-popup .yjd-suggestion-button {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 9px;
+  border: 1px solid var(--rte-border);
+  border-radius: 20px;
+  background: var(--rte-bg);
+  color: var(--rte-ink-2);
+  font-size: 12px !important;
+  cursor: pointer;
+}
+.yjd-rich-editor .tag-popup .yjd-suggestion-button:hover {
+  background: var(--rte-chrome-2);
+  color: var(--rte-ink);
+}
+.yjd-rich-editor .tag-popup .yjd-input-group { margin-bottom: 10px; }
+.yjd-rich-editor .tag-popup .yjd-input-group:last-of-type { margin-bottom: 0; }
+.yjd-rich-editor .tag-popup .yjd-select-input,
+.yjd-rich-editor .tag-popup .yjd-input { width: 100%; box-sizing: border-box; }
+
+/* ---------- Drag & drop: drop pill + visible drop caret ---------- */
+.rich-editor-area.yjd-drag-over::after {
+  content: "Drop to insert here";
+  position: absolute;
+  right: 12px;
+  top: 10px;
+  display: flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 9px;
+  border-radius: 20px;
+  background: var(--rte-accent);
+  color: var(--rte-accent-ink-on, #fff);
+  font-size: 11px;
+  font-weight: 500;
+  box-shadow: var(--rte-shadow-sm);
+  pointer-events: none;
+}
+.yjd-drop-caret {
+  position: fixed;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--rte-accent, #5b5bd6);
+  pointer-events: none;
+  z-index: 10000;
+}
+.yjd-drop-caret::before {
+  content: "";
+  position: absolute;
+  left: -3px;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: inherit;
+}
+/* Unhandled-drop toast. */
+.yjd-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(92vw, 380px);
+  padding: 9px 13px;
+  border: 1px solid var(--rte-border-strong, #ced2d9);
+  border-radius: var(--rte-radius-md, 8px);
+  background: var(--rte-bg, #fff);
+  color: var(--rte-ink-2, #3c424d);
+  font-size: 12.5px;
+  box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.2));
+  animation: yjd-toast-in 160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.yjd-toast svg { flex: 0 0 auto; color: var(--rte-warning, #a86500); }
+@keyframes yjd-toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(6px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
 /* ---------- Toolbar selects: quiet by default (design recipe) ----------
@@ -5521,51 +5821,59 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 
 /* Attachment chip upload status: progress bar while pending, danger ring +
    "!" badge on failure (chip keeps the file so the user can retry/remove). */
-.rte-attach-chip { position: relative; }
+/* Upload status (design "Upload status"): spinner ring while pending; error
+   chips go danger-weak with an inline retry affordance. */
 .rte-attach-chip[data-status="error"] {
-  border-color: var(--rte-danger) !important;
-  box-shadow: 0 0 0 2px rgba(208, 52, 58, 0.18);
+  border-color: rgba(208, 52, 58, 0.4) !important;
+  background: var(--rte-danger-weak, #fdecec);
 }
-.rte-attach-progress {
+.rte-attach-spin {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  border: 2px solid var(--rte-border);
+  border-top-color: var(--rte-accent);
+  border-radius: 50%;
+  animation: yjd-spin 0.9s linear infinite;
+}
+/* Row chips: the spinner takes the icon tile's place (flex order — the span
+   is appended after the close button). */
+.rte-attach-row[data-status="pending"] .rte-attach-ic { display: none; }
+.rte-attach-row .rte-attach-spin { width: 16px; height: 16px; order: -1; }
+/* Tiles: spinner floats centred over the preview. */
+.rte-attach-tile .rte-attach-spin {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -8px 0 0 -8px;
+  width: 16px;
+  height: 16px;
+  border-color: rgba(255, 255, 255, 0.55);
+  border-top-color: #fff;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.45));
+}
+@keyframes yjd-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .rte-attach-spin { animation: none; opacity: 0.6; }
+}
+.rte-attach-retry {
+  border: 0;
+  padding: 0;
+  background: none;
+  font: 400 10.5px/1 var(--rte-mono, monospace);
+  color: var(--rte-danger);
+  text-decoration: underline;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+.rte-attach-tile .rte-attach-retry {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0;
-  height: 3px;
-  border-radius: 0 0 var(--rte-radius-md) var(--rte-radius-md);
-  background: var(--rte-chrome-3);
-  overflow: hidden;
-}
-.rte-attach-progress span {
-  display: block;
-  width: 40%;
-  height: 100%;
-  background: var(--rte-accent);
-  animation: yjd-attach-progress 1.1s ease-in-out infinite;
-}
-@keyframes yjd-attach-progress {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(350%); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .rte-attach-progress span { animation: none; width: 100%; opacity: 0.5; }
-}
-.rte-attach-error-badge {
-  position: absolute;
-  top: -5px;
-  left: -5px; /* top-right belongs to the remove (×) button */
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--rte-danger);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
+  bottom: 3px;
+  text-align: center;
+  text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
 }
 
 /* ---------- Link view bar: href · edit · copy · unlink ---------- */

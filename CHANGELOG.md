@@ -10,6 +10,52 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 component layouts and redrawn glyphs on top of the 2.12.0 token pass.
 
 ### Changed
+- **Form popups (design "Video popup" / "Import popup" / "Tag popup" cards)**:
+  300px card, 14px padding, h3 titles (13.5px/600), 11.5px/500 labels, 30px
+  inputs (13px), 30px upload button, 28px confirm/cancel buttons; disabled
+  confirm buttons render the quiet chrome fill (`.button-disable`). The link
+  popup's Apply matches at 28px.
+- **Video popup states**: typing a URL hides the upload button (a URL and a
+  file are mutually exclusive) and, for a recognised host/extension, shows an
+  inline "Recognised host — validated again on insert" check; the file preview
+  gets a bottom scrim so the white controls stay legible.
+- **Import popup**: the bare file input is now a dashed drop/browse area that
+  stays inert until a type is chosen ("Choose a type first…"), accepts drops,
+  and renders the picked file as a compact row (icon tile, ellipsised name,
+  `size · MIME` in mono, ✕ to clear). Unsupported combinations (PDF, Word,
+  .xlsx/.xls) surface as an inline warning with Import held disabled — no more
+  post-pick `alert()`.
+- **Tag popup**: suggestions render as 24px pill chips.
+- **Attachment tray (prompt layout)**: media with a preview renders as 48px
+  tiles (16px close circle, play badge bottom-left on videos); files and
+  context chips are 32px rows with a 20px icon tile. A pending upload shows a
+  spinner ring in the icon's place; a failed one gets danger styling and an
+  inline **retry** that re-runs the upload hook (replaces the old progress bar
+  and "!" badge). The "+" add-menu gains a mono "Attach" header (186px, 12.5px
+  rows).
+- **Drag & drop (canvas)**: the drag-over state is now the design's 1.5px
+  dashed accent frame with a "Drop to insert here" pill, plus a live **drop
+  caret** (2px accent bar with a dot) tracking the pointer so the insertion
+  point is visible before release. Dropping multiple files inserts **all**
+  matching files (was: first only), and a drop nothing can handle shows a
+  toast ("PDF files aren't enabled in this editor.") instead of failing
+  silently.
+- **Size ceilings**: ESM/UMD 78→82 KB, Core 78→79 KB, stylesheet 15→16 KB
+  (brotli), covering the new popup states, drop UX and tray CSS.
+
+### Added (this pass)
+- **Popup drop zones**: the image and video popups accept file drops — while
+  files are dragged over them the input group swaps for a dashed "Drop your
+  video/image here" target that feeds the same path as the upload button.
+- **`editor.showToast(message)`**: small transient status toast used by the
+  unhandled-drop path, available to integrators.
+
+### Fixed (this pass)
+- Import popup no longer closes when clearing the picked file (the ✕ detached
+  from the DOM before the click-outside handler ran).
+- The popup upload button can hide again (`display` was pinned by an
+  `!important` in a legacy rule); its idle look follows the design (solid
+  border, chrome fill, grey icon — was dashed accent).
 - **62 icons redrawn** to match the design spec exactly (bold, italic, color,
   ai sparkle, undo/redo, all alignment, list, table-operation and picker
   glyphs) — every registry entry now byte-matches the design's icon set.

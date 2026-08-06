@@ -517,6 +517,8 @@ export class Editor {
   insertImageFile(file: File): void;
   /** Insert a non-image File as a file chip (uses options.file.upload). */
   insertFileAttachment(file: File): void;
+  /** Transient status toast (used by the unhandled-drop path). */
+  showToast(message: string, opts?: { duration?: number }): HTMLElement;
   /** Open the native picker for a file attachment. */
   openFileAttachmentPicker(): void;
   /** True when a mention/slash/emoji popup that captures Enter is open. */
