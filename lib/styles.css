@@ -4573,6 +4573,80 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   background: var(--rte-border-strong);
 }
 
+/* ---------- Popover/floating-bar active state = ink fill (v2 tbsOn) ---------- */
+.yjd-rich-editor .yjd-image-align-btn.active,
+.yjd-rich-editor .align-button.active,
+.yjd-rich-editor .list-button.active,
+.yjd-rich-editor .table-toolbar-btn.active {
+  background: var(--rte-ink) !important;
+  color: var(--rte-bg) !important;
+  border-color: transparent !important;
+}
+.yjd-rich-editor .yjd-image-align-btn.active svg,
+.yjd-rich-editor .yjd-image-align-btn.active svg path,
+.yjd-rich-editor .align-button.active svg,
+.yjd-rich-editor .align-button.active svg path,
+.yjd-rich-editor .list-button.active svg,
+.yjd-rich-editor .list-button.active svg path,
+.yjd-rich-editor .table-toolbar-btn.active svg,
+.yjd-rich-editor .table-toolbar-btn.active svg path {
+  color: var(--rte-bg) !important;
+  stroke: var(--rte-bg) !important;
+  fill: none !important;
+}
+.yjd-rich-editor .yjd-image-align-btn.active svg [fill="currentColor"],
+.yjd-rich-editor .align-button.active svg [fill="currentColor"],
+.yjd-rich-editor .list-button.active svg [fill="currentColor"] {
+  fill: var(--rte-bg) !important;
+  stroke: none !important;
+}
+/* …and pressed popover buttons ignore hover, same as the toolbar. */
+.yjd-rich-editor .yjd-image-align-btn.active:hover,
+.yjd-rich-editor .align-button.active:hover,
+.yjd-rich-editor .list-button.active:hover,
+.yjd-rich-editor .table-toolbar-btn.active:hover {
+  background: var(--rte-ink) !important;
+  color: var(--rte-bg) !important;
+}
+
+/* ---------- Popover form metrics (v2): 26px inputs & buttons ----------
+   The design's popovers (link, find & replace) use compact 26px controls at
+   12px type — noticeably smaller than the 30px chrome controls. */
+.yjd-rich-editor .rich-editor-popup-container .yjd-input,
+.yjd-rich-editor .rich-editor-popup-container .yjd-select-input,
+.yjd-rich-editor .yjd-find-input {
+  height: 26px;
+  min-height: 26px;
+  padding: 0 8px;
+  font-size: 12px;
+  border-radius: var(--rte-radius-sm);
+}
+.yjd-rich-editor .yjd-find-btn:not(.yjd-find-icon):not(.yjd-find-toggle) {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 11.5px;
+  font-weight: 500;
+}
+.yjd-rich-editor .yjd-find-btn.yjd-find-icon {
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  padding: 0;
+}
+.yjd-rich-editor .yjd-find-replace { padding: 9px; gap: 6px; }
+.yjd-rich-editor .yjd-find-count { font-family: var(--rte-mono); font-size: 11px; }
+.yjd-rich-editor .rich-editor-popup-container .yjd-button-confirm,
+.yjd-rich-editor .rich-editor-popup-container .yjd-button-cancel,
+.yjd-rich-editor .link-popup-apply {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.yjd-rich-editor .link-popup { padding: 9px; }
+.yjd-rich-editor .link-popup .link-popup-row { gap: 6px; margin-bottom: 7px; }
+.yjd-rich-editor .link-popup .link-popup-row:last-child { margin-bottom: 0; }
+
 /* ---------- Toolbar selects: quiet by default (design recipe) ----------
    The design's chrome-bar select has NO border and NO fill at rest — the
    chrome-2 wash and hairline border only appear on hover. */

@@ -11,13 +11,34 @@ const contentContainer = document.getElementById('content-container');
 contentContainer.classList.add('yjd-content');
 
 const editor = new RichEditor('#editor-container', {
-  content: "",
+  // Starter document so the side panel's Outline tab has something to show.
+  content: '<h1>Streaming diffs in the editor core</h1>' +
+    '<p>The core applies AI edits as a <b>word-level diff</b> with ' +
+    '<a href="https://yjd.io/docs">a link</a> and <code>exec()</code> inline code.</p>' +
+    '<h2>Patch pipeline</h2><p>Every operation lands through the same command pipeline.</p>' +
+    '<h3>Word tokenizer</h3><p>Keep whitespace runs so the caret can be remapped.</p>' +
+    '<h2>Benchmarks</h2><p>Cost per patch is O(nm) in the worst case.</p>',
   theme: 'light',
+  // UI 2.0 right rail: Outline · Comments · Versions.
+  sidePanel: true,
   onChange: (content) => {
     // Update the output container with new content
     contentContainer.innerHTML = content;
   }
 });
+
+// Demo data for the rail: a version snapshot + a comment on the first bold run.
+editor.saveVersion();
+const boldEl = document.querySelector('#editor-container .rich-editor-area b');
+if (boldEl && editor.addComment) {
+  const r = document.createRange();
+  r.selectNodeContents(boldEl);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(r);
+  editor.addComment('Can we cap this at 5k tokens per block?', 'Linh');
+  sel.removeAllRanges();
+}
 
 // Remove the loading skeleton once the editor has mounted.
 document.getElementById('editor-loading')?.remove();
