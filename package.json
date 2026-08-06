@@ -99,7 +99,7 @@
     {
       "name": "Stylesheet",
       "path": "lib/styles.min.css",
-      "limit": "13.5 KB"
+      "limit": "14 KB"
     }
   ]
 }

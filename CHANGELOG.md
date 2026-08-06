@@ -102,7 +102,7 @@ component layouts and redrawn glyphs on top of the 2.12.0 token pass.
   - **Date chip** — `insertDateChip()` / the `date` command inserts an inline
     chip with `data-date` (info-wash styling, non-editable).
   - Size ceilings raised for the feature set: all-in-one bundles 75 → 78 KB
-    (actual ~75.2), stylesheet 13 → 13.5 KB (actual 13.09). Tree-shaken presets
+    (actual ~75.2), stylesheet 13 → 14 KB (actual 13.63 after the callout/toggle blocks). Tree-shaken presets
     (Minimal ~17 KB) are unaffected — none of the new modules load unless used.
 - **Phase C1 — block handles** (the design's editor-surface signature): hover a
   block to reveal the left-gutter pair — **⠿ drag to reorder** (accent drop
