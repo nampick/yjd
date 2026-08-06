@@ -61,6 +61,10 @@ component layouts and redrawn glyphs on top of the 2.12.0 token pass.
   unhandled-drop path, available to integrators.
 
 ### Fixed (this pass)
+- **Enter inside a code block**: browsers split every line into its OWN
+  `<pre>` — multi-line code was impossible and language detection never had
+  enough signal. Enter now inserts a newline in the same block; Enter on an
+  empty trailing line exits into a fresh paragraph (test-covered).
 - **Toolbar fonts never applied**: the font reset targeted `.toolbar-container`
   but the DOM class is `.rich-editor-toolbar-container` — toolbar buttons had
   rendered in the browser's default font (Arial) all along. Size ceilings
