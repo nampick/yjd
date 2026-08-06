@@ -51,6 +51,11 @@ component layouts and redrawn glyphs on top of the 2.12.0 token pass.
   unhandled-drop path, available to integrators.
 
 ### Fixed (this pass)
+- **Ask AI first open**: with no caret in the document, the panel anchored to
+  the EDITOR BOX and dropped below the whole document on the first click. It
+  now opens right-aligned under the toolbar pill. A first-open positioning
+  regression suite (test/popup-position.test.js) covers the AI bar, the
+  video/image/tag/import popovers and the shared position helper.
 - **More-toggle dots**: the ⋯ glyph's `[fill="currentColor"]` circles were
   painted paper by the ink-fill active recipe — invisible on the toggle's
   LIGHT pressed chrome. Re-inked while open.
