@@ -2496,7 +2496,10 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .rich-editor-toolbar-2.visible {
   border-top: 1px solid var(--rte-border);
 }
-/* UI 2.0: clusters separated by hairline dividers (the design's chrome bar). */
+/* UI 2.0: clusters separated by hairline dividers — the design's exact recipe
+   (a 1px × 20px centred line with 4px breathing room on each side), on the
+   primary row AND the overflow rows. The divider is a ::before inside each
+   non-first group so the responsive reflow needs no extra DOM. */
 .yjd-rich-editor .toolbar-group {
   display: flex;
   align-items: center;
@@ -2506,18 +2509,28 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   padding: 0;
 }
 .yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group + .toolbar-group {
-  border-left: 1px solid var(--rte-border);
-  padding-left: 5px;
-  margin-left: 6px;
+  margin-left: 4px;
+}
+/* Overflow rows: spacing comes ONLY from the row's flex gap (the packer's
+   invariant) — the divider rides inside the group, no extra margin. */
+.yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group + .toolbar-group::before,
+.yjd-rich-editor .rich-editor-toolbar-2-row .toolbar-group + .toolbar-group::before {
+  content: '';
+  flex: 0 0 auto;
+  align-self: center;
+  width: 1px;
+  height: 20px;
+  background: var(--rte-border);
+  /* + the group's own 2px gap = 4px on the trailing side, matching the lead. */
+  margin-right: 2px;
 }
 /* No divider before the right-aligned AI cluster — the spacer separates it. */
+.yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group:has(> .ai-btn)::before {
+  content: none;
+}
 .yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group:has(> .ai-btn) {
   border-left: 0;
   padding-left: 0;
-}
-/* Overflow rows keep the quiet, divider-less spacing. */
-.yjd-rich-editor .rich-editor-toolbar-2 .toolbar-group + .toolbar-group {
-  margin-left: 12px;
 }
 
 /* ---------- Buttons (toolbar + dropdown triggers) ---------- */
@@ -3820,9 +3833,10 @@ body.yjd-fullscreen-lock { overflow: hidden; }
     flex: 0 0 auto;
   }
   .yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group + .toolbar-group {
-    border-left: 0;
-    padding-left: 0;
     margin-left: 8px;
+  }
+  .yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group + .toolbar-group::before {
+    content: none;
   }
   /* 44px touch targets (UI 2.0) — the row swipes, so bigger buttons cost
      nothing horizontally. */
@@ -3914,7 +3928,8 @@ body.yjd-fullscreen-lock { overflow: hidden; }
      pathologically narrow editors where a single group is wider than the row —
      the group drops to a second line instead of scrolling sideways. */
   flex-wrap: wrap;
-  gap: 20px;                 /* group spacing; the JS packer budgets this exact value */
+  gap: 4px;                  /* group spacing; the JS packer budgets this exact value
+                                (dividers live inside the groups as ::before) */
   padding: 8px 16px;         /* horizontal padding is overwritten inline to match row 1 */
   min-height: 48px;
   box-sizing: border-box;
