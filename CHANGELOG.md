@@ -4,6 +4,40 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+**Editor UI 2.0, part 2 — component & icon pass.** Applies the redesign's
+component layouts and redrawn glyphs on top of the 2.12.0 token pass.
+
+### Changed
+- **62 icons redrawn** to match the design spec exactly (bold, italic, color,
+  ai sparkle, undo/redo, all alignment, list, table-operation and picker
+  glyphs) — every registry entry now byte-matches the design's icon set.
+- **Toolbar layout (UI 2.0)**: undo/redo lead the row on the left (no longer a
+  pinned right cluster); when a model is wired, the AI trigger renders as a
+  right-aligned **"Ask AI" accent pill** that never overflows into the hidden
+  panel (it reuses the pinned-group reservation in `reflow()`).
+- **Slash menu**: "Blocks" section header, bordered 26px icon tiles, per-block
+  glyphs (H1/H2/H3, paragraph, blockquote, code-block) and markdown shortcut
+  chips (`#`, `-`, `>`, ` ``` `, `---`, …) on the right of each row; active row
+  uses the quiet chrome wash with an accent-tinted tile.
+- **Colour picker**: curated 8×3 UI 2.0 palette (neutral ramp, saturated hues,
+  soft washes) replaces the legacy web palette; "No colour" and "Custom…" are
+  full-width menu rows under a hairline (white/black now live in the grid).
+- **Table size picker**: 16px cells with accent-weak highlight and a mono
+  "3 × 4" size label.
+- **Find & replace**: the match-case toggle renders as a chip (accent when on).
+- **Floating block/table bars**: 28px buttons per the bubble-metrics spec.
+- **Mention menu**: two-line rows — name plus an optional handle/description
+  line (`item.handle` / `item.hint` / `item.description`), 22px avatars.
+
+### Added
+- **Media bar delete**: the image/video align bar gains a divider + destructive
+  delete button (one undoable step).
+- **Live resize badge**: dragging a resize handle shows a "376 × 212" size chip
+  pinned to the element's top-right corner; handles are now 8px accent-bordered
+  squares per the design.
+
 ## [2.12.0] — 2026-08-06
 
 **Editor UI 2.0** — a full visual redesign of every surface, from the

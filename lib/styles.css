@@ -2928,7 +2928,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .rich-editor-toolbar-btn .icon svg path {
   fill: currentColor;
 }
-.yjd-rich-editor .rich-editor-toolbar-btn { color: #4b5060; }
+.yjd-rich-editor .rich-editor-toolbar-btn { color: var(--rte-muted, #6d7480); }
 .yjd-rich-editor .rich-editor-toolbar-btn:hover { color: var(--rte-ink); }
 .yjd-rich-editor .rich-editor-toolbar-btn.active,
 .yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg,
@@ -3299,21 +3299,10 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .rich-editor-toolbar-1 .more-btn {
   margin-left: 12px;
 }
-/* Right-side action cluster: push the pinned history group (undo/redo) and the
-   "More" button to the right edge as one tight unit, so "More" reads as part of
-   a deliberate action group instead of a lone icon. The auto margin absorbs the
-   toolbar's free space, collapsing the left groups to their natural gap. */
-.yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group-history {
-  margin-left: auto;
-}
-/* When a history group is present it carries the auto margin, so the More button
-   must NOT also auto-margin (two auto margins would split the free space and
-   leave a gap between undo/redo and More). Collapse More to a tight gap right
-   after the history group — the cluster stays one unit. Higher specificity than
-   the base `.more-btn { margin-left: auto !important }`, so it wins. */
-.yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group-history ~ .more-btn {
-  margin-left: 12px !important;
-}
+/* UI 2.0: undo/redo lead the row on the LEFT (no pinned right cluster). The
+   right side belongs to the AI pill + "More" — the AI group carries the auto
+   margin (see the component pass), and "More" keeps its own auto margin as a
+   fallback when no AI group is present. */
 
 /* =====================================================================
    PROMPT LAYOUT (options.layout:'prompt') — chat-style input.
@@ -4386,6 +4375,256 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   outline: 2px dashed var(--rte-accent, var(--rte-accent));
   outline-offset: -4px;
   background: var(--rte-accent-weak, #f6f5ff);
+}
+
+/* =====================================================================
+   UI 2.0 — component pass
+   Layout + chrome for the redesigned components: Ask AI pill, slash menu
+   tiles/keys, mention rows, colour & table pickers, media bar, find chips.
+   Appended after the earlier sections so these rules win.
+   ===================================================================== */
+
+/* ---------- Ask AI pill (toolbar) ---------- */
+.yjd-rich-editor .rich-editor-toolbar-btn .rte-btn-label {
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.ai-btn {
+  width: auto; /* labelled pill — don't inherit the fixed square width */
+  padding: 0 10px;
+  gap: 6px;
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
+  border-color: var(--rte-accent-weak);
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.ai-btn:hover {
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
+  border-color: var(--rte-accent);
+}
+/* The AI group is right-aligned (design: AI affordances live on the right).
+   It takes over the auto margin, so the "More" button after it collapses to a
+   tight gap — otherwise two auto margins would split the free space. */
+.yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group:has(> .ai-btn) {
+  margin-left: auto;
+}
+.yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group:has(> .ai-btn) ~ .more-btn {
+  margin-left: 12px !important;
+}
+
+/* ---------- Slash menu: header, icon tiles, shortcut chips ---------- */
+.yjd-slash-head {
+  padding: 6px 8px 8px;
+  font-family: var(--rte-mono, ui-monospace, monospace);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rte-faint, var(--rte-muted));
+}
+.yjd-slash-item {
+  gap: 10px;
+}
+.yjd-slash-icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-sm, 6px);
+  background: var(--rte-bg);
+  color: var(--rte-muted);
+}
+/* Active row: quiet chrome wash (not the accent), accent-tinted glyph. */
+.yjd-slash-item:hover,
+.yjd-slash-item.active {
+  background: var(--rte-chrome-2);
+  color: var(--rte-ink);
+}
+.yjd-slash-item:hover .yjd-slash-icon,
+.yjd-slash-item.active .yjd-slash-icon {
+  color: var(--rte-accent-ink);
+  background: var(--rte-bg);
+}
+.yjd-slash-item.active .yjd-slash-hint { color: var(--rte-muted); }
+.yjd-slash-key {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-family: var(--rte-mono, ui-monospace, monospace);
+  font-size: 10.5px;
+  color: var(--rte-faint, var(--rte-muted));
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-xs, 4px);
+  padding: 1px 5px;
+}
+
+/* ---------- Mention menu: two-line rows ---------- */
+.yjd-mention-item:hover,
+.yjd-mention-item.active {
+  background: var(--rte-chrome-2);
+  color: var(--rte-ink);
+}
+.yjd-mention-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: 0 0 auto;
+}
+.yjd-mention-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+  text-align: start;
+}
+.yjd-mention-name { font-size: 12.5px; }
+.yjd-mention-handle {
+  font-size: 11px;
+  color: var(--rte-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Colour picker: 8-col swatch grid + menu rows ---------- */
+.yjd-rich-editor .color-grid {
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.yjd-rich-editor .color-button {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-xs, 4px);
+}
+.yjd-rich-editor .color-button:hover {
+  transform: none;
+  border-color: var(--rte-border-strong);
+  box-shadow: 0 0 0 2px var(--rte-accent-ring);
+}
+.yjd-rich-editor .custom-color-container {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1px;
+  padding-top: 6px;
+  border-top: 1px solid var(--rte-border);
+}
+.yjd-rich-editor .custom-color-container::before { content: none; }
+.yjd-rich-editor .color-menu-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: var(--rte-radius-sm, 6px);
+  background: transparent;
+  color: var(--rte-ink-2, var(--rte-ink));
+  font-family: var(--rte-ui, system-ui, sans-serif);
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: background var(--rte-t);
+  text-align: start;
+}
+.yjd-rich-editor .color-menu-row:hover { background: var(--rte-chrome-2); }
+.yjd-rich-editor .color-menu-row .icon { color: var(--rte-muted); }
+/* The hidden <input type=color> must not take layout space in the row list. */
+.yjd-rich-editor .custom-color-input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* ---------- Table size picker ---------- */
+.yjd-rich-editor .table-grid-selector {
+  gap: 3px;
+  border-bottom: 0;
+}
+.yjd-rich-editor .table-grid-cell {
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--rte-border);
+  border-radius: 2px;
+}
+.yjd-rich-editor .table-grid-cell:hover,
+.yjd-rich-editor .table-grid-cell.highlighted {
+  background: var(--rte-accent-weak);
+  border-color: var(--rte-accent);
+}
+.yjd-rich-editor .table-size-display {
+  margin-top: 8px;
+  font-family: var(--rte-mono, ui-monospace, monospace) !important;
+  font-size: 11px;
+  color: var(--rte-muted) !important;
+}
+
+/* ---------- Media resize: square handles, size badge, delete ---------- */
+.yjd-rich-editor .resize-handle {
+  width: 8px !important;
+  height: 8px !important;
+  background: var(--rte-bg) !important;
+  border: 1.5px solid var(--rte-accent) !important;
+  border-radius: 2px !important;
+  box-shadow: var(--rte-shadow-sm) !important;
+}
+.yjd-rich-editor .yjd-resize-size {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 1000;
+  font-family: var(--rte-mono, ui-monospace, monospace);
+  font-size: 10px;
+  color: var(--rte-accent-ink-on);
+  background: var(--rte-accent);
+  border-radius: var(--rte-radius-xs, 4px);
+  padding: 1px 5px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.yjd-rich-editor .yjd-image-align-sep {
+  width: 1px;
+  height: 16px;
+  background: var(--rte-border);
+  margin: 0 2px;
+  align-self: center;
+}
+.yjd-rich-editor .yjd-image-delete-btn { color: var(--rte-danger); }
+.yjd-rich-editor .yjd-image-delete-btn:hover {
+  background: var(--rte-danger-weak);
+  color: var(--rte-danger);
+}
+
+/* ---------- Find & replace: match-option chip ---------- */
+.yjd-rich-editor .yjd-find-toggle {
+  border: 1px solid var(--rte-border);
+  border-radius: 20px;
+  font-size: 11px;
+  padding: 0 9px;
+  color: var(--rte-ink-2, var(--rte-ink));
+}
+.yjd-rich-editor .yjd-find-toggle.active {
+  border-color: var(--rte-accent);
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
+}
+
+/* ---------- Floating bars: 28px buttons (design bubble metrics) ---------- */
+.yjd-rich-editor .block-toolbar-btn,
+.yjd-rich-editor .table-toolbar-btn {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
