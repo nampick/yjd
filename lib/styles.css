@@ -720,7 +720,7 @@
   /* Allow interaction with inputs */
   pointer-events: auto;
 }
-.yjd-rich-editor .yjd-input::placeholder { color: var(--rte-muted, #9aa0b4); }
+.yjd-rich-editor .yjd-input::placeholder { color: var(--rte-muted, #6d7480); }
 /* Same ellipsis-not-cut treatment for every other popup text input that can
    hold a long value (URLs, tag values, file names, hex colours). */
 .yjd-rich-editor .yjd-select-input,
@@ -994,16 +994,16 @@
   min-width: 150px;
   padding: 10px 12px;
   background: var(--rte-bg, #fff);
-  color: var(--rte-ink, #20242f);
-  border: 1px solid var(--rte-border, #e9e9f1);
+  color: var(--rte-ink, #15171c);
+  border: 1px solid var(--rte-border, #e3e5ea);
   border-radius: var(--rte-radius-sm, 8px);
-  box-shadow: var(--rte-shadow, 0 12px 32px -8px rgba(20, 24, 46, 0.2));
+  box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.20), 0 2px 6px rgba(16, 18, 23, 0.06));
   font: 500 13px/1.5 system-ui, -apple-system, sans-serif;
 }
 .yjd-table-profile-title {
   font-weight: 600;
   margin-bottom: 6px;
-  color: var(--rte-muted, #767c8e);
+  color: var(--rte-muted, #6d7480);
   text-transform: uppercase;
   font-size: 11px;
   letter-spacing: 0.04em;
@@ -1014,7 +1014,7 @@
   gap: 24px;
   padding: 2px 0;
 }
-.yjd-table-profile-row span { color: var(--rte-muted, #767c8e); }
+.yjd-table-profile-row span { color: var(--rte-muted, #6d7480); }
 
 .yjd-rich-editor .rich-editor-table td:focus {
   outline: 2px solid var(--rte-focus);
@@ -1568,18 +1568,18 @@
 }
 
 .yjd-rich-editor .custom-tag.tag-mention {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--rte-info-weak, #ebf3fd);
+  color: var(--rte-info, #1f6fdc);
 }
 
 .yjd-rich-editor .custom-tag.tag-hashtag {
-  background: #dcfce7;
-  color: #166534;
+  background: var(--rte-success-weak, #e7f5ef);
+  color: var(--rte-success, #0f8a5f);
 }
 
 .yjd-rich-editor .custom-tag.tag-custom {
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--rte-warning-weak, #fdf3e0);
+  color: var(--rte-warning, #a86500);
 }
 
 .yjd-rich-editor .custom-tag:hover {
@@ -1749,18 +1749,18 @@
 }
 
 .yjd-rich-editor .imported-content.html-content {
-  border-color: var(--rte-focus);
-  background-color: #eff6ff;
+  border-color: var(--rte-info, #1f6fdc);
+  background-color: var(--rte-info-weak, #ebf3fd);
 }
 
 .yjd-rich-editor .imported-content.excel-content {
-  border-color: #10b981;
-  background-color: #f0fdf4;
+  border-color: var(--rte-success, #0f8a5f);
+  background-color: var(--rte-success-weak, #e7f5ef);
 }
 
 .yjd-rich-editor .imported-content.text-content {
-  border-color: #f59e0b;
-  background-color: #fffbeb;
+  border-color: var(--rte-warning, #a86500);
+  background-color: var(--rte-warning-weak, #fdf3e0);
 }
 
 .yjd-rich-editor .imported-table {
@@ -2351,44 +2351,70 @@
    and the editor inherits it. Defining these on .yjd-rich-editor used to block
    ancestor/:root overrides. */
 :root {
-  /* Palette */
+  /* Palette — Editor UI 2.0 */
   --rte-bg: #ffffff;
-  --rte-chrome: #fbfbfd;
-  --rte-chrome-2: #f2f2f7;
-  --rte-border: #e9e9f1;
-  --rte-border-strong: #dadae6;
-  --rte-ink: #20242f;
-  --rte-muted: #767c8e;
-  --rte-accent: #6d5efc;
-  --rte-accent-ink: #5a48ee;
-  --rte-accent-weak: #efedff;
-  --rte-accent-ring: rgba(109, 94, 252, 0.28);
+  --rte-bg-2: #fafbfc;
+  --rte-chrome: #fcfcfd;
+  --rte-chrome-2: #f3f4f6;
+  --rte-chrome-3: #eceef1;
+  --rte-border: #e3e5ea;
+  --rte-border-strong: #ced2d9;
+  --rte-hairline: #eceef1;
+  --rte-ink: #15171c;
+  --rte-ink-2: #3c424d;
+  --rte-muted: #6d7480;
+  --rte-faint: #98a0ac;
+  --rte-accent: #5b5bd6;
+  --rte-accent-ink: #4a49cf;
+  --rte-accent-weak: #eeeefc;
+  --rte-accent-ring: rgba(91, 91, 214, 0.24);
   --rte-accent-ink-on: #ffffff; /* text/icon colour on an accent fill */
-  --rte-danger: #e5484d;
+  --rte-danger: #d0343a;
+  --rte-danger-weak: #fdecec;
+  --rte-success: #0f8a5f;
+  --rte-success-weak: #e7f5ef;
+  --rte-warning: #a86500;
+  --rte-warning-weak: #fdf3e0;
+  --rte-info: #1f6fdc;
+  --rte-info-weak: #ebf3fd;
   --rte-focus: var(--rte-accent, #3b82f6);
+  --rte-sel: rgba(91, 91, 214, 0.16);
   /* Content palette (editor body + read-view) */
-  --rte-link: #2563eb;
-  --rte-code-bg: #f1f2f3;
+  --rte-link: #2f5fd4;
+  --rte-code-bg: #f2f3f5;
   --rte-code-ink: inherit;
-  --rte-code-block-bg: #20242f;
-  --rte-code-block-ink: #ececf5;
-  --rte-quote-border: #d1d5db;
-  --rte-quote-bg: #f9fafb;
-  --rte-quote-ink: #555555;
-  --rte-table-border: #d1d5db;
+  --rte-code-block-bg: #14161a;
+  --rte-code-block-ink: #e6e8ec;
+  --rte-quote-border: #ced2d9;
+  --rte-quote-bg: #fafbfc;
+  --rte-quote-ink: #4b515c;
+  --rte-table-border: #dfe2e7;
   /* Shape & depth */
-  --rte-radius: 14px;
+  --rte-radius: 10px;
   /* Concentric inner radius for the chrome bars (toolbar/statusbar/area) which
      sit 1px inside the container's border. Using the same radius as the outer
      frame makes the curves non-concentric, so the bar's background overlaps the
      1px border at the corners and the border looks broken there. Keep this in
      sync with the .yjd-rich-editor border-width (1px). */
   --rte-radius-inner: calc(var(--rte-radius) - 1px);
-  --rte-radius-md: 11px;
-  --rte-radius-sm: 8px;
-  --rte-shadow-sm: 0 1px 2px rgba(20, 24, 46, 0.06);
-  --rte-shadow: 0 12px 32px -8px rgba(20, 24, 46, 0.20), 0 4px 10px -4px rgba(20, 24, 46, 0.10);
+  --rte-radius-md: 8px;
+  --rte-radius-sm: 6px;
+  --rte-radius-xs: 4px;
+  --rte-shadow-sm: 0 1px 2px rgba(16, 18, 23, 0.07);
+  --rte-shadow: 0 10px 28px -8px rgba(16, 18, 23, 0.20), 0 2px 6px rgba(16, 18, 23, 0.06);
+  --rte-shadow-lg: 0 28px 64px -16px rgba(16, 18, 23, 0.32), 0 4px 12px rgba(16, 18, 23, 0.08);
   --rte-t: 140ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Metrics: control height (buttons, inputs, selects) + standard gap.
+     Density knobs — override at :root or on the wrapper. Controls grow to a
+     44px touch target below 640px (see the mobile block). */
+  --rte-ctl: 30px;
+  --rte-gap: 6px;
+
+  /* UI font for the chrome (toolbar, menus, popups). Content keeps the host
+     app's font via `font-family: inherit` on the editor area. */
+  --rte-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Roboto, sans-serif;
+  --rte-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   /* One knob for every UI glyph (toolbar, menus, chips, popups). Override at
      :root, on any ancestor, or per-editor via options.iconSize. */
@@ -2401,7 +2427,7 @@
   background: var(--rte-bg);
   color: var(--rte-ink);
   box-shadow: var(--rte-shadow-sm);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--rte-ui, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
 }
 
 /* Distraction-free full screen: fill the viewport (Esc exits). The editor area
@@ -2433,7 +2459,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .rich-editor-popup-container input,
 .yjd-rich-editor .rich-editor-popup-container select,
 .yjd-rich-editor .rich-editor-popup-container textarea {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-family: var(--rte-ui, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif) !important;
 }
 
 /* Keep rounded frame corners now that the wrapper is overflow:visible (so the
@@ -2474,7 +2500,8 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   justify-content: flex-start; /* pack left; override legacy space-between */
   column-gap: 0;
   row-gap: 4px;
-  padding: 8px 12px;
+  /* 30px controls + 7px vertical padding = the 44px chrome bar of UI 2.0. */
+  padding: 7px 8px;
 }
 .yjd-rich-editor .rich-editor-toolbar-2.visible {
   border-top: 1px solid var(--rte-border);
@@ -2499,9 +2526,10 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-width: 32px;
-  height: 32px;
+  min-width: var(--rte-ctl, 30px);
+  height: var(--rte-ctl, 30px);
   padding: 0 8px;
+  font-size: 12.5px;
   border: 1px solid transparent;
   border-radius: var(--rte-radius-sm);
   background: transparent;
@@ -2544,42 +2572,52 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 7px 14px;
-  background: var(--rte-chrome);
+  padding: 7px 12px;
+  background: var(--rte-chrome-2);
   border-top: 1px solid var(--rte-border);
 }
 .yjd-rich-editor .rich-editor-breadcrumb,
 .yjd-rich-editor .wordcount {
   color: var(--rte-muted);
-  font-size: 12px;
+  font-family: var(--rte-mono, ui-monospace, monospace);
+  font-size: 11px;
   letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---------- Editor surface ---------- */
 .yjd-rich-editor .rich-editor-area {
   color: var(--rte-ink);
   font-size: 16px;
-  line-height: 1.75;
+  line-height: 1.72;
   padding: 22px 24px;
 }
+/* Text selection uses the accent wash so native selection, AI ranges and
+   remote-peer highlights all read as the same system. */
+.yjd-rich-editor .rich-editor-area ::selection,
+.yjd-content ::selection {
+  background: var(--rte-sel, rgba(91, 91, 214, 0.16));
+}
 .yjd-rich-editor .rich-editor-area a {
-  color: var(--rte-accent-ink);
+  color: var(--rte-link);
   text-decoration-color: var(--rte-accent-ring);
   text-underline-offset: 2px;
 }
+/* Quiet editorial quote: hairline bar, no fill (UI 2.0). */
 .yjd-rich-editor .rich-editor-area blockquote {
-  border-left: 3px solid var(--rte-accent);
-  background: var(--rte-accent-weak);
-  border-radius: 0 var(--rte-radius-sm) var(--rte-radius-sm) 0;
-  padding: 8px 16px;
-  color: var(--rte-ink);
+  border-left: 2px solid var(--rte-quote-border);
+  background: var(--rte-quote-bg);
+  border-radius: 0;
+  padding: 4px 16px 4px 18px;
+  color: var(--rte-quote-ink);
   margin: 12px 0;
 }
 .yjd-rich-editor .rich-editor-area code {
-  background: var(--rte-chrome-2);
-  border-radius: 6px;
-  padding: 2px 6px;
-  font-size: 0.9em;
+  background: var(--rte-code-bg);
+  color: var(--rte-code-ink);
+  border-radius: var(--rte-radius-xs, 4px);
+  padding: 2px 5px;
+  font-size: 0.88em;
 }
 .yjd-rich-editor .rich-editor-area pre {
   background: var(--rte-code-block-bg);
@@ -2610,8 +2648,9 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .table-popup,
 .yjd-rich-editor .text-align-picker-popup,
 .yjd-rich-editor .emoji-picker-popup {
+  /* Popover recipe (UI 2.0): 1px strong border, 8px radius, --rte-shadow. */
   background: var(--rte-bg);
-  border: 1px solid var(--rte-border);
+  border: 1px solid var(--rte-border-strong);
   border-radius: var(--rte-radius-md);
   box-shadow: var(--rte-shadow);
 }
@@ -2672,7 +2711,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   transition: background var(--rte-t);
 }
 .yjd-rich-editor .yjd-button-cancel:hover {
-  background: #e9e9f2;
+  background: var(--rte-chrome-3, #eceef1);
 }
 .yjd-rich-editor .yjd-custom-upload-button {
   border-radius: var(--rte-radius-sm);
@@ -2689,7 +2728,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .block-toolbar-container,
 .yjd-rich-editor .table-toolbar-container {
   background: var(--rte-bg);
-  border: 1px solid var(--rte-border);
+  border: 1px solid var(--rte-border-strong);
   border-radius: var(--rte-radius-md);
   box-shadow: var(--rte-shadow);
   padding: 4px;
@@ -2749,10 +2788,10 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   gap: 8px;
   padding: 10px;
   background: var(--rte-bg);
-  border: 1px solid var(--rte-border);
+  border: 1px solid var(--rte-border-strong);
   border-radius: var(--rte-radius-md);
   box-shadow: var(--rte-shadow);
-  font: 13px/1.4 system-ui, -apple-system, sans-serif;
+  font: 13px/1.4 var(--rte-ui, system-ui, -apple-system, sans-serif);
   max-width: calc(100% - 20px);
 }
 .yjd-rich-editor .yjd-find-replace.open {
@@ -2935,9 +2974,9 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .table-popup,
 .yjd-rich-editor .text-align-picker-popup,
 .yjd-rich-editor .emoji-picker-popup {
-  border-color: var(--rte-border);
+  border-color: var(--rte-border-strong);
   border-radius: var(--rte-radius-md);
-  box-shadow: 0 10px 30px -10px rgba(20, 24, 46, 0.18), 0 2px 6px -2px rgba(20, 24, 46, 0.08);
+  box-shadow: var(--rte-shadow);
 }
 
 /* roomier dropdown lists */
@@ -3073,7 +3112,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   display: block;
   fill: none !important;
   stroke: currentColor;
-  stroke-width: 2;
+  stroke-width: 1.75;
   stroke-linecap: round;
   stroke-linejoin: round;
   overflow: visible;
@@ -3160,7 +3199,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   max-width: 20px;
   fill: none !important;
   stroke: currentColor;
-  stroke-width: 2;
+  stroke-width: 1.75;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -3182,7 +3221,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   display: block;
   fill: none !important;
   stroke: currentColor;
-  stroke-width: 2;
+  stroke-width: 1.75;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -3222,7 +3261,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   color: inherit;
   fill: none !important;
   stroke: currentColor;
-  stroke-width: 2;
+  stroke-width: 1.75;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -3409,10 +3448,10 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   gap: 5px;
   padding: 5px 26px 5px 9px;
   border-radius: 999px;
-  background: var(--rte-accent-weak, rgba(109, 94, 252, 0.1));
-  border-color: var(--rte-accent-ring, rgba(109, 94, 252, 0.35));
+  background: var(--rte-accent-weak, rgba(91, 91, 214, 0.1));
+  border-color: var(--rte-accent-ring, rgba(91, 91, 214, 0.28));
 }
-.rte-attach-context .rte-attach-ic { width: auto; height: auto; font: 700 12px/1 var(--rte-mono, monospace); color: var(--rte-accent-ink, #5a48ee); }
+.rte-attach-context .rte-attach-ic { width: auto; height: auto; font: 700 12px/1 var(--rte-mono, monospace); color: var(--rte-accent-ink, #4a49cf); }
 .rte-attach-context .rte-attach-name { max-width: 160px; font-size: 12.5px; color: var(--rte-ink); }
 .rte-attach-context .rte-attach-close { top: 50%; transform: translateY(-50%); right: 5px; width: 16px; height: 16px; font-size: 11px; }
 
@@ -3556,9 +3595,9 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   overflow-y: auto;
   padding: 6px;
   background: var(--rte-bg, var(--rte-bg));
-  border: 1px solid var(--rte-border, var(--rte-border));
+  border: 1px solid var(--rte-border-strong, var(--rte-border));
   border-radius: var(--rte-radius-md, 12px);
-  box-shadow: var(--rte-shadow, 0 12px 32px -8px rgba(20, 24, 46, 0.20), 0 4px 10px -4px rgba(20, 24, 46, 0.10));
+  box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.20), 0 2px 6px rgba(16, 18, 23, 0.06));
   font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   animation: yjd-slash-in 90ms ease-out;
 }
@@ -3595,7 +3634,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   height: var(--rte-icon-size);
   fill: none;
   stroke: currentColor;
-  stroke-width: 2;
+  stroke-width: 1.75;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -3603,7 +3642,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-slash-text { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
 .yjd-slash-label { font-weight: 500; }
 .yjd-slash-hint { font-size: 12px; color: var(--rte-muted, var(--rte-muted)); }
-.yjd-slash-item.active .yjd-slash-hint { color: var(--rte-accent, #8b7ff0); }
+.yjd-slash-item.active .yjd-slash-hint { color: var(--rte-accent, #5b5bd6); }
 @media (prefers-reduced-motion: reduce) { .yjd-slash-menu { animation: none; } }
 
 /* ── Colour button swatch (v2.10) ─────────────────────────────────────────
@@ -3621,7 +3660,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   width: 16px;
   height: 3px;
   border-radius: 2px;
-  background: var(--rte-ink, #20242f);
+  background: var(--rte-ink, #15171c);
   pointer-events: none;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
 }
@@ -3709,7 +3748,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   font: 500 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   color: var(--rte-ink);
   background-color: var(--rte-bg);
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='16'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23767c8e'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='m6%209%206%206%206-6'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='16'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%236d7480'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='m6%209%206%206%206-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
   background-size: 16px;
@@ -3792,10 +3831,15 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   .yjd-rich-editor .toolbar-group + .toolbar-group {
     margin-left: 8px;
   }
+  /* 44px touch targets (UI 2.0) — the row swipes, so bigger buttons cost
+     nothing horizontally. */
+  .yjd-rich-editor {
+    --rte-ctl: 44px;
+  }
   .yjd-rich-editor .rich-editor-toolbar-btn,
   .yjd-rich-editor .custom-select-button {
-    min-width: 32px;
-    height: 32px;
+    min-width: var(--rte-ctl, 44px);
+    height: var(--rte-ctl, 44px);
     padding: 0 8px;
     flex: 0 0 auto;
   }
@@ -4001,8 +4045,8 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   white-space: nowrap;
 }
 .mention[data-trigger="#"] {
-  background: #e8f3ff;
-  color: #1f6feb;
+  background: var(--rte-info-weak, #ebf3fd);
+  color: var(--rte-info, #1f6fdc);
 }
 
 /* ── @mention autocomplete menu (v2.24) ───────────────────────────────────
@@ -4016,9 +4060,9 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   overflow-y: auto;
   padding: 6px;
   background: var(--rte-bg, var(--rte-bg));
-  border: 1px solid var(--rte-border, var(--rte-border));
+  border: 1px solid var(--rte-border-strong, var(--rte-border));
   border-radius: var(--rte-radius-md, 12px);
-  box-shadow: var(--rte-shadow, 0 12px 32px -8px rgba(20, 24, 46, 0.20), 0 4px 10px -4px rgba(20, 24, 46, 0.10));
+  box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.20), 0 2px 6px rgba(16, 18, 23, 0.06));
   font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   animation: yjd-slash-in 90ms ease-out;
 }
@@ -4062,9 +4106,9 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   max-width: calc(100vw - 16px);
   padding: 8px;
   background: var(--rte-bg, var(--rte-bg));
-  border: 1px solid var(--rte-border, var(--rte-border));
+  border: 1px solid var(--rte-border-strong, var(--rte-border));
   border-radius: var(--rte-radius-md, 12px);
-  box-shadow: var(--rte-shadow, 0 12px 32px -8px rgba(20, 24, 46, 0.20), 0 4px 10px -4px rgba(20, 24, 46, 0.10));
+  box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.20), 0 2px 6px rgba(16, 18, 23, 0.06));
   font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: var(--rte-ink, var(--rte-ink));
   animation: yjd-slash-in 90ms ease-out;
@@ -4088,7 +4132,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   width: 100%;
   box-sizing: border-box;
   padding: 8px 10px;
-  border: 1px solid var(--rte-border, var(--rte-border));
+  border: 1px solid var(--rte-border-strong, var(--rte-border));
   border-radius: 8px;
   font: inherit;
   color: var(--rte-ink, var(--rte-ink));
@@ -4097,7 +4141,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-ai-input:focus {
   outline: none;
   border-color: var(--rte-accent, var(--rte-accent));
-  box-shadow: 0 0 0 3px var(--rte-accent-ring, rgba(109, 94, 252, 0.28));
+  box-shadow: 0 0 0 3px var(--rte-accent-ring, rgba(91, 91, 214, 0.24));
 }
 .yjd-ai-result {
   max-height: 220px;
@@ -4109,13 +4153,13 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   white-space: pre-wrap;
   word-break: break-word;
 }
-.yjd-ai-result.is-error { background: #fdecec; color: #b3261e; }
+.yjd-ai-result.is-error { background: var(--rte-danger-weak, #fdecec); color: var(--rte-danger, #d0343a); }
 .yjd-ai-foot { display: flex; gap: 6px; margin-top: 8px; }
 .yjd-ai-foot button {
   flex: 1 1 auto;
   padding: 6px 10px;
   border-radius: 8px;
-  border: 1px solid var(--rte-border, var(--rte-border));
+  border: 1px solid var(--rte-border-strong, var(--rte-border));
   background: var(--rte-bg, var(--rte-bg));
   color: var(--rte-ink, var(--rte-ink));
   cursor: pointer;
@@ -4127,7 +4171,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   position: absolute;
   z-index: 1;
   pointer-events: none;
-  color: var(--rte-muted, #9aa0b4);
+  color: var(--rte-muted, #6d7480);
   white-space: pre;
   font: inherit;
 }
@@ -4137,21 +4181,21 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-ai-diff {
   border-radius: 4px;
   padding: 0 1px;
-  background: rgba(109, 94, 252, 0.07);
-  box-shadow: 0 0 0 1px rgba(109, 94, 252, 0.25);
+  background: rgba(91, 91, 214, 0.07);
+  box-shadow: 0 0 0 1px rgba(91, 91, 214, 0.25);
 }
 .yjd-ai-diff del.yjd-ai-del {
   text-decoration: line-through;
-  color: #c0392b; background: #fdecec;
+  color: var(--rte-danger, #d0343a); background: var(--rte-danger-weak, #fdecec);
   border-radius: 3px; padding: 0 1px; cursor: pointer;
 }
 .yjd-ai-diff ins.yjd-ai-ins {
   text-decoration: none;
-  color: #1e7e34; background: #e6f7ec;
+  color: var(--rte-success, #0f8a5f); background: var(--rte-success-weak, #e7f5ef);
   border-radius: 3px; padding: 0 1px; cursor: pointer;
 }
 .yjd-ai-diff del.yjd-ai-off { text-decoration: none; color: inherit; background: transparent; } /* kept original */
-.yjd-ai-diff ins.yjd-ai-off { text-decoration: line-through; color: var(--rte-muted, #9aa0b4); background: transparent; } /* dropped addition */
+.yjd-ai-diff ins.yjd-ai-off { text-decoration: line-through; color: var(--rte-muted, #6d7480); background: transparent; } /* dropped addition */
 .yjd-ai-diffbar {
   position: absolute;
   z-index: 2147483000;
@@ -4159,14 +4203,14 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   gap: 8px;
   align-items: center;
   background: var(--rte-bg, #fff);
-  color: var(--rte-ink, #16161d);
-  border: 1px solid var(--rte-border, #e7e7f0);
-  border-radius: 10px;
+  color: var(--rte-ink, #15171c);
+  border: 1px solid var(--rte-border-strong, #ced2d9);
+  border-radius: var(--rte-radius-md, 8px);
   padding: 6px 8px;
-  box-shadow: var(--rte-shadow, 0 12px 32px -8px rgba(20, 24, 46, 0.2));
+  box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.20), 0 2px 6px rgba(16, 18, 23, 0.06));
   font: 500 13px/1 system-ui, -apple-system, sans-serif;
 }
-.yjd-ai-diffbar .yjd-ai-diffhint { color: var(--rte-muted, #6b6f7e); font-size: 12px; }
+.yjd-ai-diffbar .yjd-ai-diffhint { color: var(--rte-muted, #6d7480); font-size: 12px; }
 
 /* streamMarkdown: a blinking caret at the end of the reply while it "types". */
 .yjd-md-stream::after {
@@ -4175,7 +4219,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   width: 2px; height: 1.05em;
   margin-left: 1px;
   vertical-align: text-bottom;
-  background: var(--rte-accent, #6d5efc);
+  background: var(--rte-accent, #5b5bd6);
   animation: yjd-ai-caret 1s steps(1) infinite;
 }
 @keyframes yjd-ai-caret { 50% { opacity: 0; } }
@@ -4183,12 +4227,12 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 
 /* AI authorship marks (ai.trackAuthorship): invisible until showAiMarks(true). */
 .yjd-rich-editor.yjd-show-ai .yjd-ai-mark {
-  background: rgba(109, 94, 252, 0.12);
-  box-shadow: inset 0 -2px rgba(109, 94, 252, 0.45);
+  background: var(--rte-accent-weak, rgba(91, 91, 214, 0.12));
+  box-shadow: inset 0 -2px rgba(91, 91, 214, 0.45);
   border-radius: 2px;
 }
 .yjd-ai-diffbar button {
-  border: 1px solid var(--rte-border, #e7e7f0);
+  border: 1px solid var(--rte-border, #e3e5ea);
   border-radius: 8px;
   padding: 5px 11px;
   font: 600 12.5px system-ui, sans-serif;
@@ -4286,8 +4330,8 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   vertical-align: baseline;
   padding: 3px 10px 3px 8px;
   margin: 0 1px;
-  border: 1px solid #e0e0ec;
-  border-radius: 8px;
+  border: 1px solid var(--rte-border, #e3e5ea);
+  border-radius: var(--rte-radius-md, 8px);
   background: var(--rte-chrome-2);
   color: var(--rte-ink);
   text-decoration: none;
@@ -4368,31 +4412,45 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-slash-menu[data-theme="dark"],
 .yjd-content[data-theme="dark"],
 .yjd-content.yjd-theme-dark {
-  --rte-bg: #1b1d24;
-  --rte-chrome: #23252f;
-  --rte-chrome-2: #2d313d;
-  --rte-border: #353944;
-  --rte-border-strong: #434857;
-  --rte-ink: #e8e9ef;
-  --rte-muted: #9aa0b4;
-  --rte-accent: #8b7ff0;
-  --rte-accent-ink: #b3a8ff;
-  --rte-accent-weak: #2c2942;
-  --rte-accent-ring: rgba(139, 127, 240, 0.40);
-  --rte-accent-ink-on: #ffffff;
-  --rte-danger: #f2686c;
+  --rte-bg: #101216;
+  --rte-bg-2: #14171b;
+  --rte-chrome: #15181d;
+  --rte-chrome-2: #1c2027;
+  --rte-chrome-3: #232830;
+  --rte-border: #262b33;
+  --rte-border-strong: #353b45;
+  --rte-hairline: #1f242b;
+  --rte-ink: #e8eaee;
+  --rte-ink-2: #c2c8d1;
+  --rte-muted: #949ca8;
+  --rte-faint: #6f7783;
+  --rte-accent: #7c7cf0;
+  --rte-accent-ink: #a8a8ff;
+  --rte-accent-weak: #1e2040;
+  --rte-accent-ring: rgba(124, 124, 240, 0.34);
+  --rte-accent-ink-on: #0d0e14;
+  --rte-danger: #f0666b;
+  --rte-danger-weak: #2c1a1c;
+  --rte-success: #3fbc8b;
+  --rte-success-weak: #12261f;
+  --rte-warning: #e0a247;
+  --rte-warning-weak: #2a2015;
+  --rte-info: #68a6f5;
+  --rte-info-weak: #141f2e;
   --rte-focus: var(--rte-accent, #5b9bff);
+  --rte-sel: rgba(124, 124, 240, 0.26);
   --rte-link: #8ab4ff;
-  --rte-code-bg: #2d313d;
-  --rte-code-ink: #e8e9ef;
-  --rte-code-block-bg: #14161d;
-  --rte-code-block-ink: #e3e4ec;
-  --rte-quote-border: #8b7ff0;
-  --rte-quote-bg: #262433;
-  --rte-quote-ink: #c7cad6;
-  --rte-table-border: #434857;
+  --rte-code-bg: #1c2027;
+  --rte-code-ink: #e8eaee;
+  --rte-code-block-bg: #0a0c0f;
+  --rte-code-block-ink: #dfe2e8;
+  --rte-quote-border: #3a4150;
+  --rte-quote-bg: #161a1f;
+  --rte-quote-ink: #b6bdc8;
+  --rte-table-border: #2b313a;
   --rte-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --rte-shadow: 0 14px 36px -10px rgba(0, 0, 0, 0.6), 0 4px 12px -4px rgba(0, 0, 0, 0.45);
+  --rte-shadow: 0 10px 28px -8px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.4);
+  --rte-shadow-lg: 0 28px 64px -16px rgba(0, 0, 0, 0.7), 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
 /* Force light on the wrapper/read-view (theme:'light') so it stays light even
@@ -4400,61 +4458,89 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor[data-theme="light"],
 .yjd-content[data-theme="light"] {
   --rte-bg: #ffffff;
-  --rte-chrome: #fbfbfd;
-  --rte-chrome-2: #f2f2f7;
-  --rte-border: #e9e9f1;
-  --rte-border-strong: #dadae6;
-  --rte-ink: #20242f;
-  --rte-muted: #767c8e;
-  --rte-accent: #6d5efc;
-  --rte-accent-ink: #5a48ee;
-  --rte-accent-weak: #efedff;
-  --rte-accent-ring: rgba(109, 94, 252, 0.28);
+  --rte-bg-2: #fafbfc;
+  --rte-chrome: #fcfcfd;
+  --rte-chrome-2: #f3f4f6;
+  --rte-chrome-3: #eceef1;
+  --rte-border: #e3e5ea;
+  --rte-border-strong: #ced2d9;
+  --rte-hairline: #eceef1;
+  --rte-ink: #15171c;
+  --rte-ink-2: #3c424d;
+  --rte-muted: #6d7480;
+  --rte-faint: #98a0ac;
+  --rte-accent: #5b5bd6;
+  --rte-accent-ink: #4a49cf;
+  --rte-accent-weak: #eeeefc;
+  --rte-accent-ring: rgba(91, 91, 214, 0.24);
   --rte-accent-ink-on: #ffffff;
-  --rte-danger: #e5484d;
-  --rte-focus: #3b82f6;
-  --rte-link: #2563eb;
-  --rte-code-bg: #f1f2f3;
+  --rte-danger: #d0343a;
+  --rte-danger-weak: #fdecec;
+  --rte-success: #0f8a5f;
+  --rte-success-weak: #e7f5ef;
+  --rte-warning: #a86500;
+  --rte-warning-weak: #fdf3e0;
+  --rte-info: #1f6fdc;
+  --rte-info-weak: #ebf3fd;
+  --rte-focus: var(--rte-accent, #3b82f6);
+  --rte-sel: rgba(91, 91, 214, 0.16);
+  --rte-link: #2f5fd4;
+  --rte-code-bg: #f2f3f5;
   --rte-code-ink: inherit;
-  --rte-code-block-bg: #20242f;
-  --rte-code-block-ink: #ececf5;
-  --rte-quote-border: #d1d5db;
-  --rte-quote-bg: #f9fafb;
-  --rte-quote-ink: #555555;
-  --rte-table-border: #d1d5db;
-  --rte-shadow-sm: 0 1px 2px rgba(20, 24, 46, 0.06);
-  --rte-shadow: 0 12px 32px -8px rgba(20, 24, 46, 0.20), 0 4px 10px -4px rgba(20, 24, 46, 0.10);
+  --rte-code-block-bg: #14161a;
+  --rte-code-block-ink: #e6e8ec;
+  --rte-quote-border: #ced2d9;
+  --rte-quote-bg: #fafbfc;
+  --rte-quote-ink: #4b515c;
+  --rte-table-border: #dfe2e7;
+  --rte-shadow-sm: 0 1px 2px rgba(16, 18, 23, 0.07);
+  --rte-shadow: 0 10px 28px -8px rgba(16, 18, 23, 0.20), 0 2px 6px rgba(16, 18, 23, 0.06);
+  --rte-shadow-lg: 0 28px 64px -16px rgba(16, 18, 23, 0.32), 0 4px 12px rgba(16, 18, 23, 0.08);
 }
 
 /* theme:'auto' → follow the operating system. */
 @media (prefers-color-scheme: dark) {
   .yjd-rich-editor[data-theme="auto"],
   .yjd-content[data-theme="auto"] {
-    --rte-bg: #1b1d24;
-    --rte-chrome: #23252f;
-    --rte-chrome-2: #2d313d;
-    --rte-border: #353944;
-    --rte-border-strong: #434857;
-    --rte-ink: #e8e9ef;
-    --rte-muted: #9aa0b4;
-    --rte-accent: #8b7ff0;
-    --rte-accent-ink: #b3a8ff;
-    --rte-accent-weak: #2c2942;
-    --rte-accent-ring: rgba(139, 127, 240, 0.40);
-    --rte-accent-ink-on: #ffffff;
-    --rte-danger: #f2686c;
+    --rte-bg: #101216;
+    --rte-bg-2: #14171b;
+    --rte-chrome: #15181d;
+    --rte-chrome-2: #1c2027;
+    --rte-chrome-3: #232830;
+    --rte-border: #262b33;
+    --rte-border-strong: #353b45;
+    --rte-hairline: #1f242b;
+    --rte-ink: #e8eaee;
+    --rte-ink-2: #c2c8d1;
+    --rte-muted: #949ca8;
+    --rte-faint: #6f7783;
+    --rte-accent: #7c7cf0;
+    --rte-accent-ink: #a8a8ff;
+    --rte-accent-weak: #1e2040;
+    --rte-accent-ring: rgba(124, 124, 240, 0.34);
+    --rte-accent-ink-on: #0d0e14;
+    --rte-danger: #f0666b;
+    --rte-danger-weak: #2c1a1c;
+    --rte-success: #3fbc8b;
+    --rte-success-weak: #12261f;
+    --rte-warning: #e0a247;
+    --rte-warning-weak: #2a2015;
+    --rte-info: #68a6f5;
+    --rte-info-weak: #141f2e;
     --rte-focus: var(--rte-accent, #5b9bff);
+    --rte-sel: rgba(124, 124, 240, 0.26);
     --rte-link: #8ab4ff;
-    --rte-code-bg: #2d313d;
-    --rte-code-ink: #e8e9ef;
-    --rte-code-block-bg: #14161d;
-    --rte-code-block-ink: #e3e4ec;
-    --rte-quote-border: #8b7ff0;
-    --rte-quote-bg: #262433;
-    --rte-quote-ink: #c7cad6;
-    --rte-table-border: #434857;
+    --rte-code-bg: #1c2027;
+    --rte-code-ink: #e8eaee;
+    --rte-code-block-bg: #0a0c0f;
+    --rte-code-block-ink: #dfe2e8;
+    --rte-quote-border: #3a4150;
+    --rte-quote-bg: #161a1f;
+    --rte-quote-ink: #b6bdc8;
+    --rte-table-border: #2b313a;
     --rte-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --rte-shadow: 0 14px 36px -10px rgba(0, 0, 0, 0.6), 0 4px 12px -4px rgba(0, 0, 0, 0.45);
+    --rte-shadow: 0 10px 28px -8px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.4);
+    --rte-shadow-lg: 0 28px 64px -16px rgba(0, 0, 0, 0.7), 0 4px 12px rgba(0, 0, 0, 0.5);
   }
 }
 
