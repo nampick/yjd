@@ -28,21 +28,34 @@ overriding tokens, without touching component CSS.
 
 | Token | Light | Dark | Use for |
 |-------|-------|------|---------|
-| `--rte-bg` | `#ffffff` | `#1b1d24` | Editor / popup / input surfaces |
-| `--rte-chrome` | `#fbfbfd` | `#23252f` | Toolbar / status bar |
-| `--rte-chrome-2` | `#f2f2f7` | `#2d313d` | Hover surfaces, secondary chrome |
-| `--rte-border` | `#e9e9f1` | `#353944` | Default borders/dividers |
-| `--rte-border-strong` | `#dadae6` | `#434857` | Emphasised borders |
-| `--rte-ink` | `#20242f` | `#e8e9ef` | Primary text & icons |
-| `--rte-muted` | `#767c8e` | `#9aa0b4` | Secondary/placeholder text |
-| `--rte-accent` | `#6d5efc` | `#8b7ff0` | Brand accent |
-| `--rte-accent-ink` | `#5a48ee` | `#b3a8ff` | Accent text/icon (active state) |
-| `--rte-accent-weak` | `#efedff` | `#2c2942` | Accent wash (active background) |
-| `--rte-accent-ink-on` | `#ffffff` | `#ffffff` | Text/icon **on** an accent fill |
-| `--rte-accent-ring` | `rgba(109,94,252,.28)` | `rgba(139,127,240,.40)` | Focus ring around accent |
-| `--rte-focus` | `var(--rte-accent, #3b82f6)` | `var(--rte-accent, #5b9bff)` | Focus/selection outlines |
-| `--rte-danger` | `#e5484d` | `#f2686c` | Destructive actions |
-| `--rte-link` | `#2563eb` | `#8ab4ff` | Links |
+| `--rte-bg` | `#ffffff` | `#101216` | Editor / popup / input surfaces |
+| `--rte-bg-2` | `#fafbfc` | `#14171b` | Page-level canvas behind the editor |
+| `--rte-chrome` | `#fcfcfd` | `#15181d` | Toolbar |
+| `--rte-chrome-2` | `#f3f4f6` | `#1c2027` | Hover surfaces, status bar |
+| `--rte-chrome-3` | `#eceef1` | `#232830` | Pressed/tertiary chrome |
+| `--rte-border` | `#e3e5ea` | `#262b33` | Default borders/dividers |
+| `--rte-border-strong` | `#ced2d9` | `#353b45` | Emphasised borders, popover frames |
+| `--rte-hairline` | `#eceef1` | `#1f242b` | Sub-dividers inside surfaces |
+| `--rte-ink` | `#15171c` | `#e8eaee` | Primary text & icons |
+| `--rte-ink-2` | `#3c424d` | `#c2c8d1` | Body copy (softer than headings) |
+| `--rte-muted` | `#6d7480` | `#949ca8` | Secondary/placeholder text |
+| `--rte-faint` | `#98a0ac` | `#6f7783` | Tertiary text, kbd hints |
+| `--rte-accent` | `#5b5bd6` | `#7c7cf0` | Brand accent |
+| `--rte-accent-ink` | `#4a49cf` | `#a8a8ff` | Accent text/icon (active state) |
+| `--rte-accent-weak` | `#eeeefc` | `#1e2040` | Accent wash (active background) |
+| `--rte-accent-ink-on` | `#ffffff` | `#0d0e14` | Text/icon **on** an accent fill |
+| `--rte-accent-ring` | `rgba(91,91,214,.24)` | `rgba(124,124,240,.34)` | Focus ring around accent |
+| `--rte-focus` | `var(--rte-accent, …)` | `var(--rte-accent, …)` | Focus/selection outlines |
+| `--rte-sel` | `rgba(91,91,214,.16)` | `rgba(124,124,240,.26)` | Text selection wash |
+| `--rte-danger` | `#d0343a` | `#f0666b` | Destructive actions |
+| `--rte-danger-weak` | `#fdecec` | `#2c1a1c` | Destructive wash |
+| `--rte-success` | `#0f8a5f` | `#3fbc8b` | Success states |
+| `--rte-success-weak` | `#e7f5ef` | `#12261f` | Success wash |
+| `--rte-warning` | `#a86500` | `#e0a247` | Warning states |
+| `--rte-warning-weak` | `#fdf3e0` | `#2a2015` | Warning wash |
+| `--rte-info` | `#1f6fdc` | `#68a6f5` | Info states, `#` tags |
+| `--rte-info-weak` | `#ebf3fd` | `#141f2e` | Info wash |
+| `--rte-link` | `#2f5fd4` | `#8ab4ff` | Links |
 
 > `--rte-focus` now **defaults to `var(--rte-accent, …)`** instead of a fixed
 > blue. Set `--rte-accent` and focus rings/outlines match it for free — set
@@ -52,24 +65,29 @@ overriding tokens, without touching component CSS.
 
 | Token | Light | Dark | Use for |
 |-------|-------|------|---------|
-| `--rte-code-bg` | `#f1f2f3` | `#2d313d` | Inline `code` background |
-| `--rte-code-ink` | `inherit` | `#e8e9ef` | Inline `code` text |
-| `--rte-code-block-bg` | `#20242f` | `#14161d` | `pre` code block background |
-| `--rte-code-block-ink` | `#ececf5` | `#e3e4ec` | `pre` code block text |
-| `--rte-quote-border` | `#d1d5db` | `#8b7ff0` | Blockquote bar |
-| `--rte-quote-bg` | `#f9fafb` | `#262433` | Blockquote background |
-| `--rte-quote-ink` | `#555555` | `#c7cad6` | Blockquote text |
-| `--rte-table-border` | `#d1d5db` | `#434857` | Table cell borders |
+| `--rte-code-bg` | `#f2f3f5` | `#1c2027` | Inline `code` background |
+| `--rte-code-ink` | `inherit` | `#e8eaee` | Inline `code` text |
+| `--rte-code-block-bg` | `#14161a` | `#0a0c0f` | `pre` code block background |
+| `--rte-code-block-ink` | `#e6e8ec` | `#dfe2e8` | `pre` code block text |
+| `--rte-quote-border` | `#ced2d9` | `#3a4150` | Blockquote bar |
+| `--rte-quote-bg` | `#fafbfc` | `#161a1f` | Blockquote background |
+| `--rte-quote-ink` | `#4b515c` | `#b6bdc8` | Blockquote text |
+| `--rte-table-border` | `#dfe2e7` | `#2b313a` | Table cell borders |
 
-### Shape & depth
+### Shape, depth & metrics
 
 | Token | Value | Use for |
 |-------|-------|---------|
-| `--rte-radius` | `14px` | Outer frame radius |
+| `--rte-radius` | `10px` | Outer frame radius |
 | `--rte-radius-inner` | `calc(var(--rte-radius) - 1px)` | Chrome bars (concentric with the 1px border) |
-| `--rte-radius-md` / `--rte-radius-sm` | `11px` / `8px` | Popups / controls |
-| `--rte-shadow-sm` / `--rte-shadow` | … | Small / elevated shadows |
+| `--rte-radius-md` / `--rte-radius-sm` / `--rte-radius-xs` | `8px` / `6px` / `4px` | Popups / controls / chips |
+| `--rte-shadow-sm` / `--rte-shadow` / `--rte-shadow-lg` | … | Small / elevated / modal shadows |
 | `--rte-t` | `140ms cubic-bezier(.4,0,.2,1)` | Standard transition |
+| `--rte-ctl` | `30px` (`44px` on touch) | Control height — buttons, selects, inputs. One density knob: `26px` compact, `34px` roomy |
+| `--rte-gap` | `6px` | Standard gap between controls |
+| `--rte-ui` | system stack | Chrome font (toolbar, menus, popups). Content keeps `font-family: inherit` |
+| `--rte-mono` | `ui-monospace, …` | Status bar, kbd hints |
+| `--rte-icon-size` | `16px` | Every UI glyph |
 
 ## Overriding tokens (theme your app)
 
@@ -99,16 +117,14 @@ above them either. If your app previously lowered the toolbar's `z-index` or
 wrapped the editor in its own stacking-context hack to keep it under a modal,
 you can delete that workaround — isolation now does it for you.
 
-## Known exceptions (not yet tokenised)
+## Known exceptions (not tokenised)
 
-A small set of **semantic state** colours are still literal because there is no
-matching token yet. If you touch these, prefer adding a semantic token
-(`--rte-success` / `--rte-warning` / `--rte-info`) to all theme blocks:
-
-- Success / warning / info tints on upload chips & AI states (greens `#dcfce7`,
-  ambers `#fef3c7`/`#f59e0b`, blues `#dbeafe`/`#eff6ff`).
 - Colour-picker swatches (`lib/ui/color-picker.js`) are a deliberate fixed
   palette — **not** theme tokens.
+
+(Semantic state colours — success / warning / info / danger, each with a
+`-weak` wash — became real tokens in the UI 2.0 redesign and are used by tag
+chips, import states and AI diff marks. Use them instead of literals.)
 
 ## Verifying a change
 

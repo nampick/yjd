@@ -22,26 +22,28 @@ new yjd('#editor', { placeholder: 'Start writing…' });
 - **XSS-safe paste** — sanitises pasted HTML (scripts/handlers/unsafe URLs stripped; only trusted embeds survive).
 - **Accessible** — keyboard navigable, WCAG-AA contrast (Lighthouse a11y 100).
 
-## New in 2.7
+## New in 2.12
 
-- **Prompt / chat layout** — `layout:'prompt'` turns the editor into a chat-style
-  composer: a rounded pill with a bottom action bar (`+ add · tools · send`),
-  auto-growing height, and a soft-keyboard-aware Enter (sends on desktop, newlines
-  on mobile). See [Prompt / chat layout](#prompt--chat-layout).
-- **Attachment tray** — images/files/videos attach as removable thumbnails that
-  travel with the message. Read them via `getAttachments()` (with upload `status`
-  and a `meta` bag), react to `attachment:add` / `attachment:remove`, or fold them
-  into the content with `prompt.serializeAttachments` — which also flows into the
-  `fromTextarea` value.
-- **Smarter Enter** — inside a list, blockquote or code block, Enter continues the
-  block instead of submitting; `submit.enterToSend` (`'auto' | 'always' | 'never'`)
-  decouples Enter-to-send from the send button.
-- **Per-trigger mention tokens** — `mention` `serialize(item)` emits the exact
-  token you store (e.g. a bare `#id`).
+- **Editor UI 2.0** — a full visual redesign of every surface. Calmer neutral
+  palette with a new indigo accent, hairline borders, a tighter 10/8/6/4 px
+  radius scale, 30px controls (44px chrome bar), one shared popover recipe for
+  every floating surface, and the whole icon family redrawn at a lighter 1.75
+  stroke. Same markup and API — it's (almost) all tokens, so your existing
+  `--rte-*` overrides keep working.
+- **Semantic state tokens** — `--rte-success` / `--rte-warning` / `--rte-info` /
+  `--rte-danger` (each with a `-weak` wash) are real tokens in all theme blocks
+  now; tag chips, import states and AI word-diff marks flip with dark mode.
+- **Density knob** — one token, `--rte-ctl`, sets control height everywhere:
+  `26px` compact · `30px` default · `34px` roomy · `44px` on touch.
+- **Extra icon pack** — 40 more glyphs in the same family
+  (`save`, `share`, `drag-handle`, `duplicate`, `rewrite`, `presence`, …) via the
+  opt-in, tree-shakeable `lib/ui/icons-extra.js`.
 
-Earlier highlights (2.3): interactive checklists, full-screen mode, image align &
-live resize, richer tables (merge/split, header row, cell styling), auto-linkify,
-and fully tokenised `--rte-*` theming. Full history in the [changelog](./CHANGELOG.md).
+Earlier highlights (2.7): prompt / chat layout (`layout:'prompt'`), attachment
+tray with `getAttachments()`, smarter Enter (`submit.enterToSend`), per-trigger
+mention tokens. (2.3): interactive checklists, full-screen mode, image align &
+live resize, richer tables, auto-linkify, and fully tokenised `--rte-*` theming.
+Full history in the [changelog](./CHANGELOG.md).
 
 ## Bundle size (gzipped JS)
 
@@ -647,14 +649,19 @@ new yjd('#editor', {
 });
 ```
 
-> **Token reference** — surfaces: `--rte-bg` (editor/popups), `--rte-chrome`
-> (toolbar/statusbar), `--rte-chrome-2` (hovers, code). Text: `--rte-ink`,
-> `--rte-muted`. Lines: `--rte-border`, `--rte-border-strong`. Accent:
+> **Token reference** — surfaces: `--rte-bg` (editor/popups), `--rte-bg-2`
+> (canvas), `--rte-chrome`(`-2`/`-3`) (toolbar / hovers+statusbar / pressed).
+> Text: `--rte-ink`(`-2`), `--rte-muted`, `--rte-faint`. Lines: `--rte-border`,
+> `--rte-border-strong` (popover frames), `--rte-hairline`. Accent:
 > `--rte-accent`, `--rte-accent-ink` (text on light), `--rte-accent-weak`
 > (tints/active), `--rte-accent-ink-on` (text on an accent fill), `--rte-accent-ring`
-> (focus). State: `--rte-danger`. Content: `--rte-link`, `--rte-code-bg`/`-ink`,
-> `--rte-code-block-bg`/`-ink`, `--rte-quote-bg`/`-border`/`-ink`, `--rte-table-border`.
-> Shape/depth: `--rte-radius`(`-md`/`-sm`), `--rte-shadow`(`-sm`).
+> (focus), `--rte-sel` (text selection). State: `--rte-danger`/`-success`/
+> `-warning`/`-info` (each with a `-weak` wash). Content: `--rte-link`,
+> `--rte-code-bg`/`-ink`, `--rte-code-block-bg`/`-ink`,
+> `--rte-quote-bg`/`-border`/`-ink`, `--rte-table-border`.
+> Shape/metrics: `--rte-radius`(`-md`/`-sm`/`-xs`), `--rte-shadow`(`-sm`/`-lg`),
+> `--rte-ctl` (control height / density: 26 compact · 30 default · 34 roomy),
+> `--rte-ui`/`--rte-mono` (chrome fonts). Full tables: [docs/THEMING.md](docs/THEMING.md).
 
 **Dark mode** — built in. By default `theme: 'inherit'` follows the nearest
 ancestor `[data-theme]`, so toggling **one** attribute on `<html>` themes every

@@ -4,6 +4,58 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [2.12.0] — 2026-08-06
+
+**Editor UI 2.0** — a full visual redesign of every surface, from the
+[YJD Editor Redesign](https://yjd.io) design spec. Same markup, same API — the
+change is (almost) entirely tokens, so existing `--rte-*` overrides keep
+working and custom themes inherit the new structure for free.
+
+### Changed
+- **New token palette (light + dark + auto).** Calmer neutral greys
+  (`#15171c` ink on `#ffffff`, hairline `#e3e5ea` borders), a new indigo accent
+  (`#5b5bd6` / dark `#7c7cf0`), and a refreshed content palette (near-black
+  `#14161a` code blocks, quiet `2px` hairline blockquotes with no accent fill,
+  `#2f5fd4` links). Dark mode is deeper (`#101216` surface, `#15181d` chrome).
+- **Tighter geometry.** Radius scale is now 10 / 8 / 6 px (frame / popups /
+  controls) plus a new 4px `--rte-radius-xs` for chips; controls are **30px**
+  tall (was 32px) via the new `--rte-ctl` token, giving the classic 44px chrome
+  bar. Softer, larger shadows (`--rte-shadow-lg` added for modal surfaces).
+- **Popover recipe.** Every floating surface — dropdowns, pickers, bubble/table
+  toolbars, slash & mention menus, find/replace, AI bar — now uses the same
+  recipe: 1px `--rte-border-strong` frame, 8px radius, `--rte-shadow`.
+- **Icon family at 1.75 stroke.** All ~64 registry glyphs render at
+  `stroke-width: 1.75` (was 2) for a lighter, more even weight; a few core
+  glyphs (upload, theme, horizontal-rule) were redrawn to match the family.
+- **Status bar** is now 11px monospace (`--rte-mono`) on `--rte-chrome-2`, with
+  tabular numerals for the word count.
+- **Mobile swipe-row toolbar** grows controls to a 44px touch target
+  (`--rte-ctl: 44px` under `hover:none`+`pointer:coarse`).
+- **Text selection** uses the new `--rte-sel` accent wash (`::selection`).
+
+### Added
+- **Semantic state tokens** — `--rte-success`, `--rte-warning`, `--rte-info`,
+  `--rte-danger-weak` (+ `-weak` washes for all), themed in all four palette
+  blocks. Tag chips, import states and AI word-diff marks now use them, so they
+  finally flip with dark mode.
+- **New tokens**: `--rte-bg-2`, `--rte-chrome-3`, `--rte-hairline`,
+  `--rte-ink-2`, `--rte-faint`, `--rte-sel`, `--rte-radius-xs`,
+  `--rte-shadow-lg`, `--rte-ctl` (control height / density knob: 26 compact ·
+  30 default · 34 roomy · 44 touch), `--rte-gap`, `--rte-ui`, `--rte-mono`.
+- **Extra icon pack** (`lib/ui/icons-extra.js`, opt-in, tree-shakeable): 40 new
+  glyphs in the same family for custom chrome — `save`, `share`, `history`,
+  `download`, `print`, `unlink`, `heading-2/3`, `paragraph`, `blockquote`,
+  `code-block`, `callout`, `toggle`, `columns`, `drag-handle`, `duplicate`,
+  `delete`, `rewrite`, `regenerate`, `diff-view`, `replace`, `preview`,
+  `settings`, `mention`, `comment`, `date`, `attachment`, `saved`, `error`,
+  `info`, `offline`, `locked`, `presence`, `help` and more. Import
+  `registerExtraIcons()` to add all (or a named subset) to the registry.
+
+### Docs
+- `docs/THEMING.md` rewritten for the new palette: full token tables (light +
+  dark values), the metrics tokens, and the retired "not yet tokenised"
+  exceptions list (semantic states are tokens now).
+
 ## [2.11.6] — 2026-07-24
 
 ### Added
@@ -248,6 +300,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.12.0]: https://github.com/nampick/yjd/releases/tag/v2.12.0
 [2.11.6]: https://github.com/nampick/yjd/releases/tag/v2.11.6
 [2.11.5]: https://github.com/nampick/yjd/releases/tag/v2.11.5
 [2.11.4]: https://github.com/nampick/yjd/releases/tag/v2.11.4
