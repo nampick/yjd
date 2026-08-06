@@ -3144,22 +3144,23 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 /* quiet default colour, accent on active */
 .yjd-rich-editor .rich-editor-toolbar-btn .icon svg { color: var(--rte-muted); }
 .yjd-rich-editor .rich-editor-toolbar-btn:hover .icon svg { color: var(--rte-ink); }
+/* v2: active = ink fill, so pressed glyphs render in the PAPER colour. */
 .yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg,
 .yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg path,
 .yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg line,
 .yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg polyline,
 .yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg rect {
-  color: var(--rte-accent-ink) !important;
-  stroke: var(--rte-accent-ink) !important;
+  color: var(--rte-bg) !important;
+  stroke: var(--rte-bg) !important;
   fill: none !important;
 }
 .yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg [fill="currentColor"] {
-  fill: var(--rte-accent-ink) !important;
+  fill: var(--rte-bg) !important;
   stroke: none !important;
 }
 .yjd-rich-editor .block-toolbar-btn.active .icon svg,
 .yjd-rich-editor .block-toolbar-btn.active .icon svg path {
-  stroke: var(--rte-accent-ink) !important;
+  stroke: var(--rte-bg) !important;
   fill: none !important;
 }
 
