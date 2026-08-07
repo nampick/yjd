@@ -82,6 +82,19 @@ component layouts and redrawn glyphs on top of the 2.12.0 token pass.
   unhandled-drop path, available to integrators.
 
 ### Fixed (this pass)
+- **QA sweep (5 findings)**: (1) a highlight applied while the live selection
+  had collapsed silently armed a placeholder instead of colouring the text —
+  the picker now recovers the last real selection first. (2) Bold no longer
+  reports active inside a plain heading (queryCommandState mistakes the
+  heading's computed weight for a bold mark; a real b/strong/inline-weight
+  ancestor is now required). (3) **Tab nests list items** (Shift+Tab
+  outdents) instead of tabbing focus out of the editor; table-cell Tab
+  navigation is untouched. (4) The character counter recovers after the HTML
+  source view: exit strips the source view's pretty-print whitespace from
+  the document and the counter now counts the VISIBLE text (innerText).
+  (5) The overflow tool row WRAPS on desktop instead of clipping its last
+  tools behind a hidden-scrollbar row; touch keeps the single swipe row.
+  UMD 86→87 KB, Core 80→81 KB.
 - **Active submenu rows ignore hover**: a stale ink-fill pin flipped active
   picker rows (align/list) to a black tile on hover, and the select popup's
   current option lost its accent wash under a higher-specificity hover rule.

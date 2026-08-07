@@ -4786,14 +4786,23 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 
 /* Overflow row (v2): ONE horizontal-scroll row on chrome-2 with a label. */
 .yjd-rich-editor .rich-editor-toolbar-2 { background: var(--rte-chrome-2); }
+/* Desktop: WRAP to as many rows as needed — a hidden-scrollbar row reads as
+   clipped (the last tools looked cut off and unreachable with a mouse).
+   Touch keeps the design's single swipe-scroll row below. */
 .yjd-rich-editor .rich-editor-toolbar-2-row.yjd-noscroll {
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
+  flex-wrap: wrap;
+  row-gap: 6px;
 }
-.yjd-rich-editor .rich-editor-toolbar-2-row.yjd-noscroll::-webkit-scrollbar { display: none; }
+@media (hover: none) and (pointer: coarse) {
+  .yjd-rich-editor .rich-editor-toolbar-2-row.yjd-noscroll {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .yjd-rich-editor .rich-editor-toolbar-2-row.yjd-noscroll::-webkit-scrollbar { display: none; }
+}
 .yjd-rich-editor .rich-editor-toolbar-2-row .toolbar-group { flex: 0 0 auto; }
 /* Overflow buttons hover on chrome-3; dividers use the strong border there. */
 .yjd-rich-editor .rich-editor-toolbar-2-row .toolbar-group + .toolbar-group::before {
