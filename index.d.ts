@@ -186,6 +186,12 @@ export interface AiOptions {
    * Off by default.
    */
   trackAuthorship?: boolean;
+  /**
+   * Auto-open the selection AI menu whenever text is selected. Off by default —
+   * the selection shows the formatting bubble, whose "✦ AI" entry (and the
+   * toolbar pill) opens this menu.
+   */
+  openOnSelect?: boolean;
 }
 
 /** Streaming sink returned by editor.streamInto(). */
@@ -380,6 +386,11 @@ export interface EditorOptions {
    * the page); see also the exported `registerIcons` and `RichEditor.registerIcons`.
    */
   icons?: Record<string, string>;
+  /**
+   * Right rail with Outline · Comments · Versions tabs (UI 2.0). `true` for
+   * all three, or pick tabs: { tabs: ['outline','comments'] }. Off by default.
+   */
+  sidePanel?: boolean | { tabs?: Array<'outline' | 'comments' | 'versions'>; user?: { name: string } };
   features?: {
     emoji?: boolean;
     image?: boolean;
@@ -492,9 +503,37 @@ export class Editor {
   streamInto(): StreamSink;
   clearFormatting(): void;
   insertHorizontalRule(): void;
+  /** Insert an inline date chip at the caret (`data-date` carries the ISO date). */
+  insertDateChip(date?: Date): void;
+  /** Print the document via a hidden iframe styled with the read-view CSS. */
+  printContent(): void;
+  /** Download the document as a styled HTML file, or Markdown with `'md'`. */
+  downloadContent(format?: 'html' | 'md'): void;
+  /** Headings (H1–H3) in document order — needs the side-panel module. */
+  getOutline(): Array<{ level: number; text: string; el: HTMLElement }>;
+  /** Wrap the selection in a comment mark and store the thread. Returns the id. */
+  addComment(body: string, author?: string): string | null;
+  removeComment(id: string): void;
+  /** Append a reply to a thread (design section 09). */
+  addReply(id: string, body: string, author?: string): { author: string; body: string; time: number } | null;
+  /** Resolve keeps the thread in the rail but clears the highlight. */
+  resolveComment(id: string, by?: string): void;
+  unresolveComment(id: string): void;
+  /** Open the new-comment composer on the current selection (also ⌘⌥M). */
+  openCommentComposer(): void;
+  /** Open a thread's popover anchored at its mark (bottom sheet on touch). */
+  openCommentThread(id: string): void;
+  getComments(): Array<{ id: string; body: string; author: string; quote: string; time: number; replies: Array<{ author: string; body: string; time: number }>; resolved: boolean; resolvedBy?: string }>;
+  setComments(list: Array<{ id: string; body: string; author: string; quote: string; time: number; replies?: Array<{ author: string; body: string; time: number }>; resolved?: boolean; resolvedBy?: string }>): void;
+  /** Snapshot the current document into the Versions tab. */
+  saveVersion(label?: string): { v: string; label: string; html: string; words: number; time: number };
+  getVersions(): Array<{ v: string; label: string; html: string; words: number; time: number }>;
+  setVersions(list: Array<{ v: string; label: string; html: string; words: number; time: number }>): void;
   insertImageFile(file: File): void;
   /** Insert a non-image File as a file chip (uses options.file.upload). */
   insertFileAttachment(file: File): void;
+  /** Transient status toast (used by the unhandled-drop path). */
+  showToast(message: string, opts?: { duration?: number }): HTMLElement;
   /** Open the native picker for a file attachment. */
   openFileAttachmentPicker(): void;
   /** True when a mention/slash/emoji popup that captures Enter is open. */

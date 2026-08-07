@@ -1,7 +1,7 @@
 {
   "name": "@oix1987/yjd",
-  "version": "2.12.0",
-  "description": "Dependency-free, tree-shakeable rich text editor & WYSIWYG for the web — with a chat/prompt input layout, bring-your-own-model AI (selection toolbar + ghost-text), @mentions, image/file upload, and HTML/Markdown/JSON export. Ship ~17 KB, not the whole library.",
+  "version": "2.13.0",
+  "description": "Dependency-free, tree-shakeable rich text editor & WYSIWYG for the web — comment threads, outline/versions rail, block drag handles, slash menu, code blocks with language detection, chat/prompt input layout, bring-your-own-model AI, @mentions, drag-drop uploads, and HTML/Markdown/JSON export. Ship ~17 KB, not the whole library.",
   "keywords": [
     "rich-text-editor",
     "wysiwyg",
@@ -84,22 +84,22 @@
     {
       "name": "ESM (all-in-one)",
       "path": "dist/rich-editor.esm.js",
-      "limit": "75 KB"
+      "limit": "87 KB"
     },
     {
       "name": "UMD min",
       "path": "dist/rich-editor.min.js",
-      "limit": "75 KB"
+      "limit": "87 KB"
     },
     {
       "name": "Core ESM",
       "path": "dist/core.esm.js",
-      "limit": "75 KB"
+      "limit": "81 KB"
     },
     {
       "name": "Stylesheet",
       "path": "lib/styles.min.css",
-      "limit": "12 KB"
+      "limit": "17 KB"
     }
   ]
 }

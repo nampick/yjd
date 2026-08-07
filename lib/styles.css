@@ -22,19 +22,19 @@
      and statusbar bottom (see design-system layer). */
   overflow: visible;
   margin: 0 auto;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--rte-ui);
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
 }
 @layer base {
-  .yjd-rich-editor .toolbar-container button,
-  .yjd-rich-editor .toolbar-container input,
-  .yjd-rich-editor .toolbar-container select,
-  .yjd-rich-editor .toolbar-container optgroup,
-  .yjd-rich-editor .toolbar-container textarea,
-  .yjd-rich-editor .toolbar-container ::file-selector-button {
-    font: normal 500 14px/1.4 "Inter", Arial, sans-serif !important;
+  .yjd-rich-editor .rich-editor-toolbar-container button,
+  .yjd-rich-editor .rich-editor-toolbar-container input,
+  .yjd-rich-editor .rich-editor-toolbar-container select,
+  .yjd-rich-editor .rich-editor-toolbar-container optgroup,
+  .yjd-rich-editor .rich-editor-toolbar-container textarea,
+  .yjd-rich-editor .rich-editor-toolbar-container ::file-selector-button {
+    font: normal 500 12px/1.4 var(--rte-ui) !important;
     letter-spacing: normal !important;
     font-feature-settings: normal !important;
     font-variation-settings: normal !important;
@@ -53,7 +53,9 @@
   .yjd-rich-editor .rich-editor-popup-container optgroup,
   .yjd-rich-editor .rich-editor-popup-container textarea,
   .yjd-rich-editor .rich-editor-popup-container ::file-selector-button {
-    font: normal 500 14px/1.4 "Inter", Arial, sans-serif !important;
+    /* Design default for popup text is 400; 500 is opted into per control
+       (confirm/cancel buttons, current option) below. */
+    font: normal 400 12.5px/1.4 var(--rte-ui) !important;
     letter-spacing: normal !important;
     font-feature-settings: normal !important;
     font-variation-settings: normal !important;
@@ -63,6 +65,43 @@
     .yjd-rich-editor .emoji-picker-popup button.emoji-button {
       font-size: 20px !important;
     }
+  /* v2 form popups run 13px inputs (find & replace stays compact at 12px);
+     must live in this base layer — !important in an earlier sublayer beats
+     any later-layer !important. */
+  .yjd-rich-editor .rich-editor-popup-container .yjd-input,
+  .yjd-rich-editor .rich-editor-popup-container .yjd-select-input {
+    font: normal 400 13px/1.4 var(--rte-ui) !important;
+  }
+  .yjd-rich-editor .yjd-find-input {
+    font: normal 400 12px/1.4 var(--rte-ui) !important;
+  }
+  /* Select popups: plain 12.5px/400 options; the active row carries 500. */
+  .yjd-rich-editor .rich-editor-popup-container [class*="select-popup"] button {
+    font: normal 400 12.5px/1.4 var(--rte-ui) !important;
+  }
+  .yjd-rich-editor .rich-editor-popup-container [class*="select-popup"] button.current {
+    font-weight: 500 !important;
+  }
+  /* Find & replace: compact 11.5px/500 action buttons and toggle chips. */
+  .yjd-rich-editor .yjd-find-replace button {
+    font: normal 500 11.5px/1.4 var(--rte-ui) !important;
+  }
+  /* Ask AI pill runs the design's 12.5px/500. */
+  .yjd-rich-editor .rich-editor-toolbar-container .ai-btn {
+    font: normal 500 12.5px/1.4 var(--rte-ui) !important;
+  }
+  /* Toolbar select triggers (heading / font / size): 13px/400 per design. */
+  .yjd-rich-editor .rich-editor-toolbar-container .custom-select-button {
+    font: normal 400 13px/1.4 var(--rte-ui) !important;
+  }
+  .yjd-rich-editor .rich-editor-popup-container .yjd-button-confirm,
+  .yjd-rich-editor .rich-editor-popup-container .yjd-button-cancel,
+  .yjd-rich-editor .rich-editor-popup-container .link-popup-apply {
+    font: normal 500 12px/1.4 var(--rte-ui) !important;
+  }
+  .yjd-rich-editor .rich-editor-popup-container .yjd-suggestion-button {
+    font: normal 400 12px/1.4 var(--rte-ui) !important;
+  }
 }
 
 .yjd-rich-editor .rich-editor-area {
@@ -208,7 +247,7 @@
 /* code & pre */
 .yjd-rich-editor .rich-editor-area pre,
 .yjd-rich-editor .rich-editor-area code {
-  font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
+  font-family: var(--rte-mono);
   background: var(--rte-code-bg, var(--rte-code-bg));
   color: var(--rte-code-ink, inherit);
   padding: 4px 6px;
@@ -253,7 +292,7 @@
   background-color: var(--rte-code-block-bg, var(--rte-code-bg));
   width: 96%;
   padding: 10px 2% 10px 2%;
-  font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
+  font-family: var(--rte-mono);
   overflow-x: auto;
   white-space: pre;
   word-wrap: normal;
@@ -298,7 +337,7 @@
     flex-wrap:wrap;
     background:var(--rte-chrome);
     align-items:center;
-    min-height:48px;
+    min-height:44px;
     padding-bottom:8px;
     box-sizing:border-box;
     width:100%;
@@ -314,7 +353,7 @@
   flex-wrap: wrap;
   background: var(--rte-chrome);
   align-items: center;
-  min-height: 48px;
+  min-height: 44px;
   padding-bottom: 8px;
   box-sizing: border-box;
   width: 100%;
@@ -408,7 +447,7 @@
   gap: 28px;
   padding: 8px;
   background: var(--rte-bg);
-  border-radius: 6.9px;
+  border-radius: var(--rte-radius-sm);
   box-shadow: 0 4px 24px rgba(0,0,0,0.13);
 }
 
@@ -456,7 +495,7 @@
   z-index: 1001;
   background: transparent;
   border: none;
-  border-radius: 6.9px;
+  border-radius: var(--rte-radius-sm);
   box-sizing: border-box;
   padding: 0;
   gap: 0;
@@ -472,7 +511,7 @@
   position: absolute;
   background: var(--rte-bg);
   display:none;
-  border-radius: 6.9px;
+  border-radius: var(--rte-radius-sm);
   padding: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   z-index: 1000;
@@ -494,7 +533,7 @@
   background: var(--rte-chrome, var(--rte-bg));
   display: none;
   border: 1px solid var(--rte-border, var(--rte-table-border));
-  border-radius: 6.9px;
+  border-radius: var(--rte-radius-sm);
   padding: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   z-index: 1002;
@@ -574,7 +613,7 @@
   padding: 4px 4px;
   border: none;
   background: transparent;
-  border-radius: 6px;
+  border-radius: var(--rte-radius-sm);
   cursor: pointer;
   text-align: left;
   transition: all 0.2s ease;
@@ -594,7 +633,8 @@
 
 .yjd-rich-editor .custom-select-item-button.current {
   font-weight: 500;
-  background: var(--rte-chrome-2) !important;
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
 }
 .yjd-rich-editor .custom-select-item-button .item-checkmark{
   display:none;
@@ -683,17 +723,17 @@
 .yjd-rich-editor .yjd-input-title{
   margin: 0;
   color: var(--rte-ink);
-  font-size: 16px;
+  font-size: 13.5px;
   font-style: normal;
-  font-weight: 700;
+  font-weight: 600;
   line-height: normal;
 }
 .yjd-rich-editor .yjd-input-label{
   color: var(--rte-ink);
   margin: 0;
-  font-size: 14px;
+  font-size: 11.5px;
   font-style: normal;
-  font-weight: 700;
+  font-weight: 500;
   line-height: normal;
 }
 .yjd-rich-editor .yjd-input-group{
@@ -707,8 +747,8 @@
   min-width: 0;
   max-width: 100%;
   max-height: 37px;
-  border-radius: 10px;
-  border: 1px solid var(--rte-border-strong, var(--rte-border));
+  border-radius: var(--rte-radius-sm);
+  border: 1px solid var(--rte-border-strong);
   box-sizing: border-box;
   background: var(--rte-bg, var(--rte-bg));
   color: var(--rte-ink, var(--rte-ink));
@@ -720,7 +760,7 @@
   /* Allow interaction with inputs */
   pointer-events: auto;
 }
-.yjd-rich-editor .yjd-input::placeholder { color: var(--rte-muted, #6d7480); }
+.yjd-rich-editor .yjd-input::placeholder { color: var(--rte-muted); }
 /* Same ellipsis-not-cut treatment for every other popup text input that can
    hold a long value (URLs, tag values, file names, hex colours). */
 .yjd-rich-editor .yjd-select-input,
@@ -735,7 +775,7 @@
 .yjd-rich-editor .yjd-input:focus {
   outline: none;
     border-color: var(--rte-accent, var(--rte-focus));
-    box-shadow: 0 0 0 3px var(--rte-accent-ring, rgba(59, 130, 246, 0.1));
+    box-shadow: 0 0 0 2px var(--rte-accent-ring, rgba(59, 130, 246, 0.1));
 }
 .yjd-rich-editor .yjd-button-container{
   display: flex ;
@@ -746,14 +786,14 @@
   padding: 8px 15px;
   align-items: center;
   border-radius: 6px;
-  background: #181616;
+  background: var(--rte-accent);
   box-shadow: 0px 1px 3.3px 0px rgba(0, 0, 0, 0.04);
   /* Allow interaction with buttons */
   pointer-events: auto;
   color: var(--rte-accent-ink-on);
   font-size: 12px;
   font-style: normal;
-  font-weight: 700;
+  font-weight: 500;
   line-height: normal;
   cursor: pointer;
 }
@@ -764,24 +804,29 @@
   border: 1px solid var(--rte-border);
   background: var(--rte-bg);
   box-shadow: 0px 1px 3.3px 0px rgba(0, 0, 0, 0.04);
-  color: #2A2727;
+  color: var(--rte-ink);
   font-size: 12px;
   font-style: normal;
-  font-weight: 700;
+  font-weight: 500;
   line-height: normal;
   cursor: pointer;
 }
 .yjd-rich-editor .button-disable{
   cursor: not-allowed;
+  /* Design btnPrimaryDisabled: quiet chrome fill, faint label. */
+  border-color: var(--rte-border) !important;
+  background: var(--rte-chrome-2) !important;
+  color: var(--rte-faint) !important;
+  box-shadow: none !important;
 }
 /* === LINK POPUP === */
 .yjd-rich-editor .link-popup {
   position: absolute;
   background: var(--rte-bg);
-  font-family: 'Lato', sans-serif;
+  font-family: var(--rte-ui);
   display: none;
   border: none;
-  border-radius: 10px;
+  border-radius: var(--rte-radius);
   box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.18);
   z-index: 1000;
   margin: 0;
@@ -809,15 +854,17 @@
   gap: 4px;
 }
 .yjd-rich-editor .yjd-custom-upload-button {
-  display: flex !important;
+  /* no !important: the video popup hides this button inline while a URL is
+     typed (a URL and a file are mutually exclusive). */
+  display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   border: 1px solid var(--rte-border);
   background: var(--rte-bg);
   width: 34px;
-  height: 34px;
-  border-radius: 10px;
+  height: var(--rte-ctl, 30px);
+  border-radius: var(--rte-radius-sm);
   cursor: pointer;
 }
 .yjd-rich-editor .yjd-suggestions-list {
@@ -846,14 +893,15 @@
   appearance: none;
   cursor: pointer;
   padding: 10px 10px 10px 10px;
-  border-radius: 10px;
+  border-radius: var(--rte-radius-sm);
   border: 1px solid var(--rte-border);
   max-height: 37px;
   align-items: center;
-  background-image: url('data:image/svg+xml;utf8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10" fill="none"%3E%3Cpath d="M4.55859 7.94141C4.80273 8.18555 5.19922 8.18555 5.44336 7.94141L9.19336 4.19141C9.4375 3.94727 9.4375 3.55078 9.19336 3.30664C8.94922 3.0625 8.55274 3.0625 8.30859 3.30664L5 6.61523L1.69141 3.30859C1.44727 3.06445 1.05078 3.06445 0.806641 3.30859C0.5625 3.55273 0.5625 3.94922 0.806641 4.19336L4.55664 7.94336L4.55859 7.94141Z" fill="%23A4A7AE" /%3E%3C/svg%3E');
+  /* Same dropdown chevron as every other select (UI 2.0 family: 1.75 stroke). */
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='16'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%236d7480'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='m6%209%206%206%206-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 10px center;
-  background-size: 10px;
+  background-size: 14px;
   font-size: 14px;
   color: var(--rte-ink) !important;
 }
@@ -868,10 +916,10 @@
 .yjd-rich-editor .table-popup {
   position: absolute;
   background: var(--rte-bg);
-  font-family: 'Lato', sans-serif;
+  font-family: var(--rte-ui);
   display: none;
   border: 1px solid var(--rte-table-border);
-  border-radius: 6.9px;
+  border-radius: var(--rte-radius-sm);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   /* Prevent focus and click on popup container */
@@ -924,7 +972,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Lato', sans-serif;
+  font-family: var(--rte-ui);
   color: var(--rte-ink) !important;
   font-size: 12px;
   font-style: normal;
@@ -994,16 +1042,16 @@
   min-width: 150px;
   padding: 10px 12px;
   background: var(--rte-bg, #fff);
-  color: var(--rte-ink, #15171c);
-  border: 1px solid var(--rte-border, #e3e5ea);
+  color: var(--rte-ink);
+  border: 1px solid var(--rte-border);
   border-radius: var(--rte-radius-sm, 8px);
   box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.20), 0 2px 6px rgba(16, 18, 23, 0.06));
-  font: 500 13px/1.5 system-ui, -apple-system, sans-serif;
+  font: 500 13px/1.5 var(--rte-ui);
 }
 .yjd-table-profile-title {
   font-weight: 600;
   margin-bottom: 6px;
-  color: var(--rte-muted, #6d7480);
+  color: var(--rte-muted);
   text-transform: uppercase;
   font-size: 11px;
   letter-spacing: 0.04em;
@@ -1014,7 +1062,7 @@
   gap: 24px;
   padding: 2px 0;
 }
-.yjd-table-profile-row span { color: var(--rte-muted, #6d7480); }
+.yjd-table-profile-row span { color: var(--rte-muted); }
 
 .yjd-rich-editor .rich-editor-table td:focus {
   outline: 2px solid var(--rte-focus);
@@ -1029,7 +1077,7 @@
   z-index: 1002;
   background: transparent;
   border: none;
-  border-radius: 6.9px;
+  border-radius: var(--rte-radius-sm);
   opacity: 0;
   pointer-events: none;
 }
@@ -1065,7 +1113,7 @@
 
 .yjd-rich-editor .table-toolbar-btn:hover {
   background: var(--rte-chrome-2);
-  color: #111827;
+  color: var(--rte-ink);
 }
 
 .yjd-rich-editor .table-toolbar-btn:active {
@@ -1096,7 +1144,7 @@
   background: var(--rte-bg);
   display: none;
   border: 1px solid var(--rte-table-border);
-  border-radius: 6.9px;
+  border-radius: var(--rte-radius-sm);
   padding: 8px 4px 0 4px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   z-index: 1000;
@@ -1136,7 +1184,7 @@
 
 .yjd-rich-editor .align-button {
   height: 24px;
-  border-radius: 3.456px;
+  border-radius: var(--rte-radius-xs);
   background: var(--rte-bg);
   border: none;
   align-items: center;
@@ -1174,7 +1222,7 @@
   position: absolute;
   background: var(--rte-bg);
   display: none;
-  border-radius: 6.9px;
+  border-radius: var(--rte-radius-sm);
   padding: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   z-index: 1000;
@@ -1200,7 +1248,7 @@
 .yjd-rich-editor .list-button {
 
   border: none;
-  border-radius: 3.46px;
+  border-radius: var(--rte-radius-xs);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1331,7 +1379,7 @@
   position: absolute;
   z-index: 10000;
   background: var(--rte-bg);
-  border-radius: 8px;
+  border-radius: var(--rte-radius-md);
   padding: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   display: none;
@@ -1355,23 +1403,13 @@
   max-height: 240px;
   overflow-y: auto;
 }
-.yjd-rich-editor .emoji-text-message{
-  margin-top: 4px;
-  color: #71787C;
-  text-align: center;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  font-size: 12px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
-}
 .yjd-rich-editor .emoji-button {
   width: 28px;
   height: 28px;
   border: none;
   background: none;
   padding: 0;
-  border-radius: 4px;
+  border-radius: var(--rte-radius-xs);
   cursor: pointer;
   font-size: 20px !important;
   display: flex;
@@ -1396,8 +1434,8 @@
   position: absolute;
   z-index: 10000;
   background: var(--rte-bg);
-  font-family: 'Lato', sans-serif;
-  border-radius: 10px;
+  font-family: var(--rte-ui);
+  border-radius: var(--rte-radius);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   display: none;
   margin: 0;
@@ -1417,8 +1455,10 @@
 .yjd-rich-editor .image-popup-content {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 16px;
+  /* The popup shell itself carries the design's 14px padding; element
+     margins (title 12px, labels 5px, button row 14px) set the rhythm. */
+  gap: 0;
+  padding: 0;
 }
 
 
@@ -1439,8 +1479,8 @@
   position: absolute;
   z-index: 10000;
   background: var(--rte-bg);
-  font-family: 'Lato', sans-serif;
-  border-radius: 10px;
+  font-family: var(--rte-ui);
+  border-radius: var(--rte-radius);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   display: none;
   margin: 0;
@@ -1460,8 +1500,10 @@
 .yjd-rich-editor .video-popup-content {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 16px;
+  /* The popup shell itself carries the design's 14px padding; element
+     margins (title 12px, labels 5px, button row 14px) set the rhythm. */
+  gap: 0;
+  padding: 0;
 }
 
 .yjd-rich-editor .video-input-container {
@@ -1513,8 +1555,8 @@
   position: absolute;
   z-index: 10000;
   background: var(--rte-bg);
-  font-family: 'Lato', sans-serif;
-  border-radius: 10px;
+  font-family: var(--rte-ui);
+  border-radius: var(--rte-radius);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   display: none;
   margin: 0;
@@ -1545,8 +1587,10 @@
 .yjd-rich-editor .tag-popup-content {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 16px;
+  /* The popup shell itself carries the design's 14px padding; element
+     margins (title 12px, labels 5px, button row 14px) set the rhythm. */
+  gap: 0;
+  padding: 0;
 }
 
 
@@ -1568,18 +1612,18 @@
 }
 
 .yjd-rich-editor .custom-tag.tag-mention {
-  background: var(--rte-info-weak, #ebf3fd);
-  color: var(--rte-info, #1f6fdc);
+  background: var(--rte-info-weak);
+  color: var(--rte-info);
 }
 
 .yjd-rich-editor .custom-tag.tag-hashtag {
-  background: var(--rte-success-weak, #e7f5ef);
-  color: var(--rte-success, #0f8a5f);
+  background: var(--rte-success-weak);
+  color: var(--rte-success);
 }
 
 .yjd-rich-editor .custom-tag.tag-custom {
-  background: var(--rte-warning-weak, #fdf3e0);
-  color: var(--rte-warning, #a86500);
+  background: var(--rte-warning-weak);
+  color: var(--rte-warning);
 }
 
 .yjd-rich-editor .custom-tag:hover {
@@ -1592,7 +1636,7 @@
   z-index: 10000;
   background: var(--rte-bg);
   border: 1px solid var(--rte-table-border);
-  border-radius: 8px;
+  border-radius: var(--rte-radius);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   display: none;
   width: 400px;
@@ -1610,12 +1654,12 @@
 }
 
 .yjd-rich-editor .import-popup-content {
-  padding: 20px;
+  padding: 0;
 }
 
 .yjd-rich-editor .import-popup-title {
   margin: 0 0 20px 0;
-  font-size: 18px;
+  font-size: 13.5px;
   font-weight: 600;
   color: var(--rte-ink);
 }
@@ -1749,18 +1793,18 @@
 }
 
 .yjd-rich-editor .imported-content.html-content {
-  border-color: var(--rte-info, #1f6fdc);
-  background-color: var(--rte-info-weak, #ebf3fd);
+  border-color: var(--rte-info);
+  background-color: var(--rte-info-weak);
 }
 
 .yjd-rich-editor .imported-content.excel-content {
-  border-color: var(--rte-success, #0f8a5f);
-  background-color: var(--rte-success-weak, #e7f5ef);
+  border-color: var(--rte-success);
+  background-color: var(--rte-success-weak);
 }
 
 .yjd-rich-editor .imported-content.text-content {
-  border-color: var(--rte-warning, #a86500);
-  background-color: var(--rte-warning-weak, #fdf3e0);
+  border-color: var(--rte-warning);
+  background-color: var(--rte-warning-weak);
 }
 
 .yjd-rich-editor .imported-table {
@@ -1808,7 +1852,7 @@
 .yjd-rich-editor .code-view-textarea {
   width: 100%;
   height: 500px;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-family: var(--rte-mono);
   font-size: 14px;
   line-height: 1.5;
   padding: 16px;
@@ -2413,8 +2457,8 @@
 
   /* UI font for the chrome (toolbar, menus, popups). Content keeps the host
      app's font via `font-family: inherit` on the editor area. */
-  --rte-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Roboto, sans-serif;
-  --rte-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --rte-ui: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Roboto, sans-serif;
+  --rte-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   /* One knob for every UI glyph (toolbar, menus, chips, popups). Override at
      :root, on any ancestor, or per-editor via options.iconSize. */
@@ -2451,10 +2495,10 @@
 body.yjd-fullscreen-lock { overflow: hidden; }
 
 /* Use a friendly system stack everywhere (overrides the forced "Inter") */
-.yjd-rich-editor .toolbar-container button,
-.yjd-rich-editor .toolbar-container input,
-.yjd-rich-editor .toolbar-container select,
-.yjd-rich-editor .toolbar-container textarea,
+.yjd-rich-editor .rich-editor-toolbar-container button,
+.yjd-rich-editor .rich-editor-toolbar-container input,
+.yjd-rich-editor .rich-editor-toolbar-container select,
+.yjd-rich-editor .rich-editor-toolbar-container textarea,
 .yjd-rich-editor .rich-editor-popup-container button,
 .yjd-rich-editor .rich-editor-popup-container input,
 .yjd-rich-editor .rich-editor-popup-container select,
@@ -2492,6 +2536,21 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   background: var(--rte-chrome);
   border-bottom: 1px solid var(--rte-border);
 }
+/* The wrapper is a flex column: with a tall document the default flex-shrink
+   COMPRESSED the toolbar (measured 15px) while the area overflowed. Chrome
+   bars never shrink — the content area is the scroll surface. */
+.yjd-rich-editor .rich-editor-toolbar-container,
+.yjd-rich-editor .rich-editor-statusbar {
+  flex-shrink: 0;
+}
+/* Long documents can still scroll the PAGE (auto-height hosts) — pin the
+   chrome bar to the viewport top so the tools never scroll away mid-edit.
+   The prompt layout's bar sits at the BOTTOM of its pill, so it opts out. */
+.yjd-rich-editor:not([data-layout="prompt"]) .rich-editor-toolbar-container {
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+}
 .yjd-rich-editor .rich-editor-toolbar-1,
 .yjd-rich-editor .rich-editor-toolbar-2 {
   display: flex;
@@ -2506,7 +2565,10 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .rich-editor-toolbar-2.visible {
   border-top: 1px solid var(--rte-border);
 }
-/* Group by spacing, not dividers: tight within a group, airy between groups. */
+/* UI 2.0: clusters separated by hairline dividers — the design's exact recipe
+   (a 1px × 20px centred line with 4px breathing room on each side), on the
+   primary row AND the overflow rows. The divider is a ::before inside each
+   non-first group so the responsive reflow needs no extra DOM. */
 .yjd-rich-editor .toolbar-group {
   display: flex;
   align-items: center;
@@ -2515,9 +2577,24 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   margin: 0;
   padding: 0;
 }
-.yjd-rich-editor .toolbar-group + .toolbar-group {
-  margin-left: 12px;
+.yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group + .toolbar-group {
+  margin-left: var(--rte-gap, 6px);
 }
+/* Overflow rows: spacing comes ONLY from the row's flex gap (the packer's
+   invariant) — the divider rides inside the group, no extra margin. */
+.yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group + .toolbar-group::before,
+.yjd-rich-editor .rich-editor-toolbar-2-row .toolbar-group + .toolbar-group::before {
+  content: '';
+  flex: 0 0 auto;
+  align-self: center;
+  width: 1px;
+  height: 20px;
+  background: var(--rte-border);
+  /* Trailing side = this margin + the group's own 2px flex gap, so it lands on
+     exactly --rte-gap — matching the token-driven lead side. */
+  margin-right: max(0px, calc(var(--rte-gap, 6px) - 2px));
+}
+
 
 /* ---------- Buttons (toolbar + dropdown triggers) ---------- */
 .yjd-rich-editor .rich-editor-toolbar-btn,
@@ -2579,7 +2656,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .rich-editor-breadcrumb,
 .yjd-rich-editor .wordcount {
   color: var(--rte-muted);
-  font-family: var(--rte-mono, ui-monospace, monospace);
+  font-family: var(--rte-mono);
   font-size: 11px;
   letter-spacing: 0.01em;
   font-variant-numeric: tabular-nums;
@@ -2596,7 +2673,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
    remote-peer highlights all read as the same system. */
 .yjd-rich-editor .rich-editor-area ::selection,
 .yjd-content ::selection {
-  background: var(--rte-sel, rgba(91, 91, 214, 0.16));
+  background: var(--rte-sel);
 }
 .yjd-rich-editor .rich-editor-area a {
   color: var(--rte-link);
@@ -2615,7 +2692,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .rich-editor-area code {
   background: var(--rte-code-bg);
   color: var(--rte-code-ink);
-  border-radius: var(--rte-radius-xs, 4px);
+  border-radius: var(--rte-radius-xs);
   padding: 2px 5px;
   font-size: 0.88em;
 }
@@ -2711,13 +2788,13 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   transition: background var(--rte-t);
 }
 .yjd-rich-editor .yjd-button-cancel:hover {
-  background: var(--rte-chrome-3, #eceef1);
+  background: var(--rte-chrome-3);
 }
 .yjd-rich-editor .yjd-custom-upload-button {
   border-radius: var(--rte-radius-sm);
-  border: 1px dashed var(--rte-border-strong);
-  color: var(--rte-accent-ink);
-  background: var(--rte-accent-weak);
+  border: 1px solid var(--rte-border-strong);
+  color: var(--rte-ink-2);
+  background: var(--rte-chrome);
   transition: background var(--rte-t), border-color var(--rte-t);
 }
 .yjd-rich-editor .yjd-custom-upload-button:hover {
@@ -2791,7 +2868,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   border: 1px solid var(--rte-border-strong);
   border-radius: var(--rte-radius-md);
   box-shadow: var(--rte-shadow);
-  font: 13px/1.4 var(--rte-ui, system-ui, -apple-system, sans-serif);
+  font: 13px/1.4 var(--rte-ui);
   max-width: calc(100% - 20px);
 }
 .yjd-rich-editor .yjd-find-replace.open {
@@ -2855,7 +2932,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   border-color: transparent;
 }
 .yjd-rich-editor .yjd-find-replace .yjd-find-btn.yjd-find-close:hover {
-  background: #fdecec;
+  background: var(--rte-danger-weak);
   color: var(--rte-danger);
   border-color: #f6caca;
 }
@@ -2870,7 +2947,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor mark.yjd-find-hit {
   background: #fff1b8;
   color: inherit;
-  border-radius: 3px;
+  border-radius: var(--rte-radius-xs);
 }
 .yjd-rich-editor mark.yjd-find-hit.active {
   background: var(--rte-accent);
@@ -2928,7 +3005,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .rich-editor-toolbar-btn .icon svg path {
   fill: currentColor;
 }
-.yjd-rich-editor .rich-editor-toolbar-btn { color: #4b5060; }
+.yjd-rich-editor .rich-editor-toolbar-btn { color: var(--rte-muted); }
 .yjd-rich-editor .rich-editor-toolbar-btn:hover { color: var(--rte-ink); }
 .yjd-rich-editor .rich-editor-toolbar-btn.active,
 .yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg,
@@ -3018,7 +3095,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .yjd-input,
 .yjd-rich-editor .yjd-select-input,
 .yjd-rich-editor .yjd-find-input {
-  height: 36px;
+  height: var(--rte-ctl, 30px);
   padding: 0 12px;
   border: 1px solid var(--rte-border);
   border-radius: var(--rte-radius-sm);
@@ -3043,7 +3120,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .yjd-button-confirm,
 .yjd-rich-editor .yjd-button-cancel,
 .yjd-rich-editor .yjd-find-btn {
-  height: 36px;
+  height: 28px;
   padding: 0 16px;
   font-size: 14px;
   font-weight: 500;
@@ -3134,22 +3211,23 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 /* quiet default colour, accent on active */
 .yjd-rich-editor .rich-editor-toolbar-btn .icon svg { color: var(--rte-muted); }
 .yjd-rich-editor .rich-editor-toolbar-btn:hover .icon svg { color: var(--rte-ink); }
+/* v2: active = ink fill, so pressed glyphs render in the PAPER colour. */
 .yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg,
 .yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg path,
 .yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg line,
 .yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg polyline,
 .yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg rect {
-  color: var(--rte-accent-ink) !important;
-  stroke: var(--rte-accent-ink) !important;
+  color: var(--rte-bg) !important;
+  stroke: var(--rte-bg) !important;
   fill: none !important;
 }
 .yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg [fill="currentColor"] {
-  fill: var(--rte-accent-ink) !important;
+  fill: var(--rte-bg) !important;
   stroke: none !important;
 }
 .yjd-rich-editor .block-toolbar-btn.active .icon svg,
 .yjd-rich-editor .block-toolbar-btn.active .icon svg path {
-  stroke: var(--rte-accent-ink) !important;
+  stroke: var(--rte-bg) !important;
   fill: none !important;
 }
 
@@ -3272,7 +3350,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   width: var(--rte-icon-size);
   height: var(--rte-icon-size);
   fill: none;
-  stroke: var(--rte-accent-ink);
+  stroke: currentColor;
 }
 
 /* keep align-picker labels on one line */
@@ -3299,21 +3377,10 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .rich-editor-toolbar-1 .more-btn {
   margin-left: 12px;
 }
-/* Right-side action cluster: push the pinned history group (undo/redo) and the
-   "More" button to the right edge as one tight unit, so "More" reads as part of
-   a deliberate action group instead of a lone icon. The auto margin absorbs the
-   toolbar's free space, collapsing the left groups to their natural gap. */
-.yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group-history {
-  margin-left: auto;
-}
-/* When a history group is present it carries the auto margin, so the More button
-   must NOT also auto-margin (two auto margins would split the free space and
-   leave a gap between undo/redo and More). Collapse More to a tight gap right
-   after the history group — the cluster stays one unit. Higher specificity than
-   the base `.more-btn { margin-left: auto !important }`, so it wins. */
-.yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group-history ~ .more-btn {
-  margin-left: 12px !important;
-}
+/* UI 2.0: undo/redo lead the row on the LEFT (no pinned right cluster). The
+   right side belongs to the AI pill + "More" — the AI group carries the auto
+   margin (see the component pass), and "More" keeps its own auto margin as a
+   fallback when no AI group is present. */
 
 /* =====================================================================
    PROMPT LAYOUT (options.layout:'prompt') — chat-style input.
@@ -3323,7 +3390,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
    ===================================================================== */
 .yjd-rich-editor[data-layout="prompt"] {
   border-radius: 26px !important; /* beat the `border-radius: var(--rte-radius) !important` base */
-  border: 1px solid var(--rte-border-strong, var(--rte-border));
+  border: 1px solid var(--rte-border-strong);
   box-shadow: 0 1px 2px rgba(20, 24, 47, 0.04), 0 8px 24px rgba(20, 24, 47, 0.06);
   overflow: visible;
   /* The base rule isolates the editor's stacking context; a prompt input's "+"
@@ -3363,69 +3430,98 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   padding: 4px 18px 6px;
 }
 .yjd-rich-editor[data-layout="prompt"] .rte-prompt-attachments.has-items { display: flex; }
+/* Media tiles: 48px squares (design attachTile). Non-media: 32px rows. */
 .rte-attach-chip {
   position: relative;
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  border: 1px solid var(--rte-border, var(--rte-table-border));
-  background: var(--rte-chrome-2);
-  overflow: hidden;
   flex: 0 0 auto;
+  border: 1px solid var(--rte-border, var(--rte-table-border));
+  overflow: hidden;
+}
+.rte-attach-chip.rte-attach-tile {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--rte-radius-sm, 6px);
+  background: var(--rte-chrome-2);
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+}
+.rte-attach-chip.rte-attach-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 6px;
+  border-radius: var(--rte-radius-sm, 6px);
+  background: var(--rte-bg);
+  color: var(--rte-ink-2);
 }
 .rte-attach-chip img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .rte-attach-chip video { width: 100%; height: 100%; object-fit: cover; display: block; background: #000; }
+/* Play badge sits bottom-left on video tiles (close occupies top-right). */
 .rte-attach-play {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 22px;
-  height: 22px;
+  left: 4px;
+  bottom: 4px;
+  width: 16px;
+  height: 16px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  background: rgba(20, 24, 47, 0.55);
+  color: var(--rte-accent-ink-on, #fff);
+  background: rgba(0, 0, 0, 0.66);
   border-radius: 50%;
   pointer-events: none;
 }
-.rte-attach-play svg { width: 13px; height: 13px; margin-left: 1px; fill: currentColor; stroke: none; color: inherit; }
-.rte-attach-ic { width: 22px; height: 22px; color: var(--rte-muted); display: inline-flex; }
-.rte-attach-ic svg { width: var(--rte-icon-size); height: var(--rte-icon-size); fill: none; stroke: currentColor; color: inherit; }
-.rte-attach-name {
-  max-width: 52px;
-  padding: 0 4px;
-  font: 500 9px/1.1 system-ui, sans-serif;
+.rte-attach-play svg { width: 11px; height: 11px; margin-left: 1px; fill: currentColor; stroke: none; color: inherit; }
+.rte-attach-row .rte-attach-ic {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--rte-radius-xs, 4px);
+  background: var(--rte-chrome-2);
   color: var(--rte-muted);
-  text-align: center;
+}
+.rte-attach-row .rte-attach-ic svg { width: 12px; height: 12px; fill: none; stroke: currentColor; color: inherit; }
+.rte-attach-row .rte-attach-name {
+  max-width: 118px;
+  font: 400 12px/1.2 var(--rte-ui);
+  color: var(--rte-ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* Close: overlay circle on tiles, quiet inline X on rows. */
 .rte-attach-close {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 18px;
-  height: 18px;
   border: 0;
-  border-radius: 50%;
-  background: rgba(20, 24, 47, 0.62);
-  color: #fff;
-  font: 600 13px/1 system-ui, sans-serif;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
 }
-.rte-attach-close:hover { background: rgba(20, 24, 47, 0.82); }
+.rte-attach-tile .rte-attach-close {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.66);
+  color: #fff;
+}
+.rte-attach-tile .rte-attach-close:hover { background: rgba(0, 0, 0, 0.82); }
+.rte-attach-row .rte-attach-close {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  background: transparent;
+  color: var(--rte-faint);
+}
+.rte-attach-row .rte-attach-close:hover { color: var(--rte-ink); }
 
 /* Remove/close affordances draw the shared `close` glyph instead of a text "×",
    so they follow --rte-icon-size like every other icon. Sized down (0.65) to sit
@@ -3441,25 +3537,18 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   stroke-width: 2.5;
 }
 
-/* Context chip (@file / @selection) — a horizontal pill, not a 56px tile. */
-.rte-attach-chip.rte-attach-context {
-  width: auto; height: auto;
-  flex-direction: row;
-  gap: 5px;
-  padding: 5px 26px 5px 9px;
-  border-radius: 999px;
+/* Context chip (@file / @selection) — same row shape, accent @ tile. */
+.rte-attach-context .rte-attach-ic {
+  font: 500 12px/1 var(--rte-mono, monospace);
   background: var(--rte-accent-weak, rgba(91, 91, 214, 0.1));
-  border-color: var(--rte-accent-ring, rgba(91, 91, 214, 0.28));
+  color: var(--rte-accent-ink, #4a49cf);
 }
-.rte-attach-context .rte-attach-ic { width: auto; height: auto; font: 700 12px/1 var(--rte-mono, monospace); color: var(--rte-accent-ink, #4a49cf); }
-.rte-attach-context .rte-attach-name { max-width: 160px; font-size: 12.5px; color: var(--rte-ink); }
-.rte-attach-context .rte-attach-close { top: 50%; transform: translateY(-50%); right: 5px; width: 16px; height: 16px; font-size: 11px; }
 
 /* Token/cost meter — a quiet counter left of the send button. */
 .rte-token-meter {
   align-self: center;
   margin: 0 4px 0 auto;
-  font: 500 11.5px/1 var(--rte-mono, ui-monospace, monospace);
+  font: 500 11.5px/1 var(--rte-mono);
   color: var(--rte-muted);
   white-space: nowrap;
 }
@@ -3478,6 +3567,21 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   overflow: visible;
   row-gap: 6px;
 }
+/* Design "Prompt / chat" bar: NO dividers between groups, tight 4px gap,
+   and the send cluster pinned to the RIGHT edge behind a flex spacer. */
+.yjd-rich-editor[data-layout="prompt"] .rich-editor-toolbar-1 .toolbar-group + .toolbar-group::before,
+.yjd-rich-editor[data-layout="prompt"] .rich-editor-toolbar-2 .toolbar-group + .toolbar-group::before {
+  display: none;
+}
+.yjd-rich-editor[data-layout="prompt"] .rich-editor-toolbar-1,
+.yjd-rich-editor[data-layout="prompt"] .rich-editor-toolbar-2 {
+  gap: 4px;
+}
+.yjd-rich-editor[data-layout="prompt"] .rich-editor-toolbar-1 .toolbar-group.toolbar-group-send,
+.yjd-rich-editor[data-layout="prompt"] .rich-editor-toolbar-2 .toolbar-group.toolbar-group-send {
+  margin-left: auto !important;
+}
+
 /* No word-count/breadcrumb bar in a compact prompt input. */
 .yjd-rich-editor[data-layout="prompt"] .rich-editor-statusbar {
   display: none;
@@ -3487,9 +3591,9 @@ body.yjd-fullscreen-lock { overflow: hidden; }
    Usable in any toolbar, but designed for the prompt bar where it sits far
    right. */
 .yjd-rich-editor .rich-editor-toolbar-btn.rte-send-btn {
-  width: 34px;
-  min-width: 34px;
-  height: 34px;
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -3518,15 +3622,16 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   stroke: currentColor;
 }
 /* In the prompt bar the whole send group pins to the far right. */
-.yjd-rich-editor[data-layout="prompt"] .toolbar-group-send {
-  margin-left: auto;
+.yjd-rich-editor[data-layout="prompt"] .rich-editor-toolbar-1 .toolbar-group.toolbar-group-send,
+.yjd-rich-editor[data-layout="prompt"] .rich-editor-toolbar-2 .toolbar-group.toolbar-group-send {
+  margin-left: auto !important;
 }
 
 /* "+" add button — circular outline; accent tint while its menu is open. */
 .yjd-rich-editor .rich-editor-toolbar-btn.rte-add-btn {
-  width: 34px;
-  min-width: 34px;
-  height: 34px;
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
   padding: 0;
   border: 1px solid var(--rte-border, var(--rte-table-border));
   border-radius: 50%;
@@ -3545,35 +3650,44 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   border: 1px solid var(--rte-border, var(--rte-table-border));
   border-radius: var(--rte-radius-md, 14px);
   box-shadow: 0 8px 28px rgba(20, 24, 47, 0.14);
-  padding: 6px;
-  min-width: 196px;
+  padding: 5px;
+  width: 186px;
+  box-sizing: border-box;
   pointer-events: auto;
 }
 .rte-add-menu-popup.visible { display: block; }
+.rte-add-head {
+  padding: 5px 8px 6px;
+  font-family: var(--rte-mono, monospace);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rte-faint, #98a0ac);
+}
 .rte-add-item {
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 9px;
   width: 100%;
-  padding: 9px 12px;
+  padding: 7px 9px;
   border: 0;
-  border-radius: 9px;
+  border-radius: var(--rte-radius-sm, 6px);
   background: transparent;
-  color: var(--rte-ink);
-  font: 500 14px/1.2 inherit;
+  color: var(--rte-ink-2, #3c424d);
+  font: 400 12.5px/1.2 inherit;
   text-align: left;
   cursor: pointer;
 }
-.rte-add-item:hover { background: var(--rte-chrome-2); }
+.rte-add-item:hover { background: var(--rte-chrome-2); color: var(--rte-ink); }
 .rte-add-ic {
-  width: 20px;
-  height: 20px;
+  width: 15px;
+  height: 15px;
   flex: 0 0 auto;
   display: inline-flex;
-  color: var(--rte-muted);
+  color: inherit;
 }
-.rte-add-ic svg { width: var(--rte-icon-size); height: var(--rte-icon-size); fill: none; stroke: currentColor; color: inherit; }
-.rte-add-sep { height: 1px; background: var(--rte-border, var(--rte-table-border)); margin: 5px 8px; }
+.rte-add-ic svg { width: 15px; height: 15px; fill: none; stroke: currentColor; color: inherit; }
+.rte-add-sep { height: 1px; background: var(--rte-border, var(--rte-table-border)); margin: 4px 0; }
 
 /* =====================================================================
    DESIGN SYSTEM v2.8 — remove the triangle pointer on floating toolbars
@@ -3595,10 +3709,10 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   overflow-y: auto;
   padding: 6px;
   background: var(--rte-bg, var(--rte-bg));
-  border: 1px solid var(--rte-border-strong, var(--rte-border));
+  border: 1px solid var(--rte-border-strong);
   border-radius: var(--rte-radius-md, 12px);
   box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.20), 0 2px 6px rgba(16, 18, 23, 0.06));
-  font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font: 12.5px/1.4 var(--rte-ui);
   animation: yjd-slash-in 90ms ease-out;
 }
 @keyframes yjd-slash-in { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: none; } }
@@ -3660,7 +3774,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   width: 16px;
   height: 3px;
   border-radius: 2px;
-  background: var(--rte-ink, #15171c);
+  background: var(--rte-ink);
   pointer-events: none;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
 }
@@ -3682,19 +3796,19 @@ body.yjd-fullscreen-lock { overflow: hidden; }
    Compact link input anchored right at the selected text. */
 .yjd-rich-editor .link-popup.link-popup--inline {
   width: auto;
-  min-width: 320px;
-  max-width: min(92vw, 420px);
-  padding: 10px;
+  min-width: 262px;
+  max-width: min(92vw, 320px);
+  padding: 9px;
 }
 .yjd-rich-editor .link-popup--inline .link-popup-content {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 .yjd-rich-editor .link-popup--inline .link-popup-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 .yjd-rich-editor .link-popup--inline .link-popup-row .yjd-input {
   flex: 1;
@@ -3704,7 +3818,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .link-popup--inline .link-popup-apply {
   flex: 0 0 auto;
   white-space: nowrap;
-  padding: 8px 16px;
+  padding: 0 10px;
   margin: 0;
 }
 
@@ -3745,7 +3859,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   width: 100%;
   box-sizing: border-box;
   padding: 10px 36px 10px 12px;
-  font: 500 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font: 500 14px/1.4 var(--rte-ui);
   color: var(--rte-ink);
   background-color: var(--rte-bg);
   background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='16'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%236d7480'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='m6%209%206%206%206-6'/%3E%3C/svg%3E");
@@ -3819,17 +3933,18 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   .yjd-rich-editor .rich-editor-toolbar-1::-webkit-scrollbar {
     display: none;                    /* WebKit/Blink */
   }
-  /* The overflow row + "More" button aren't used on mobile. */
-  .yjd-rich-editor .rich-editor-toolbar-2,
-  .yjd-rich-editor .rich-editor-toolbar-1 .more-btn {
-    display: none !important;
-  }
-  /* Keep every group/button on one line and let the row scroll. */
+  /* v2: the counted overflow works on mobile too — the toggle stays and the
+     overflow row swipe-scrolls like the primary row. */
+  /* Keep every group/button on one line and let the row scroll. No dividers
+     on mobile — the design's swipe-row is a single uninterrupted strip. */
   .yjd-rich-editor .toolbar-group {
     flex: 0 0 auto;
   }
-  .yjd-rich-editor .toolbar-group + .toolbar-group {
-    margin-left: 8px;
+  .yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group + .toolbar-group {
+    margin-left: var(--rte-gap, 6px);
+  }
+  .yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group + .toolbar-group::before {
+    content: none;
   }
   /* 44px touch targets (UI 2.0) — the row swipes, so bigger buttons cost
      nothing horizontally. */
@@ -3862,23 +3977,58 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 /* ── Align picker: icon-only, compact row (v2.16) ─────────────────────────
    Labels removed (tooltip carries the name) → lay the 4 alignment icons out
    as a tight horizontal row of square buttons instead of wide list rows. */
-.yjd-rich-editor .align-button-container {
-  flex-direction: row !important;
+/* Design "List picker" card recipe: 186px pop, mono header, labelled rows. */
+.yjd-rich-editor .text-align-picker-popup,
+.yjd-rich-editor .list-picker-popup {
+  width: 186px !important;
+  padding: 5px;
+  box-sizing: border-box;
+}
+.yjd-rich-editor .yjd-pick-head {
+  padding: 5px 8px 6px;
+  font-family: var(--rte-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rte-faint);
+}
+.yjd-rich-editor .align-button-container,
+.yjd-rich-editor .list-button-container {
+  display: flex;
+  flex-direction: column !important;
   width: auto !important;
   height: auto !important;
-  gap: 4px;
+  gap: 1px;
 }
-.yjd-rich-editor .align-button {
-  width: 34px !important;
-  min-height: 34px !important;
-  height: 34px !important;
-  padding: 0 !important;
-  gap: 0 !important;
-  justify-content: center !important;
+.yjd-rich-editor .align-button,
+.yjd-rich-editor .list-button {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 9px !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 7px 9px !important;
+  border: 0;
+  border-radius: var(--rte-radius-sm);
+  background: transparent;
+  color: var(--rte-ink-2);
+  font-size: 12.5px !important;
+  cursor: pointer;
 }
-.yjd-rich-editor .text-align-picker-popup {
-  width: auto !important;
+.yjd-rich-editor .align-button .icon-wrapper,
+.yjd-rich-editor .list-button .icon-wrapper {
+  display: inline-flex;
+  margin: 0 !important;
+  flex: 0 0 auto;
 }
+.yjd-rich-editor .align-button svg,
+.yjd-rich-editor .list-button svg { width: 14px !important; height: 14px !important; }
+.yjd-rich-editor .align-button .label-text,
+.yjd-rich-editor .list-button .label-text { font-size: 12.5px; color: inherit; }
+.yjd-rich-editor .align-button:hover,
+.yjd-rich-editor .list-button:hover { background: var(--rte-chrome-2); color: var(--rte-ink); }
 
 /* ── "More" overflow row: single swipe-scroll row on TOUCH only (v2.17) ────
    On touch devices the secondary toolbar is one tidy row you swipe sideways,
@@ -3921,9 +4071,10 @@ body.yjd-fullscreen-lock { overflow: hidden; }
      pathologically narrow editors where a single group is wider than the row —
      the group drops to a second line instead of scrolling sideways. */
   flex-wrap: wrap;
-  gap: 20px;                 /* group spacing; the JS packer budgets this exact value */
-  padding: 8px 16px;         /* horizontal padding is overwritten inline to match row 1 */
-  min-height: 48px;
+  gap: var(--rte-gap, 6px);  /* group spacing; the JS packer reads the same token
+                                (dividers live inside the groups as ::before) */
+  padding: 7px 16px;         /* horizontal padding is overwritten inline to match row 1 */
+  min-height: 44px;
   box-sizing: border-box;
 }
 /* Spacing inside an overflow row comes ONLY from the row's flex gap, so the JS
@@ -4045,8 +4196,8 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   white-space: nowrap;
 }
 .mention[data-trigger="#"] {
-  background: var(--rte-info-weak, #ebf3fd);
-  color: var(--rte-info, #1f6fdc);
+  background: var(--rte-info-weak);
+  color: var(--rte-info);
 }
 
 /* ── @mention autocomplete menu (v2.24) ───────────────────────────────────
@@ -4060,10 +4211,10 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   overflow-y: auto;
   padding: 6px;
   background: var(--rte-bg, var(--rte-bg));
-  border: 1px solid var(--rte-border-strong, var(--rte-border));
+  border: 1px solid var(--rte-border-strong);
   border-radius: var(--rte-radius-md, 12px);
   box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.20), 0 2px 6px rgba(16, 18, 23, 0.06));
-  font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font: 12.5px/1.4 var(--rte-ui);
   animation: yjd-slash-in 90ms ease-out;
 }
 .yjd-mention-item {
@@ -4102,68 +4253,123 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-ai-bar {
   position: absolute;
   z-index: 2100;
-  width: 320px;
+  width: 232px;
   max-width: calc(100vw - 16px);
-  padding: 8px;
+  padding: 5px;
   background: var(--rte-bg, var(--rte-bg));
-  border: 1px solid var(--rte-border-strong, var(--rte-border));
-  border-radius: var(--rte-radius-md, 12px);
+  border: 1px solid var(--rte-border-strong);
+  border-radius: var(--rte-radius-md);
   box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.20), 0 2px 6px rgba(16, 18, 23, 0.06));
-  font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font: 13px/1.4 var(--rte-ui);
   color: var(--rte-ink, var(--rte-ink));
   animation: yjd-slash-in 90ms ease-out;
 }
-.yjd-ai-actions { display: flex; flex-wrap: wrap; gap: 4px; }
+/* Vertical menu list (UI 2.0): icon + label rows under a mono header. */
+.yjd-ai-head {
+  padding: 5px 8px 6px;
+  font-family: var(--rte-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rte-faint);
+}
+.yjd-ai-actions { display: flex; flex-direction: column; gap: 1px; }
 .yjd-ai-act {
-  flex: 1 1 auto;
-  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 9px;
   border: none;
   background: transparent;
-  border-radius: 8px;
+  border-radius: var(--rte-radius-sm);
   cursor: pointer;
   text-align: left;
   white-space: nowrap;
-  color: var(--rte-ink, var(--rte-ink));
+  color: var(--rte-ink-2);
   font: inherit;
+  font-size: 12.5px;
 }
-.yjd-ai-act:hover { background: var(--rte-accent-weak, var(--rte-accent-weak)); color: var(--rte-accent-ink, var(--rte-accent-ink)); }
-.yjd-ai-ask { margin-top: 6px; }
-.yjd-ai-input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 8px 10px;
-  border: 1px solid var(--rte-border-strong, var(--rte-border));
-  border-radius: 8px;
-  font: inherit;
-  color: var(--rte-ink, var(--rte-ink));
-  background: var(--rte-bg, var(--rte-bg));
+.yjd-ai-act:hover { background: var(--rte-chrome-2); color: var(--rte-ink, var(--rte-ink)); }
+.yjd-ai-act-ic {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  color: var(--rte-muted);
 }
-.yjd-ai-input:focus {
-  outline: none;
+.yjd-ai-act-ic svg { width: 14px; height: 14px; }
+.yjd-ai-act:hover .yjd-ai-act-ic { color: var(--rte-accent-ink, var(--rte-accent)); }
+.yjd-ai-act-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.yjd-ai-ask {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 5px;
+  padding: 6px 8px;
+  border: 1px solid var(--rte-border, var(--rte-border));
+  border-radius: var(--rte-radius-sm);
+  background: var(--rte-chrome, var(--rte-bg));
+  transition: border-color var(--rte-t), box-shadow var(--rte-t);
+}
+.yjd-ai-ask:focus-within {
   border-color: var(--rte-accent, var(--rte-accent));
-  box-shadow: 0 0 0 3px var(--rte-accent-ring, rgba(91, 91, 214, 0.24));
+  box-shadow: 0 0 0 3px var(--rte-accent-ring);
+  background: var(--rte-bg, #fff);
+}
+.yjd-ai-ask-ic {
+  flex: 0 0 auto;
+  display: inline-flex;
+  color: var(--rte-accent-ink, var(--rte-accent));
+}
+.yjd-ai-ask-ic svg { width: 13px; height: 13px; }
+.yjd-ai-input {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--rte-ink, var(--rte-ink));
+  background: transparent;
+}
+.yjd-ai-kbd {
+  flex: 0 0 auto;
+  font-family: var(--rte-mono);
+  font-size: 10.5px;
+  color: var(--rte-faint);
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-xs);
+  padding: 1px 5px;
 }
 .yjd-ai-result {
   max-height: 220px;
   overflow-y: auto;
   padding: 8px 10px;
-  border-radius: 8px;
+  border-radius: var(--rte-radius-md);
   background: var(--rte-accent-weak, var(--rte-accent-weak));
   color: var(--rte-ink, var(--rte-ink));
   white-space: pre-wrap;
   word-break: break-word;
 }
-.yjd-ai-result.is-error { background: var(--rte-danger-weak, #fdecec); color: var(--rte-danger, #d0343a); }
+.yjd-ai-result.is-error { background: var(--rte-danger-weak); color: var(--rte-danger); }
 .yjd-ai-foot { display: flex; gap: 6px; margin-top: 8px; }
 .yjd-ai-foot button {
   flex: 1 1 auto;
-  padding: 6px 10px;
-  border-radius: 8px;
-  border: 1px solid var(--rte-border-strong, var(--rte-border));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: var(--rte-radius-sm);
+  border: 1px solid var(--rte-border-strong);
   background: var(--rte-bg, var(--rte-bg));
   color: var(--rte-ink, var(--rte-ink));
   cursor: pointer;
-  font: inherit;
+  font: 500 12px/1 var(--rte-ui);
 }
 .yjd-ai-accept { background: var(--rte-accent, var(--rte-accent)) !important; color: var(--rte-accent-ink-on, var(--rte-accent-ink-on)) !important; border-color: var(--rte-accent, var(--rte-accent)) !important; }
 .yjd-ai-foot button:hover { filter: brightness(0.97); }
@@ -4171,7 +4377,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   position: absolute;
   z-index: 1;
   pointer-events: none;
-  color: var(--rte-muted, #6d7480);
+  color: var(--rte-muted);
   white-space: pre;
   font: inherit;
 }
@@ -4179,23 +4385,23 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 
 /* AI diff-edit: an inline word diff awaiting per-word accept/reject. */
 .yjd-ai-diff {
-  border-radius: 4px;
+  border-radius: var(--rte-radius-xs);
   padding: 0 1px;
-  background: rgba(91, 91, 214, 0.07);
-  box-shadow: 0 0 0 1px rgba(91, 91, 214, 0.25);
+  background: var(--rte-accent-weak, rgba(91, 91, 214, 0.07));
+  box-shadow: 0 0 0 1px var(--rte-accent-ring);
 }
 .yjd-ai-diff del.yjd-ai-del {
   text-decoration: line-through;
-  color: var(--rte-danger, #d0343a); background: var(--rte-danger-weak, #fdecec);
-  border-radius: 3px; padding: 0 1px; cursor: pointer;
+  color: var(--rte-danger); background: var(--rte-danger-weak);
+  border-radius: var(--rte-radius-xs); padding: 0 1px; cursor: pointer;
 }
 .yjd-ai-diff ins.yjd-ai-ins {
   text-decoration: none;
-  color: var(--rte-success, #0f8a5f); background: var(--rte-success-weak, #e7f5ef);
-  border-radius: 3px; padding: 0 1px; cursor: pointer;
+  color: var(--rte-success); background: var(--rte-success-weak);
+  border-radius: var(--rte-radius-xs); padding: 0 1px; cursor: pointer;
 }
 .yjd-ai-diff del.yjd-ai-off { text-decoration: none; color: inherit; background: transparent; } /* kept original */
-.yjd-ai-diff ins.yjd-ai-off { text-decoration: line-through; color: var(--rte-muted, #6d7480); background: transparent; } /* dropped addition */
+.yjd-ai-diff ins.yjd-ai-off { text-decoration: line-through; color: var(--rte-muted); background: transparent; } /* dropped addition */
 .yjd-ai-diffbar {
   position: absolute;
   z-index: 2147483000;
@@ -4203,14 +4409,14 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   gap: 8px;
   align-items: center;
   background: var(--rte-bg, #fff);
-  color: var(--rte-ink, #15171c);
-  border: 1px solid var(--rte-border-strong, #ced2d9);
-  border-radius: var(--rte-radius-md, 8px);
+  color: var(--rte-ink);
+  border: 1px solid var(--rte-border-strong);
+  border-radius: var(--rte-radius-md);
   padding: 6px 8px;
   box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.20), 0 2px 6px rgba(16, 18, 23, 0.06));
-  font: 500 13px/1 system-ui, -apple-system, sans-serif;
+  font: 500 12px/1 var(--rte-ui);
 }
-.yjd-ai-diffbar .yjd-ai-diffhint { color: var(--rte-muted, #6d7480); font-size: 12px; }
+.yjd-ai-diffbar .yjd-ai-diffhint { color: var(--rte-muted); font-size: 12px; }
 
 /* streamMarkdown: a blinking caret at the end of the reply while it "types". */
 .yjd-md-stream::after {
@@ -4232,10 +4438,13 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   border-radius: 2px;
 }
 .yjd-ai-diffbar button {
-  border: 1px solid var(--rte-border, #e3e5ea);
-  border-radius: 8px;
-  padding: 5px 11px;
-  font: 600 12.5px system-ui, sans-serif;
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-sm);
+  padding: 0 12px;
+  font: 500 12px/1 var(--rte-ui);
   cursor: pointer;
   background: var(--rte-chrome, #fff);
 }
@@ -4252,7 +4461,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
    editor's content typography so a saved post renders identically without an
    editor instance. Kept self-contained (not scoped under .yjd-rich-editor). */
 .yjd-content {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--rte-ui);
   font-size: 16px;
   line-height: 1.6;
   color: var(--rte-ink);
@@ -4271,11 +4480,11 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-content li { margin: 0.25em 0; }
 .yjd-content a { color: var(--rte-link); text-decoration: underline; }
 .yjd-content code {
-  font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
+  font-family: var(--rte-mono);
   background: var(--rte-code-bg); padding: 2px 6px; border-radius: 4px;
 }
 .yjd-content pre {
-  font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
+  font-family: var(--rte-mono);
   background: var(--rte-code-bg); padding: 12px 14px; border-radius: 6px;
   margin: 1em 0; overflow-x: auto; white-space: pre;
 }
@@ -4330,8 +4539,8 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   vertical-align: baseline;
   padding: 3px 10px 3px 8px;
   margin: 0 1px;
-  border: 1px solid var(--rte-border, #e3e5ea);
-  border-radius: var(--rte-radius-md, 8px);
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-md);
   background: var(--rte-chrome-2);
   color: var(--rte-ink);
   text-decoration: none;
@@ -4383,9 +4592,1893 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 
 /* Drag-and-drop target highlight (image or file dragged over the editor). */
 .rich-editor-area.yjd-drag-over {
-  outline: 2px dashed var(--rte-accent, var(--rte-accent));
+  position: relative; /* anchors the drop pill */
+  outline: 1.5px dashed var(--rte-accent);
   outline-offset: -4px;
-  background: var(--rte-accent-weak, #f6f5ff);
+  /* accent at ~5% over the canvas (fixed rgba — no color-mix). */
+  background: rgba(91, 91, 214, 0.05);
+}
+
+/* =====================================================================
+   UI 2.0 — component pass
+   Layout + chrome for the redesigned components: Ask AI pill, slash menu
+   tiles/keys, mention rows, colour & table pickers, media bar, find chips.
+   Appended after the earlier sections so these rules win.
+   ===================================================================== */
+
+/* =====================================================================
+   UI 2.0 v2 — design revision (colour setup, counted overflow, states)
+   ===================================================================== */
+
+/* Toolbar icons render at 1.9 stroke in the chrome bar (the registry family
+   stays 1.75 for menus/slash/pickers per the iconography spec). */
+.yjd-rich-editor .rich-editor-toolbar-btn .icon svg {
+  stroke-width: 1.9;
+}
+
+/* Active toolbar state = ink fill (v2), not the accent wash. */
+.yjd-rich-editor .rich-editor-toolbar-btn.active,
+.yjd-rich-editor .block-toolbar-btn.active {
+  background: var(--rte-ink) !important;
+  color: var(--rte-bg) !important;
+  border-color: transparent;
+}
+/* Pressed glyphs: paper-coloured STROKES — outline icons must keep fill:none
+   (a blanket fill turned B/U into solid blobs). Dot glyphs (fill=currentColor)
+   are re-filled separately below. */
+.yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg,
+.yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg path,
+.yjd-rich-editor .block-toolbar-btn.active .icon svg,
+.yjd-rich-editor .block-toolbar-btn.active .icon svg path {
+  color: var(--rte-bg) !important;
+  fill: none !important;
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg [fill="currentColor"],
+.yjd-rich-editor .block-toolbar-btn.active .icon svg [fill="currentColor"] {
+  fill: var(--rte-bg) !important;
+  stroke: none !important;
+}
+
+/* Hover = chrome-3 (v2) for icon buttons in the chrome + floating bars.
+   An ACTIVE tool ignores hover entirely — it's already in its pressed state. */
+.yjd-rich-editor .rich-editor-toolbar-btn:not(.active):hover {
+  background: var(--rte-chrome-3) !important;
+}
+.yjd-rich-editor .block-toolbar-btn:not(.active):hover,
+.yjd-rich-editor .table-toolbar-btn:not(.active):hover {
+  background: var(--rte-chrome-3);
+}
+/* Pin the pressed look through hover (beats every legacy :hover rule). */
+.yjd-rich-editor .rich-editor-toolbar-btn.active:not(.more-btn):hover,
+.yjd-rich-editor .block-toolbar-btn.active:hover {
+  background: var(--rte-ink) !important;
+  color: var(--rte-bg) !important;
+  border-color: transparent !important;
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.active:not(.more-btn):hover .icon svg,
+.yjd-rich-editor .rich-editor-toolbar-btn.active:not(.more-btn):hover .icon svg path,
+.yjd-rich-editor .block-toolbar-btn.active:hover .icon svg,
+.yjd-rich-editor .block-toolbar-btn.active:hover .icon svg path {
+  color: var(--rte-bg) !important;
+  stroke: var(--rte-bg) !important;
+  fill: none !important;
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.active:not(.more-btn):hover .icon svg [fill="currentColor"] {
+  fill: var(--rte-bg) !important;
+  stroke: none !important;
+}
+/* The open "⋯ N" toggle keeps its own pressed chrome on hover. */
+.yjd-rich-editor .rich-editor-toolbar-btn.more-btn.active:hover {
+  background: var(--rte-chrome-2) !important;
+  color: var(--rte-ink) !important;
+}
+.yjd-rich-editor .block-toolbar-btn,
+.yjd-rich-editor .table-toolbar-btn { color: var(--rte-ink-2); }
+
+/* Bubble "✦ AI" entry (design bubbleAi) + hairline divider after it. */
+.yjd-rich-editor .block-toolbar-btn.block-toolbar-ai {
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: var(--rte-radius-sm);
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
+  font-family: var(--rte-ui);
+  font-size: 12px;
+  font-weight: 500;
+}
+.yjd-rich-editor .block-toolbar-btn.block-toolbar-ai:hover {
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
+  filter: brightness(0.97);
+}
+.yjd-rich-editor .block-toolbar-sep {
+  width: 1px;
+  height: 18px;
+  background: var(--rte-border);
+  margin: 0 3px;
+  flex: 0 0 auto;
+}
+/* "⋮" overflow sheet (design "Touch bubble · overflow menu"). */
+.yjd-rich-editor .block-toolbar-more.open {
+  background: var(--rte-chrome-2);
+  color: var(--rte-ink);
+}
+.yjd-rich-editor .block-toolbar-sheet {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 1001;
+  width: 206px;
+  padding: 5px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  max-height: 212px;
+  overflow-y: auto;
+  background: var(--rte-bg);
+  border: 1px solid var(--rte-border-strong);
+  border-radius: var(--rte-radius-md);
+  box-shadow: var(--rte-shadow);
+}
+.yjd-rich-editor .block-toolbar-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: var(--rte-radius-sm);
+  background: transparent;
+  color: var(--rte-ink-2);
+  font-family: var(--rte-ui);
+  font-size: 12.5px;
+  text-align: left;
+  cursor: pointer;
+}
+.yjd-rich-editor .block-toolbar-item:hover { background: var(--rte-chrome-2); color: var(--rte-ink); }
+.yjd-rich-editor .block-toolbar-item.danger { color: var(--rte-danger); }
+.yjd-rich-editor .block-toolbar-item.danger:hover { background: var(--rte-danger-weak); color: var(--rte-danger); }
+.yjd-rich-editor .block-toolbar-item svg { flex: 0 0 auto; }
+.yjd-rich-editor .block-toolbar-item-label { flex: 1; }
+.yjd-rich-editor .block-toolbar-kbd {
+  font-family: var(--rte-mono);
+  font-size: 10.5px;
+  color: var(--rte-faint);
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-xs);
+  padding: 1px 5px;
+}
+.yjd-rich-editor .block-toolbar-sheet-sep {
+  height: 1px;
+  background: var(--rte-border);
+  margin: 4px 2px;
+}
+/* Touch: 44px comfortable rows per the design note. */
+@media (hover: none) and (pointer: coarse) {
+  .yjd-rich-editor .block-toolbar-item { min-height: 44px; }
+}
+
+/* Counted overflow toggle: bordered pill "⋯ +N"; pressed while open. */
+.yjd-rich-editor .rich-editor-toolbar-btn.more-btn {
+  width: auto;
+  min-width: var(--rte-ctl, 30px);
+  padding: 0 8px;
+  gap: 5px;
+  border: 1px solid var(--rte-border);
+  color: var(--rte-muted);
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.more-btn .rte-more-count {
+  font-family: var(--rte-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.more-btn .rte-more-count:empty { display: none; }
+.yjd-rich-editor .rich-editor-toolbar-btn.more-btn.open,
+.yjd-rich-editor .rich-editor-toolbar-btn.more-btn.active {
+  background: var(--rte-chrome-2) !important;
+  color: var(--rte-ink) !important;
+  border-color: var(--rte-border-strong);
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.more-btn.active .icon svg {
+  color: var(--rte-ink) !important;
+  fill: var(--rte-ink) !important;
+}
+/* The ⋯ dots are [fill="currentColor"] circles — the ink-fill active recipe
+   paints those paper (for dark pressed tools), which vanishes on the
+   more-btn's LIGHT pressed chrome. Re-ink them. */
+.yjd-rich-editor .rich-editor-toolbar-btn.more-btn.active .icon svg [fill="currentColor"],
+.yjd-rich-editor .rich-editor-toolbar-btn.more-btn.active:hover .icon svg [fill="currentColor"],
+.yjd-rich-editor .rich-editor-toolbar-btn.more-btn.active .icon svg path,
+.yjd-rich-editor .rich-editor-toolbar-btn.more-btn.active:hover .icon svg path {
+  fill: var(--rte-ink) !important;
+  stroke: none !important;
+}
+
+/* Overflow row (v2): ONE horizontal-scroll row on chrome-2 with a label. */
+.yjd-rich-editor .rich-editor-toolbar-2 { background: var(--rte-chrome-2); }
+/* Desktop: WRAP to as many rows as needed — a hidden-scrollbar row reads as
+   clipped (the last tools looked cut off and unreachable with a mouse).
+   Touch keeps the design's single swipe-scroll row below. */
+.yjd-rich-editor .rich-editor-toolbar-2-row.yjd-noscroll {
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+@media (hover: none) and (pointer: coarse) {
+  .yjd-rich-editor .rich-editor-toolbar-2-row.yjd-noscroll {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .yjd-rich-editor .rich-editor-toolbar-2-row.yjd-noscroll::-webkit-scrollbar { display: none; }
+}
+.yjd-rich-editor .rich-editor-toolbar-2-row .toolbar-group { flex: 0 0 auto; }
+/* Overflow buttons hover on chrome-3; dividers use the strong border there. */
+.yjd-rich-editor .rich-editor-toolbar-2-row .toolbar-group + .toolbar-group::before {
+  background: var(--rte-border-strong);
+}
+
+/* ---------- Popover/floating-bar active state = ink fill (v2 tbsOn) ---------- */
+.yjd-rich-editor .yjd-image-align-btn.active,
+.yjd-rich-editor .table-toolbar-btn.active {
+  background: var(--rte-ink) !important;
+  color: var(--rte-bg) !important;
+  border-color: transparent !important;
+}
+/* Labelled picker rows (align/list): active = accent row, not ink tile. */
+.yjd-rich-editor .align-button.active,
+.yjd-rich-editor .list-button.active {
+  background: var(--rte-accent-weak) !important;
+  color: var(--rte-accent-ink) !important;
+}
+.yjd-rich-editor .align-button.active svg,
+.yjd-rich-editor .list-button.active svg {
+  color: var(--rte-accent-ink) !important;
+  stroke: var(--rte-accent-ink) !important;
+}
+.yjd-rich-editor .yjd-image-align-btn.active svg,
+.yjd-rich-editor .yjd-image-align-btn.active svg path,
+.yjd-rich-editor .table-toolbar-btn.active svg,
+.yjd-rich-editor .table-toolbar-btn.active svg path {
+  color: var(--rte-bg) !important;
+  stroke: var(--rte-bg) !important;
+  fill: none !important;
+}
+.yjd-rich-editor .yjd-image-align-btn.active svg [fill="currentColor"],
+.yjd-rich-editor .align-button.active svg [fill="currentColor"],
+.yjd-rich-editor .list-button.active svg [fill="currentColor"] {
+  fill: var(--rte-bg) !important;
+  stroke: none !important;
+}
+/* …and pressed popover buttons ignore hover, same as the toolbar. */
+.yjd-rich-editor .yjd-image-align-btn.active:hover,
+.yjd-rich-editor .table-toolbar-btn.active:hover {
+  background: var(--rte-ink) !important;
+  color: var(--rte-bg) !important;
+}
+/* Labelled picker rows pin their ACCENT active state through hover. */
+.yjd-rich-editor .align-button.active:hover,
+.yjd-rich-editor .list-button.active:hover {
+  background: var(--rte-accent-weak) !important;
+  color: var(--rte-accent-ink) !important;
+}
+.yjd-rich-editor .align-button.active:hover svg,
+.yjd-rich-editor .list-button.active:hover svg {
+  color: var(--rte-accent-ink) !important;
+  stroke: var(--rte-accent-ink) !important;
+}
+
+/* ---------- Popover form metrics (v2): 26px inputs & buttons ----------
+   The design's popovers (link, find & replace) use compact 26px controls at
+   12px type — noticeably smaller than the 30px chrome controls. */
+.yjd-rich-editor .rich-editor-popup-container .yjd-input,
+.yjd-rich-editor .rich-editor-popup-container .yjd-select-input {
+  height: var(--rte-ctl, 30px);
+  min-height: var(--rte-ctl, 30px);
+  padding: 0 10px;
+  border-color: var(--rte-border-strong);
+  border-radius: var(--rte-radius-sm);
+}
+.yjd-rich-editor .yjd-find-input {
+  height: 26px;
+  min-height: 26px;
+  padding: 0 8px;
+  border-radius: var(--rte-radius-sm);
+}
+.yjd-rich-editor .yjd-find-btn:not(.yjd-find-icon):not(.yjd-find-toggle) {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 11.5px;
+  font-weight: 500;
+}
+.yjd-rich-editor .yjd-find-btn.yjd-find-icon {
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  padding: 0;
+}
+.yjd-rich-editor .yjd-find-replace { padding: 9px; gap: 6px; }
+.yjd-rich-editor .yjd-find-count { font-family: var(--rte-mono); font-size: 11px; }
+.yjd-rich-editor .rich-editor-popup-container .yjd-button-confirm,
+.yjd-rich-editor .rich-editor-popup-container .yjd-button-cancel,
+.yjd-rich-editor .link-popup-apply {
+  height: 28px;
+  padding: 0 12px;
+}
+.yjd-rich-editor .link-popup {
+  padding: 9px;
+  width: 262px;
+  box-sizing: border-box;
+}
+.yjd-rich-editor .link-popup .link-popup-row { gap: 6px; margin-bottom: 7px; }
+.yjd-rich-editor .link-popup .link-popup-row:last-child { margin-bottom: 0; }
+.yjd-rich-editor .link-popup .yjd-input { flex: 1; min-width: 0; }
+
+/* ---------- Form popups (image / video / tag / import): v2 shell ----------
+   Design cards "Video popup" / "Import popup" / "Tag popup": 14px card
+   padding, h3 title 13.5/600, 11.5/500 labels, 30px inputs, 28px buttons. */
+.yjd-rich-editor .image-popup,
+.yjd-rich-editor .video-popup,
+.yjd-rich-editor .tag-popup,
+.yjd-rich-editor .import-popup {
+  width: 300px;
+  box-sizing: border-box;
+  padding: 14px;
+}
+.yjd-rich-editor .rich-editor-popup-container .yjd-input-title,
+.yjd-rich-editor .import-popup-title {
+  margin: 0 0 12px;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--rte-ink);
+}
+.yjd-rich-editor .rich-editor-popup-container .yjd-input-label,
+.yjd-rich-editor .import-input-label {
+  display: block;
+  margin: 0 0 5px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--rte-ink-2);
+}
+.yjd-rich-editor .yjd-input-upload-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.yjd-rich-editor .yjd-input-upload-group .yjd-input { flex: 1; min-width: 0; }
+.yjd-rich-editor .rich-editor-popup-container .yjd-custom-upload-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--rte-ctl, 30px);
+  height: var(--rte-ctl, 30px);
+  flex: 0 0 auto;
+  padding: 0;
+  border: 1px solid var(--rte-border-strong);
+  border-radius: var(--rte-radius-sm);
+  background: var(--rte-chrome);
+  color: var(--rte-ink-2);
+}
+.yjd-rich-editor .rich-editor-popup-container .yjd-custom-upload-button svg {
+  width: 15px;
+  height: 15px;
+}
+.yjd-rich-editor .yjd-button-container {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+  margin-top: 14px;
+}
+.yjd-rich-editor .rich-editor-popup-container .image-preview-container img,
+.yjd-rich-editor .rich-editor-popup-container .video-preview-container video {
+  border-radius: var(--rte-radius-md);
+  max-width: 100%;
+}
+/* File preview gets a bottom scrim so the white controls stay legible. */
+.yjd-rich-editor .rich-editor-popup-container .video-preview-container::after,
+.yjd-rich-editor .rich-editor-popup-container .image-preview-container::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 26px;
+  border-radius: 0 0 7px 7px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.45));
+  pointer-events: none;
+}
+/* Inline URL check under the video field: "Recognised host — …". */
+.yjd-rich-editor .yjd-url-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: var(--rte-success);
+}
+.yjd-rich-editor .yjd-url-check svg { flex: 0 0 auto; }
+/* Drop zone inside the video/image popups while files are dragged over. */
+.yjd-rich-editor .yjd-popup-dropzone {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 20px 14px;
+  border: 1.5px dashed var(--rte-accent);
+  border-radius: var(--rte-radius-sm);
+  background: rgba(91, 91, 214, 0.06);
+  color: var(--rte-accent-ink);
+  text-align: center;
+}
+.yjd-rich-editor .yjd-popup-dropzone.active { display: flex; }
+.yjd-rich-editor .yjd-popup-dropzone .yjd-dropzone-main { font-size: 12.5px; font-weight: 500; }
+.yjd-rich-editor .yjd-popup-dropzone .yjd-dropzone-sub { font-size: 11px; color: var(--rte-muted); }
+
+/* ---------- Import popup: type select, drop area, file row, notice ------- */
+.yjd-rich-editor .import-popup .import-type-select {
+  display: block;
+  width: 100%;
+  height: var(--rte-ctl, 30px);
+  margin-bottom: 9px;
+  padding: 0 9px;
+  border: 1px solid var(--rte-border-strong);
+  border-radius: var(--rte-radius-sm);
+  background: var(--rte-bg);
+  color: var(--rte-ink);
+  font-size: 12.5px !important;
+  cursor: pointer;
+}
+.yjd-rich-editor .import-drop-area {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 14px;
+  border: 1px dashed var(--rte-border);
+  border-radius: var(--rte-radius-sm);
+  background: var(--rte-chrome-2);
+  color: var(--rte-faint);
+  font-size: 12px;
+  line-height: 1.5;
+  cursor: not-allowed;
+}
+.yjd-rich-editor .import-drop-area.ready {
+  color: var(--rte-muted);
+  cursor: pointer;
+}
+.yjd-rich-editor .import-drop-area.drag {
+  border-color: var(--rte-accent);
+  border-style: dashed;
+  background: rgba(91, 91, 214, 0.06);
+  color: var(--rte-accent-ink);
+}
+.yjd-rich-editor .import-drop-ic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-sm);
+  background: var(--rte-bg);
+}
+.yjd-rich-editor .import-file-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 11px;
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-sm);
+  background: var(--rte-chrome);
+}
+.yjd-rich-editor .import-file-ic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-sm);
+  background: var(--rte-bg);
+  color: var(--rte-muted);
+}
+.yjd-rich-editor .import-file-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.yjd-rich-editor .import-file-name {
+  font-size: 12.5px;
+  color: var(--rte-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.yjd-rich-editor .import-file-size {
+  font-family: var(--rte-mono);
+  font-size: 10.5px;
+  color: var(--rte-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.yjd-rich-editor .import-file-x {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  padding: 0;
+  border: none;
+  border-radius: var(--rte-radius-sm);
+  background: transparent;
+  color: var(--rte-faint);
+  cursor: pointer;
+}
+.yjd-rich-editor .import-file-x:hover { color: var(--rte-ink); background: var(--rte-chrome-2); }
+/* Inline "needs extra libraries" notice — replaces the post-pick alert(). */
+.yjd-rich-editor .yjd-popup-notice {
+  display: flex;
+  gap: 9px;
+  margin-top: 9px;
+  padding: 10px 12px;
+  border: 1px solid rgba(168, 101, 0, 0.26);
+  border-radius: var(--rte-radius-md);
+  background: var(--rte-warning-weak);
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--rte-ink-2);
+}
+.yjd-rich-editor .yjd-popup-notice svg { flex: 0 0 auto; margin-top: 1px; color: var(--rte-warning); }
+
+/* ---------- Tag popup: suggestion chips ---------- */
+.yjd-rich-editor .tag-popup .yjd-suggestions-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.yjd-rich-editor .tag-popup .yjd-suggestion-button {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 9px;
+  border: 1px solid var(--rte-border);
+  border-radius: 20px;
+  background: var(--rte-bg);
+  color: var(--rte-ink-2);
+  font-size: 12px !important;
+  cursor: pointer;
+}
+.yjd-rich-editor .tag-popup .yjd-suggestion-button:hover {
+  background: var(--rte-chrome-2);
+  color: var(--rte-ink);
+}
+.yjd-rich-editor .tag-popup .yjd-input-group { margin-bottom: 10px; }
+.yjd-rich-editor .tag-popup .yjd-input-group:last-of-type { margin-bottom: 0; }
+.yjd-rich-editor .tag-popup .yjd-select-input,
+.yjd-rich-editor .tag-popup .yjd-input { width: 100%; box-sizing: border-box; }
+
+/* ---------- Drag & drop: drop pill + visible drop caret ---------- */
+.rich-editor-area.yjd-drag-over::after {
+  content: "Drop to insert here";
+  position: absolute;
+  right: 12px;
+  top: 10px;
+  display: flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 9px;
+  border-radius: 20px;
+  background: var(--rte-accent);
+  color: var(--rte-accent-ink-on, #fff);
+  font-size: 11px;
+  font-weight: 500;
+  box-shadow: var(--rte-shadow-sm);
+  pointer-events: none;
+}
+.yjd-drop-caret {
+  position: fixed;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--rte-accent, #5b5bd6);
+  pointer-events: none;
+  z-index: 10000;
+}
+.yjd-drop-caret::before {
+  content: "";
+  position: absolute;
+  left: -3px;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: inherit;
+}
+/* Unhandled-drop toast. */
+.yjd-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(92vw, 380px);
+  padding: 9px 13px;
+  border: 1px solid var(--rte-border-strong, #ced2d9);
+  border-radius: var(--rte-radius-md, 8px);
+  background: var(--rte-bg, #fff);
+  color: var(--rte-ink-2, #3c424d);
+  font-size: 12.5px;
+  box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.2));
+  animation: yjd-toast-in 160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.yjd-toast svg { flex: 0 0 auto; color: var(--rte-warning, #a86500); }
+@keyframes yjd-toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(6px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ---------- Toolbar selects: quiet by default (design recipe) ----------
+   The design's chrome-bar select has NO border and NO fill at rest — the
+   chrome-2 wash and hairline border only appear on hover. */
+.yjd-rich-editor .rich-editor-toolbar-container .custom-select-button {
+  border-color: transparent;
+  background: transparent;
+  color: var(--rte-ink);
+  font-size: 13px;
+  font-weight: 400;
+  gap: 6px;
+  padding: 0 5px 0 8px;
+  justify-content: space-between;
+}
+.yjd-rich-editor .rich-editor-toolbar-container .custom-select-button:hover {
+  background: var(--rte-chrome-2);
+  border-color: var(--rte-border);
+}
+/* Trigger stays pressed while its popup is open (v2 select spec). */
+.yjd-rich-editor .rich-editor-toolbar-container .custom-select-button.open {
+  background: var(--rte-chrome-2);
+  border-color: var(--rte-border-strong);
+}
+.yjd-rich-editor .custom-select-button .dropdown-icon { color: var(--rte-muted); }
+
+/* Select popup (v2 listbox recipe): 4px padding, mono group header, compact
+   options — hover chrome-3, current = accent wash + 500 with the check right. */
+.yjd-rich-editor .custom-select-popup,
+.yjd-rich-editor .heading-select-popup,
+.yjd-rich-editor .capitalization-select-popup,
+.yjd-rich-editor .font-family-select-popup,
+.yjd-rich-editor .line-height-select-popup,
+.yjd-rich-editor .text-size-select-popup {
+  padding: 4px;
+}
+.yjd-rich-editor .custom-select-header {
+  padding: 6px 8px 5px;
+  font-family: var(--rte-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rte-faint);
+}
+/* Higher specificity than the legacy per-popup rules (min-height 34 / 14px). */
+.yjd-rich-editor .rich-editor-popup-container .custom-select-item-button,
+.yjd-rich-editor .custom-select-item-button {
+  min-height: 0;
+  padding: 6px 8px;
+  font-size: 12.5px !important;
+  color: var(--rte-ink-2);
+}
+/* An option that IS the current value ignores hover (pressed state wins). */
+.yjd-rich-editor .rich-editor-popup-container .custom-select-item-button:not(.current):hover,
+.yjd-rich-editor .custom-select-item-button:not(.current):hover {
+  background: var(--rte-chrome-3);
+  color: var(--rte-ink);
+}
+/* Current row's checkmark: 15px accent-inked, right-aligned (v2 spec). */
+.yjd-rich-editor .custom-select-item-button .item-checkmark svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2.4;
+}
+.yjd-rich-editor .custom-select-item-button.current .item-checkmark {
+  display: inline-flex;
+  align-items: center;
+  color: var(--rte-accent-ink);
+}
+.yjd-rich-editor .custom-select-item-button.current {
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
+  font-weight: 500;
+}
+
+/* ---------- Ask AI pill (toolbar) ---------- */
+.yjd-rich-editor .rich-editor-toolbar-btn .rte-btn-label {
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.ai-btn {
+  width: auto; /* labelled pill — don't inherit the fixed square width */
+  padding: 0 10px;
+  gap: 6px;
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
+  border-color: var(--rte-accent-weak);
+}
+.yjd-rich-editor .rich-editor-toolbar-btn.ai-btn:hover {
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
+  border-color: var(--rte-accent);
+}
+/* v2 right cluster: the "⋯ +N" toggle carries the auto margin; the AI group
+   follows it with a hairline divider and sits outermost right. */
+.yjd-rich-editor .rich-editor-toolbar-1 .more-btn + .toolbar-group:has(> .ai-btn) {
+  display: inline-flex;
+  margin-left: 0;
+}
+.yjd-rich-editor .rich-editor-toolbar-1 .more-btn + .toolbar-group:has(> .ai-btn)::before {
+  content: '';
+  flex: 0 0 auto;
+  align-self: center;
+  width: 1px;
+  height: 20px;
+  background: var(--rte-border);
+  margin: 0 max(0px, calc(var(--rte-gap, 6px) - 2px)) 0 var(--rte-gap, 6px);
+}
+
+/* ---------- Slash menu: header, icon tiles, shortcut chips ---------- */
+.yjd-slash-head {
+  padding: 6px 8px 8px;
+  font-family: var(--rte-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rte-faint);
+}
+.yjd-slash-item {
+  gap: 10px;
+}
+.yjd-slash-icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-sm);
+  background: var(--rte-bg);
+  color: var(--rte-muted);
+}
+/* Active row: quiet chrome wash (not the accent), accent-tinted glyph. */
+.yjd-slash-item:hover,
+.yjd-slash-item.active {
+  background: var(--rte-chrome-2);
+  color: var(--rte-ink);
+}
+.yjd-slash-item:hover .yjd-slash-icon,
+.yjd-slash-item.active .yjd-slash-icon {
+  color: var(--rte-accent-ink);
+  background: var(--rte-bg);
+}
+.yjd-slash-item.active .yjd-slash-hint { color: var(--rte-muted); }
+.yjd-slash-key {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-family: var(--rte-mono);
+  font-size: 10.5px;
+  color: var(--rte-faint);
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-xs);
+  padding: 1px 5px;
+}
+
+/* ---------- Mention menu: two-line rows ---------- */
+.yjd-mention-item:hover,
+.yjd-mention-item.active {
+  background: var(--rte-chrome-2);
+  color: var(--rte-ink);
+}
+.yjd-mention-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: 0 0 auto;
+}
+.yjd-mention-initial {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 9.5px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.yjd-mention-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+  text-align: start;
+}
+.yjd-mention-name { font-size: 12.5px; }
+.yjd-mention-handle {
+  font-size: 11px;
+  color: var(--rte-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Colour picker (UI 2.0 v2): 6-col grid + utility row + hex ---------- */
+.yjd-rich-editor .color-picker-popup {
+  width: 236px;
+  box-sizing: border-box;
+  padding: 8px;
+  border: 1px solid var(--rte-border-strong);
+}
+.yjd-rich-editor .color-picker-head {
+  padding: 2px 2px 8px;
+  font-family: var(--rte-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rte-faint);
+}
+.yjd-rich-editor .color-grid {
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+  margin-bottom: 0;
+}
+.yjd-rich-editor .color-button {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  border: 1px solid rgba(21, 23, 28, 0.16);
+  border-radius: var(--rte-radius-xs);
+}
+.yjd-rich-editor .color-button:hover {
+  transform: none;
+  border-color: var(--rte-border-strong);
+  box-shadow: 0 0 0 2px var(--rte-bg), 0 0 0 3.5px var(--rte-accent);
+}
+/* Bottom utility row: no-colour · white · black · custom · spacer · hex. */
+.yjd-rich-editor .custom-color-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--rte-border);
+}
+.yjd-rich-editor .custom-color-container::before { content: none; }
+.yjd-rich-editor .custom-color-container .color-button {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  aspect-ratio: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--rte-border-strong);
+  border-radius: var(--rte-radius-sm);
+  background: transparent;
+  color: var(--rte-muted);
+  padding: 0;
+}
+.yjd-rich-editor .custom-color-container .white-button { background: #ffffff; }
+.yjd-rich-editor .custom-color-container .black-button {
+  background: #000000;
+  border-color: rgba(21, 23, 28, 0.22);
+}
+.yjd-rich-editor .custom-color-container .custom-color-button { color: var(--rte-ink-2); }
+.yjd-rich-editor .color-row-spacer { flex: 1; }
+.yjd-rich-editor .color-hex-readout {
+  font-family: var(--rte-mono);
+  font-size: 10px;
+  color: var(--rte-faint);
+}
+/* The hidden <input type=color> must not take layout space in the row. */
+.yjd-rich-editor .custom-color-input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* ---------- Table size picker ---------- */
+.yjd-rich-editor .table-grid-selector {
+  gap: 3px;
+  border-bottom: 0;
+}
+.yjd-rich-editor .table-grid-cell {
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--rte-border);
+  border-radius: 2px;
+}
+.yjd-rich-editor .table-grid-cell:hover,
+.yjd-rich-editor .table-grid-cell.highlighted {
+  background: var(--rte-accent-weak);
+  border-color: var(--rte-accent);
+}
+.yjd-rich-editor .table-size-display {
+  margin-top: 8px;
+  font-family: var(--rte-mono) !important;
+  font-size: 11px;
+  color: var(--rte-muted) !important;
+}
+
+/* ---------- Media resize: square handles, size badge, delete ---------- */
+.yjd-rich-editor .resize-handle {
+  width: 8px !important;
+  height: 8px !important;
+  background: var(--rte-bg) !important;
+  border: 1.5px solid var(--rte-accent) !important;
+  border-radius: 2px !important;
+  box-shadow: var(--rte-shadow-sm) !important;
+}
+.yjd-rich-editor .yjd-resize-size {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 1000;
+  font-family: var(--rte-mono);
+  font-size: 10px;
+  color: var(--rte-accent-ink-on);
+  background: var(--rte-accent);
+  border-radius: var(--rte-radius-xs);
+  padding: 1px 5px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.yjd-rich-editor .yjd-image-align-sep {
+  width: 1px;
+  height: 16px;
+  background: var(--rte-border);
+  margin: 0 2px;
+  align-self: center;
+}
+.yjd-rich-editor .yjd-image-delete-btn { color: var(--rte-danger); }
+.yjd-rich-editor .yjd-image-delete-btn:hover {
+  background: var(--rte-danger-weak);
+  color: var(--rte-danger);
+}
+
+/* ---------- Find & replace: match-option chip ---------- */
+.yjd-rich-editor .yjd-find-toggle {
+  border: 1px solid var(--rte-border);
+  border-radius: 20px;
+  font-size: 11px;
+  padding: 0 9px;
+  color: var(--rte-ink-2);
+}
+.yjd-rich-editor .yjd-find-toggle.active {
+  border-color: var(--rte-accent);
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
+}
+.yjd-rich-editor .yjd-find-opts { gap: 5px; }
+.yjd-rich-editor .yjd-find-regex { font-family: var(--rte-mono); }
+/* Kill the UA-native button face (a legacy `background: 0 0` let Chromium
+   paint white native buttons in dark mode) — same specificity, later wins. */
+.yjd-rich-editor .yjd-find-btn:not(.yjd-find-icon):not(.yjd-find-toggle) {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--rte-chrome);
+  color: var(--rte-ink);
+  border: 1px solid var(--rte-border);
+}
+.yjd-rich-editor .yjd-find-btn:not(.yjd-find-icon):not(.yjd-find-toggle):hover {
+  background: var(--rte-chrome-2);
+}
+.yjd-rich-editor .yjd-find-btn.yjd-find-toggle:not(.yjd-find-icon) {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--rte-bg);
+}
+.yjd-rich-editor .yjd-find-btn.yjd-find-toggle.active:not(.yjd-find-icon) {
+  background: var(--rte-accent-weak);
+}
+
+/* ---------- Callout block (UI 2.0) ---------- */
+.yjd-rich-editor .rich-editor-area .yjd-callout,
+.yjd-content .yjd-callout {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  margin: 12px 0;
+  border: 1px solid rgba(31, 111, 220, 0.22);
+  border-radius: var(--rte-radius-md);
+  background: var(--rte-info-weak);
+}
+.yjd-rich-editor .rich-editor-area .yjd-callout::before,
+.yjd-content .yjd-callout::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 17px;
+  height: 17px;
+  margin-top: 3px;
+  background: var(--rte-info);
+  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Ccircle%20cx='12'%20cy='12'%20r='9'/%3E%3Cpath%20d='M12%2016v-5'/%3E%3Cpath%20d='M12%208h.01'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.yjd-rich-editor .rich-editor-area .yjd-callout > p,
+.yjd-content .yjd-callout > p {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  font-size: 0.92em;
+  line-height: 1.6;
+  color: var(--rte-ink-2);
+}
+.yjd-callout[data-callout="success"] { background: var(--rte-success-weak) !important; border-color: rgba(15, 138, 95, 0.24) !important; }
+.yjd-callout[data-callout="success"]::before { background: var(--rte-success) !important; }
+.yjd-callout[data-callout="warning"] { background: var(--rte-warning-weak) !important; border-color: rgba(168, 101, 0, 0.26) !important; }
+.yjd-callout[data-callout="warning"]::before { background: var(--rte-warning) !important; }
+.yjd-callout[data-callout="danger"] { background: var(--rte-danger-weak) !important; border-color: rgba(208, 52, 58, 0.26) !important; }
+.yjd-callout[data-callout="danger"]::before { background: var(--rte-danger) !important; }
+
+/* ---------- Toggle block (UI 2.0, native details/summary) ---------- */
+.yjd-rich-editor .rich-editor-area .yjd-toggle,
+.yjd-content .yjd-toggle {
+  margin: 12px 0;
+  padding: 2px 0;
+}
+.yjd-rich-editor .rich-editor-area .yjd-toggle > summary,
+.yjd-content .yjd-toggle > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+  border-radius: var(--rte-radius-sm);
+  padding: 2px 4px;
+}
+.yjd-rich-editor .rich-editor-area .yjd-toggle > summary::-webkit-details-marker { display: none; }
+.yjd-rich-editor .rich-editor-area .yjd-toggle > summary::before,
+.yjd-content .yjd-toggle > summary::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  background: var(--rte-faint);
+  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='m9%2018%206-6-6-6'/%3E%3C/svg%3E") center / contain no-repeat;
+  transition: transform var(--rte-t);
+}
+.yjd-rich-editor .rich-editor-area .yjd-toggle[open] > summary::before,
+.yjd-content .yjd-toggle[open] > summary::before {
+  transform: rotate(90deg);
+}
+.yjd-rich-editor .rich-editor-area .yjd-toggle > :not(summary),
+.yjd-content .yjd-toggle > :not(summary) {
+  margin-left: 22px;
+}
+
+/* ---------- Side panel: Outline · Comments · Versions (UI 2.0 rail) ---------- */
+.yjd-rich-editor .yjd-side-layout {
+  display: flex;
+  align-items: stretch;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.yjd-rich-editor .yjd-side-layout > .rich-editor-area { flex: 1 1 auto; min-width: 0; }
+.yjd-rich-editor .yjd-side-panel {
+  flex: 0 0 268px;
+  /* Hard cap: a nowrap row (resolved "Resolved by … — …") must ellipsise,
+     not push the rail past its 268px basis via min-width:auto. */
+  width: 268px;
+  max-width: 268px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--rte-border);
+  background: var(--rte-chrome);
+  min-height: 0;
+  overflow: hidden;
+}
+.yjd-rich-editor .yjd-side-tabs {
+  display: flex;
+  gap: 1px;
+  padding: 8px;
+  border-bottom: 1px solid var(--rte-border);
+}
+.yjd-rich-editor .yjd-side-tab {
+  flex: 1;
+  height: 26px;
+  border: 0;
+  border-radius: var(--rte-radius-sm);
+  background: transparent;
+  color: var(--rte-muted);
+  font-family: var(--rte-ui);
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--rte-t);
+}
+.yjd-rich-editor .yjd-side-tab:hover { background: var(--rte-chrome-2); }
+.yjd-rich-editor .yjd-side-tab.active {
+  background: var(--rte-accent-weak);
+  color: var(--rte-accent-ink);
+}
+.yjd-rich-editor .yjd-side-body {
+  flex: 1;
+  padding: 12px 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.yjd-rich-editor .yjd-side-empty {
+  padding: 18px 8px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--rte-faint);
+  text-align: center;
+}
+/* Outline rows */
+.yjd-rich-editor .yjd-side-outline-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: var(--rte-radius-sm);
+  background: transparent;
+  color: var(--rte-muted);
+  font-family: var(--rte-ui);
+  font-size: 12px;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.yjd-rich-editor .yjd-side-outline-row.lvl-1 { color: var(--rte-ink); font-weight: 500; font-size: 12.5px; }
+.yjd-rich-editor .yjd-side-outline-row.lvl-2 { padding-left: 21px; }
+.yjd-rich-editor .yjd-side-outline-row.lvl-3 { padding-left: 34px; }
+.yjd-rich-editor .yjd-side-outline-row:hover { background: var(--rte-chrome-2); }
+.yjd-rich-editor .yjd-side-tag {
+  flex: 0 0 auto;
+  font-family: var(--rte-mono);
+  font-size: 9.5px;
+  color: var(--rte-faint);
+}
+.yjd-rich-editor .yjd-side-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Comment cards */
+.yjd-rich-editor .yjd-side-comment {
+  padding: 10px;
+  margin-bottom: 8px;
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-md);
+  background: var(--rte-bg);
+  cursor: pointer;
+}
+.yjd-rich-editor .yjd-side-comment.focus {
+  border-color: var(--rte-border-strong);
+  box-shadow: var(--rte-shadow-sm);
+}
+.yjd-rich-editor .yjd-side-comment-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 7px;
+}
+.yjd-rich-editor .yjd-side-avatar {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--rte-accent);
+  color: var(--rte-accent-ink-on);
+  font-size: 8.5px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.yjd-rich-editor .yjd-side-who { font-size: 12px; font-weight: 500; color: var(--rte-ink); flex: 1; }
+.yjd-rich-editor .yjd-side-time { font-size: 10.5px; color: var(--rte-faint); }
+.yjd-rich-editor .yjd-side-x {
+  border: 0;
+  background: transparent;
+  color: var(--rte-faint);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: var(--rte-radius-xs);
+}
+.yjd-rich-editor .yjd-side-x:hover { background: var(--rte-danger-weak); color: var(--rte-danger); }
+.yjd-rich-editor .yjd-side-quote {
+  font-size: 11.5px;
+  color: var(--rte-muted);
+  border-left: 2px solid var(--rte-quote-border);
+  padding-left: 7px;
+  margin-bottom: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.yjd-rich-editor .yjd-side-text { font-size: 12px; line-height: 1.5; color: var(--rte-ink-2); }
+/* Version rows */
+.yjd-rich-editor .yjd-side-version {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 8px;
+  border: 0;
+  border-top: 1px solid var(--rte-hairline);
+  background: transparent;
+  border-radius: var(--rte-radius-sm);
+  font-family: var(--rte-ui);
+  cursor: pointer;
+  text-align: left;
+}
+.yjd-rich-editor .yjd-side-version:first-child { border-top: 0; }
+.yjd-rich-editor .yjd-side-version:hover { background: var(--rte-chrome-2); }
+.yjd-rich-editor .yjd-side-version.current { background: var(--rte-accent-weak); }
+.yjd-rich-editor .yjd-side-v { font-family: var(--rte-mono); font-size: 11px; color: var(--rte-muted); }
+.yjd-rich-editor .yjd-side-version.current .yjd-side-v { color: var(--rte-accent-ink); }
+.yjd-rich-editor .yjd-side-vwho { font-size: 12px; color: var(--rte-ink-2); }
+.yjd-rich-editor .yjd-side-spacer { flex: 1; }
+.yjd-rich-editor .yjd-side-vtag {
+  font-size: 10px;
+  color: var(--rte-muted);
+  border: 1px solid var(--rte-border);
+  border-radius: 20px;
+  padding: 1px 6px;
+}
+.yjd-rich-editor .yjd-side-vtime { font-size: 10.5px; color: var(--rte-faint); font-family: var(--rte-mono); }
+/* Comment marks in the content (design: warning wash + 2px underline). */
+.yjd-rich-editor .yjd-comment-mark,
+.yjd-content .yjd-comment-mark {
+  background: var(--rte-warning-weak);
+  border-bottom: 2px solid var(--rte-warning);
+  border-radius: 2px 2px 0 0;
+  padding: 1px 0;
+  cursor: pointer;
+}
+
+/* ---------- Comments (design section 09 — Review) ---------- */
+/* Thread popover / composer shell — anchored under the mark. */
+.yjd-rich-editor .yjd-comment-pop {
+  position: absolute;
+  z-index: 1200;
+  width: 262px;
+  box-sizing: border-box;
+  border: 1px solid var(--rte-border-strong);
+  border-radius: var(--rte-radius-md);
+  background: var(--rte-bg);
+  box-shadow: var(--rte-shadow);
+  overflow: hidden;
+}
+.yjd-rich-editor .yjd-c-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+}
+.yjd-rich-editor .yjd-c-row { display: flex; gap: 9px; }
+.yjd-rich-editor .yjd-c-col { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+.yjd-rich-editor .yjd-c-head { display: flex; align-items: baseline; gap: 6px; }
+.yjd-rich-editor .yjd-c-who { font-size: 12.5px; font-weight: 600; color: var(--rte-ink); }
+.yjd-rich-editor .yjd-c-time { font-size: 10.5px; font-family: var(--rte-mono); color: var(--rte-faint); }
+.yjd-rich-editor .yjd-c-body { font-size: 12.5px; line-height: 1.55; color: var(--rte-ink-2); }
+.yjd-rich-editor .yjd-c-avatar {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  color: var(--rte-accent-ink-on, #fff);
+  font-size: 10px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.yjd-rich-editor .yjd-c-avatar.sm { width: 20px; height: 20px; font-size: 9px; }
+.yjd-rich-editor .yjd-c-replyrow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 10px;
+  border-top: 1px solid var(--rte-border);
+  background: var(--rte-chrome-2);
+}
+.yjd-rich-editor .yjd-c-replyinput { flex: 1; min-width: 0; height: 26px !important; min-height: 26px !important; }
+.yjd-rich-editor .yjd-c-replybtn { height: 26px; padding: 0 10px; }
+.yjd-rich-editor .yjd-c-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 6px 8px 0;
+}
+.yjd-rich-editor .yjd-c-resolve {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--rte-radius-sm);
+  background: transparent;
+  color: var(--rte-muted);
+  font-size: 11.5px;
+  cursor: pointer;
+}
+.yjd-rich-editor .yjd-c-resolve:hover { background: var(--rte-success-weak); color: var(--rte-success); }
+/* Composer (design "New comment composer"). */
+.yjd-rich-editor .yjd-c-composer { padding: 11px; }
+.yjd-rich-editor .yjd-c-quote {
+  font-size: 11.5px;
+  color: var(--rte-muted);
+  border-left: 2px solid var(--rte-warning);
+  padding-left: 8px;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+.yjd-rich-editor .yjd-c-field {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--rte-accent);
+  border-radius: var(--rte-radius-sm);
+  padding: 8px 9px;
+  font: 400 12.5px/1.55 var(--rte-ui);
+  color: var(--rte-ink);
+  background: var(--rte-bg);
+  resize: vertical;
+  min-height: 52px;
+  outline: none;
+}
+.yjd-rich-editor .yjd-c-field:focus { box-shadow: 0 0 0 2px var(--rte-accent-ring); }
+.yjd-rich-editor .yjd-c-composer-foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 9px;
+}
+.yjd-rich-editor .yjd-c-cbtn { height: 26px !important; padding: 0 10px; }
+.yjd-rich-editor .yjd-c-hint {
+  margin-top: 9px;
+  font-size: 10.5px;
+  font-family: var(--rte-mono);
+  color: var(--rte-faint);
+  text-align: center;
+}
+/* Rail: Open/Resolved filter chips. */
+.yjd-rich-editor .yjd-c-filter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 8px;
+}
+.yjd-rich-editor .yjd-c-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 9px;
+  border: 1px solid var(--rte-border);
+  border-radius: 20px;
+  background: var(--rte-bg);
+  color: var(--rte-ink-2);
+  font-size: 11.5px;
+  cursor: pointer;
+}
+.yjd-rich-editor .yjd-c-chip.on {
+  background: var(--rte-accent-weak);
+  border-color: var(--rte-accent);
+  color: var(--rte-accent-ink);
+}
+/* Rail: thread cards. */
+.yjd-rich-editor .yjd-c-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  margin-bottom: 8px;
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-sm);
+  background: var(--rte-bg);
+  cursor: pointer;
+}
+.yjd-rich-editor .yjd-c-card:hover { border-color: var(--rte-border-strong); }
+.yjd-rich-editor .yjd-c-card.focus {
+  border-color: var(--rte-accent);
+  border-left-width: 2px;
+}
+.yjd-rich-editor .yjd-c-card .yjd-c-head { align-items: center; gap: 7px; }
+.yjd-rich-editor .yjd-c-card .yjd-c-avatar { width: 18px; height: 18px; font-size: 8.5px; }
+.yjd-rich-editor .yjd-c-replies { font-size: 11.5px; color: var(--rte-accent-ink); }
+.yjd-rich-editor .yjd-c-orphan {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--rte-warning);
+}
+/* Rail: resolved rows. */
+.yjd-rich-editor .yjd-c-resolved {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px;
+  margin-bottom: 8px;
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-sm);
+  background: var(--rte-chrome-2);
+  opacity: 0.72;
+}
+.yjd-rich-editor .yjd-c-check { color: var(--rte-success); display: inline-flex; flex: 0 0 auto; }
+.yjd-rich-editor .yjd-c-resolved-text {
+  font-size: 12.5px;
+  color: var(--rte-muted);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.yjd-rich-editor .yjd-c-undo {
+  font-size: 11.5px;
+  color: var(--rte-muted);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--rte-ui);
+  flex: 0 0 auto;
+}
+.yjd-rich-editor .yjd-c-undo:hover { color: var(--rte-ink); }
+/* Touch: the popover re-pins as a bottom sheet with a grab handle. */
+@media (hover: none) and (pointer: coarse) {
+  .yjd-rich-editor .yjd-comment-pop {
+    position: fixed;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0;
+    top: auto !important;
+    width: auto;
+    transform: none !important;
+    border-radius: 16px 16px 0 0;
+    padding-top: 6px;
+  }
+  .yjd-rich-editor .yjd-comment-pop::before {
+    content: "";
+    display: block;
+    width: 34px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--rte-border-strong);
+    margin: 3px auto 6px;
+  }
+}
+
+/* The rail collapses on narrow editors. */
+@media (max-width: 720px) {
+  .yjd-rich-editor .yjd-side-panel { display: none; }
+}
+
+/* ---------- Block gutter: drag handle + plus (UI 2.0 editor surface) ---------- */
+/* The design reserves a left gutter for the handles — widen the content's
+   left padding while the module is active (desktop pointers only). */
+@media (hover: hover) and (pointer: fine) {
+  .yjd-rich-editor.yjd-has-block-handles .rich-editor-area {
+    padding-left: 64px;
+  }
+}
+.yjd-rich-editor .yjd-block-gutter {
+  position: absolute;
+  z-index: 998;
+  display: inline-flex;
+  gap: 2px;
+  opacity: 0.65;
+  transition: opacity var(--rte-t);
+  pointer-events: auto;
+}
+.yjd-rich-editor .yjd-block-gutter:hover { opacity: 1; }
+.yjd-rich-editor .yjd-block-gutter.dragging { opacity: 1; }
+.yjd-rich-editor .yjd-block-drag,
+.yjd-rich-editor .yjd-block-plus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: var(--rte-radius-xs);
+  background: transparent;
+  color: var(--rte-faint);
+  cursor: pointer;
+  padding: 0;
+}
+.yjd-rich-editor .yjd-block-drag { cursor: grab; }
+.yjd-rich-editor .yjd-block-gutter.dragging .yjd-block-drag { cursor: grabbing; }
+.yjd-rich-editor .yjd-block-drag:hover,
+.yjd-rich-editor .yjd-block-plus:hover {
+  background: var(--rte-chrome-2);
+  color: var(--rte-muted);
+}
+.yjd-rich-editor .yjd-block-drag svg,
+.yjd-rich-editor .yjd-block-plus svg { width: 16px; height: 16px; }
+.yjd-rich-editor .yjd-drop-indicator {
+  position: absolute;
+  z-index: 999;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--rte-accent);
+  pointer-events: none;
+}
+.yjd-rich-editor .yjd-block-dragging { opacity: 0.4; }
+
+/* ---------- Code-block tools: language label + Copy chip ---------- */
+.yjd-rich-editor .yjd-codeblock-bar {
+  position: absolute;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  pointer-events: auto;
+}
+/* Reserve the design's header strip inside code blocks so the lang/Copy line
+   never overlaps the first line of code (module adds the wrapper class). */
+.yjd-rich-editor.yjd-has-codetools .rich-editor-area pre {
+  padding-top: 38px;
+}
+.yjd-rich-editor .yjd-codeblock-lang {
+  font-family: var(--rte-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--rte-code-block-ink);
+  opacity: 0.45;
+}
+.yjd-rich-editor .yjd-codeblock-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--rte-radius-sm);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--rte-code-block-ink);
+  font-family: var(--rte-mono);
+  font-size: 11px;
+  cursor: pointer;
+  opacity: 0.75;
+  transition: opacity var(--rte-t), background var(--rte-t);
+}
+.yjd-rich-editor .yjd-codeblock-copy:hover { opacity: 1; background: rgba(255, 255, 255, 0.12); }
+.yjd-rich-editor .yjd-codeblock-copy.copied { color: var(--rte-success); opacity: 1; }
+.yjd-rich-editor .yjd-codeblock-copy svg { width: 12px; height: 12px; }
+
+/* ---------- Date chip ---------- */
+.yjd-rich-editor .yjd-date-chip,
+.yjd-content .yjd-date-chip {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: baseline;
+  padding: 1px 8px;
+  border-radius: 20px;
+  background: var(--rte-info-weak);
+  color: var(--rte-info);
+  font-size: 0.88em;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ---------- Loading skeleton (States · Loading) ----------
+   Mirrors the real chrome heights (44px bar + body) so swapping the skeleton
+   for the mounted editor causes zero layout shift. Markup:
+   <div class="yjd-skeleton">
+     <div class="yjd-skeleton-bar"><span class="yjd-skeleton-chip"></span> …
+       <span class="yjd-skeleton-chip yjd-skeleton-chip--wide"></span></div>
+     <div class="yjd-skeleton-body"><span class="yjd-skeleton-line" style="width:70%"></span> …</div>
+   </div> */
+.yjd-skeleton {
+  border: 1px solid var(--rte-border, #e3e5ea);
+  border-radius: var(--rte-radius, 10px);
+  background: var(--rte-bg, #fff);
+  overflow: hidden;
+}
+.yjd-skeleton-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 12px;
+  background: var(--rte-chrome, #fcfcfd);
+  border-bottom: 1px solid var(--rte-border, #e3e5ea);
+}
+.yjd-skeleton-chip,
+.yjd-skeleton-line {
+  display: block;
+  border-radius: var(--rte-radius-sm, 6px);
+  background: linear-gradient(90deg, var(--rte-chrome-2, #f3f4f6) 25%, var(--rte-chrome-3, #eceef1) 37%, var(--rte-chrome-2, #f3f4f6) 63%);
+  background-size: 400% 100%;
+  animation: yjd-skeleton-shimmer 1.3s ease infinite;
+}
+.yjd-skeleton-chip { width: 26px; height: 26px; flex: 0 0 auto; }
+.yjd-skeleton-chip--wide { width: 86px; }
+.yjd-skeleton-body { padding: 20px; }
+.yjd-skeleton-line { height: 13px; border-radius: 5px; margin-bottom: 12px; width: 80%; }
+@keyframes yjd-skeleton-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .yjd-skeleton-chip, .yjd-skeleton-line { animation: none; }
+}
+
+/* ---------- Error states (UI 2.0 input-error recipe) ---------- */
+.yjd-rich-editor .yjd-input.yjd-input--error {
+  border-color: var(--rte-danger);
+  box-shadow: 0 0 0 3px rgba(208, 52, 58, 0.18);
+}
+.yjd-rich-editor .yjd-input.yjd-input--error:focus {
+  border-color: var(--rte-danger);
+  box-shadow: 0 0 0 3px rgba(208, 52, 58, 0.18);
+}
+.yjd-rich-editor .link-popup-error {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: var(--rte-danger);
+}
+.yjd-rich-editor .link-popup-error svg { width: 12px; height: 12px; flex: 0 0 auto; }
+
+/* Attachment chip upload status: progress bar while pending, danger ring +
+   "!" badge on failure (chip keeps the file so the user can retry/remove). */
+/* Upload status (design "Upload status"): spinner ring while pending; error
+   chips go danger-weak with an inline retry affordance. */
+.rte-attach-chip[data-status="error"] {
+  border-color: rgba(208, 52, 58, 0.4) !important;
+  background: var(--rte-danger-weak, #fdecec);
+}
+.rte-attach-spin {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  border: 2px solid var(--rte-border);
+  border-top-color: var(--rte-accent);
+  border-radius: 50%;
+  animation: yjd-spin 0.9s linear infinite;
+}
+/* Row chips: the spinner takes the icon tile's place (flex order — the span
+   is appended after the close button). */
+.rte-attach-row[data-status="pending"] .rte-attach-ic { display: none; }
+.rte-attach-row .rte-attach-spin { width: 16px; height: 16px; order: -1; }
+/* Tiles: spinner floats centred over the preview. */
+.rte-attach-tile .rte-attach-spin {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -8px 0 0 -8px;
+  width: 16px;
+  height: 16px;
+  border-color: rgba(255, 255, 255, 0.55);
+  border-top-color: #fff;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.45));
+}
+@keyframes yjd-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .rte-attach-spin { animation: none; opacity: 0.6; }
+}
+.rte-attach-retry {
+  border: 0;
+  padding: 0;
+  background: none;
+  font: 400 10.5px/1 var(--rte-mono, monospace);
+  color: var(--rte-danger);
+  text-decoration: underline;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+.rte-attach-tile .rte-attach-retry {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 3px;
+  text-align: center;
+  text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+}
+
+/* ---------- Link view bar: href · edit · copy · unlink ---------- */
+.link-bar {
+  position: absolute;
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 5px;
+  background: var(--rte-bg, #fff);
+  border: 1px solid var(--rte-border-strong);
+  border-radius: var(--rte-radius-md);
+  box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.20));
+  font-family: var(--rte-ui);
+}
+.link-bar.visible { display: inline-flex; }
+/* Popup containers are pointer-events:none by default; the bar re-enables. */
+.link-bar, .link-bar * { pointer-events: auto; }
+.link-bar-url {
+  font-size: 12px;
+  color: var(--rte-link);
+  text-decoration: none;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 6px;
+}
+.link-bar-url:hover { text-decoration: underline; }
+.link-bar-sep {
+  width: 1px;
+  height: 16px;
+  background: var(--rte-border);
+  margin: 0 2px;
+}
+.link-bar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: var(--rte-radius-sm);
+  background: transparent;
+  color: var(--rte-muted);
+  cursor: pointer;
+  transition: background var(--rte-t), color var(--rte-t);
+}
+.link-bar-btn svg { width: 14px; height: 14px; }
+.link-bar-btn:hover { background: var(--rte-chrome-2); color: var(--rte-ink); }
+.link-bar-copy.copied { color: var(--rte-success); }
+.link-bar-unlink { color: var(--rte-danger); }
+.link-bar-unlink:hover { background: var(--rte-danger-weak); color: var(--rte-danger); }
+
+/* ---------- Emoji picker: search + sections + category tabs ---------- */
+.yjd-rich-editor .emoji-picker-popup {
+  width: 264px;
+  box-sizing: border-box;
+  padding: 5px;
+}
+.yjd-rich-editor .emoji-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px 7px;
+  margin-bottom: 2px;
+  border-bottom: 1px solid var(--rte-border);
+  color: var(--rte-faint);
+  pointer-events: auto;
+}
+.yjd-rich-editor .emoji-search svg { width: 13px; height: 13px; flex: 0 0 auto; }
+.yjd-rich-editor .emoji-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-family: var(--rte-ui);
+  font-size: 12px;
+  color: var(--rte-ink);
+}
+.yjd-rich-editor .emoji-search input::placeholder { color: var(--rte-faint); }
+.yjd-rich-editor .emoji-head {
+  padding: 5px 8px 6px;
+  font-family: var(--rte-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rte-faint);
+}
+.yjd-rich-editor .emoji-picker-popup .emoji-grid {
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+  padding: 0 3px 4px;
+  max-height: 208px;
+}
+.yjd-rich-editor .emoji-picker-popup .emoji-button {
+  width: 100%;
+  height: 28px;
+  border-radius: var(--rte-radius-xs);
+}
+.yjd-rich-editor .emoji-empty {
+  grid-column: 1 / -1;
+  padding: 14px 0 16px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--rte-muted);
+}
+.yjd-rich-editor .emoji-cats {
+  display: flex;
+  justify-content: space-between;
+  gap: 2px;
+  padding: 5px 4px 1px;
+  border-top: 1px solid var(--rte-border);
+  pointer-events: auto;
+}
+.yjd-rich-editor .emoji-cat {
+  border: 0;
+  background: transparent;
+  font-size: 14px;
+  line-height: 1;
+  padding: 4px 5px;
+  border-radius: var(--rte-radius-xs);
+  cursor: pointer;
+  filter: grayscale(1);
+  opacity: 0.6;
+  transition: opacity var(--rte-t), background var(--rte-t);
+}
+.yjd-rich-editor .emoji-cat:hover { background: var(--rte-chrome-2); opacity: 0.9; }
+.yjd-rich-editor .emoji-cat.active {
+  background: var(--rte-accent-weak);
+  filter: none;
+  opacity: 1;
+}
+
+/* ---------- Floating bars: 28px buttons (design bubble metrics) ---------- */
+.yjd-rich-editor .block-toolbar-btn,
+.yjd-rich-editor .table-toolbar-btn {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Table bar groups read as clusters: hairline divider between groups, and the
+   destructive commands carry the danger ink (UI 2.0). */
+.yjd-rich-editor .table-toolbar-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.yjd-rich-editor .table-toolbar-group + .table-toolbar-group {
+  border-left: 1px solid var(--rte-border);
+  margin-left: 5px;
+  padding-left: 5px;
+}
+.yjd-rich-editor .table-toolbar-btn[data-command="deleteTable"],
+.yjd-rich-editor .table-toolbar-btn[data-command="deleteRow"],
+.yjd-rich-editor .table-toolbar-btn[data-command="deleteCol"] {
+  color: var(--rte-danger);
+}
+.yjd-rich-editor .table-toolbar-btn[data-command="deleteTable"]:hover,
+.yjd-rich-editor .table-toolbar-btn[data-command="deleteRow"]:hover,
+.yjd-rich-editor .table-toolbar-btn[data-command="deleteCol"]:hover {
+  background: var(--rte-danger-weak);
+  color: var(--rte-danger);
 }
 
 /* ══════════════════════════════════════════════════════════════════════════

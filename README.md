@@ -22,27 +22,37 @@ new yjd('#editor', { placeholder: 'Start writing…' });
 - **XSS-safe paste** — sanitises pasted HTML (scripts/handlers/unsafe URLs stripped; only trusted embeds survive).
 - **Accessible** — keyboard navigable, WCAG-AA contrast (Lighthouse a11y 100).
 
-## New in 2.12
+## New in 2.13
 
-- **Editor UI 2.0** — a full visual redesign of every surface. Calmer neutral
-  palette with a new indigo accent, hairline borders, a tighter 10/8/6/4 px
-  radius scale, 30px controls (44px chrome bar), one shared popover recipe for
-  every floating surface, and the whole icon family redrawn at a lighter 1.75
-  stroke. Same markup and API — it's (almost) all tokens, so your existing
-  `--rte-*` overrides keep working.
-- **Semantic state tokens** — `--rte-success` / `--rte-warning` / `--rte-info` /
-  `--rte-danger` (each with a `-weak` wash) are real tokens in all theme blocks
-  now; tag chips, import states and AI word-diff marks flip with dark mode.
-- **Density knob** — one token, `--rte-ctl`, sets control height everywhere:
-  `26px` compact · `30px` default · `34px` roomy · `44px` on touch.
-- **Extra icon pack** — 40 more glyphs in the same family
-  (`save`, `share`, `drag-handle`, `duplicate`, `rewrite`, `presence`, …) via the
-  opt-in, tree-shakeable `lib/ui/icons-extra.js`.
+- **Comment threads** — select text and press ⌘⌥M (or call
+  `openCommentComposer()`): a quote-header composer marks the range; the mark
+  opens an anchored thread popover (replies, resolve/unresolve, relative
+  times; a bottom sheet on touch). The side rail filters Open/Resolved,
+  shows reply counts, and keeps threads readable even after the anchor text
+  is deleted. `addReply()` / `resolveComment()` / `get/setComments()` +
+  `comment:*` events for persistence.
+- **Side panel** — opt-in right rail (`sidePanel: true`): live **Outline**
+  (H1–H3, click-to-scroll), **Comments**, and **Versions** (manual snapshots,
+  one-click restore).
+- **Editor surface (UI 2.0 pt. 2)** — block **drag handles** (⠿ reorder + ➕
+  insert-below with slash menu), a redesigned **slash menu**, selection
+  **bubble** with a ✦ AI entry and a ⋮ overflow sheet, labelled list/align
+  picker menus, and IBM Plex type across the chrome.
+- **Code blocks** — header strip with **automatic language detection**
+  (14 languages, `detectLanguage` exported), `data-filename` labels and
+  one-click Copy; Enter stays in the block, double-Enter exits.
+- **Drag & drop** — dashed drop frame with a live insertion caret, multi-file
+  drops insert every matching file, in-popup drop zones for image/video, and
+  a toast (`editor.showToast()`) when a type isn't enabled.
+- **Attachment tray v2** — 48px media tiles / 32px file chips, spinner while
+  the upload hook runs, danger chip + **retry** on failure.
+- **Sticky chrome** — the toolbar never shrinks under a tall document and
+  pins to the viewport top while the page scrolls.
 
-Earlier highlights (2.7): prompt / chat layout (`layout:'prompt'`), attachment
-tray with `getAttachments()`, smarter Enter (`submit.enterToSend`), per-trigger
-mention tokens. (2.3): interactive checklists, full-screen mode, image align &
-live resize, richer tables, auto-linkify, and fully tokenised `--rte-*` theming.
+Earlier highlights (2.12): Editor UI 2.0 token pass — indigo accent, semantic
+state tokens, `--rte-ctl` density knob, redrawn icon family. (2.7): prompt /
+chat layout, attachment tray, `submit.enterToSend`. (2.3): checklists,
+full-screen, image align & live resize, richer tables, `--rte-*` theming.
 Full history in the [changelog](./CHANGELOG.md).
 
 ## Bundle size (gzipped JS)
@@ -56,13 +66,13 @@ Every preset is built from the same `/core` entry — pick a profile, tree-shake
 | Basic | + strike · headings · lists · align | **~28 KB** |
 | Standard | + colour · image · table · find · code view · resize | **~46 KB** |
 | + AI assistant | any preset + `ai` module (BYO model, no SDK bundled) | **+~2 KB** |
-| Full (all-in-one) | everything, CSS inlined | **~75 KB** |
+| Full (all-in-one) | everything (comments, side panel, block handles, …), CSS inlined | **~108 KB** |
 
 > All figures are measured gzip (gzip -9). Tree-shake from the `/core` entry to land
 > near the top of the table; the all-in-one default (`import yjd from '@oix1987/yjd'`)
-> is the ~75 KB row because it registers every format/module and inlines the CSS.
+> is the ~108 KB row because it registers every format/module and inlines the CSS.
 > Icons and the optional Editor methods (see below) tree-shake per feature, so a
-> Minimal build ships ~5 icons, not all 64. The standalone stylesheet is ~11 KB gzip
+> Minimal build ships ~5 icons, not all 64. The standalone stylesheet is ~19 KB gzip
 > — link it once (and skip `StylesLoader`) to keep it out of the JS.
 
 ## Install
