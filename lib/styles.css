@@ -3552,6 +3552,21 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   overflow: visible;
   row-gap: 6px;
 }
+/* Design "Prompt / chat" bar: NO dividers between groups, tight 4px gap,
+   and the send cluster pinned to the RIGHT edge behind a flex spacer. */
+.yjd-rich-editor[data-layout="prompt"] .rich-editor-toolbar-1 .toolbar-group + .toolbar-group::before,
+.yjd-rich-editor[data-layout="prompt"] .rich-editor-toolbar-2 .toolbar-group + .toolbar-group::before {
+  display: none;
+}
+.yjd-rich-editor[data-layout="prompt"] .rich-editor-toolbar-1,
+.yjd-rich-editor[data-layout="prompt"] .rich-editor-toolbar-2 {
+  gap: 4px;
+}
+.yjd-rich-editor[data-layout="prompt"] .rich-editor-toolbar-1 .toolbar-group.toolbar-group-send,
+.yjd-rich-editor[data-layout="prompt"] .rich-editor-toolbar-2 .toolbar-group.toolbar-group-send {
+  margin-left: auto !important;
+}
+
 /* No word-count/breadcrumb bar in a compact prompt input. */
 .yjd-rich-editor[data-layout="prompt"] .rich-editor-statusbar {
   display: none;
@@ -3561,9 +3576,9 @@ body.yjd-fullscreen-lock { overflow: hidden; }
    Usable in any toolbar, but designed for the prompt bar where it sits far
    right. */
 .yjd-rich-editor .rich-editor-toolbar-btn.rte-send-btn {
-  width: 34px;
-  min-width: 34px;
-  height: 34px;
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -3592,15 +3607,16 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   stroke: currentColor;
 }
 /* In the prompt bar the whole send group pins to the far right. */
-.yjd-rich-editor[data-layout="prompt"] .toolbar-group-send {
-  margin-left: auto;
+.yjd-rich-editor[data-layout="prompt"] .rich-editor-toolbar-1 .toolbar-group.toolbar-group-send,
+.yjd-rich-editor[data-layout="prompt"] .rich-editor-toolbar-2 .toolbar-group.toolbar-group-send {
+  margin-left: auto !important;
 }
 
 /* "+" add button — circular outline; accent tint while its menu is open. */
 .yjd-rich-editor .rich-editor-toolbar-btn.rte-add-btn {
-  width: 34px;
-  min-width: 34px;
-  height: 34px;
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
   padding: 0;
   border: 1px solid var(--rte-border, var(--rte-table-border));
   border-radius: 50%;
