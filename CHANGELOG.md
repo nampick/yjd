@@ -61,6 +61,11 @@ component layouts and redrawn glyphs on top of the 2.12.0 token pass.
   unhandled-drop path, available to integrators.
 
 ### Fixed (this pass)
+- **Toolbar no longer greys out on first load**: tools disabled themselves
+  whenever the selection was outside the document — including before the
+  first click, which made the editor look broken at rest. The bar now stays
+  enabled (clicking a tool focuses the editor and applies at the caret);
+  read-only and code view keep their own disable paths.
 - **App-wide token sweep (audit-driven)**: one audit pass normalised every
   hardcoded style that duplicated or fought a token. Buttons: AI panel
   Accept/Retry/Discard and the word-diff Accept/Reject now run the spec's
