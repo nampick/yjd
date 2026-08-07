@@ -82,6 +82,13 @@ component layouts and redrawn glyphs on top of the 2.12.0 token pass.
   unhandled-drop path, available to integrators.
 
 ### Fixed (this pass)
+- **QA sweep, round 2**: the demo composer's onSubmit destructured a
+  `{ content }` payload that doesn't exist — the handler receives
+  `(content, editor)` — so Send threw and never cleared (demo-only bug).
+  Enter on a TRAILING empty list item now exits the list into a paragraph
+  (Notion/Docs convention) instead of minting empty items; the Versions
+  rail's "Current" row counts the LIVE document instead of the stale
+  snapshot number.
 - **QA sweep (5 findings)**: (1) a highlight applied while the live selection
   had collapsed silently armed a placeholder instead of colouring the text —
   the picker now recovers the last real selection first. (2) Bold no longer

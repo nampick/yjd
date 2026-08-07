@@ -95,8 +95,9 @@ if (promptHost) {
     placeholder: 'Message… (attach with +, or drop files here)',
     image: { upload: mockUpload },
     submit: {
-      onSubmit: ({ content }) => {
-        log(`submit: ${content.slice(0, 60)} · attachments=${JSON.stringify(
+      // Signature: onSubmit(content, editor) — content is the HTML string.
+      onSubmit: (content) => {
+        log(`submit: ${String(content).slice(0, 60)} · attachments=${JSON.stringify(
           (promptEditor.getAttachments ? promptEditor.getAttachments() : []).map(a => ({ kind: a.kind, src: a.src, status: a.status }))
         )}`);
         promptEditor.setContent('');
