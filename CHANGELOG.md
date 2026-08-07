@@ -4,56 +4,15 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [2.13.0] — 2026-08-07
 
-**Editor UI 2.0, part 2 — component & icon pass.** Applies the redesign's
-component layouts and redrawn glyphs on top of the 2.12.0 token pass.
+**Editor UI 2.0, part 2 — the full component pass.** Applies the redesign's
+component layouts, redrawn glyphs, IBM Plex type, comment threads, code-block
+language detection and drag-drop UX on top of the 2.12.0 token pass — then a
+two-round manual QA sweep and a 300-case randomized browser fuzz (0 exceptions)
+to get it ship-ready.
 
-### Changed
-- **List & text-align pickers**: rebuilt as the design's labelled vertical
-  menus — 186px pop with a mono header ("LIST TYPE" / "TEXT ALIGN") and
-  12.5px rows (14px icon + label); the current value is an accent row. The
-  old 34px icon tiles (whose ink-fill active rendered oversized and
-  misaligned) are gone.
-- **Bubble "⋮" more tools (design "Touch bubble · overflow menu")**: the
-  selection bubble gains a trailing ⋮ that opens a 206px sheet — Highlight,
-  Comment (⌘⌥M, shown when the side panel is on), Copy, and a
-  danger-styled Clear formatting; 44px rows on touch. Size ceilings
-  ESM/UMD 85→86 KB.
-- **Form popups (design "Video popup" / "Import popup" / "Tag popup" cards)**:
-  300px card, 14px padding, h3 titles (13.5px/600), 11.5px/500 labels, 30px
-  inputs (13px), 30px upload button, 28px confirm/cancel buttons; disabled
-  confirm buttons render the quiet chrome fill (`.button-disable`). The link
-  popup's Apply matches at 28px.
-- **Video popup states**: typing a URL hides the upload button (a URL and a
-  file are mutually exclusive) and, for a recognised host/extension, shows an
-  inline "Recognised host — validated again on insert" check; the file preview
-  gets a bottom scrim so the white controls stay legible.
-- **Import popup**: the bare file input is now a dashed drop/browse area that
-  stays inert until a type is chosen ("Choose a type first…"), accepts drops,
-  and renders the picked file as a compact row (icon tile, ellipsised name,
-  `size · MIME` in mono, ✕ to clear). Unsupported combinations (PDF, Word,
-  .xlsx/.xls) surface as an inline warning with Import held disabled — no more
-  post-pick `alert()`.
-- **Tag popup**: suggestions render as 24px pill chips.
-- **Attachment tray (prompt layout)**: media with a preview renders as 48px
-  tiles (16px close circle, play badge bottom-left on videos); files and
-  context chips are 32px rows with a 20px icon tile. A pending upload shows a
-  spinner ring in the icon's place; a failed one gets danger styling and an
-  inline **retry** that re-runs the upload hook (replaces the old progress bar
-  and "!" badge). The "+" add-menu gains a mono "Attach" header (186px, 12.5px
-  rows).
-- **Drag & drop (canvas)**: the drag-over state is now the design's 1.5px
-  dashed accent frame with a "Drop to insert here" pill, plus a live **drop
-  caret** (2px accent bar with a dot) tracking the pointer so the insertion
-  point is visible before release. Dropping multiple files inserts **all**
-  matching files (was: first only), and a drop nothing can handle shows a
-  toast ("PDF files aren't enabled in this editor.") instead of failing
-  silently.
-- **Size ceilings**: ESM/UMD 78→82 KB, Core 78→79 KB, stylesheet 15→16 KB
-  (brotli), covering the new popup states, drop UX and tray CSS.
-
-### Added (this pass)
+### Added
 - **Comment threads (design section 09 — Review)**: comments grew from flat
   notes into threads. Replies (`addReply`), resolve/unresolve
   (`resolveComment` — clears the highlight but keeps the thread), an
@@ -81,121 +40,6 @@ component layouts and redrawn glyphs on top of the 2.12.0 token pass.
 - **`editor.showToast(message)`**: small transient status toast used by the
   unhandled-drop path, available to integrators.
 
-### Fixed (this pass)
-- **QA sweep, round 2**: the demo composer's onSubmit destructured a
-  `{ content }` payload that doesn't exist — the handler receives
-  `(content, editor)` — so Send threw and never cleared (demo-only bug).
-  Enter on a TRAILING empty list item now exits the list into a paragraph
-  (Notion/Docs convention) instead of minting empty items; the Versions
-  rail's "Current" row counts the LIVE document instead of the stale
-  snapshot number.
-- **QA sweep (5 findings)**: (1) a highlight applied while the live selection
-  had collapsed silently armed a placeholder instead of colouring the text —
-  the picker now recovers the last real selection first. (2) Bold no longer
-  reports active inside a plain heading (queryCommandState mistakes the
-  heading's computed weight for a bold mark; a real b/strong/inline-weight
-  ancestor is now required). (3) **Tab nests list items** (Shift+Tab
-  outdents) instead of tabbing focus out of the editor; table-cell Tab
-  navigation is untouched. (4) The character counter recovers after the HTML
-  source view: exit strips the source view's pretty-print whitespace from
-  the document and the counter now counts the VISIBLE text (innerText).
-  (5) The overflow tool row WRAPS on desktop instead of clipping its last
-  tools behind a hidden-scrollbar row; touch keeps the single swipe row.
-  UMD 86→87 KB, Core 80→81 KB.
-- **Active submenu rows ignore hover**: a stale ink-fill pin flipped active
-  picker rows (align/list) to a black tile on hover, and the select popup's
-  current option lost its accent wash under a higher-specificity hover rule.
-  Active/current rows now pin their accent state through hover, matching the
-  toolbar's active-ignores-hover behaviour.
-- **Toolbar no longer greys out on first load**: tools disabled themselves
-  whenever the selection was outside the document — including before the
-  first click, which made the editor look broken at rest. The bar now stays
-  enabled (clicking a tool focuses the editor and applies at the caret);
-  read-only and code view keep their own disable paths.
-- **App-wide token sweep (audit-driven)**: one audit pass normalised every
-  hardcoded style that duplicated or fought a token. Buttons: AI panel
-  Accept/Retry/Discard and the word-diff Accept/Reject now run the spec's
-  12px/500 · 28px · radius-sm (were `font:inherit` / 600 12.5px with 8px
-  radii); legacy confirm/cancel drop `#181616`/`#2A2727`/700-weight for
-  accent/ink/500; the stacked 36px input/button generation collapses to
-  `--rte-ctl`/28px. Radii: every `6.9px`/`3.456px`/`3.46px` Figma artifact
-  and bare 4/6/8/10px on component chrome now uses `--rte-radius-*`. Colors:
-  bare hex duplicating tokens (`#fdecec`, `#111827`, accent rgba washes,
-  `#ddd` table cell borders and the white popover arrow in JS inline styles)
-  route through their tokens with fallbacks. Base-layer defaults drop from
-  14px to the spec's 12/12.5px. Theming: portaled surfaces (AI bar, slash
-  menu, toast) now copy the full token set — including `--rte-accent-ink-on`
-  and `--rte-t` — so wrapper-scoped themes reach them; select-button's inert
-  inline font overrides removed.
-- **Selection chrome no longer stacks**: selecting text used to pop BOTH the
-  formatting bubble and the AI "Edit selection" menu on top of each other.
-  Per the design, selection now shows only the bubble, which leads with a
-  "✦ AI" accent entry (shown when a model is wired) that opens the AI menu
-  pinned at the selection. Auto-open is still available via
-  `ai.openOnSelect: true`.
-- **List picker sync**: the picker's active row now recognises checklists
-  (its stale duplicate of getListType flagged `ul.checklist` as Bullet while
-  the toolbar icon said Checklist).
-- **Font weights (post-font-fix sweep)**: popup text now defaults to 400 —
-  500 is opted in per control. Select options run the design's 12.5px/400
-  (current row 500), find & replace actions 11.5px/500, Ask AI pill
-  12.5px/500. Previously the popup reset forced 14px/500 over everything,
-  which the never-matching toolbar selector had been masking.
-- **Enter inside a code block**: browsers split every line into its OWN
-  `<pre>` — multi-line code was impossible and language detection never had
-  enough signal. Enter now inserts a newline in the same block; Enter on an
-  empty trailing line exits into a fresh paragraph (test-covered).
-- **Toolbar fonts never applied**: the font reset targeted `.toolbar-container`
-  but the DOM class is `.rich-editor-toolbar-container` — toolbar buttons had
-  rendered in the browser's default font (Arial) all along. Size ceilings
-  ESM/UMD 82→83 KB for the detector + font pass.
-- **Ask AI first open**: with no caret in the document, the panel anchored to
-  the EDITOR BOX and dropped below the whole document on the first click. It
-  now opens right-aligned under the toolbar pill. A first-open positioning
-  regression suite (test/popup-position.test.js) covers the AI bar, the
-  video/image/tag/import popovers and the shared position helper.
-- **More-toggle dots**: the ⋯ glyph's `[fill="currentColor"]` circles were
-  painted paper by the ink-fill active recipe — invisible on the toggle's
-  LIGHT pressed chrome. Re-inked while open.
-- **Stuck pressed select**: re-showing a shared select against a different
-  trigger left the previous trigger's `.open` chrome behind.
-- **Block handles**: the ⠿/+ gutter now centres on the block's FIRST LINE
-  (an H1's tall line box left it floating above the text) and no longer
-  vanishes while the pointer crosses the gutter band on the way to the
-  buttons (blocks are resolved by row when the target isn't inside one).
-  Buttons grew to 22px with 16px glyphs.
-- **Toolbar selects size to content**: heading / font-family / text-size
-  triggers use auto width, so "X-Large" or a long font name widens the
-  trigger instead of truncating to "X…".
-- The overflow row's mono "⌄ OVERFLOW" label is gone — the second row now
-  starts flush with its first control.
-- Import popup no longer closes when clearing the picked file (the ✕ detached
-  from the DOM before the click-outside handler ran).
-- The popup upload button can hide again (`display` was pinned by an
-  `!important` in a legacy rule); its idle look follows the design (solid
-  border, chrome fill, grey icon — was dashed accent).
-- **62 icons redrawn** to match the design spec exactly (bold, italic, color,
-  ai sparkle, undo/redo, all alignment, list, table-operation and picker
-  glyphs) — every registry entry now byte-matches the design's icon set.
-- **Toolbar layout (UI 2.0)**: undo/redo lead the row on the left (no longer a
-  pinned right cluster); when a model is wired, the AI trigger renders as a
-  right-aligned **"Ask AI" accent pill** that never overflows into the hidden
-  panel (it reuses the pinned-group reservation in `reflow()`).
-- **Slash menu**: "Blocks" section header, bordered 26px icon tiles, per-block
-  glyphs (H1/H2/H3, paragraph, blockquote, code-block) and markdown shortcut
-  chips (`#`, `-`, `>`, ` ``` `, `---`, …) on the right of each row; active row
-  uses the quiet chrome wash with an accent-tinted tile.
-- **Colour picker**: curated 8×3 UI 2.0 palette (neutral ramp, saturated hues,
-  soft washes) replaces the legacy web palette; "No colour" and "Custom…" are
-  full-width menu rows under a hairline (white/black now live in the grid).
-- **Table size picker**: 16px cells with accent-weak highlight and a mono
-  "3 × 4" size label.
-- **Find & replace**: the match-case toggle renders as a chip (accent when on).
-- **Floating block/table bars**: 28px buttons per the bubble-metrics spec.
-- **Mention menu**: two-line rows — name plus an optional handle/description
-  line (`item.handle` / `item.hint` / `item.description`), 22px avatars.
-
-### Added
 - **Media bar delete**: the image/video align bar gains a divider + destructive
   delete button (one undoable step).
 - **Live resize badge**: dragging a resize handle shows a "376 × 212" size chip
@@ -317,7 +161,176 @@ component layouts and redrawn glyphs on top of the 2.12.0 token pass.
   `saveVersion(label)`, one-click restore, `get/setVersions()`). The rail
   lives outside the content DOM; only the comment marks serialize.
 
+### Changed
+- **List & text-align pickers**: rebuilt as the design's labelled vertical
+  menus — 186px pop with a mono header ("LIST TYPE" / "TEXT ALIGN") and
+  12.5px rows (14px icon + label); the current value is an accent row. The
+  old 34px icon tiles (whose ink-fill active rendered oversized and
+  misaligned) are gone.
+- **Bubble "⋮" more tools (design "Touch bubble · overflow menu")**: the
+  selection bubble gains a trailing ⋮ that opens a 206px sheet — Highlight,
+  Comment (⌘⌥M, shown when the side panel is on), Copy, and a
+  danger-styled Clear formatting; 44px rows on touch. Size ceilings
+  ESM/UMD 85→86 KB.
+- **Form popups (design "Video popup" / "Import popup" / "Tag popup" cards)**:
+  300px card, 14px padding, h3 titles (13.5px/600), 11.5px/500 labels, 30px
+  inputs (13px), 30px upload button, 28px confirm/cancel buttons; disabled
+  confirm buttons render the quiet chrome fill (`.button-disable`). The link
+  popup's Apply matches at 28px.
+- **Video popup states**: typing a URL hides the upload button (a URL and a
+  file are mutually exclusive) and, for a recognised host/extension, shows an
+  inline "Recognised host — validated again on insert" check; the file preview
+  gets a bottom scrim so the white controls stay legible.
+- **Import popup**: the bare file input is now a dashed drop/browse area that
+  stays inert until a type is chosen ("Choose a type first…"), accepts drops,
+  and renders the picked file as a compact row (icon tile, ellipsised name,
+  `size · MIME` in mono, ✕ to clear). Unsupported combinations (PDF, Word,
+  .xlsx/.xls) surface as an inline warning with Import held disabled — no more
+  post-pick `alert()`.
+- **Tag popup**: suggestions render as 24px pill chips.
+- **Attachment tray (prompt layout)**: media with a preview renders as 48px
+  tiles (16px close circle, play badge bottom-left on videos); files and
+  context chips are 32px rows with a 20px icon tile. A pending upload shows a
+  spinner ring in the icon's place; a failed one gets danger styling and an
+  inline **retry** that re-runs the upload hook (replaces the old progress bar
+  and "!" badge). The "+" add-menu gains a mono "Attach" header (186px, 12.5px
+  rows).
+- **Drag & drop (canvas)**: the drag-over state is now the design's 1.5px
+  dashed accent frame with a "Drop to insert here" pill, plus a live **drop
+  caret** (2px accent bar with a dot) tracking the pointer so the insertion
+  point is visible before release. Dropping multiple files inserts **all**
+  matching files (was: first only), and a drop nothing can handle shows a
+  toast ("PDF files aren't enabled in this editor.") instead of failing
+  silently.
+- **Size ceilings**: ESM/UMD 78→82 KB, Core 78→79 KB, stylesheet 15→16 KB
+  (brotli), covering the new popup states, drop UX and tray CSS.
+
 ### Fixed
+- **Toolbar compressed by tall documents**: the wrapper's flex column let the
+  chrome bars SHRINK when content overflowed — a long document squeezed the
+  toolbar to a 15px sliver mid-edit. Chrome bars are now `flex-shrink: 0`
+  (the content area is the scroll surface), and the bar is `position: sticky`
+  in page-scrolling hosts so tools never scroll away (prompt layout's
+  bottom bar opts out).
+- **Sticky `styleWithCSS` (found by 300-case fuzz QA)**: applying any text or
+  background colour flipped the document-wide execCommand styleWithCSS flag on
+  and never back, so every LATER bold/italic serialized as
+  `<span style="font-weight: bold">` instead of `<b>/<i>`. Both colour paths
+  now reset the flag (regression-pinned in test/style-with-css.test.js).
+
+- **QA sweep, round 2**: the demo composer's onSubmit destructured a
+  `{ content }` payload that doesn't exist — the handler receives
+  `(content, editor)` — so Send threw and never cleared (demo-only bug).
+  Enter on a TRAILING empty list item now exits the list into a paragraph
+  (Notion/Docs convention) instead of minting empty items; the Versions
+  rail's "Current" row counts the LIVE document instead of the stale
+  snapshot number.
+- **QA sweep (5 findings)**: (1) a highlight applied while the live selection
+  had collapsed silently armed a placeholder instead of colouring the text —
+  the picker now recovers the last real selection first. (2) Bold no longer
+  reports active inside a plain heading (queryCommandState mistakes the
+  heading's computed weight for a bold mark; a real b/strong/inline-weight
+  ancestor is now required). (3) **Tab nests list items** (Shift+Tab
+  outdents) instead of tabbing focus out of the editor; table-cell Tab
+  navigation is untouched. (4) The character counter recovers after the HTML
+  source view: exit strips the source view's pretty-print whitespace from
+  the document and the counter now counts the VISIBLE text (innerText).
+  (5) The overflow tool row WRAPS on desktop instead of clipping its last
+  tools behind a hidden-scrollbar row; touch keeps the single swipe row.
+  UMD 86→87 KB, Core 80→81 KB.
+- **Active submenu rows ignore hover**: a stale ink-fill pin flipped active
+  picker rows (align/list) to a black tile on hover, and the select popup's
+  current option lost its accent wash under a higher-specificity hover rule.
+  Active/current rows now pin their accent state through hover, matching the
+  toolbar's active-ignores-hover behaviour.
+- **Toolbar no longer greys out on first load**: tools disabled themselves
+  whenever the selection was outside the document — including before the
+  first click, which made the editor look broken at rest. The bar now stays
+  enabled (clicking a tool focuses the editor and applies at the caret);
+  read-only and code view keep their own disable paths.
+- **App-wide token sweep (audit-driven)**: one audit pass normalised every
+  hardcoded style that duplicated or fought a token. Buttons: AI panel
+  Accept/Retry/Discard and the word-diff Accept/Reject now run the spec's
+  12px/500 · 28px · radius-sm (were `font:inherit` / 600 12.5px with 8px
+  radii); legacy confirm/cancel drop `#181616`/`#2A2727`/700-weight for
+  accent/ink/500; the stacked 36px input/button generation collapses to
+  `--rte-ctl`/28px. Radii: every `6.9px`/`3.456px`/`3.46px` Figma artifact
+  and bare 4/6/8/10px on component chrome now uses `--rte-radius-*`. Colors:
+  bare hex duplicating tokens (`#fdecec`, `#111827`, accent rgba washes,
+  `#ddd` table cell borders and the white popover arrow in JS inline styles)
+  route through their tokens with fallbacks. Base-layer defaults drop from
+  14px to the spec's 12/12.5px. Theming: portaled surfaces (AI bar, slash
+  menu, toast) now copy the full token set — including `--rte-accent-ink-on`
+  and `--rte-t` — so wrapper-scoped themes reach them; select-button's inert
+  inline font overrides removed.
+- **Selection chrome no longer stacks**: selecting text used to pop BOTH the
+  formatting bubble and the AI "Edit selection" menu on top of each other.
+  Per the design, selection now shows only the bubble, which leads with a
+  "✦ AI" accent entry (shown when a model is wired) that opens the AI menu
+  pinned at the selection. Auto-open is still available via
+  `ai.openOnSelect: true`.
+- **List picker sync**: the picker's active row now recognises checklists
+  (its stale duplicate of getListType flagged `ul.checklist` as Bullet while
+  the toolbar icon said Checklist).
+- **Font weights (post-font-fix sweep)**: popup text now defaults to 400 —
+  500 is opted in per control. Select options run the design's 12.5px/400
+  (current row 500), find & replace actions 11.5px/500, Ask AI pill
+  12.5px/500. Previously the popup reset forced 14px/500 over everything,
+  which the never-matching toolbar selector had been masking.
+- **Enter inside a code block**: browsers split every line into its OWN
+  `<pre>` — multi-line code was impossible and language detection never had
+  enough signal. Enter now inserts a newline in the same block; Enter on an
+  empty trailing line exits into a fresh paragraph (test-covered).
+- **Toolbar fonts never applied**: the font reset targeted `.toolbar-container`
+  but the DOM class is `.rich-editor-toolbar-container` — toolbar buttons had
+  rendered in the browser's default font (Arial) all along. Size ceilings
+  ESM/UMD 82→83 KB for the detector + font pass.
+- **Ask AI first open**: with no caret in the document, the panel anchored to
+  the EDITOR BOX and dropped below the whole document on the first click. It
+  now opens right-aligned under the toolbar pill. A first-open positioning
+  regression suite (test/popup-position.test.js) covers the AI bar, the
+  video/image/tag/import popovers and the shared position helper.
+- **More-toggle dots**: the ⋯ glyph's `[fill="currentColor"]` circles were
+  painted paper by the ink-fill active recipe — invisible on the toggle's
+  LIGHT pressed chrome. Re-inked while open.
+- **Stuck pressed select**: re-showing a shared select against a different
+  trigger left the previous trigger's `.open` chrome behind.
+- **Block handles**: the ⠿/+ gutter now centres on the block's FIRST LINE
+  (an H1's tall line box left it floating above the text) and no longer
+  vanishes while the pointer crosses the gutter band on the way to the
+  buttons (blocks are resolved by row when the target isn't inside one).
+  Buttons grew to 22px with 16px glyphs.
+- **Toolbar selects size to content**: heading / font-family / text-size
+  triggers use auto width, so "X-Large" or a long font name widens the
+  trigger instead of truncating to "X…".
+- The overflow row's mono "⌄ OVERFLOW" label is gone — the second row now
+  starts flush with its first control.
+- Import popup no longer closes when clearing the picked file (the ✕ detached
+  from the DOM before the click-outside handler ran).
+- The popup upload button can hide again (`display` was pinned by an
+  `!important` in a legacy rule); its idle look follows the design (solid
+  border, chrome fill, grey icon — was dashed accent).
+- **62 icons redrawn** to match the design spec exactly (bold, italic, color,
+  ai sparkle, undo/redo, all alignment, list, table-operation and picker
+  glyphs) — every registry entry now byte-matches the design's icon set.
+- **Toolbar layout (UI 2.0)**: undo/redo lead the row on the left (no longer a
+  pinned right cluster); when a model is wired, the AI trigger renders as a
+  right-aligned **"Ask AI" accent pill** that never overflows into the hidden
+  panel (it reuses the pinned-group reservation in `reflow()`).
+- **Slash menu**: "Blocks" section header, bordered 26px icon tiles, per-block
+  glyphs (H1/H2/H3, paragraph, blockquote, code-block) and markdown shortcut
+  chips (`#`, `-`, `>`, ` ``` `, `---`, …) on the right of each row; active row
+  uses the quiet chrome wash with an accent-tinted tile.
+- **Colour picker**: curated 8×3 UI 2.0 palette (neutral ramp, saturated hues,
+  soft washes) replaces the legacy web palette; "No colour" and "Custom…" are
+  full-width menu rows under a hairline (white/black now live in the grid).
+- **Table size picker**: 16px cells with accent-weak highlight and a mono
+  "3 × 4" size label.
+- **Find & replace**: the match-case toggle renders as a chip (accent when on).
+- **Floating block/table bars**: 28px buttons per the bubble-metrics spec.
+- **Mention menu**: two-line rows — name plus an optional handle/description
+  line (`item.handle` / `item.hint` / `item.description`), 22px avatars.
+
 - **Dark mode: native white buttons in find & replace.** A legacy
   `background: 0 0` let Chromium paint the UA's native button face (white) on
   the dark panel — Replace/Replace all now set `appearance: none` plus token
@@ -619,6 +632,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.13.0]: https://github.com/nampick/yjd/releases/tag/v2.13.0
 [2.12.0]: https://github.com/nampick/yjd/releases/tag/v2.12.0
 [2.11.6]: https://github.com/nampick/yjd/releases/tag/v2.11.6
 [2.11.5]: https://github.com/nampick/yjd/releases/tag/v2.11.5

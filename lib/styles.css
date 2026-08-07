@@ -2536,6 +2536,21 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   background: var(--rte-chrome);
   border-bottom: 1px solid var(--rte-border);
 }
+/* The wrapper is a flex column: with a tall document the default flex-shrink
+   COMPRESSED the toolbar (measured 15px) while the area overflowed. Chrome
+   bars never shrink — the content area is the scroll surface. */
+.yjd-rich-editor .rich-editor-toolbar-container,
+.yjd-rich-editor .rich-editor-statusbar {
+  flex-shrink: 0;
+}
+/* Long documents can still scroll the PAGE (auto-height hosts) — pin the
+   chrome bar to the viewport top so the tools never scroll away mid-edit.
+   The prompt layout's bar sits at the BOTTOM of its pill, so it opts out. */
+.yjd-rich-editor:not([data-layout="prompt"]) .rich-editor-toolbar-container {
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+}
 .yjd-rich-editor .rich-editor-toolbar-1,
 .yjd-rich-editor .rich-editor-toolbar-2 {
   display: flex;
