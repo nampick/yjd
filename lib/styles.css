@@ -337,7 +337,7 @@
     flex-wrap:wrap;
     background:var(--rte-chrome);
     align-items:center;
-    min-height:48px;
+    min-height:44px;
     padding-bottom:8px;
     box-sizing:border-box;
     width:100%;
@@ -353,7 +353,7 @@
   flex-wrap: wrap;
   background: var(--rte-chrome);
   align-items: center;
-  min-height: 48px;
+  min-height: 44px;
   padding-bottom: 8px;
   box-sizing: border-box;
   width: 100%;
@@ -4007,8 +4007,8 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   flex-wrap: wrap;
   gap: var(--rte-gap, 6px);  /* group spacing; the JS packer reads the same token
                                 (dividers live inside the groups as ::before) */
-  padding: 8px 16px;         /* horizontal padding is overwritten inline to match row 1 */
-  min-height: 48px;
+  padding: 7px 16px;         /* horizontal padding is overwritten inline to match row 1 */
+  min-height: 44px;
   box-sizing: border-box;
 }
 /* Spacing inside an overflow row comes ONLY from the row's flex gap, so the JS
