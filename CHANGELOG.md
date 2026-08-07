@@ -18,7 +18,8 @@ component layouts and redrawn glyphs on top of the 2.12.0 token pass.
 - **Bubble "⋮" more tools (design "Touch bubble · overflow menu")**: the
   selection bubble gains a trailing ⋮ that opens a 206px sheet — Highlight,
   Comment (⌘⌥M, shown when the side panel is on), Copy, and a
-  danger-styled Clear formatting; 44px rows on touch.
+  danger-styled Clear formatting; 44px rows on touch. Size ceilings
+  ESM/UMD 85→86 KB.
 - **Form popups (design "Video popup" / "Import popup" / "Tag popup" cards)**:
   300px card, 14px padding, h3 titles (13.5px/600), 11.5px/500 labels, 30px
   inputs (13px), 30px upload button, 28px confirm/cancel buttons; disabled
