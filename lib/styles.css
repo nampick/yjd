@@ -4818,11 +4818,20 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 }
 /* …and pressed popover buttons ignore hover, same as the toolbar. */
 .yjd-rich-editor .yjd-image-align-btn.active:hover,
-.yjd-rich-editor .align-button.active:hover,
-.yjd-rich-editor .list-button.active:hover,
 .yjd-rich-editor .table-toolbar-btn.active:hover {
   background: var(--rte-ink) !important;
   color: var(--rte-bg) !important;
+}
+/* Labelled picker rows pin their ACCENT active state through hover. */
+.yjd-rich-editor .align-button.active:hover,
+.yjd-rich-editor .list-button.active:hover {
+  background: var(--rte-accent-weak) !important;
+  color: var(--rte-accent-ink) !important;
+}
+.yjd-rich-editor .align-button.active:hover svg,
+.yjd-rich-editor .list-button.active:hover svg {
+  color: var(--rte-accent-ink) !important;
+  stroke: var(--rte-accent-ink) !important;
 }
 
 /* ---------- Popover form metrics (v2): 26px inputs & buttons ----------
@@ -5232,8 +5241,9 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   font-size: 12.5px !important;
   color: var(--rte-ink-2);
 }
-.yjd-rich-editor .rich-editor-popup-container .custom-select-item-button:hover,
-.yjd-rich-editor .custom-select-item-button:hover {
+/* An option that IS the current value ignores hover (pressed state wins). */
+.yjd-rich-editor .rich-editor-popup-container .custom-select-item-button:not(.current):hover,
+.yjd-rich-editor .custom-select-item-button:not(.current):hover {
   background: var(--rte-chrome-3);
   color: var(--rte-ink);
 }

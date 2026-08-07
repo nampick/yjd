@@ -65,3 +65,44 @@ if (codeEl && editor.addComment) {
 
 // Remove the loading skeleton once the editor has mounted.
 document.getElementById('editor-loading')?.remove();
+
+// ---------------------------------------------------------------------------
+// Prompt (bubble) layout — upload testbed. Mock upload: resolves after ~1.5s
+// with a fake CDN URL; a filename containing "fail" rejects so the chip shows
+// the error state + retry.
+const promptHost = document.getElementById('prompt-container');
+if (promptHost) {
+  const log = (line) => {
+    const el = document.getElementById('prompt-log');
+    if (el) el.textContent = `${new Date().toLocaleTimeString()} ${line}\n` + el.textContent;
+  };
+  const mockUpload = (file) => new Promise((resolve, reject) => {
+    log(`upload start: ${file.name} (${file.size} B)`);
+    setTimeout(() => {
+      if (/fail/i.test(file.name)) {
+        log(`upload FAILED: ${file.name}`);
+        reject(new Error('mock upload failed'));
+      } else {
+        log(`upload done: ${file.name}`);
+        resolve(`https://cdn.example.com/${encodeURIComponent(file.name)}`);
+      }
+    }, 1500);
+  });
+  const promptEditor = new RichEditor('#prompt-container', {
+    layout: 'prompt',
+    toolbar: 'prompt',
+    theme: 'light',
+    placeholder: 'Message… (attach with +, or drop files here)',
+    image: { upload: mockUpload },
+    submit: {
+      onSubmit: ({ content }) => {
+        log(`submit: ${content.slice(0, 60)} · attachments=${JSON.stringify(
+          (promptEditor.getAttachments ? promptEditor.getAttachments() : []).map(a => ({ kind: a.kind, src: a.src, status: a.status }))
+        )}`);
+        promptEditor.setContent('');
+      }
+    }
+  });
+  promptEditor.on?.('attachment:add', (a) => log(`attachment:add ${a.kind} ${(a.file && a.file.name) || ''}`));
+  promptEditor.on?.('attachment:remove', (a) => log(`attachment:remove ${a.id}`));
+}

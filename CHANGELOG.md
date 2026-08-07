@@ -82,6 +82,11 @@ component layouts and redrawn glyphs on top of the 2.12.0 token pass.
   unhandled-drop path, available to integrators.
 
 ### Fixed (this pass)
+- **Active submenu rows ignore hover**: a stale ink-fill pin flipped active
+  picker rows (align/list) to a black tile on hover, and the select popup's
+  current option lost its accent wash under a higher-specificity hover rule.
+  Active/current rows now pin their accent state through hover, matching the
+  toolbar's active-ignores-hover behaviour.
 - **Toolbar no longer greys out on first load**: tools disabled themselves
   whenever the selection was outside the document — including before the
   first click, which made the editor look broken at rest. The bar now stays
