@@ -5535,11 +5535,17 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .yjd-side-layout > .rich-editor-area { flex: 1 1 auto; min-width: 0; }
 .yjd-rich-editor .yjd-side-panel {
   flex: 0 0 268px;
+  /* Hard cap: a nowrap row (resolved "Resolved by … — …") must ellipsise,
+     not push the rail past its 268px basis via min-width:auto. */
+  width: 268px;
+  max-width: 268px;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   border-left: 1px solid var(--rte-border);
   background: var(--rte-chrome);
   min-height: 0;
+  overflow: hidden;
 }
 .yjd-rich-editor .yjd-side-tabs {
   display: flex;
