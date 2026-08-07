@@ -3946,23 +3946,58 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 /* ── Align picker: icon-only, compact row (v2.16) ─────────────────────────
    Labels removed (tooltip carries the name) → lay the 4 alignment icons out
    as a tight horizontal row of square buttons instead of wide list rows. */
-.yjd-rich-editor .align-button-container {
-  flex-direction: row !important;
+/* Design "List picker" card recipe: 186px pop, mono header, labelled rows. */
+.yjd-rich-editor .text-align-picker-popup,
+.yjd-rich-editor .list-picker-popup {
+  width: 186px !important;
+  padding: 5px;
+  box-sizing: border-box;
+}
+.yjd-rich-editor .yjd-pick-head {
+  padding: 5px 8px 6px;
+  font-family: var(--rte-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rte-faint);
+}
+.yjd-rich-editor .align-button-container,
+.yjd-rich-editor .list-button-container {
+  display: flex;
+  flex-direction: column !important;
   width: auto !important;
   height: auto !important;
-  gap: 4px;
+  gap: 1px;
 }
-.yjd-rich-editor .align-button {
-  width: 34px !important;
-  min-height: 34px !important;
-  height: 34px !important;
-  padding: 0 !important;
-  gap: 0 !important;
-  justify-content: center !important;
+.yjd-rich-editor .align-button,
+.yjd-rich-editor .list-button {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 9px !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 7px 9px !important;
+  border: 0;
+  border-radius: var(--rte-radius-sm);
+  background: transparent;
+  color: var(--rte-ink-2);
+  font-size: 12.5px !important;
+  cursor: pointer;
 }
-.yjd-rich-editor .text-align-picker-popup {
-  width: auto !important;
+.yjd-rich-editor .align-button .icon-wrapper,
+.yjd-rich-editor .list-button .icon-wrapper {
+  display: inline-flex;
+  margin: 0 !important;
+  flex: 0 0 auto;
 }
+.yjd-rich-editor .align-button svg,
+.yjd-rich-editor .list-button svg { width: 14px !important; height: 14px !important; }
+.yjd-rich-editor .align-button .label-text,
+.yjd-rich-editor .list-button .label-text { font-size: 12.5px; color: inherit; }
+.yjd-rich-editor .align-button:hover,
+.yjd-rich-editor .list-button:hover { background: var(--rte-chrome-2); color: var(--rte-ink); }
 
 /* ── "More" overflow row: single swipe-scroll row on TOUCH only (v2.17) ────
    On touch devices the secondary toolbar is one tidy row you swipe sideways,
@@ -4636,6 +4671,66 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   margin: 0 3px;
   flex: 0 0 auto;
 }
+/* "⋮" overflow sheet (design "Touch bubble · overflow menu"). */
+.yjd-rich-editor .block-toolbar-more.open {
+  background: var(--rte-chrome-2);
+  color: var(--rte-ink);
+}
+.yjd-rich-editor .block-toolbar-sheet {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 1001;
+  width: 206px;
+  padding: 5px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  max-height: 212px;
+  overflow-y: auto;
+  background: var(--rte-bg);
+  border: 1px solid var(--rte-border-strong);
+  border-radius: var(--rte-radius-md);
+  box-shadow: var(--rte-shadow);
+}
+.yjd-rich-editor .block-toolbar-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: var(--rte-radius-sm);
+  background: transparent;
+  color: var(--rte-ink-2);
+  font-family: var(--rte-ui);
+  font-size: 12.5px;
+  text-align: left;
+  cursor: pointer;
+}
+.yjd-rich-editor .block-toolbar-item:hover { background: var(--rte-chrome-2); color: var(--rte-ink); }
+.yjd-rich-editor .block-toolbar-item.danger { color: var(--rte-danger); }
+.yjd-rich-editor .block-toolbar-item.danger:hover { background: var(--rte-danger-weak); color: var(--rte-danger); }
+.yjd-rich-editor .block-toolbar-item svg { flex: 0 0 auto; }
+.yjd-rich-editor .block-toolbar-item-label { flex: 1; }
+.yjd-rich-editor .block-toolbar-kbd {
+  font-family: var(--rte-mono);
+  font-size: 10.5px;
+  color: var(--rte-faint);
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-xs);
+  padding: 1px 5px;
+}
+.yjd-rich-editor .block-toolbar-sheet-sep {
+  height: 1px;
+  background: var(--rte-border);
+  margin: 4px 2px;
+}
+/* Touch: 44px comfortable rows per the design note. */
+@media (hover: none) and (pointer: coarse) {
+  .yjd-rich-editor .block-toolbar-item { min-height: 44px; }
+}
 
 /* Counted overflow toggle: bordered pill "⋯ +N"; pressed while open. */
 .yjd-rich-editor .rich-editor-toolbar-btn.more-btn {
@@ -4691,19 +4786,24 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 
 /* ---------- Popover/floating-bar active state = ink fill (v2 tbsOn) ---------- */
 .yjd-rich-editor .yjd-image-align-btn.active,
-.yjd-rich-editor .align-button.active,
-.yjd-rich-editor .list-button.active,
 .yjd-rich-editor .table-toolbar-btn.active {
   background: var(--rte-ink) !important;
   color: var(--rte-bg) !important;
   border-color: transparent !important;
 }
+/* Labelled picker rows (align/list): active = accent row, not ink tile. */
+.yjd-rich-editor .align-button.active,
+.yjd-rich-editor .list-button.active {
+  background: var(--rte-accent-weak) !important;
+  color: var(--rte-accent-ink) !important;
+}
+.yjd-rich-editor .align-button.active svg,
+.yjd-rich-editor .list-button.active svg {
+  color: var(--rte-accent-ink) !important;
+  stroke: var(--rte-accent-ink) !important;
+}
 .yjd-rich-editor .yjd-image-align-btn.active svg,
 .yjd-rich-editor .yjd-image-align-btn.active svg path,
-.yjd-rich-editor .align-button.active svg,
-.yjd-rich-editor .align-button.active svg path,
-.yjd-rich-editor .list-button.active svg,
-.yjd-rich-editor .list-button.active svg path,
 .yjd-rich-editor .table-toolbar-btn.active svg,
 .yjd-rich-editor .table-toolbar-btn.active svg path {
   color: var(--rte-bg) !important;

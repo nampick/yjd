@@ -10,6 +10,15 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 component layouts and redrawn glyphs on top of the 2.12.0 token pass.
 
 ### Changed
+- **List & text-align pickers**: rebuilt as the design's labelled vertical
+  menus — 186px pop with a mono header ("LIST TYPE" / "TEXT ALIGN") and
+  12.5px rows (14px icon + label); the current value is an accent row. The
+  old 34px icon tiles (whose ink-fill active rendered oversized and
+  misaligned) are gone.
+- **Bubble "⋮" more tools (design "Touch bubble · overflow menu")**: the
+  selection bubble gains a trailing ⋮ that opens a 206px sheet — Highlight,
+  Comment (⌘⌥M, shown when the side panel is on), Copy, and a
+  danger-styled Clear formatting; 44px rows on touch.
 - **Form popups (design "Video popup" / "Import popup" / "Tag popup" cards)**:
   300px card, 14px padding, h3 titles (13.5px/600), 11.5px/500 labels, 30px
   inputs (13px), 30px upload button, 28px confirm/cancel buttons; disabled
