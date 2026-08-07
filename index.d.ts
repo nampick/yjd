@@ -390,7 +390,7 @@ export interface EditorOptions {
    * Right rail with Outline · Comments · Versions tabs (UI 2.0). `true` for
    * all three, or pick tabs: { tabs: ['outline','comments'] }. Off by default.
    */
-  sidePanel?: boolean | { tabs?: Array<'outline' | 'comments' | 'versions'> };
+  sidePanel?: boolean | { tabs?: Array<'outline' | 'comments' | 'versions'>; user?: { name: string } };
   features?: {
     emoji?: boolean;
     image?: boolean;
@@ -514,8 +514,17 @@ export class Editor {
   /** Wrap the selection in a comment mark and store the thread. Returns the id. */
   addComment(body: string, author?: string): string | null;
   removeComment(id: string): void;
-  getComments(): Array<{ id: string; body: string; author: string; quote: string; time: number }>;
-  setComments(list: Array<{ id: string; body: string; author: string; quote: string; time: number }>): void;
+  /** Append a reply to a thread (design section 09). */
+  addReply(id: string, body: string, author?: string): { author: string; body: string; time: number } | null;
+  /** Resolve keeps the thread in the rail but clears the highlight. */
+  resolveComment(id: string, by?: string): void;
+  unresolveComment(id: string): void;
+  /** Open the new-comment composer on the current selection (also ⌘⌥M). */
+  openCommentComposer(): void;
+  /** Open a thread's popover anchored at its mark (bottom sheet on touch). */
+  openCommentThread(id: string): void;
+  getComments(): Array<{ id: string; body: string; author: string; quote: string; time: number; replies: Array<{ author: string; body: string; time: number }>; resolved: boolean; resolvedBy?: string }>;
+  setComments(list: Array<{ id: string; body: string; author: string; quote: string; time: number; replies?: Array<{ author: string; body: string; time: number }>; resolved?: boolean; resolvedBy?: string }>): void;
   /** Snapshot the current document into the Versions tab. */
   saveVersion(label?: string): { v: string; label: string; html: string; words: number; time: number };
   getVersions(): Array<{ v: string; label: string; html: string; words: number; time: number }>;

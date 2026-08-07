@@ -44,6 +44,17 @@ component layouts and redrawn glyphs on top of the 2.12.0 token pass.
   (brotli), covering the new popup states, drop UX and tray CSS.
 
 ### Added (this pass)
+- **Comment threads (design section 09 — Review)**: comments grew from flat
+  notes into threads. Replies (`addReply`), resolve/unresolve
+  (`resolveComment` — clears the highlight but keeps the thread), an
+  anchored **thread popover** on mark click (avatars, relative times, inline
+  Reply composer; renders as a bottom sheet on touch), a **new-comment
+  composer** on the selection (⌘⌥M or `openCommentComposer()`, quote
+  header, ⌘⏎ submits / Esc discards), and a rail with **Open/Resolved
+  filter chips**, reply counts, resolved rows with Undo, and **orphan
+  detection** ("Anchor text was deleted") when the mark is edited away.
+  Marks now carry the design's 2px warning underline. Size ceilings
+  ESM/UMD 83→85 KB, Core 79→80 KB.
 - **Code-block language detection**: with no `data-lang`, the header label is
   DETECTED from the block's content (14 languages, regex heuristics — exported
   as `detectLanguage`, test-covered). `data-filename` renders the design's

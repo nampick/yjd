@@ -84,17 +84,17 @@
     {
       "name": "ESM (all-in-one)",
       "path": "dist/rich-editor.esm.js",
-      "limit": "83 KB"
+      "limit": "85 KB"
     },
     {
       "name": "UMD min",
       "path": "dist/rich-editor.min.js",
-      "limit": "83 KB"
+      "limit": "85 KB"
     },
     {
       "name": "Core ESM",
       "path": "dist/core.esm.js",
-      "limit": "79 KB"
+      "limit": "80 KB"
     },
     {
       "name": "Stylesheet",

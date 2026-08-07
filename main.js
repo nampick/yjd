@@ -37,7 +37,8 @@ const editor = new RichEditor('#editor-container', {
   }
 });
 
-// Demo data for the rail: a version snapshot + a comment on the first bold run.
+// Demo data for the rail: a version snapshot + a thread with a reply on the
+// first bold run, plus a resolved thread (select text and press ⌘⌥M to add).
 editor.saveVersion();
 const boldEl = document.querySelector('#editor-container .rich-editor-area b');
 if (boldEl && editor.addComment) {
@@ -46,8 +47,20 @@ if (boldEl && editor.addComment) {
   const sel = window.getSelection();
   sel.removeAllRanges();
   sel.addRange(r);
-  editor.addComment('Can we cap this at 5k tokens per block?', 'Linh');
+  const cid = editor.addComment('Do we still re-parse? Thought we dropped that in the v3 exporter.', 'Linh Pham');
+  if (cid) editor.addReply(cid, 'Still there behind options.markdown.', 'Duc Nguyen');
   sel.removeAllRanges();
+}
+const codeEl = document.querySelector('#editor-container .rich-editor-area code');
+if (codeEl && editor.addComment) {
+  const r2 = document.createRange();
+  r2.selectNodeContents(codeEl);
+  const sel2 = window.getSelection();
+  sel2.removeAllRanges();
+  sel2.addRange(r2);
+  const rid = editor.addComment('The table caption wraps oddly at 320px.', 'Mai Tran');
+  if (rid) editor.resolveComment(rid, 'Duc Nguyen');
+  sel2.removeAllRanges();
 }
 
 // Remove the loading skeleton once the editor has mounted.

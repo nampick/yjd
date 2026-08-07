@@ -5697,15 +5697,229 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   padding: 1px 6px;
 }
 .yjd-rich-editor .yjd-side-vtime { font-size: 10.5px; color: var(--rte-faint); font-family: var(--rte-mono); }
-/* Comment marks in the content */
+/* Comment marks in the content (design: warning wash + 2px underline). */
 .yjd-rich-editor .yjd-comment-mark,
 .yjd-content .yjd-comment-mark {
   background: var(--rte-warning-weak);
-  border-bottom: 1.5px solid var(--rte-warning);
+  border-bottom: 2px solid var(--rte-warning);
   border-radius: 2px 2px 0 0;
   padding: 1px 0;
   cursor: pointer;
 }
+
+/* ---------- Comments (design section 09 — Review) ---------- */
+/* Thread popover / composer shell — anchored under the mark. */
+.yjd-rich-editor .yjd-comment-pop {
+  position: absolute;
+  z-index: 1200;
+  width: 262px;
+  box-sizing: border-box;
+  border: 1px solid var(--rte-border-strong);
+  border-radius: var(--rte-radius-md);
+  background: var(--rte-bg);
+  box-shadow: var(--rte-shadow);
+  overflow: hidden;
+}
+.yjd-rich-editor .yjd-c-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+}
+.yjd-rich-editor .yjd-c-row { display: flex; gap: 9px; }
+.yjd-rich-editor .yjd-c-col { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+.yjd-rich-editor .yjd-c-head { display: flex; align-items: baseline; gap: 6px; }
+.yjd-rich-editor .yjd-c-who { font-size: 12.5px; font-weight: 600; color: var(--rte-ink); }
+.yjd-rich-editor .yjd-c-time { font-size: 10.5px; font-family: var(--rte-mono); color: var(--rte-faint); }
+.yjd-rich-editor .yjd-c-body { font-size: 12.5px; line-height: 1.55; color: var(--rte-ink-2); }
+.yjd-rich-editor .yjd-c-avatar {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  color: var(--rte-accent-ink-on, #fff);
+  font-size: 10px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.yjd-rich-editor .yjd-c-avatar.sm { width: 20px; height: 20px; font-size: 9px; }
+.yjd-rich-editor .yjd-c-replyrow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 10px;
+  border-top: 1px solid var(--rte-border);
+  background: var(--rte-chrome-2);
+}
+.yjd-rich-editor .yjd-c-replyinput { flex: 1; min-width: 0; height: 26px !important; min-height: 26px !important; }
+.yjd-rich-editor .yjd-c-replybtn { height: 26px; padding: 0 10px; }
+.yjd-rich-editor .yjd-c-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 6px 8px 0;
+}
+.yjd-rich-editor .yjd-c-resolve {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--rte-radius-sm);
+  background: transparent;
+  color: var(--rte-muted);
+  font-size: 11.5px;
+  cursor: pointer;
+}
+.yjd-rich-editor .yjd-c-resolve:hover { background: var(--rte-success-weak); color: var(--rte-success); }
+/* Composer (design "New comment composer"). */
+.yjd-rich-editor .yjd-c-composer { padding: 11px; }
+.yjd-rich-editor .yjd-c-quote {
+  font-size: 11.5px;
+  color: var(--rte-muted);
+  border-left: 2px solid var(--rte-warning);
+  padding-left: 8px;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+.yjd-rich-editor .yjd-c-field {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--rte-accent);
+  border-radius: var(--rte-radius-sm);
+  padding: 8px 9px;
+  font: 400 12.5px/1.55 var(--rte-ui);
+  color: var(--rte-ink);
+  background: var(--rte-bg);
+  resize: vertical;
+  min-height: 52px;
+  outline: none;
+}
+.yjd-rich-editor .yjd-c-field:focus { box-shadow: 0 0 0 2px var(--rte-accent-ring); }
+.yjd-rich-editor .yjd-c-composer-foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 9px;
+}
+.yjd-rich-editor .yjd-c-cbtn { height: 26px !important; padding: 0 10px; }
+.yjd-rich-editor .yjd-c-hint {
+  margin-top: 9px;
+  font-size: 10.5px;
+  font-family: var(--rte-mono);
+  color: var(--rte-faint);
+  text-align: center;
+}
+/* Rail: Open/Resolved filter chips. */
+.yjd-rich-editor .yjd-c-filter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 8px;
+}
+.yjd-rich-editor .yjd-c-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 9px;
+  border: 1px solid var(--rte-border);
+  border-radius: 20px;
+  background: var(--rte-bg);
+  color: var(--rte-ink-2);
+  font-size: 11.5px;
+  cursor: pointer;
+}
+.yjd-rich-editor .yjd-c-chip.on {
+  background: var(--rte-accent-weak);
+  border-color: var(--rte-accent);
+  color: var(--rte-accent-ink);
+}
+/* Rail: thread cards. */
+.yjd-rich-editor .yjd-c-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  margin-bottom: 8px;
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-sm);
+  background: var(--rte-bg);
+  cursor: pointer;
+}
+.yjd-rich-editor .yjd-c-card:hover { border-color: var(--rte-border-strong); }
+.yjd-rich-editor .yjd-c-card.focus {
+  border-color: var(--rte-accent);
+  border-left-width: 2px;
+}
+.yjd-rich-editor .yjd-c-card .yjd-c-head { align-items: center; gap: 7px; }
+.yjd-rich-editor .yjd-c-card .yjd-c-avatar { width: 18px; height: 18px; font-size: 8.5px; }
+.yjd-rich-editor .yjd-c-replies { font-size: 11.5px; color: var(--rte-accent-ink); }
+.yjd-rich-editor .yjd-c-orphan {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--rte-warning);
+}
+/* Rail: resolved rows. */
+.yjd-rich-editor .yjd-c-resolved {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px;
+  margin-bottom: 8px;
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-sm);
+  background: var(--rte-chrome-2);
+  opacity: 0.72;
+}
+.yjd-rich-editor .yjd-c-check { color: var(--rte-success); display: inline-flex; flex: 0 0 auto; }
+.yjd-rich-editor .yjd-c-resolved-text {
+  font-size: 12.5px;
+  color: var(--rte-muted);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.yjd-rich-editor .yjd-c-undo {
+  font-size: 11.5px;
+  color: var(--rte-muted);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--rte-ui);
+  flex: 0 0 auto;
+}
+.yjd-rich-editor .yjd-c-undo:hover { color: var(--rte-ink); }
+/* Touch: the popover re-pins as a bottom sheet with a grab handle. */
+@media (hover: none) and (pointer: coarse) {
+  .yjd-rich-editor .yjd-comment-pop {
+    position: fixed;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0;
+    top: auto !important;
+    width: auto;
+    transform: none !important;
+    border-radius: 16px 16px 0 0;
+    padding-top: 6px;
+  }
+  .yjd-rich-editor .yjd-comment-pop::before {
+    content: "";
+    display: block;
+    width: 34px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--rte-border-strong);
+    margin: 3px auto 6px;
+  }
+}
+
 /* The rail collapses on narrow editors. */
 @media (max-width: 720px) {
   .yjd-rich-editor .yjd-side-panel { display: none; }
