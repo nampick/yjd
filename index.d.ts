@@ -80,7 +80,8 @@ export interface FileOptions {
 /** Video drop/insert config (inline <video> player, parallel to images). */
 export interface VideoOptions {
   /**
-   * Upload a dropped video and resolve to its URL (string, or { url }). While
+   * Upload a video (dropped, pasted, picked in the toolbar popup, or attached
+   * in the prompt tray) and resolve to its URL (string, or { url }). While
    * pending a placeholder is shown; on resolve an inline <video controls> is
    * inserted. Omit to inline a data: URL.
    */

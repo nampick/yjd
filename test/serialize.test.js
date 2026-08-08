@@ -60,3 +60,46 @@ test('checklist round-trips markdown -> html -> markdown', () => {
   const md = '- [x] Done\n- [ ] Todo\n';
   assert.equal(htmlToMarkdown(markdownToHtml(md)), md);
 });
+
+test('htmlToMarkdown serializes an inserted <video> to ![video](src)', () => {
+  const html = '<video class="inserted-video" src="https://cdn.example.com/clip.mp4" controls></video>';
+  assert.equal(htmlToMarkdown(html), '![video](https://cdn.example.com/clip.mp4)\n');
+});
+
+test('htmlToMarkdown serializes a YouTube embed iframe to ![video](embedUrl)', () => {
+  const html = '<iframe class="inserted-video youtube-video" src="https://www.youtube.com/embed/abc123DEF45"></iframe>';
+  assert.equal(htmlToMarkdown(html), '![video](https://www.youtube.com/embed/abc123DEF45)\n');
+});
+
+test('htmlToMarkdown keeps a video inline within a paragraph', () => {
+  const html = '<p>see <video class="inserted-video" src="https://cdn.example.com/clip.mp4"></video> here</p>';
+  assert.ok(htmlToMarkdown(html).includes('![video](https://cdn.example.com/clip.mp4)'));
+});
+
+test('htmlToMarkdown drops a non-video iframe (unchanged behavior)', () => {
+  assert.equal(htmlToMarkdown('<iframe src="https://evil.example.com/x"></iframe>'), '');
+});
+
+test('markdownToHtml renders ![video](….mp4) as a <video> player, not <img>', () => {
+  const out = markdownToHtml('![video](https://cdn.example.com/clip.mp4)');
+  assert.ok(out.includes('<video'), 'should emit a <video> element');
+  assert.ok(out.includes('src="https://cdn.example.com/clip.mp4"'));
+  assert.ok(!out.includes('<img'), 'must not fall back to <img>');
+});
+
+test('markdownToHtml renders a YouTube URL in image syntax as an embed iframe', () => {
+  const out = markdownToHtml('![video](https://www.youtube.com/watch?v=abc123DEF45)');
+  assert.ok(out.includes('<iframe'), 'should emit an iframe embed');
+  assert.ok(out.includes('youtube.com/embed/abc123DEF45'));
+});
+
+test('markdownToHtml still renders plain images as <img>', () => {
+  const out = markdownToHtml('![photo](https://cdn.example.com/pic.png)');
+  assert.ok(out.includes('<img'));
+  assert.ok(!out.includes('<video'));
+});
+
+test('video round-trips markdown -> html -> markdown', () => {
+  const md = '![video](https://cdn.example.com/clip.mp4)\n';
+  assert.equal(htmlToMarkdown(markdownToHtml(md)), md);
+});

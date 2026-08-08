@@ -58,3 +58,35 @@ test('getAll() still reports undefined src for a not-yet-uploaded video (preview
   assert.equal(all.length, 1);
   assert.equal(all[0].src, undefined, 'preview object URL must not become the returned src');
 });
+
+test('video attachment runs the video upload hook and reports the uploaded URL', async () => {
+  created = []; revoked = [];
+  const ed = makeEditor();
+  let uploaded = null;
+  ed.options.video = { upload: async (f) => { uploaded = f; return 'https://cdn.example.com/clip.mp4'; } };
+  const pa = new PromptAttachments(ed);
+  await pa.add({ name: 'clip.mp4', type: 'video/mp4' }, 'video');
+  assert.equal(uploaded && uploaded.name, 'clip.mp4', 'the upload hook must receive the video file');
+  const all = pa.getAll();
+  assert.equal(all[0].src, 'https://cdn.example.com/clip.mp4', 'src must be the uploaded URL');
+  assert.equal(all[0].status, 'done');
+});
+
+test('video attachment falls back to image.upload when no video hook is set', async () => {
+  created = []; revoked = [];
+  const ed = makeEditor();
+  let uploaded = null;
+  ed.options.image = { upload: async (f) => { uploaded = f; return 'https://cdn.example.com/via-image-hook.mp4'; } };
+  const pa = new PromptAttachments(ed);
+  await pa.add({ name: 'clip.mp4', type: 'video/mp4' }, 'video');
+  assert.equal(uploaded && uploaded.name, 'clip.mp4');
+  assert.equal(pa.getAll()[0].src, 'https://cdn.example.com/via-image-hook.mp4');
+});
+
+test('video attachment stays pending-free with no hook at all (status done, src undefined)', async () => {
+  created = []; revoked = [];
+  const pa = new PromptAttachments(makeEditor());
+  await pa.add({ name: 'clip.mp4', type: 'video/mp4' }, 'video');
+  assert.equal(pa.getAll()[0].status, 'done');
+  assert.equal(pa.getAll()[0].src, undefined);
+});

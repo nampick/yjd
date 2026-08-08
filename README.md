@@ -314,7 +314,9 @@ Insert video from the toolbar (`video` button → URL / YouTube / file upload), 
 just **drag-and-drop or paste a video file** onto the editor — it inserts an inline
 `<video controls>` player (parallel to images). Provide `video.upload` to send the
 file to your server/CDN instead of inlining a data URL; omit it for the data-URL
-fallback. A tall/portrait clip is capped to `maxHeight` (default **360px**) on
+fallback. All three file paths — toolbar popup, drag-drop, and paste — go through
+the same hook. Videos serialize to Markdown as `![video](src)` and round-trip
+back to an inline player (or a YouTube/Vimeo embed iframe). A tall/portrait clip is capped to `maxHeight` (default **360px**) on
 insert so it doesn't blow out the frame — the user can still drag-resize larger.
 
 ```js
@@ -330,7 +332,9 @@ new yjd('#editor', {
 ```
 
 In the **prompt layout**, a video added via the `+` menu rides along as an
-attachment chip (with a first-frame preview + play badge), read via `getAttachments()`.
+attachment chip (with a first-frame preview + play badge) and uploads via
+`video.upload` (falling back to `image.upload`); read the uploaded URL via
+`getAttachments()[].src`.
 
 ### File attachments
 

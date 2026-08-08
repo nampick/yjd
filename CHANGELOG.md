@@ -4,6 +4,31 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [2.13.1] — 2026-08-08
+
+**Video pipeline fixes** — the three gaps that forced integrators to patch
+video handling app-side (base64 popup inserts, videos vanishing from Markdown,
+attachment videos never uploading) are closed upstream.
+
+### Fixed
+- **Video popup now honours `video.upload`**: picking a file in the toolbar
+  video popup routes through `insertVideoFile` (placeholder → upload hook →
+  inline player), the same single path drag-drop and paste already used —
+  instead of always inlining a base64 data URL. Core builds without
+  `applyEditorInput`, or no configured hook, keep the data-URL fallback.
+- **Markdown serialization of video**: `htmlToMarkdown` serializes an inserted
+  `<video>` (and the video feature's YouTube/Vimeo embed iframes) as
+  `![video](src)` instead of silently dropping it; `markdownToHtml` renders
+  `![…](url)` back as an inline `<video controls>` player for video-file URLs
+  and as an embed iframe for YouTube/Vimeo URLs, so video content round-trips.
+  Other iframes are still dropped; plain images are untouched.
+- **Prompt attachments upload videos**: an attachment of kind `video` now runs
+  the upload hook (prefers `video.upload`, falls back to `image.upload`) with
+  the same pending → done/error chip states as images and files, and
+  `getAttachments()` reports the uploaded URL as `src`. Previously videos were
+  excluded from the built-in upload and immediately reported `status: 'done'`
+  with no URL. Retry after a failed upload resolves the hook the same way.
+
 ## [2.13.0] — 2026-08-07
 
 **Editor UI 2.0, part 2 — the full component pass.** Applies the redesign's
@@ -632,6 +657,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.13.1]: https://github.com/nampick/yjd/releases/tag/v2.13.1
 [2.13.0]: https://github.com/nampick/yjd/releases/tag/v2.13.0
 [2.12.0]: https://github.com/nampick/yjd/releases/tag/v2.12.0
 [2.11.6]: https://github.com/nampick/yjd/releases/tag/v2.11.6
