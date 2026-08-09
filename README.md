@@ -361,6 +361,41 @@ frame) with `image.maxHeight` / `image.maxWidth` (px or any CSS length):
 new yjd('#editor', { image: { upload, maxHeight: '60vh' } });
 ```
 
+**Migrate legacy base64 media.** If you have saved drafts from before you wired
+an upload hook, they still carry inline `data:` images/videos. Opt into
+`media.migrateDataUrls` and yjd re-uploads each one through the matching hook on
+load and swaps the src in place — so old bodies stop re-embedding megabytes:
+
+```js
+new yjd('#editor', {
+  media: { migrateDataUrls: true },
+  image: { upload },   // (video.upload used for <video>, falling back to image.upload)
+});
+// events: editor.on('media:migrate' | 'media:migrated' | 'media:migrate-error', cb)
+```
+
+### Localisation (`strings`)
+
+Every built-in UI string — toolbar tooltips, popup titles/buttons, add-menu
+labels, the "Uploading" chip — resolves through one `strings` option, so you can
+translate the editor without forking it. Pass a flat map or a function; anything
+missing keeps the English default.
+
+```js
+new yjd('#editor', {
+  strings: {
+    'toolbar.bold': 'Đậm', 'toolbar.link': 'Chèn liên kết',
+    'popup.insertLink': 'Chèn liên kết', 'apply': 'Áp dụng', 'cancel': 'Huỷ',
+    'addMenu.image': 'Thêm ảnh', 'uploading': 'Đang tải…',
+  },
+});
+// or hook your own i18n: strings: (key, fallback) => t('yjd.' + key) ?? fallback
+```
+
+Keys are dot-namespaced (`toolbar.<fmt>`, `popup.*`, `addMenu.*`, `apply`,
+`cancel`, `uploading`). `editor.t(key, fallback)` is the same lookup if you build
+custom chrome.
+
 ### Enter-to-submit (comment boxes)
 
 ```js
@@ -620,8 +655,10 @@ renderStatic(post.body_html, document.querySelector('#post'));
 - **Events** (via `editor.on(name, cb)` / `editor.off(name, cb)`): `change`,
   `image:upload` · `image:uploaded` · `image:error`, `video:upload` · `video:uploaded`
   · `video:error`, `file:upload` · `file:uploaded`
-  · `file:error`, `mention:select`, `ai:start` · `ai:done` · `ai:accept` · `ai:discard`
-  · `ai:error`, `content:overflow` (when `maxContentSize` exceeded).
+  · `file:error`, `media:migrate` · `media:migrated` · `media:migrate-error`
+  (with `media.migrateDataUrls`), `mention:select`, `ai:start` · `ai:done` ·
+  `ai:accept` · `ai:discard` · `ai:error`, `content:overflow` (when
+  `maxContentSize` exceeded).
 - `editor.editor` is the public contentEditable element (attach your own listeners).
 - **Markdown dialect** — GFM-ish: headings `#`–`######`, `**bold**`, `*italic*`,
   `~~strike~~`, `` `code` ``, fenced ``` ``` ```, `>` quotes, `-`/`1.` lists,

@@ -57,3 +57,23 @@ test('sanitizeUrl returns safe URL or empty string', () => {
   assert.equal(sanitizeUrl('  https://example.com  '), 'https://example.com');
   assert.equal(sanitizeUrl('javascript:alert(1)'), '');
 });
+
+test('isSafeUrl allowDataFile permits inert file data URIs, blocks script-capable ones', () => {
+  // Off by default
+  assert.equal(isSafeUrl('data:application/pdf;base64,JVBER'), false);
+  // Inert file types allowed for embedded file attachments
+  assert.equal(isSafeUrl('data:application/pdf;base64,JVBER', { allowDataFile: true }), true);
+  assert.equal(isSafeUrl('data:text/plain;base64,QQ==', { allowDataFile: true }), true);
+  assert.equal(isSafeUrl('data:application/zip;base64,UEsD', { allowDataFile: true }), true);
+  assert.equal(isSafeUrl('data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,UEsD', { allowDataFile: true }), true);
+  // Script-capable document types stay blocked even with allowDataFile
+  assert.equal(isSafeUrl('data:text/html;base64,PHNjcmlwdD4=', { allowDataFile: true }), false);
+  assert.equal(isSafeUrl('data:image/svg+xml;base64,PHN2Zz4=', { allowDataFile: true }), false);
+  assert.equal(isSafeUrl('data:application/xhtml+xml;base64,PA==', { allowDataFile: true }), false);
+  assert.equal(isSafeUrl('data:text/xml;base64,PA==', { allowDataFile: true }), false);
+  // Ambiguous/empty mediatype blocked (defaults to text/plain but treat as suspicious)
+  assert.equal(isSafeUrl('data:;base64,PHNjcmlwdD4=', { allowDataFile: true }), false);
+  // Non-data schemes unaffected
+  assert.equal(isSafeUrl('javascript:alert(1)', { allowDataFile: true }), false);
+  assert.equal(isSafeUrl('https://a.test/f.pdf', { allowDataFile: true }), true);
+});

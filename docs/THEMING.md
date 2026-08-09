@@ -168,3 +168,22 @@ without touching a single library selector.
   `--rte-popup-pad`, `--rte-popup-pad-inline`, `--rte-popup-pad-lg`,
   `--rte-popup-pad-sm`, `--rte-input-pad`, `--rte-popup-btn-pad`,
   `--rte-popup-btn-pad-inline`, `--rte-popup-ctl-pad`.
+- **Toolbar/edit-area padding is NOT in the un-layered guard** — unlike the
+  popups, those containers carry *dynamic, state-dependent* padding (a left
+  gutter while block handles are active, a taller top strip inside code blocks,
+  a different box in the prompt layout), several of it set with `padding-*`
+  longhands. A single un-layered `padding` shorthand would flatten those states
+  for everyone, so it's deliberately left out. If your host CSS ships a blanket
+  `* { padding: 0 }`, scope it away from the editor
+  (`:not(.yjd-rich-editor *)`) or set `.rich-editor-area` / the toolbar rows
+  explicitly — those are the only surfaces the popup guard doesn't cover.
+
+## Toolbar group spacing
+
+The gap **between toolbar groups** is one token: `--rte-toolbar-group-gap`
+(falls back to the generic `--rte-gap`, default `6px`). Widen it to make the
+format / insert / list groups read as distinct clusters:
+
+```css
+.my-app .yjd-rich-editor { --rte-toolbar-group-gap: 16px; }
+```
