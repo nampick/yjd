@@ -392,9 +392,19 @@ new yjd('#editor', {
 // or hook your own i18n: strings: (key, fallback) => t('yjd.' + key) ?? fallback
 ```
 
-Keys are dot-namespaced (`toolbar.<fmt>`, `popup.*`, `addMenu.*`, `apply`,
-`cancel`, `uploading`). `editor.t(key, fallback)` is the same lookup if you build
-custom chrome.
+Every built-in surface goes through this lookup — toolbar tooltips
+(`toolbar.*`), the slash menu (`slash.*`), side panel (`panel.*`), find &
+replace (`find.*`), the AI bar (`ai.*`), block/table toolbars (`block.*` /
+`table.*`), all popups (`popup.*`, `tag.*`, `import.*`), format dropdowns
+(`heading.*`, `size.*`, `case.*`, `spacing.*`, `lineHeight.*`, `align.*`,
+`list.*`, `color.*`), the emoji picker (`emoji.*`), the status bar (`status.*`),
+and the editor placeholder (`editor.placeholder`). A composite string takes
+`{name}` placeholders: `t('toolbar.hideNTools', 'Hide {n} more tools', { n })`.
+`editor.t(key, fallback, params?)` is the same lookup for custom chrome.
+
+> The emoji **search index** stays keyed on the built-in English emoji names
+> (`grinning`, `thumbsup`, …); only the category labels and picker chrome
+> localise. Font-family names are proper nouns and are left as-is.
 
 ### Enter-to-submit (comment boxes)
 
