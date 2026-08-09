@@ -100,6 +100,21 @@ export interface VideoOptions {
   maxWidth?: number | string;
 }
 
+/** Cross-format media handling. */
+export interface MediaOptions {
+  /**
+   * Opt-in: when content loads (constructor `content`, setContent/setMarkdown/
+   * setJSON), re-upload any legacy `data:` `<img>`/`<video>` through the
+   * matching upload hook (`video.upload`, falling back to `image.upload`) and
+   * swap the src to the returned URL in place. Heals drafts saved during the
+   * base64 era so they stop re-embedding megabytes on every save. Best-effort:
+   * an element with no hook, or whose upload throws, is left untouched. Emits
+   * `media:migrate` (start), `media:migrated` ({el, url}), and
+   * `media:migrate-error` ({el, file, error}).
+   */
+  migrateDataUrls?: boolean;
+}
+
 /** Enter-to-submit behaviour (e.g. a comment box). */
 export interface SubmitOptions {
   /**
@@ -357,6 +372,17 @@ export interface EditorOptions {
   video?: VideoOptions;
   /** @mention / #task autocomplete. Inert until a `source` is given. */
   mention?: MentionOptions;
+  /**
+   * Localise the built-in UI strings (toolbar tooltips, popup titles/buttons,
+   * add-menu labels, attachment chrome). Either a flat map of `key → string` or
+   * a function `(key, englishFallback) => string`; anything missing (or a
+   * nullish function return) keeps the English default. Keys are dot-namespaced,
+   * e.g. `'toolbar.bold'`, `'popup.insertLink'`, `'apply'`, `'cancel'`,
+   * `'uploading'`, `'addMenu.image'`, `'addMenu.head'`.
+   */
+  strings?: Record<string, string> | ((key: string, fallback: string) => string | null | undefined);
+  /** Media handling that isn't tied to a single format (see MediaOptions). */
+  media?: MediaOptions;
   /** Enter-to-submit behaviour for comment-style editors. */
   submit?: SubmitOptions;
   /** AI assistant (selection toolbar + ghost-text). Inert until `complete` is set. */
@@ -460,6 +486,11 @@ export class Editor {
   /** Export/import the document as Markdown (mention ids preserved). */
   getMarkdown(): string;
   setMarkdown(markdown: string): void;
+  /**
+   * Resolve a UI string through `options.strings`, falling back to the built-in
+   * English `fallback`. The single lookup every localisable label goes through.
+   */
+  t(key: string, fallback: string): string;
   /**
    * Stream a Markdown response and render it as formatted HTML token-by-token,
    * partial-safe (an open **bold or code fence renders cleanly) — for showing an

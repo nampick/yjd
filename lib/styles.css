@@ -2580,7 +2580,10 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   padding: 0;
 }
 .yjd-rich-editor .rich-editor-toolbar-1 .toolbar-group + .toolbar-group {
-  margin-left: var(--rte-gap, 6px);
+  /* Spacing between toolbar GROUPS. --rte-toolbar-group-gap is the named knob;
+     it falls back to the generic --rte-gap, then 6px — so the default is
+     unchanged and an app can widen group separation with one token. */
+  margin-left: var(--rte-toolbar-group-gap, var(--rte-gap, 6px));
 }
 /* Overflow rows: spacing comes ONLY from the row's flex gap (the packer's
    invariant) — the divider rides inside the group, no extra margin. */
@@ -2593,8 +2596,8 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   height: 20px;
   background: var(--rte-border);
   /* Trailing side = this margin + the group's own 2px flex gap, so it lands on
-     exactly --rte-gap — matching the token-driven lead side. */
-  margin-right: max(0px, calc(var(--rte-gap, 6px) - 2px));
+     exactly the group gap — matching the token-driven lead side. */
+  margin-right: max(0px, calc(var(--rte-toolbar-group-gap, var(--rte-gap, 6px)) - 2px));
 }
 
 

@@ -270,3 +270,117 @@ test('focus re-syncs the prompt send state (iOS IME belt)', async () => {
   await new Promise((r) => setTimeout(r, 20));
   assert.ok(calls >= 1, 'focus must re-run the send-state sync');
 });
+
+test('serializeAttachments drops a javascript: src (html + markdown)', () => {
+  const ed = new Editor(mount(), { prompt: { serializeAttachments: true } });
+  ed.getAttachments = () => [{ kind: 'image', file: { name: 'a.png' }, src: 'javascript:alert(1)' }];
+  const html = ed._serializeAttachmentsTail('html');
+  assert.ok(!/javascript:/i.test(html), 'unsafe src must not reach attachment HTML');
+  const ed2 = new Editor(mount(), { prompt: { serializeAttachments: true } });
+  ed2.getAttachments = () => [{ kind: 'file', file: { name: 'x' }, src: 'javascript:alert(1)' }];
+  const md = ed2._serializeAttachmentsTail('markdown');
+  assert.ok(!/\]\(javascript:/i.test(md), 'unsafe src must not reach attachment markdown link');
+});
+
+test('serializeAttachments keeps safe and data:image srcs', () => {
+  const ed = new Editor(mount(), { prompt: { serializeAttachments: true } });
+  ed.getAttachments = () => [{ kind: 'image', file: { name: 'a.png' }, src: 'data:image/png;base64,QQ==' }];
+  assert.ok(ed._serializeAttachmentsTail('html').includes('data:image/png'), 'inline image data URL is preserved');
+});
+
+test('insertFileAttachment (no upload hook) drops a data:text/html chip href', async () => {
+  const ed = new Editor(mount(), {});
+  globalThis.__execCalls.length = 0;
+  // Fake a FileReader that yields a data:text/html URL (attacker attaches .html)
+  const RealFR = globalThis.FileReader;
+  globalThis.FileReader = class {
+    readAsDataURL() { setTimeout(() => this.onload({ target: { result: 'data:text/html;base64,PHNjcmlwdD4=' } }), 0); }
+  };
+  ed.insertFileAttachment({ name: 'evil.html', type: 'text/html', size: 10 });
+  await new Promise((r) => setTimeout(r, 20));
+  globalThis.FileReader = RealFR;
+  const html = globalThis.__execCalls.filter((c) => c[0] === 'insertHTML').map((c) => c[2]).join('');
+  assert.ok(!/data:text\/html/i.test(html), 'a data:text/html file must not become a clickable chip href');
+});
+
+test('insertFileAttachment (no upload hook) keeps an inert data:application/pdf chip href', async () => {
+  const ed = new Editor(mount(), {});
+  globalThis.__execCalls.length = 0;
+  const RealFR = globalThis.FileReader;
+  globalThis.FileReader = class {
+    readAsDataURL() { setTimeout(() => this.onload({ target: { result: 'data:application/pdf;base64,JVBER' } }), 0); }
+  };
+  ed.insertFileAttachment({ name: 'doc.pdf', type: 'application/pdf', size: 10 });
+  await new Promise((r) => setTimeout(r, 20));
+  globalThis.FileReader = RealFR;
+  const html = globalThis.__execCalls.filter((c) => c[0] === 'insertHTML').map((c) => c[2]).join('');
+  assert.ok(/data:application\/pdf/i.test(html), 'an inert file embed is preserved');
+});
+
+test('t() resolves options.strings from a map, with English fallback', () => {
+  const ed = new Editor(mount(), { strings: { 'popup.insertLink': 'Chèn liên kết', 'apply': 'Áp dụng' } });
+  assert.equal(ed.t('popup.insertLink', 'Insert link'), 'Chèn liên kết');
+  assert.equal(ed.t('apply', 'Apply'), 'Áp dụng');
+  assert.equal(ed.t('missing.key', 'Fallback'), 'Fallback', 'unknown key falls back to English');
+});
+
+test('t() resolves options.strings from a function, with fallback on nullish', () => {
+  const ed = new Editor(mount(), { strings: (key, fb) => (key === 'apply' ? 'OK' : null) });
+  assert.equal(ed.t('apply', 'Apply'), 'OK');
+  assert.equal(ed.t('cancel', 'Cancel'), 'Cancel', 'nullish return uses the fallback');
+});
+
+test('t() returns the fallback when no strings option is set', () => {
+  const ed = new Editor(mount(), {});
+  assert.equal(ed.t('anything', 'Default'), 'Default');
+});
+
+test('options.strings localizes toolbar tooltips end-to-end', () => {
+  const ed = new Editor(mount(), { strings: { 'toolbar.bold': 'Đậm', 'toolbar.link': 'Liên kết' } });
+  const tb = ed.getModule('toolbar');
+  const box = document.createElement('div');
+  const bold = tb.addButton(box, 'bold');
+  assert.equal(bold.title, 'Đậm', 'bold tooltip localized');
+  assert.equal(bold.getAttribute('aria-label'), 'Đậm');
+  const link = tb.addButton(box, 'link');
+  assert.equal(link.title, 'Liên kết');
+  // An unmapped key keeps the English default (with its shortcut hint).
+  const italic = tb.addButton(box, 'italic');
+  assert.ok(italic.title.startsWith('Italic'), 'unmapped tooltip stays English');
+});
+
+test('media.migrateDataUrls re-uploads a data: image via image.upload and swaps src', async () => {
+  const uploaded = [];
+  const ed = new Editor(mount(), {
+    media: { migrateDataUrls: true },
+    image: { upload: async (f) => { uploaded.push(f); return 'https://cdn.test/hosted.png'; } },
+  });
+  ed.setContent('<p><img src="data:image/png;base64,iVBORw0KGgo="></p>');
+  await new Promise((r) => setTimeout(r, 20));
+  assert.equal(uploaded.length, 1, 'the upload hook ran for the data: image');
+  assert.ok(uploaded[0] instanceof (globalThis.File || Object), 'hook received a File');
+  const img = ed.editor.querySelector('img');
+  assert.equal(img.getAttribute('src'), 'https://cdn.test/hosted.png', 'src swapped to the hosted URL');
+});
+
+test('media.migrateDataUrls is a no-op without the opt-in', async () => {
+  const uploaded = [];
+  const ed = new Editor(mount(), { image: { upload: async (f) => { uploaded.push(f); return 'x'; } } });
+  ed.setContent('<p><img src="data:image/png;base64,iVBORw0KGgo="></p>');
+  await new Promise((r) => setTimeout(r, 20));
+  assert.equal(uploaded.length, 0, 'no migration without media.migrateDataUrls');
+  assert.ok(/^data:/.test(ed.editor.querySelector('img').getAttribute('src')), 'data URL left untouched');
+});
+
+test('media.migrateDataUrls leaves the data URL on upload failure', async () => {
+  const ed = new Editor(mount(), {
+    media: { migrateDataUrls: true },
+    image: { upload: async () => { throw new Error('boom'); } },
+  });
+  let err = null;
+  ed.on('media:migrate-error', (e) => { err = e; });
+  ed.setContent('<p><img src="data:image/png;base64,iVBORw0KGgo="></p>');
+  await new Promise((r) => setTimeout(r, 20));
+  assert.ok(err, 'a migrate-error event fired');
+  assert.ok(/^data:/.test(ed.editor.querySelector('img').getAttribute('src')), 'src stays the data URL on failure');
+});

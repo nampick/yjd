@@ -4,6 +4,57 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [2.13.3] — 2026-08-09
+
+**Security-forward integration release.** Closes a class of URL/attribute
+injection gaps found while acting on the 2.13.2 integration report (an
+independent sink audit surfaced more of the same class), plus the report's
+i18n, migration, and toolbar-spacing asks.
+
+### Security
+- **URL scheme validation across the serializers.** `markdownToHtml` now runs
+  every emitted link `href` and media `src` through the same allowlist the DOM
+  sanitizer uses (`isSafeUrl`): `javascript:` / `vbscript:` / `data:text/html`
+  are dropped instead of passed through. `jsonToHtml` strips `on*` event-handler
+  attributes and validates `href`/`src`. `htmlToMarkdown` drops unsafe URLs too,
+  so the exported serializers are safe standalone **and** across an
+  html↔markdown round-trip (previously they relied entirely on a downstream
+  `sanitizeHtml`, which an integrator using the raw exports may not run).
+- **File-attachment chip href** (`insertFileAttachment`) is scheme-checked. The
+  no-upload-hook path embeds the file as a `data:` URL, so an attached `.html`
+  file could otherwise become a clickable `data:text/html` chip in saved
+  content. A new `isSafeUrl` option, `allowDataFile`, permits inert file data
+  URIs (pdf, zip, office, text) while blocking script-capable document types
+  (`text/html`, `xhtml`, `svg`, `xml`).
+- **Attachment serialization** (`serializeAttachments`) validates `att.src`
+  before emitting the `<img>`/`<a>`.
+- Raw `<img>`/`<video>` insert fallbacks, and the `CodeView.setContent` /
+  `restoreVersion` fallback `innerHTML` paths, now validate/sanitize as well
+  (defense-in-depth on latent sinks).
+- **Balanced parens in link URLs**: a URL like `…/Foo_(disambiguation)` is no
+  longer truncated at the first `)`.
+
+### Added
+- **`options.strings` — localisation.** Every built-in UI string (toolbar
+  tooltips, popup titles/buttons, add-menu labels, the "Uploading" chip)
+  resolves through one option — a flat `{ key: string }` map or a
+  `(key, fallback) => string` function — falling back to English. `editor.t()`
+  is the same lookup for custom chrome. Keys are dot-namespaced
+  (`toolbar.<fmt>`, `popup.*`, `addMenu.*`, `apply`, `cancel`, `uploading`).
+- **`options.media.migrateDataUrls` — heal legacy base64 media.** Opt-in: on
+  content load, re-upload any `data:` `<img>`/`<video>` through the matching
+  hook (`video.upload`, falling back to `image.upload`) and swap the src in
+  place. Emits `media:migrate` · `media:migrated` · `media:migrate-error`.
+- **`--rte-toolbar-group-gap`** — a named token for the space between toolbar
+  groups (falls back to `--rte-gap`, default unchanged), so apps can widen group
+  separation with one variable.
+
+### Docs
+- `docs/THEMING.md` documents the group-gap token and why toolbar/edit-area
+  padding is intentionally left out of the un-layered reset guard (dynamic,
+  state-dependent `padding-*` longhands would be flattened for everyone) — with
+  the recommended host-side workaround.
+
 ## [2.13.2] — 2026-08-09
 
 **Integration-feedback release** — every actionable point from the first
@@ -709,6 +760,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.13.3]: https://github.com/nampick/yjd/releases/tag/v2.13.3
 [2.13.2]: https://github.com/nampick/yjd/releases/tag/v2.13.2
 [2.13.1]: https://github.com/nampick/yjd/releases/tag/v2.13.1
 [2.13.0]: https://github.com/nampick/yjd/releases/tag/v2.13.0

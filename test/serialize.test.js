@@ -1,7 +1,7 @@
 import './dom-setup.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { htmlToMarkdown, markdownToHtml, balancePartialMarkdown } from '../lib/serialize.js';
+import { htmlToMarkdown, markdownToHtml, balancePartialMarkdown, domToJson, jsonToHtml } from '../lib/serialize.js';
 
 test('balancePartialMarkdown closes an open inline marker so it renders', () => {
   assert.equal(balancePartialMarkdown('this is **bol'), 'this is **bol**');
@@ -121,4 +121,85 @@ test('extension-less video round-trips html -> markdown -> html as a player', ()
   const md = htmlToMarkdown(html);
   assert.equal(md, '![video](https://x.test/files/abc123)\n');
   assert.ok(markdownToHtml(md).includes('<video'), 'yjd must re-render its own serializer output as a player');
+});
+
+/* ── URL-scheme safety in the standalone serializers (defense-in-depth) ────── */
+
+test('markdownToHtml drops a javascript: link href (no downstream sanitize)', () => {
+  const out = markdownToHtml('[x](javascript:alert(1))');
+  assert.ok(!/href="javascript:/i.test(out), 'javascript: href must not be emitted');
+  assert.ok(out.includes('x'), 'link text is preserved');
+});
+
+test('markdownToHtml drops vbscript: and data:text/html link hrefs', () => {
+  assert.ok(!/href="vbscript:/i.test(markdownToHtml('[x](vbscript:msgbox(1))')));
+  assert.ok(!/href="data:text\/html/i.test(markdownToHtml('[x](data:text/html;base64,PHN2Zz4=)')));
+});
+
+test('markdownToHtml keeps safe link schemes (http/https/mailto/tel/relative)', () => {
+  for (const u of ['https://a.test/p', 'http://a.test', 'mailto:a@b.test', 'tel:+1', '/rel/path', '#anchor']) {
+    assert.ok(markdownToHtml(`[x](${u})`).includes(`href="${u}"`), `${u} should survive`);
+  }
+});
+
+test('markdownToHtml preserves balanced parens inside a link URL', () => {
+  const u = 'https://en.wikipedia.org/wiki/Foo_(disambiguation)';
+  const out = markdownToHtml(`[wiki](${u})`);
+  assert.ok(out.includes(`href="${u}"`), 'the full URL including () must be captured');
+});
+
+test('markdownToHtml drops a javascript: media src', () => {
+  const out = markdownToHtml('![video](javascript:alert(1))');
+  assert.ok(!/javascript:/i.test(out), 'unsafe media src must not be emitted');
+});
+
+test('markdownToHtml keeps a data:image on an image and a data:video on a video', () => {
+  assert.ok(markdownToHtml('![x](data:image/png;base64,QQ==)').includes('data:image/png'));
+  assert.ok(markdownToHtml('![video](data:video/mp4;base64,QQ==)').includes('data:video/mp4'));
+});
+
+test('markdownToHtml rejects a data:text/html smuggled as an image', () => {
+  const out = markdownToHtml('![x](data:text/html;base64,PHNjcmlwdD4=)');
+  assert.ok(!/data:text\/html/i.test(out), 'data:text/html must never reach an <img> src');
+});
+
+test('jsonToHtml strips event-handler attributes', () => {
+  const html = jsonToHtml({ content: [{ tag: 'img', attrs: { src: 'https://a.test/p.png', onerror: 'alert(1)' } }] });
+  assert.ok(!/onerror/i.test(html), 'on* handlers must be dropped');
+  assert.ok(html.includes('https://a.test/p.png'));
+});
+
+test('jsonToHtml validates href/src schemes', () => {
+  const a = jsonToHtml({ content: [{ tag: 'a', attrs: { href: 'javascript:alert(1)' }, content: [{ text: 'x' }] }] });
+  assert.ok(!/javascript:/i.test(a), 'unsafe href must be dropped from json → html');
+  const img = jsonToHtml({ content: [{ tag: 'img', attrs: { src: 'https://a.test/p.png' } }] });
+  assert.ok(img.includes('src="https://a.test/p.png"'), 'safe src survives');
+});
+
+test('domToJson → jsonToHtml round-trip keeps a safe link intact', () => {
+  const html = '<p><a href="https://a.test/p">x</a></p>';
+  assert.ok(jsonToHtml(domToJson(html)).includes('href="https://a.test/p"'));
+});
+
+test('htmlToMarkdown drops a javascript: link (clean output for a foreign renderer)', () => {
+  const md = htmlToMarkdown('<p><a href="javascript:alert(1)">x</a></p>');
+  assert.ok(!/javascript:/i.test(md), 'unsafe href must not survive into markdown');
+  assert.ok(md.includes('x'), 'the link text is kept as plain text');
+});
+
+test('htmlToMarkdown drops an unsafe img/video src', () => {
+  assert.equal(htmlToMarkdown('<img src="javascript:alert(1)">').trim(), '');
+  assert.equal(htmlToMarkdown('<video class="inserted-video" src="vbscript:x"></video>').trim(), '');
+});
+
+test('htmlToMarkdown drops an unsafe file-chip href but keeps the name', () => {
+  const md = htmlToMarkdown('<p><a class="yjd-file-chip" href="data:text/html;base64,PA==" data-name="evil.html"><span class="yjd-file-name">evil.html</span></a></p>');
+  assert.ok(!/data:text\/html/i.test(md), 'scriptable data URL must not survive');
+  assert.ok(md.includes('evil.html'), 'the file name is kept');
+});
+
+test('htmlToMarkdown keeps safe links/images/file-chips intact', () => {
+  assert.ok(htmlToMarkdown('<p><a href="https://a.test">x</a></p>').includes('[x](https://a.test)'));
+  assert.ok(htmlToMarkdown('<img src="https://a.test/p.png" alt="p">').includes('![p](https://a.test/p.png)'));
+  assert.ok(htmlToMarkdown('<p><a class="yjd-file-chip" href="https://a.test/f.pdf" data-name="f.pdf"><span class="yjd-file-name">f.pdf</span></a></p>').includes('](https://a.test/f.pdf)'));
 });
