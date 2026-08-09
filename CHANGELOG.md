@@ -4,6 +4,39 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [2.13.5] — 2026-08-09
+
+**Responsive & host-integration fixes.** Three layout problems that only showed
+up at small sizes or when the editor is embedded in a real app.
+
+### Fixed
+- **Popovers no longer break inside host apps.** Toolbar popovers were placed
+  `position: absolute` INSIDE the editor, so any host ancestor between the
+  editor and `<body>` that clips (`overflow` ≠ `visible`) or re-roots
+  (`transform`/`filter`/`perspective`/`contain`) would cut them off or bury them
+  under host chrome — the #1 integration complaint. New `popup` option
+  (`'auto'` default) portals popovers to `<body>` with `position: fixed` when
+  such an ancestor is detected (or always with `popup: 'fixed'`), immune to host
+  overflow/transform/stacking. Portaled popovers carry the editor's theme class
+  + `--rte-*` tokens (identical styling), reposition on scroll/resize, and are
+  cleaned up on `destroy()`. `popup: 'wrapper'` keeps the legacy placement.
+- **Side panel squished content on narrow embedded editors.** The rail's
+  collapse used a viewport `@media (max-width: 720px)`, so an editor narrow
+  inside a WIDE viewport (a split pane, a preview card) kept the fixed 268px rail
+  and crushed the content column to a mid-word-wrapping sliver. It now folds via
+  a **container query** keyed to the EDITOR's own width (with an `@media`
+  fallback for engines without container queries).
+- **Expanded toolbar overflow wrapped into a ragged mess.** The reflow packed
+  all overflowed tools into a single `flex-wrap` row, so groups wrapped
+  unevenly and the vertical dividers stranded at wrapped-line starts. The
+  reflow now packs the overflow into multiple non-wrapping rows (the layout the
+  CSS was written for) — clean single-line rows separated by a hairline.
+
+### Added
+- `popup: 'auto' | 'fixed' | 'wrapper'` option (see above).
+- `--rte-toolbar-group-gap` already shipped in 2.13.2; the container-query rail
+  fold is new here.
+
 ## [2.13.4] — 2026-08-09
 
 **Complete i18n coverage.** 2.13.3 shipped `options.strings`, but only the
@@ -798,6 +831,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.13.5]: https://github.com/nampick/yjd/releases/tag/v2.13.5
 [2.13.4]: https://github.com/nampick/yjd/releases/tag/v2.13.4
 [2.13.3]: https://github.com/nampick/yjd/releases/tag/v2.13.3
 [2.13.2]: https://github.com/nampick/yjd/releases/tag/v2.13.2
