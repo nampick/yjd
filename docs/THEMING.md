@@ -132,3 +132,39 @@ After editing `lib/styles.css`, run `npm run generate:css` (regenerates
 `styles.css.js` + `styles.min.css`) then `npm run build`, and check the editor
 in **both** light and dark (`data-theme="dark"`) — a hardcoded colour shows up
 as text/surface that fails to flip.
+
+## Overriding hover/active state visuals (the supported path)
+
+Every hover/`.active` state rule in the shipped CSS reads its colour from a
+`--rte-*` token (`--rte-chrome-2`, `--rte-chrome-3`, `--rte-accent-weak`,
+`--rte-ink`, …). Some of those rules also carry `!important` — that is internal
+cascade plumbing, and per the CSS spec a **layered `!important` beats an
+unlayered one**, so fighting these rules with your own `!important` CSS will
+lose. Don't fight them; feed them:
+
+```css
+/* App CSS (unlayered) — retune the hover wash for toolbar buttons only. */
+.my-app .yjd-rich-editor .rich-editor-toolbar-btn:hover { --rte-chrome-2: #ffe8d6; }
+
+/* Or retune a state globally. */
+.my-app .yjd-rich-editor { --rte-accent-weak: #e6f7f1; }
+```
+
+Custom-property definitions are normal declarations that your unlayered CSS
+always wins, and the library's `!important` rule then *computes from your
+value*. Scoped redefinition (as above) gives per-state, per-component control
+without touching a single library selector.
+
+## @layer facts worth knowing
+
+- **The dist keeps `@layer yjd` intact** — the build only minifies; it never
+  flattens layers (there's a build gate that fails if the wrapper disappears).
+  If dev and prod behave differently around layers in *your* app, look at your
+  own bundler/PostCSS pipeline — some flatten `@layer`, which silently breaks
+  `revert-layer` in app CSS (it falls through to the UA default).
+- Popup box-model (card/input/button padding) sits in a small **un-layered
+  guard block** at the end of the stylesheet so a global reset like
+  `* { padding: 0 }` can't collapse popup chrome. Tune it via
+  `--rte-popup-pad`, `--rte-popup-pad-inline`, `--rte-popup-pad-lg`,
+  `--rte-popup-pad-sm`, `--rte-input-pad`, `--rte-popup-btn-pad`,
+  `--rte-popup-btn-pad-inline`, `--rte-popup-ctl-pad`.

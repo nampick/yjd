@@ -316,7 +316,7 @@ just **drag-and-drop or paste a video file** onto the editor — it inserts an i
 file to your server/CDN instead of inlining a data URL; omit it for the data-URL
 fallback. All three file paths — toolbar popup, drag-drop, and paste — go through
 the same hook. Videos serialize to Markdown as `![video](src)` and round-trip
-back to an inline player (or a YouTube/Vimeo embed iframe). A tall/portrait clip is capped to `maxHeight` (default **360px**) on
+back to an inline player (or a YouTube/Vimeo embed iframe). A tall/portrait clip is capped to `maxHeight` (default **480px**, matching typical read-view caps so composing looks like viewing) on
 insert so it doesn't blow out the frame — the user can still drag-resize larger.
 
 ```js
@@ -325,7 +325,7 @@ new yjd('#editor', {
     upload: async (file) => (await api.upload(file)).url,   // return the URL
     accept: 'video/mp4,video/webm',
     maxSize: 50 * 1024 * 1024,
-    maxHeight: 360,                                          // display cap (px or CSS length)
+    maxHeight: 480,                                          // display cap (px or CSS length)
   },
 });
 // events: editor.on('video:upload'|'video:uploaded'|'video:error', cb)

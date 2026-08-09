@@ -1535,14 +1535,16 @@
 .yjd-content img { max-width: var(--rte-img-max-w, 100%); }
 
 /* Display cap for inserted videos so a tall/portrait clip doesn't blow out the
-   frame on insert. Default 360px; override via options.video.maxHeight/maxWidth
-   (writes --rte-video-max-h / --rte-video-max-w) or the tokens at :root. The
-   resize module clears these inline (max-*: none) once the user drags a size,
-   so dragging larger than the cap still works. */
+   frame on insert. Default 480px (matches typical read-view render caps, so a
+   clip looks the same while composing as when viewed); override via
+   options.video.maxHeight/maxWidth (writes --rte-video-max-h /
+   --rte-video-max-w) or the tokens at :root. The resize module clears these
+   inline (max-*: none) once the user drags a size, so dragging larger than the
+   cap still works. */
 .yjd-rich-editor .inserted-video,
 .yjd-content .inserted-video,
 .yjd-content video {
-  max-height: var(--rte-video-max-h, 360px);
+  max-height: var(--rte-video-max-h, 480px);
   max-width: var(--rte-video-max-w, 100%);
 }
 
@@ -6663,3 +6665,28 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-content.yjd-theme-dark { color: var(--rte-ink); background: var(--rte-bg); }
 
 } /* end @layer yjd */
+
+/* ── Un-layered structural guard ─────────────────────────────────────────────
+   The @layer contract means ANY unlayered app CSS outranks the styles above —
+   including blanket resets (`* { padding: 0 }`) that were never aimed at the
+   editor, which collapsed popup chrome (inputs flush to the edge, squashed
+   buttons). The box-model rules below sit OUTSIDE the layer so a
+   zero-specificity reset can't flatten them. Overriding stays easy and
+   fight-free: redefine the --rte-popup-… / --rte-input-pad tokens, or use any
+   unlayered selector of the same or higher specificity. Values mirror the
+   in-layer popup spec exactly — this block changes nothing on pages without
+   aggressive resets. */
+.yjd-rich-editor .image-popup,
+.yjd-rich-editor .video-popup,
+.yjd-rich-editor .tag-popup,
+.yjd-rich-editor .import-popup { padding: var(--rte-popup-pad, 14px); }
+.yjd-rich-editor .link-popup { padding: var(--rte-popup-pad-inline, 9px); }
+.yjd-rich-editor .link-popup-content { padding: var(--rte-popup-pad-lg, 16px); }
+.yjd-rich-editor .table-popup-content { padding: var(--rte-popup-pad-sm, 8px); }
+.yjd-rich-editor .yjd-input { padding: var(--rte-input-pad, 0 10px); }
+.yjd-rich-editor .yjd-button-confirm,
+.yjd-rich-editor .yjd-button-cancel { padding: var(--rte-popup-btn-pad, 8px 15px); }
+.yjd-rich-editor .link-popup-apply { padding: var(--rte-popup-btn-pad-inline, 0 12px); }
+.yjd-rich-editor .link-popup--inline .link-popup-apply { padding: var(--rte-popup-btn-pad-inline, 0 10px); }
+.yjd-rich-editor .import-popup .import-type-select,
+.yjd-rich-editor .tag-popup .yjd-suggestion-button { padding: var(--rte-popup-ctl-pad, 0 9px); }

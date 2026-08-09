@@ -92,7 +92,7 @@ export interface VideoOptions {
   maxSize?: number;
   /**
    * Display cap for the inline player so a tall/portrait clip doesn't blow out
-   * the frame (px or any CSS length, e.g. '60vh'). Defaults to 360px; the user
+   * the frame (px or any CSS length, e.g. '60vh'). Defaults to 480px; the user
    * can still drag-resize larger. Sets `--rte-video-max-h`.
    */
   maxHeight?: number | string;

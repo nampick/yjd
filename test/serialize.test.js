@@ -103,3 +103,22 @@ test('video round-trips markdown -> html -> markdown', () => {
   const md = '![video](https://cdn.example.com/clip.mp4)\n';
   assert.equal(htmlToMarkdown(markdownToHtml(md)), md);
 });
+
+test('markdownToHtml classifies an extension-less URL with alt "video" as a <video>', () => {
+  const out = markdownToHtml('![video](https://x.test/files/abc123)');
+  assert.ok(out.includes('<video'), 'alt video must be the tie-breaker for extension-less URLs');
+  assert.ok(!out.includes('<img'));
+});
+
+test('markdownToHtml keeps an extension-less URL with a non-video alt as <img>', () => {
+  const out = markdownToHtml('![photo](https://x.test/files/abc123)');
+  assert.ok(out.includes('<img'));
+  assert.ok(!out.includes('<video'));
+});
+
+test('extension-less video round-trips html -> markdown -> html as a player', () => {
+  const html = '<video class="inserted-video" src="https://x.test/files/abc123" controls></video>';
+  const md = htmlToMarkdown(html);
+  assert.equal(md, '![video](https://x.test/files/abc123)\n');
+  assert.ok(markdownToHtml(md).includes('<video'), 'yjd must re-render its own serializer output as a player');
+});
