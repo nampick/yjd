@@ -253,3 +253,20 @@ test('paste still prefers an image when both image and video are present', async
   });
   assert.deepEqual(calls, ['image'], 'image wins, video not double-inserted');
 });
+
+test('compositionend re-syncs the prompt send state (iOS IME belt)', () => {
+  const ed = new Editor(mount(), { autoFocus: false });
+  let calls = 0;
+  ed._syncPromptSendState = () => { calls++; };
+  ed.editor.dispatchEvent(new window.Event('compositionend', { bubbles: true }));
+  assert.ok(calls >= 1, 'compositionend must re-run the send-state sync');
+});
+
+test('focus re-syncs the prompt send state (iOS IME belt)', async () => {
+  const ed = new Editor(mount(), { autoFocus: false });
+  let calls = 0;
+  ed._syncPromptSendState = () => { calls++; };
+  ed.editor.dispatchEvent(new window.Event('focus'));
+  await new Promise((r) => setTimeout(r, 20));
+  assert.ok(calls >= 1, 'focus must re-run the send-state sync');
+});

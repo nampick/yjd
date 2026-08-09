@@ -4,6 +4,58 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [2.13.2] — 2026-08-09
+
+**Integration-feedback release** — every actionable point from the first
+production integration report against 2.13.1 (media pipeline symmetry, theming
+contract, host-reset resilience), each verified in a real browser.
+
+### Fixed
+- **Image popup now honours `image.upload`** (the image half of 2.13.1's video
+  fix): picking a file in the exported `ImagePopup` routes through
+  `insertImageFile` (placeholder → upload hook → `<img>` URL) instead of always
+  inlining a base64 data URL. Data-URL fallback kept for core builds / no hook.
+  The library's own toolbar image button already used the hook path; this
+  closes the popup component integrators wire themselves.
+- **`markdownToHtml` classifies `![video](url)` by alt, not just extension**:
+  an extension-less URL (signed/capability URLs, CDN ids) with alt `video` —
+  exactly what `htmlToMarkdown` emits for videos — now renders as an inline
+  `<video controls>` player instead of a broken `<img>`. Non-video alts on
+  extension-less URLs stay images.
+- **iOS IME send-button belt**: the editor re-runs the prompt send-state sync
+  on `compositionend` and on `focus` — WebKit IME commits (e.g. Vietnamese
+  keyboards) could land text through paths whose mutations arrived too late,
+  leaving the send button disabled with text in the pill.
+- **Popup chrome survives host CSS resets**: popup card/input/button padding
+  moved into a small **un-layered structural guard** (values unchanged), so a
+  host page's `* { padding: 0 }` — which outranks everything inside
+  `@layer yjd` — can no longer collapse popups. All values are new tokens
+  (`--rte-popup-pad`, `--rte-popup-pad-inline`, `--rte-popup-pad-lg`,
+  `--rte-popup-pad-sm`, `--rte-input-pad`, `--rte-popup-btn-pad`,
+  `--rte-popup-btn-pad-inline`, `--rte-popup-ctl-pad`).
+- **Build: guard block minified separately** — csso's restructure pass is
+  `@layer`-ignorant and silently merged the un-layered guard into an in-layer
+  rule with the same selector list, deleting it. `generate-css.js` now minifies
+  the layer and the guard independently and fails the build if the guard block
+  ever disappears from the source.
+
+### Changed
+- **`--rte-video-max-h` default 360px → 480px**: the inserted-video display cap
+  now matches typical read-view render caps, so a portrait clip looks the same
+  while composing as when viewed. Override via `options.video.maxHeight` or the
+  token, as before.
+
+### Docs
+- **State-override contract documented** (`docs/THEMING.md`): hover/active
+  visuals are token-driven — redefine `--rte-*` tokens (scoped, unlayered, no
+  `!important` needed) and the value flows through the library's own rules.
+  Removing the state `!important`s outright was attempted and rejected with
+  evidence: a 4,225-point computed-style matrix showed 642 regressions across
+  6 rule families, so the plumbing stays and the tokens are the contract.
+- Clarified that **the dist keeps `@layer yjd` intact** (a build gate enforces
+  it) — dev/prod differences around `revert-layer` come from app-side bundlers
+  that flatten layers, not from yjd.
+
 ## [2.13.1] — 2026-08-08
 
 **Video pipeline fixes** — the three gaps that forced integrators to patch
@@ -657,6 +709,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.13.2]: https://github.com/nampick/yjd/releases/tag/v2.13.2
 [2.13.1]: https://github.com/nampick/yjd/releases/tag/v2.13.1
 [2.13.0]: https://github.com/nampick/yjd/releases/tag/v2.13.0
 [2.12.0]: https://github.com/nampick/yjd/releases/tag/v2.12.0

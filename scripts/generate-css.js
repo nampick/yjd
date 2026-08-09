@@ -24,7 +24,17 @@ const raw = readFileSync(cssPath, 'utf8');
 // theming contract ("unlayered app CSS always wins, no !important / specificity
 // battles") holds for EVERY shipped artifact — including the raw styles.css if a
 // consumer links it directly. Here we only minify (the @layer is preserved).
-const css = minify(raw).css;
+//
+// The un-layered structural guard at the end of styles.css MUST be minified
+// separately: csso's restructure pass is @layer-ignorant and will merge a
+// guard rule into an in-layer rule with the identical selector list —
+// silently deleting the guard (observed with the popup-shell padding rule).
+const GUARD_MARK = '/* ── Un-layered structural guard';
+const guardAt = raw.indexOf(GUARD_MARK);
+if (guardAt === -1) {
+  throw new Error('generate-css: expected the "Un-layered structural guard" block in styles.css — popup chrome would collapse under host resets without it.');
+}
+const css = minify(raw.slice(0, guardAt)).css + minify(raw.slice(guardAt)).css;
 
 // Safety net: fail loudly if the source ever loses its layer wrapper, so we
 // never ship un-layered CSS that would silently break the override contract.
