@@ -4,6 +4,44 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [2.13.4] — 2026-08-09
+
+**Complete i18n coverage.** 2.13.3 shipped `options.strings`, but only the
+toolbar tooltips, add-menu and a few popups routed through it. This wires
+**every** remaining user-visible string in the library through `editor.t()`, so
+an integrator can fully localise the editor.
+
+### Added
+- **`t()` now interpolates `{name}` placeholders** — a composite localises as
+  one unit: `t('toolbar.hideNTools', 'Hide {n} more tools', { n })`. Modules get
+  a safe `this.t()` (falls back to English if the editor lacks `t()`).
+- **`--` (new namespaces)**: the slash menu (`slash.*`), side panel (`panel.*`),
+  find & replace (`find.*`), AI bar (`ai.*`), block & table toolbars (`block.*`
+  / `table.*`), block/resize handles, code tools (`code.*`), status bar
+  (`status.*`), editor placeholder (`editor.placeholder`), the tag / import /
+  emoji popups (`tag.*` / `import.*` / `emoji.*`), the link hover bar, and every
+  format dropdown (`heading.*`, `size.*`, `case.*`, `spacing.*`, `lineHeight.*`,
+  `align.*`, `list.*`, `color.*`) all resolve through `options.strings`.
+
+### Fixed
+- **Two tooltips overwrote their own translation on toggle**: the code-view and
+  fullscreen buttons re-set an English `title` every time they toggled, clobbering
+  a `toolbar.code-view` / `toolbar.fullscreen` value from `options.strings`. They
+  now re-resolve through `t()`.
+- The special toolbar buttons (Send / Add / More) and the list-picker tooltips —
+  reported as missed by `options.strings` — now localise (they bypassed the
+  central tooltip map).
+
+### Security
+- App-supplied strings injected into an `innerHTML` template (slash menu, AI bar)
+  are HTML-escaped, so a translation can't inject markup.
+
+### Notes
+- Emoji **search** stays keyed on the English emoji names (localising the index
+  is a separate, larger job); category labels and chrome do localise. Font-family
+  names are proper nouns, left as-is.
+- Size ceilings +2 KB for the added lookups.
+
 ## [2.13.3] — 2026-08-09
 
 **Security-forward integration release.** Closes a class of URL/attribute
@@ -760,6 +798,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.13.4]: https://github.com/nampick/yjd/releases/tag/v2.13.4
 [2.13.3]: https://github.com/nampick/yjd/releases/tag/v2.13.3
 [2.13.2]: https://github.com/nampick/yjd/releases/tag/v2.13.2
 [2.13.1]: https://github.com/nampick/yjd/releases/tag/v2.13.1

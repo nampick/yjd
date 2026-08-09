@@ -1,6 +1,6 @@
 {
   "name": "@oix1987/yjd",
-  "version": "2.13.3",
+  "version": "2.13.4",
   "description": "Dependency-free, tree-shakeable rich text editor & WYSIWYG for the web — comment threads, outline/versions rail, block drag handles, slash menu, code blocks with language detection, chat/prompt input layout, bring-your-own-model AI, @mentions, drag-drop uploads, and HTML/Markdown/JSON export. Ship ~17 KB, not the whole library.",
   "keywords": [
     "rich-text-editor",
@@ -84,17 +84,17 @@
     {
       "name": "ESM (all-in-one)",
       "path": "dist/rich-editor.esm.js",
-      "limit": "88 KB"
+      "limit": "90 KB"
     },
     {
       "name": "UMD min",
       "path": "dist/rich-editor.min.js",
-      "limit": "88 KB"
+      "limit": "90 KB"
     },
     {
       "name": "Core ESM",
       "path": "dist/core.esm.js",
-      "limit": "82 KB"
+      "limit": "84 KB"
     },
     {
       "name": "Stylesheet",

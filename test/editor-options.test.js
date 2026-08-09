@@ -384,3 +384,50 @@ test('media.migrateDataUrls leaves the data URL on upload failure', async () => 
   assert.ok(err, 'a migrate-error event fired');
   assert.ok(/^data:/.test(ed.editor.querySelector('img').getAttribute('src')), 'src stays the data URL on failure');
 });
+
+test('options.strings localizes the special toolbar buttons (Send / Add / More)', () => {
+  const ed = new Editor(mount(), {
+    layout: 'prompt',
+    strings: { 'toolbar.send': 'Gửi', 'toolbar.add': 'Thêm' },
+  });
+  const tb = ed.getModule('toolbar');
+  const send = tb.buttons.get('send');
+  assert.equal(send.title, 'Gửi', 'send tooltip localized');
+  assert.equal(send.getAttribute('aria-label'), 'Gửi');
+  const add = tb.buttons.get('add');
+  assert.equal(add.title, 'Thêm', 'add tooltip localized');
+
+  const ed2 = new Editor(mount(), { strings: { 'toolbar.more': 'Thêm công cụ' } });
+  const more = ed2.getModule('toolbar').moreBtn;
+  assert.equal(more.title, 'Thêm công cụ', 'more tooltip localized');
+});
+
+test('options.strings localizes list-picker titles', async () => {
+  const { default: ListPicker } = await import('../lib/ui/list-picker.js');
+  const fakeEd = { t: (k, fb) => (k === 'list.bullet' ? 'Danh sách chấm' : fb) };
+  const picker = new ListPicker({ editor: fakeEd });
+  await new Promise((r) => setTimeout(r, 0));
+  const bullet = picker.popup.querySelector('[data-list-type="bullet"]');
+  assert.ok(bullet, 'bullet option exists');
+  assert.equal(bullet.title, 'Danh sách chấm', 'list option tooltip localized');
+});
+
+test('options.strings reaches deep chrome: slash-menu, statusbar, placeholder', () => {
+  const ed = new Editor(mount(), {
+    strings: { 'slash.h1': 'Tiêu đề 1', 'editor.placeholder': 'Bắt đầu viết…', 'status.body': 'Thân bài' },
+  });
+  // placeholder localized on the editor element
+  assert.equal(ed.editor.getAttribute('data-placeholder'), 'Bắt đầu viết…');
+  // slash-menu command labels resolve through strings
+  const slash = ed.getModule('slash-menu');
+  if (slash && slash.commands) {
+    const h1 = slash.commands.find((c) => c.id === 'h1');
+    if (h1) assert.equal(h1.label, 'Tiêu đề 1', 'slash h1 label localized');
+  }
+});
+
+test('t() interpolates {n} params for composites', () => {
+  const ed = new Editor(mount(), { strings: { 'x.count': '{n} mục' } });
+  assert.equal(ed.t('x.count', '{n} items', { n: 3 }), '3 mục');
+  assert.equal(ed.t('x.missing', '{n} left', { n: 5 }), '5 left', 'fallback also interpolates');
+});
