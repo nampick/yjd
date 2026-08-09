@@ -6702,6 +6702,13 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .yjd-input { padding: var(--rte-input-pad, 0 10px); }
 .yjd-rich-editor .yjd-button-confirm,
 .yjd-rich-editor .yjd-button-cancel { padding: var(--rte-popup-btn-pad, 8px 15px); }
+/* Compact side-panel buttons (comment thread reply + composer) reuse
+   .yjd-button-confirm/.yjd-button-cancel but must NOT inherit the popup
+   button's 8px 15px padding / 14px text — the unlayered guard above would
+   otherwise beat their layered compact rules and blow them up next to the 26px
+   input. Keep them tight to match the thread composer. */
+.yjd-rich-editor .yjd-c-replybtn,
+.yjd-rich-editor .yjd-c-cbtn { padding: 0 10px; font-size: 12px; }
 .yjd-rich-editor .link-popup-apply { padding: var(--rte-popup-btn-pad-inline, 0 12px); }
 .yjd-rich-editor .link-popup--inline .link-popup-apply { padding: var(--rte-popup-btn-pad-inline, 0 10px); }
 .yjd-rich-editor .import-popup .import-type-select,
