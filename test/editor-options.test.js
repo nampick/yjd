@@ -431,3 +431,24 @@ test('t() interpolates {n} params for composites', () => {
   assert.equal(ed.t('x.count', '{n} items', { n: 3 }), '3 mục');
   assert.equal(ed.t('x.missing', '{n} left', { n: 5 }), '5 left', 'fallback also interpolates');
 });
+
+test('popup strategy: explicit fixed/wrapper honoured; auto defaults to wrapper without a clipping ancestor', () => {
+  const w = new Editor(mount(), { popup: 'wrapper' });
+  assert.equal(w._popupStrategy(), 'wrapper');
+  const f = new Editor(mount(), { popup: 'fixed' });
+  assert.equal(f._popupStrategy(), 'fixed');
+  assert.ok(f.getPopupContainer().classList.contains('yjd-popup-portal'), 'fixed uses a body portal root');
+  // auto with a plain (non-clipping) mount → wrapper
+  const a = new Editor(mount(), {});
+  assert.equal(a._popupStrategy(), 'wrapper');
+  assert.ok(a.getPopupContainer().classList.contains('rich-editor-popup-container'));
+});
+
+test('popup:fixed portal root carries the editor theme class + is removed on destroy', () => {
+  const ed = new Editor(mount(), { popup: 'fixed' });
+  const root = ed.getPopupContainer();
+  assert.ok(root.classList.contains('yjd-rich-editor'), 'portal carries theme class so scoped CSS applies');
+  assert.ok(document.body.contains(root));
+  ed.destroy();
+  assert.ok(!document.body.contains(root), 'portal removed on destroy');
+});

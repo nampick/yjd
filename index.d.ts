@@ -373,6 +373,18 @@ export interface EditorOptions {
   /** @mention / #task autocomplete. Inert until a `source` is given. */
   mention?: MentionOptions;
   /**
+   * Where toolbar popovers (link/image/video/tag/table/import/emoji/list/align
+   * and the format dropdowns) are placed:
+   *  - `'auto'` (default) — portal to `<body>` with `position: fixed` ONLY when a
+   *    clipping or transforming ancestor sits between the editor and `<body>`
+   *    (the case that clips/buries popovers in host apps); otherwise placed
+   *    inside the editor as before.
+   *  - `'fixed'` — always portal to `<body>` (immune to a host's
+   *    overflow/transform/stacking; the tradeoff is it can overlay host chrome).
+   *  - `'wrapper'` — legacy: always placed absolutely inside the editor.
+   */
+  popup?: 'auto' | 'fixed' | 'wrapper';
+  /**
    * Localise the built-in UI strings (toolbar tooltips, popup titles/buttons,
    * add-menu labels, attachment chrome). Either a flat map of `key → string` or
    * a function `(key, englishFallback) => string`; anything missing (or a

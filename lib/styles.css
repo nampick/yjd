@@ -5686,6 +5686,11 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   align-items: stretch;
   flex: 1 1 auto;
   min-height: 0;
+  /* Respond to the EDITOR's own width, not the viewport: an editor embedded in
+     a narrow column (or a split/preview pane) on a wide screen must still fold
+     the rail. The container query below keys off this element's inline size. */
+  container-type: inline-size;
+  container-name: yjd-editor;
 }
 .yjd-rich-editor .yjd-side-layout > .rich-editor-area { flex: 1 1 auto; min-width: 0; }
 .yjd-rich-editor .yjd-side-panel {
@@ -6081,9 +6086,17 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   }
 }
 
-/* The rail collapses on narrow editors. */
-@media (max-width: 720px) {
+/* The rail collapses on narrow editors — keyed to the EDITOR's width (container
+   query), so a narrow editor inside a wide viewport folds it too instead of
+   squeezing the content column to a mid-word-wrapping sliver. Legacy viewport
+   fallback kept for engines without container-query support. */
+@container yjd-editor (max-width: 720px) {
   .yjd-rich-editor .yjd-side-panel { display: none; }
+}
+@supports not (container-type: inline-size) {
+  @media (max-width: 720px) {
+    .yjd-rich-editor .yjd-side-panel { display: none; }
+  }
 }
 
 /* ---------- Block gutter: drag handle + plus (UI 2.0 editor surface) ---------- */
@@ -6693,3 +6706,19 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .link-popup--inline .link-popup-apply { padding: var(--rte-popup-btn-pad-inline, 0 10px); }
 .yjd-rich-editor .import-popup .import-type-select,
 .yjd-rich-editor .tag-popup .yjd-suggestion-button { padding: var(--rte-popup-ctl-pad, 0 9px); }
+
+/* Body-level popover portal (popup:'fixed'/'auto'): a zero-size, non-clipping,
+   top-of-stack anchor that carries the editor theme class so portaled popovers
+   keep their yjd styling. Unlayered so a host reset can't neutralise the
+   pointer-events / positioning that make it work. Its children (the popovers)
+   are position:fixed in viewport coordinates (set inline by popup-helper). */
+.yjd-popup-portal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+.yjd-popup-portal > * { pointer-events: auto; }

@@ -406,6 +406,25 @@ and the editor placeholder (`editor.placeholder`). A composite string takes
 > (`grinning`, `thumbsup`, …); only the category labels and picker chrome
 > localise. Font-family names are proper nouns and are left as-is.
 
+### Popover placement in host apps (`popup`)
+
+Toolbar popovers (link/image/video/tag/table/import/emoji/list/align, format
+dropdowns) default to `popup: 'auto'`: they sit inside the editor as usual, but
+if a host ancestor between the editor and `<body>` **clips** (`overflow` other
+than `visible`) or **re-roots** (`transform`/`filter`/`perspective`/`contain`)
+them — a card with `overflow:hidden`, a scroll pane, a CSS-transform panel — the
+editor portals the popover to `<body>` with `position: fixed` so it can't be cut
+off or buried under host chrome. Force it with `popup: 'fixed'` (always portal)
+or opt out with `popup: 'wrapper'` (legacy in-editor placement):
+
+```js
+new yjd('#editor', { popup: 'fixed' });   // e.g. editor lives inside a modal/card
+```
+
+Portaled popovers carry the editor's theme class + `--rte-*` tokens, so they
+render identically; they reposition on scroll/resize and are removed on
+`destroy()`.
+
 ### Enter-to-submit (comment boxes)
 
 ```js
