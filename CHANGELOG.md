@@ -4,6 +4,30 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [2.13.6] — 2026-08-11
+
+### Changed
+- **Relicensed ISC → MIT.** Functionally equivalent (permissive, commercial-OK)
+  but passes enterprise OSS-review allowlists with less friction. Copyright is
+  now a real, verifiable holder — `Nguyen Tuan Nam <nam@yjd.io>` — instead of a
+  pseudonym, and `package.json` `author`/`license` match. Zero runtime deps
+  unchanged, so consumers still inherit no third-party license obligations.
+
+### Added
+- **License banner in the bundles.** Every `dist/*.js` now carries a
+  `/*! @oix1987/yjd | MIT License | © 2024 Nguyen Tuan Nam */` banner (terser
+  preserves `/*!`), so a standalone-redeployed bundle carries the MIT notice —
+  not only the npm tarball's `LICENSE`. `CONTRIBUTING.md` adds a DCO sign-off
+  note so contributions stay unambiguously under MIT.
+
+### Fixed
+- **Comment-thread reply / composer buttons rendered oversized.** The 2.13.2
+  un-layered popup-button guard (`.yjd-button-confirm`/`.yjd-button-cancel`)
+  beat the layered compact rules on `.yjd-c-replybtn` / `.yjd-c-cbtn` (they
+  reuse those classes), so the thread Reply button and the new-comment
+  Cancel/Comment buttons showed popup-size padding (8px 15px) and 14px text next
+  to the 26px input. Added an un-layered compact override so they stay tight.
+
 ## [2.13.5] — 2026-08-09
 
 **Responsive & host-integration fixes.** Three layout problems that only showed
@@ -831,6 +855,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.13.6]: https://github.com/nampick/yjd/releases/tag/v2.13.6
 [2.13.5]: https://github.com/nampick/yjd/releases/tag/v2.13.5
 [2.13.4]: https://github.com/nampick/yjd/releases/tag/v2.13.4
 [2.13.3]: https://github.com/nampick/yjd/releases/tag/v2.13.3
