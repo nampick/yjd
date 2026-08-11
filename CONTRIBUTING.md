@@ -52,3 +52,11 @@ To refresh the live site after a release, bump `@oix1987/yjd` in the
 
 - Keep `npm test` and `npm run size` green (CI enforces it).
 - Update `index.d.ts` and `CHANGELOG.md` for any API change.
+
+## License & sign-off
+
+This project is MIT licensed. By submitting a pull request you certify the
+[Developer Certificate of Origin](https://developercertificate.org/) (DCO) —
+that you wrote the change or have the right to submit it under MIT — by adding
+a `Signed-off-by: Your Name <you@example.com>` line to each commit
+(`git commit -s`). Contributions are accepted under the project's MIT license.

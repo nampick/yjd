@@ -780,4 +780,4 @@ which consumes this package.
 
 ## License
 
-ISC
+MIT © Nguyen Tuan Nam — see [LICENSE](./LICENSE).

@@ -1,9 +1,18 @@
 import terser from '@rollup/plugin-terser';
 
+// Legal banner preserved through minification: terser keeps comments that start
+// with `/*!`, so the MIT notice (ISC's/MIT's one condition) rides along in every
+// standalone bundle a consumer might redeploy on its own — not just the npm
+// tarball's LICENSE file.
+const BANNER = '/*! @oix1987/yjd | MIT License | Copyright (c) 2024 Nguyen Tuan Nam <nam@yjd.io> | https://yjd.io */';
+
 const terserPlugin = terser({
   compress: {
     drop_console: true,
     drop_debugger: true
+  },
+  format: {
+    comments: /^!/
   }
 });
 
@@ -15,6 +24,7 @@ export default [
     input: 'umd-entry.js',
     output: {
       file: 'dist/rich-editor.min.js',
+      banner: BANNER,
       format: 'umd',
       inlineDynamicImports: true,
       name: 'yjd',
@@ -29,6 +39,7 @@ export default [
     input: 'index.js',
     output: {
       file: 'dist/rich-editor.esm.js',
+      banner: BANNER,
       format: 'es',
       inlineDynamicImports: true,
       sourcemap: true
@@ -41,6 +52,7 @@ export default [
     input: 'core.js',
     output: {
       file: 'dist/core.esm.js',
+      banner: BANNER,
       format: 'es',
       inlineDynamicImports: true,
       sourcemap: true

@@ -31,8 +31,8 @@
   "bugs": {
     "url": "https://github.com/nampick/yjd/issues"
   },
-  "license": "ISC",
-  "author": "Oix1987",
+  "license": "MIT",
+  "author": "Nguyen Tuan Nam <nam@yjd.io>",
   "type": "module",
   "main": "dist/rich-editor.min.js",
   "module": "dist/rich-editor.esm.js",
