@@ -22,7 +22,24 @@ new yjd('#editor', { placeholder: 'Start writing…' });
 - **XSS-safe paste** — sanitises pasted HTML (scripts/handlers/unsafe URLs stripped; only trusted embeds survive).
 - **Accessible** — keyboard navigable, WCAG-AA contrast (Lighthouse a11y 100).
 
-## New in 2.13
+## New in 2.14
+
+- **Plain-text mode** — `plainText: true` for chat/prompt/comment hosts that
+  store text: every formatting surface is off, paste is forced plain, and
+  `getContent()` / `onChange` / `submit` deliver newline-separated plain text.
+  Mentions and AI keep working.
+- **TypeScript under Bundler resolution** — the `exports` map now carries a
+  `types` condition, so Vite-style `moduleResolution: "Bundler"` resolves
+  `index.d.ts` instead of silently `any`.
+- **A flat `toolbar` array is a true allow-list** — formats outside the list
+  are never instantiated, so no hidden picker UI mounts behind a restricted
+  toolbar.
+- **`width` defaults to `'100%'`** — the editor fills its container (was a
+  fixed 800px). `prompt.format` (alias of `tools`) with `[]` renders no format
+  buttons, and the prompt bar's Send button renders only when a `submit`
+  handler is configured.
+
+## Earlier: 2.13
 
 - **Comment threads** — select text and press ⌘⌥M (or call
   `openCommentComposer()`): a quote-header composer marks the range; the mark

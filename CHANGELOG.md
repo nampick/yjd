@@ -4,7 +4,7 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [2.14.0] — 2026-08-19
 
 ### Added
 - **`plainText: true` — a first-class plain-text mode** for the chat/prompt/
@@ -888,6 +888,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.14.0]: https://github.com/nampick/yjd/releases/tag/v2.14.0
 [2.13.6]: https://github.com/nampick/yjd/releases/tag/v2.13.6
 [2.13.5]: https://github.com/nampick/yjd/releases/tag/v2.13.5
 [2.13.4]: https://github.com/nampick/yjd/releases/tag/v2.13.4
