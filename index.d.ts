@@ -365,6 +365,16 @@ export interface EditorOptions {
   onChange?: (content: string) => void;
   /** When true, paste always inserts plain text (default: false). */
   pasteAsPlainText?: boolean;
+  /**
+   * Plain-text mode for chat/prompt/comment hosts that store text (default
+   * false). All formatting is off: no format UI (toolbar/prompt-bar buttons,
+   * bubble), ⌘B/I/U/K are no-ops, markdown input rules and auto-linkify are
+   * disabled, paste is forced plain. `getContent()`, `onChange` and the
+   * `submit` handler deliver plain text (blocks newline-separated);
+   * `setContent()` flattens any markup it is given. Mentions and the AI
+   * module keep working — both round-trip plain text.
+   */
+  plainText?: boolean;
   /** Accessible label for the editable region (defaults to placeholder). */
   ariaLabel?: string;
   /** Maximum number of characters allowed. */

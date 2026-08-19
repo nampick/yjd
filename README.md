@@ -525,6 +525,27 @@ editor.addContext({ label: '@report.md', value: fileId });  // a removable chip 
 submit: { onSubmit: (html, ed) => send(html, ed.getContext()) }  // [{ id, label, value }]
 ```
 
+### Plain-text mode
+
+Chat, prompt and comment hosts usually store **text**, not HTML. `plainText:
+true` makes the editor honest about that: every formatting surface is off
+(toolbar/prompt-bar format buttons, ⌘B/I/U/K, markdown input rules,
+auto-linkify), paste is forced plain, and `getContent()`, `onChange` and the
+`submit` handler all deliver **plain text** — blocks separated by `\n`.
+`setContent()` flattens any markup it is given.
+
+```js
+new yjd('#chat', {
+  layout: 'prompt',
+  plainText: true,                      // text in, text out — nothing to strip on save
+  submit: { onSubmit: (text) => send(text) },
+});
+```
+
+Mentions and the AI module keep working — both round-trip plain text. With
+`prompt.serializeAttachments`, attachment tails use the markdown shape
+(`![](src)` / `[name](url)`) instead of HTML tags.
+
 ### @mention / #task
 
 ```js

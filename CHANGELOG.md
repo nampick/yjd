@@ -6,6 +6,15 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+- **`plainText: true` — a first-class plain-text mode** for the chat/prompt/
+  comment hosts the package targets. All formatting is off (format UI,
+  ⌘B/I/U/K, markdown input rules, auto-linkify), paste is forced plain, and
+  `getContent()` / `onChange` / the `submit` handler deliver newline-separated
+  plain text; `setContent()` flattens any markup it receives. Mentions and the
+  AI module keep working; `serializeAttachments` tails switch to the markdown
+  shape. (#60)
+
 ### Fixed
 - **TypeScript types resolve under `moduleResolution: "Bundler"`.** The
   `exports` map now carries a `types` condition for `.` and `./core`, so Vite

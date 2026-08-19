@@ -514,3 +514,68 @@ test('a flat toolbar array is an allow-list — no picker popups for absent cont
   assert.equal(ed._fmtCache ? ed._fmtCache.size : 0, 0,
     'no format instances created for controls that are not in the toolbar');
 });
+
+test('plainText: content APIs deliver text, markup is flattened (#60)', () => {
+  const out = [];
+  const ed = new Editor(mount(), {
+    plainText: true, autoFocus: false,
+    onChange: (c) => out.push(c),
+  });
+  assert.equal(ed.options.pasteAsPlainText, true, 'plainText forces plain paste');
+
+  ed.setContent('<p>Hi <strong>bold</strong> and <em>italic</em> <a href="http://x">link</a></p>');
+  assert.equal(ed.editor.querySelectorAll('strong, em, a').length, 0,
+    'markup handed to setContent must not survive');
+  assert.equal(ed.getContent(), 'Hi bold and italic link', 'getContent() returns text');
+  assert.equal(out[out.length - 1], 'Hi bold and italic link', 'onChange delivers text');
+
+  ed.setContent('one\ntwo');
+  assert.equal(ed.getContent(), 'one\ntwo', 'text input round-trips line breaks');
+  assert.equal(ed.editor.querySelectorAll('p').length, 2, 'each line is its own paragraph');
+});
+
+test('plainText: formatting is inert and no format UI renders (#60)', () => {
+  const ed = new Editor(mount(), { plainText: true, autoFocus: false });
+  const tb = ed.getModule('toolbar');
+  assert.deepEqual([...tb.buttons.keys()].filter((k) => k !== 'more'), ['undo', 'redo'],
+    'default plainText toolbar is history only');
+
+  ed.setContent('hello');
+  const range = document.createRange();
+  range.selectNodeContents(ed.editor.querySelector('p'));
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  ed.toggleFormat('bold');
+  assert.equal(ed.editor.querySelector('strong, b'), null, 'toggleFormat is a no-op');
+
+  const prompt = new Editor(mount(), {
+    plainText: true, layout: 'prompt', autoFocus: false,
+    submit: { onSubmit: () => {} },
+  });
+  const ptb = prompt.getModule('toolbar');
+  assert.ok(!ptb.buttons.has('bold') && !ptb.buttons.has('italic'),
+    'prompt bar renders no format buttons in plainText mode');
+  assert.ok(ptb.buttons.has('send'), 'send still renders with a submit handler');
+});
+
+test('plainText: submit handler receives text (#60)', () => {
+  let got = null;
+  const ed = new Editor(mount(), {
+    plainText: true, autoFocus: false,
+    submit: { onSubmit: (c) => { got = c; } },
+  });
+  ed.setContent('line one\nline two');
+  ed.submitContent();
+  assert.equal(got, 'line one\nline two');
+});
+
+test('plainText: inline markup flattens onto one line, blocks split lines (#60)', () => {
+  const ed = new Editor(mount(), { plainText: true, autoFocus: false });
+  ed.setContent('hello <b>world</b>');
+  assert.equal(ed.getContent(), 'hello world', 'inline tags stay on the line');
+  ed.setContent('<h1>Title</h1><p>Body with <a href="http://x">a link</a></p>');
+  assert.equal(ed.getContent(), 'Title\nBody with a link');
+  ed.setContent('<ul><li>one</li><li>two</li></ul>');
+  assert.equal(ed.getContent(), 'one\ntwo', 'list items become lines');
+});
