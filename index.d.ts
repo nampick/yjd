@@ -126,6 +126,8 @@ export interface SubmitOptions {
   /**
    * Preferred submit handler — fired by both Enter-to-send and the prompt
    * layout's send button. Receives the current HTML and the editor instance.
+   * The prompt layout renders its Send button only when `onSubmit` (or
+   * `onEnter`) is configured.
    */
   onSubmit?: (html: string, editor: Editor) => void;
   /** Shift+Enter inserts a newline (default true). */
@@ -240,7 +242,10 @@ export interface AiController {
 
 /**
  * Toolbar configuration: a built-in preset, an exclusion of default items,
- * a flat item list (single group), or full custom groups via toolbar1/toolbar2.
+ * a flat item list, or full custom groups via toolbar1/toolbar2.
+ *
+ * The flat array is an **allow-list**: only the named controls render, and no
+ * UI (pickers, popovers) is mounted for anything else.
  */
 export type ToolbarOption =
   | 'full'
@@ -259,7 +264,13 @@ export type PromptAddItem =
 export interface PromptOptions {
   /** A single item makes "+" do it directly (no popover) — the default is ['image'] (tap "+" to add an image). Two or more items open a popover menu. */
   add?: PromptAddItem[];
-  /** Format buttons next to "+" in the bottom bar. Default: ['bold', 'italic'] (basic, no popovers). */
+  /**
+   * Format buttons next to "+" in the bottom bar. Default: ['bold', 'italic']
+   * (basic, no popovers). `[]` removes them entirely. Preferred name; `tools`
+   * is the historical alias (`format` wins when both are set).
+   */
+  format?: string[];
+  /** Historical alias of `format`. */
   tools?: string[];
   /**
    * Skip the built-in image/file upload hook when an attachment is added; the
@@ -339,7 +350,9 @@ export interface EditorOptions {
   /** Explicit min/max height in px (override the height-derived defaults). */
   minHeight?: number;
   maxHeight?: number;
+  /** Editor width. Default '100%' — fills the container (number = px). */
   width?: number | string;
+  /** Width cap (default 1200). Applies on top of `width`. */
   maxWidth?: number | string;
   content?: string | null;
   /**

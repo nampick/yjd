@@ -69,12 +69,45 @@ test('more button starts hidden until reflow finds overflow', () => {
 });
 
 test("layout:'prompt' with toolbar:{overflow:false} still applies the prompt bar", () => {
-  const ed = new Editor(mount(), { layout: 'prompt', toolbar: { overflow: false }, prompt: { tools: ['bold'] } });
+  const ed = new Editor(mount(), {
+    layout: 'prompt', toolbar: { overflow: false },
+    prompt: { tools: ['bold'] }, submit: { onSubmit: () => {} },
+  });
   const tb = ed.getModule('toolbar');
   assert.equal(tb._promptPreset, true, 'a plain toolbar object must not disable the prompt preset');
   assert.ok(tb.buttons.has('send'), 'send button present');
   assert.ok(tb.buttons.has('add'), '+ add button present');
   assert.ok(!tb.buttons.has('more'), 'no dead more button');
+});
+
+test("layout:'prompt' renders Send only when a submit handler is configured (#63)", () => {
+  const bare = new Editor(mount(), { layout: 'prompt' });
+  assert.ok(!bare.getModule('toolbar').buttons.has('send'),
+    'no submit handler → no dead Send button');
+
+  const withSubmit = new Editor(mount(), { layout: 'prompt', submit: { onSubmit: () => {} } });
+  assert.ok(withSubmit.getModule('toolbar').buttons.has('send'));
+
+  const withEnter = new Editor(mount(), { layout: 'prompt', submit: { onEnter: () => {} } });
+  assert.ok(withEnter.getModule('toolbar').buttons.has('send'),
+    'onEnter alone also submits, so it earns the button');
+});
+
+test("prompt.format (and []) controls the format buttons (#62)", () => {
+  const none = new Editor(mount(), { layout: 'prompt', prompt: { format: [] } });
+  const tbN = none.getModule('toolbar');
+  assert.ok(!tbN.buttons.has('bold') && !tbN.buttons.has('italic'),
+    'format: [] must remove the default Bold/Italic');
+  assert.equal(tbN.container.querySelector('.toolbar-group-fmt'), null,
+    'no empty fmt group left in the DOM');
+
+  const some = new Editor(mount(), { layout: 'prompt', prompt: { format: ['underline'] } });
+  const tbS = some.getModule('toolbar');
+  assert.ok(tbS.buttons.has('underline') && !tbS.buttons.has('bold'));
+
+  // Historical name keeps working.
+  const legacy = new Editor(mount(), { layout: 'prompt', prompt: { tools: [] } });
+  assert.ok(!legacy.getModule('toolbar').buttons.has('bold'), 'tools: [] also means none');
 });
 
 test('submit.enterToSend controls whether Enter submits', () => {
@@ -388,6 +421,7 @@ test('media.migrateDataUrls leaves the data URL on upload failure', async () => 
 test('options.strings localizes the special toolbar buttons (Send / Add / More)', () => {
   const ed = new Editor(mount(), {
     layout: 'prompt',
+    submit: { onSubmit: () => {} }, // Send renders only with a submit handler (#63)
     strings: { 'toolbar.send': 'Gửi', 'toolbar.add': 'Thêm' },
   });
   const tb = ed.getModule('toolbar');
@@ -451,4 +485,32 @@ test('popup:fixed portal root carries the editor theme class + is removed on des
   assert.ok(document.body.contains(root));
   ed.destroy();
   assert.ok(!document.body.contains(root), 'portal removed on destroy');
+});
+
+test('default width is 100% — the editor fills its container (#61)', () => {
+  const ed = new Editor(mount(), {});
+  assert.equal(ed.wrapper.style.width, '100%',
+    'unset width must fill the container, not fix 800px');
+  const fixed = new Editor(mount(), { width: 640 });
+  assert.equal(fixed.wrapper.style.width, '640px', 'explicit numeric width still honoured');
+});
+
+test('a flat toolbar array is an allow-list — no picker popups for absent controls (#59)', () => {
+  const ed = new Editor(mount(), { toolbar: ['undo', 'redo'] });
+  // Select some text so updateToolbarButtonStates takes the active-state path.
+  ed.setContent('<p>hello</p>');
+  const range = document.createRange();
+  range.selectNodeContents(ed.editor.querySelector('p'));
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+
+  ed.updateToolbarButtonStates();
+
+  assert.equal(ed.wrapper.querySelectorAll(
+    '.heading-select-popup, .font-family-select-popup, .line-height-select-popup, ' +
+    '.color-picker-popup, .list-picker-popup, .text-size-select-popup').length, 0,
+  'formats outside the toolbar must not mount their pickers into the DOM');
+  assert.equal(ed._fmtCache ? ed._fmtCache.size : 0, 0,
+    'no format instances created for controls that are not in the toolbar');
 });

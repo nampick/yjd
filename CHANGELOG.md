@@ -4,6 +4,30 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- **TypeScript types resolve under `moduleResolution: "Bundler"`.** The
+  `exports` map now carries a `types` condition for `.` and `./core`, so Vite
+  and other Bundler-resolution consumers get `index.d.ts` instead of a silent
+  `any` (TS7016). (#58)
+- **A flat `toolbar` array is now a true allow-list.** Merely probing format
+  active-state used to instantiate all 19 formats, mounting every picker popup
+  (heading levels, font list, line heights, colour grids — 118 controls) into
+  the DOM even for `toolbar: ['undo', 'redo']`. Formats whose control isn't in
+  the toolbar are no longer instantiated at all. (#59)
+- **`prompt.format: []` removes the format buttons.** `format` is the new
+  preferred name (with `tools` kept as an alias); an explicit empty array now
+  renders no Bold/Italic and no empty group chrome. (#62)
+- **The prompt layout's Send button renders only when a `submit` handler
+  (`onSubmit`/`onEnter`) is configured** — no more dead Send in prompt-styled
+  fields that have nothing to submit. (#63)
+
+### Changed
+- **Default `width` is now `'100%'`** (was a fixed `800`px, which overflowed
+  any narrower container — intermittently by viewport, thanks to the clamp).
+  Pass `width: 800` to restore the old behaviour. (#61)
+
 ## [2.13.6] — 2026-08-11
 
 ### Changed

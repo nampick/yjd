@@ -38,10 +38,14 @@
   "module": "dist/rich-editor.esm.js",
   "exports": {
     ".": {
+      "types": "./index.d.ts",
       "import": "./dist/rich-editor.esm.js",
       "require": "./dist/rich-editor.min.js"
     },
-    "./core": "./core.js",
+    "./core": {
+      "types": "./index.d.ts",
+      "default": "./core.js"
+    },
     "./styles.css": "./lib/styles.min.css",
     "./lib/*": "./lib/*",
     "./package.json": "./package.json"

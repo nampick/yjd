@@ -443,13 +443,14 @@ item, doesn't submit). Check it yourself with `editor.isMenuOpen()`.
 `layout: 'prompt'` turns the editor into a chat-style input: a rounded pill with
 the toolbar as a bottom action bar — `[ + add ]  [ format tools ]  …  [ send ]` —
 that grows with its content (`height:'auto'`). Enter and the send button both call
-your `submit` handler.
+your `submit` handler. The **send button renders only when a `submit` handler is
+configured** — a prompt-styled field with nothing to send gets no dead button.
 
 > **Leave `toolbar` unset** with `layout:'prompt'` (or pass `toolbar:'prompt'`).
 > Passing an explicit toolbar **array** or `toolbar1/toolbar2` opts out of the
 > prompt bar and renders that layout instead. A plain `{ overflow, exclude }`
 > object keeps the prompt bar (its flags are ignored — configure tools via
-> `prompt.tools`). Bar buttons never steal focus, so the mobile soft keyboard
+> `prompt.format`). Bar buttons never steal focus, so the mobile soft keyboard
 > stays up across sends.
 
 ```js
@@ -465,8 +466,8 @@ picker — no popover), plus **bold / italic** and the send button. Configure mo
 
 ```js
 prompt: {
-  add:   ['image', 'file', 'video', 'table'],  // 2+ items → "+" opens a popover menu
-  tools: ['bold', 'italic', 'link'],           // format buttons next to "+"
+  add:    ['image', 'file', 'video', 'table'],  // 2+ items → "+" opens a popover menu
+  format: ['bold', 'italic', 'link'],           // format buttons next to "+" ([] = none; `tools` is an alias)
 }
 ```
 
