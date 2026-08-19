@@ -471,7 +471,12 @@ test('popup strategy: explicit fixed/wrapper honoured; auto defaults to wrapper 
   assert.equal(w._popupStrategy(), 'wrapper');
   const f = new Editor(mount(), { popup: 'fixed' });
   assert.equal(f._popupStrategy(), 'fixed');
-  assert.ok(f.getPopupContainer().classList.contains('yjd-popup-portal'), 'fixed uses a body portal root');
+  // The container is an INNER .rich-editor-popup-container nested in the
+  // portal, so descendant-scoped popup CSS keeps matching (#67).
+  assert.ok(f.getPopupContainer().classList.contains('rich-editor-popup-container'),
+    'portal popups mount in a .rich-editor-popup-container');
+  assert.ok(f.getPopupContainer().parentElement.classList.contains('yjd-popup-portal'),
+    'nested inside the body portal root');
   // auto with a plain (non-clipping) mount → wrapper
   const a = new Editor(mount(), {});
   assert.equal(a._popupStrategy(), 'wrapper');
@@ -480,11 +485,13 @@ test('popup strategy: explicit fixed/wrapper honoured; auto defaults to wrapper 
 
 test('popup:fixed portal root carries the editor theme class + is removed on destroy', () => {
   const ed = new Editor(mount(), { popup: 'fixed' });
-  const root = ed.getPopupContainer();
+  const inner = ed.getPopupContainer();
+  const root = inner.parentElement;
   assert.ok(root.classList.contains('yjd-rich-editor'), 'portal carries theme class so scoped CSS applies');
-  assert.ok(document.body.contains(root));
+  assert.ok(document.body.contains(inner));
   ed.destroy();
   assert.ok(!document.body.contains(root), 'portal removed on destroy');
+  assert.ok(!document.body.contains(inner), 'inner container removed with it');
 });
 
 test('default width is 100% — the editor fills its container (#61)', () => {

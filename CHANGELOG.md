@@ -4,6 +4,19 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- **Portaled popups regained their popup styling.** The body-level portal
+  (`popup:'fixed'`, or `'auto'` under a clipping ancestor) compounded both
+  scope classes on one element, so every descendant-scoped popup rule —
+  including the base-layer font enforcement that shields popup form controls
+  from host-page CSS — silently stopped matching. Popups now mount in an inner
+  `.rich-editor-popup-container` nested in the portal. Also, `.yjd-select-input`
+  uses `min-height` instead of a fixed height, so environments that inflate
+  fonts (host CSS, browser minimum font size, OS accessibility text sizing)
+  grow the control instead of clipping its label. (#67)
+
 ## [2.14.0] — 2026-08-19
 
 ### Added
