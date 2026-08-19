@@ -22,7 +22,24 @@ new yjd('#editor', { placeholder: 'Start writing…' });
 - **XSS-safe paste** — sanitises pasted HTML (scripts/handlers/unsafe URLs stripped; only trusted embeds survive).
 - **Accessible** — keyboard navigable, WCAG-AA contrast (Lighthouse a11y 100).
 
-## New in 2.13
+## New in 2.14
+
+- **Plain-text mode** — `plainText: true` for chat/prompt/comment hosts that
+  store text: every formatting surface is off, paste is forced plain, and
+  `getContent()` / `onChange` / `submit` deliver newline-separated plain text.
+  Mentions and AI keep working.
+- **TypeScript under Bundler resolution** — the `exports` map now carries a
+  `types` condition, so Vite-style `moduleResolution: "Bundler"` resolves
+  `index.d.ts` instead of silently `any`.
+- **A flat `toolbar` array is a true allow-list** — formats outside the list
+  are never instantiated, so no hidden picker UI mounts behind a restricted
+  toolbar.
+- **`width` defaults to `'100%'`** — the editor fills its container (was a
+  fixed 800px). `prompt.format` (alias of `tools`) with `[]` renders no format
+  buttons, and the prompt bar's Send button renders only when a `submit`
+  handler is configured.
+
+## Earlier: 2.13
 
 - **Comment threads** — select text and press ⌘⌥M (or call
   `openCommentComposer()`): a quote-header composer marks the range; the mark
@@ -443,13 +460,14 @@ item, doesn't submit). Check it yourself with `editor.isMenuOpen()`.
 `layout: 'prompt'` turns the editor into a chat-style input: a rounded pill with
 the toolbar as a bottom action bar — `[ + add ]  [ format tools ]  …  [ send ]` —
 that grows with its content (`height:'auto'`). Enter and the send button both call
-your `submit` handler.
+your `submit` handler. The **send button renders only when a `submit` handler is
+configured** — a prompt-styled field with nothing to send gets no dead button.
 
 > **Leave `toolbar` unset** with `layout:'prompt'` (or pass `toolbar:'prompt'`).
 > Passing an explicit toolbar **array** or `toolbar1/toolbar2` opts out of the
 > prompt bar and renders that layout instead. A plain `{ overflow, exclude }`
 > object keeps the prompt bar (its flags are ignored — configure tools via
-> `prompt.tools`). Bar buttons never steal focus, so the mobile soft keyboard
+> `prompt.format`). Bar buttons never steal focus, so the mobile soft keyboard
 > stays up across sends.
 
 ```js
@@ -465,8 +483,8 @@ picker — no popover), plus **bold / italic** and the send button. Configure mo
 
 ```js
 prompt: {
-  add:   ['image', 'file', 'video', 'table'],  // 2+ items → "+" opens a popover menu
-  tools: ['bold', 'italic', 'link'],           // format buttons next to "+"
+  add:    ['image', 'file', 'video', 'table'],  // 2+ items → "+" opens a popover menu
+  format: ['bold', 'italic', 'link'],           // format buttons next to "+" ([] = none; `tools` is an alias)
 }
 ```
 
@@ -523,6 +541,27 @@ prompt: { tokens: { costPer1k: 0.01 } }   // "~1.2k tokens · $0.012" by the sen
 editor.addContext({ label: '@report.md', value: fileId });  // a removable chip in the tray
 submit: { onSubmit: (html, ed) => send(html, ed.getContext()) }  // [{ id, label, value }]
 ```
+
+### Plain-text mode
+
+Chat, prompt and comment hosts usually store **text**, not HTML. `plainText:
+true` makes the editor honest about that: every formatting surface is off
+(toolbar/prompt-bar format buttons, ⌘B/I/U/K, markdown input rules,
+auto-linkify), paste is forced plain, and `getContent()`, `onChange` and the
+`submit` handler all deliver **plain text** — blocks separated by `\n`.
+`setContent()` flattens any markup it is given.
+
+```js
+new yjd('#chat', {
+  layout: 'prompt',
+  plainText: true,                      // text in, text out — nothing to strip on save
+  submit: { onSubmit: (text) => send(text) },
+});
+```
+
+Mentions and the AI module keep working — both round-trip plain text. With
+`prompt.serializeAttachments`, attachment tails use the markdown shape
+(`![](src)` / `[name](url)`) instead of HTML tags.
 
 ### @mention / #task
 

@@ -1,7 +1,7 @@
 {
   "name": "@oix1987/yjd",
-  "version": "2.13.6",
-  "description": "Dependency-free, tree-shakeable rich text editor & WYSIWYG for the web — comment threads, outline/versions rail, block drag handles, slash menu, code blocks with language detection, chat/prompt input layout, bring-your-own-model AI, @mentions, drag-drop uploads, and HTML/Markdown/JSON export. Ship ~17 KB, not the whole library.",
+  "version": "2.14.0",
+  "description": "Dependency-free, tree-shakeable rich text editor & WYSIWYG for the web — comment threads, outline/versions rail, block drag handles, slash menu, code blocks with language detection, chat/prompt input layout with first-class plain-text mode, bring-your-own-model AI, @mentions, drag-drop uploads, and HTML/Markdown/JSON export. Ship ~17 KB, not the whole library.",
   "keywords": [
     "rich-text-editor",
     "wysiwyg",
@@ -20,6 +20,7 @@
     "svelte",
     "prompt-input",
     "chat-input",
+    "plain-text",
     "ai-editor",
     "comment-box"
   ],
@@ -38,10 +39,14 @@
   "module": "dist/rich-editor.esm.js",
   "exports": {
     ".": {
+      "types": "./index.d.ts",
       "import": "./dist/rich-editor.esm.js",
       "require": "./dist/rich-editor.min.js"
     },
-    "./core": "./core.js",
+    "./core": {
+      "types": "./index.d.ts",
+      "default": "./core.js"
+    },
     "./styles.css": "./lib/styles.min.css",
     "./lib/*": "./lib/*",
     "./package.json": "./package.json"
@@ -84,17 +89,17 @@
     {
       "name": "ESM (all-in-one)",
       "path": "dist/rich-editor.esm.js",
-      "limit": "90 KB"
+      "limit": "91 KB"
     },
     {
       "name": "UMD min",
       "path": "dist/rich-editor.min.js",
-      "limit": "90 KB"
+      "limit": "91 KB"
     },
     {
       "name": "Core ESM",
       "path": "dist/core.esm.js",
-      "limit": "84 KB"
+      "limit": "85 KB"
     },
     {
       "name": "Stylesheet",
