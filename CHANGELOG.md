@@ -4,9 +4,37 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [2.15.0] — 2026-08-20
+
+### Added
+- **Selection-bubble custom buttons.** `'block-toolbar'.buttons` accepts
+  `{ id, title, icon | text, onClick(editor, selection) }` entries rendered
+  with the built-in button chrome; the selection survives the click. (#74)
+- **`showOnFocus` bubble mode** for input-like fields: the bubble appears on
+  focus anchored at the caret, follows a collapsed caret instead of hiding,
+  and hides on blur. (#75)
+- **`'block-toolbar'.sheet`** filters the "⋮" overflow sheet — `true` (all),
+  `false` (none), or an allow-list of `'highlight' | 'comment' | 'copy' |
+  'clear-format'`; the ⋮ and its separator disappear when nothing remains. (#70)
 
 ### Fixed
+- **Bubble no longer drifts on page scroll.** Positioning is now a pure
+  wrapper-relative anchor with no `window.scrollY` terms (the bubble is an
+  absolute child of the wrapper, so element-relative coordinates ride page
+  scroll for free); the window-scroll reposition listener is gone. (#76)
+- **Bubble shows in short, input-sized editors** — it overhangs the editor
+  instead of hiding when there is no headroom, flipping below the anchor only
+  when above would leave the viewport. This also lets the bubble **coexist
+  with the top toolbar module**. (#73, #72)
+- **Mention chips serialize their `data-token` through every text path** —
+  `getText()` in rich and plainText modes, and the plainText `setContent`
+  flatten. (#69)
+- **AI diff-edit no longer silently degrades to a plain replace** when the
+  selection endpoints sit on the editable root (e.g. `selectNodeContents(root)`
+  before `editor.ai.run()`): endpoints now resolve into the block they point
+  at. Multi-block selections still fall back by design. (#71)
+
+### Fixed (merged from open PRs)
 - **Block-handle gutter no longer blinks when the mouse crosses between
   blocks.** Inter-block margins belong to no block rect, so a vertical mouse
   path hid the ⠿/+ handles for the width of every margin and re-showed them in
@@ -907,6 +935,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.15.0]: https://github.com/nampick/yjd/releases/tag/v2.15.0
 [2.14.0]: https://github.com/nampick/yjd/releases/tag/v2.14.0
 [2.13.6]: https://github.com/nampick/yjd/releases/tag/v2.13.6
 [2.13.5]: https://github.com/nampick/yjd/releases/tag/v2.13.5

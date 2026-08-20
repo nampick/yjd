@@ -22,7 +22,18 @@ new yjd('#editor', { placeholder: 'Start writing…' });
 - **XSS-safe paste** — sanitises pasted HTML (scripts/handlers/unsafe URLs stripped; only trusted embeds survive).
 - **Accessible** — keyboard navigable, WCAG-AA contrast (Lighthouse a11y 100).
 
-## New in 2.14
+## New in 2.15
+
+- **Selection bubble, grown up** — coexists with the top toolbar, overhangs
+  input-sized editors instead of hiding, stays pinned through page scroll,
+  takes **custom action buttons** (`{ id, title, icon|text, onClick }`), a
+  filterable ⋮ sheet, and a **`showOnFocus`** mode for input-like fields.
+- **Mention tokens survive every text path** — `getText()` and plain-text
+  flattening emit a chip's serialized `data-token`, not its visible label.
+- **AI diff-edit works on whole-field selections** — `selectNodeContents(root)`
+  before `ai.run()` now gets the word-level diff.
+
+## Earlier: 2.14
 
 - **Plain-text mode** — `plainText: true` for chat/prompt/comment hosts that
   store text: every formatting surface is off, paste is forced plain, and
@@ -562,6 +573,31 @@ new yjd('#chat', {
 Mentions and the AI module keep working — both round-trip plain text. With
 `prompt.serializeAttachments`, attachment tails use the markdown shape
 (`![](src)` / `[name](url)`) instead of HTML tags.
+
+### Selection bubble
+
+The bubble (block-toolbar module) floats above the selection, coexists with the
+top toolbar, freely **overhangs short editors** (an input-sized field still gets
+its tools), and stays pinned to its field through page scrolling. Configure it
+via the `'block-toolbar'` key:
+
+```js
+new yjd('#field', {
+  'block-toolbar': {
+    showOnFocus: true,                     // input-like: appears on focus, hides on blur
+    buttons: [
+      'bold', 'italic',
+      { id: 'emoji', title: 'Emoji', text: '😀',    // custom action (#74)
+        onClick: (editor, selection) => openEmojiPicker(editor) },
+    ],
+    sheet: false,                          // '⋮' overflow: true | false | ['copy', …]
+  },
+});
+```
+
+`showOnSelection` (default) and `showOnEnter` still exist; `showOnFocus` keeps
+the bubble through a collapsed caret — it is the field's toolbar, not a
+selection affordance.
 
 ### @mention / #task
 

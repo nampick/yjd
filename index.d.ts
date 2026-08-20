@@ -336,6 +336,41 @@ export interface JsonDoc {
   content: JsonNode[];
 }
 
+/** A custom action button in the selection bubble (#74). */
+export interface BubbleButton {
+  id: string;
+  /** Tooltip / aria-label. */
+  title?: string;
+  /** A registered icon name or a raw `<svg …>` string. */
+  icon?: string;
+  /** Text content when no icon is given (e.g. an emoji). */
+  text?: string;
+  /** Click handler; the selection is preserved (pointerdown is prevented). */
+  onClick: (editor: RichEditor, selection: Selection) => void;
+}
+
+/** Selection bubble (block-toolbar module) options. */
+export interface BlockToolbarOptions {
+  /** Show on a non-collapsed selection (default true). */
+  showOnSelection?: boolean;
+  /** Show after Enter at the caret (default false). */
+  showOnEnter?: boolean;
+  /**
+   * Input-like fields: show the bubble when the editor gains focus, anchored
+   * at the caret; it follows a collapsed caret and hides on blur (default
+   * false).
+   */
+  showOnFocus?: boolean;
+  /** Built-in format names and/or custom action buttons. */
+  buttons?: (string | BubbleButton)[];
+  /**
+   * The "⋮" overflow sheet: true = all entries (default), false = no sheet,
+   * or an allow-list of 'highlight' | 'comment' | 'copy' | 'clear-format'.
+   * The ⋮ toggle disappears when nothing remains.
+   */
+  sheet?: boolean | string[];
+}
+
 // Editor options interface
 export interface EditorOptions {
   placeholder?: string;
@@ -473,6 +508,12 @@ export interface EditorOptions {
    * (e.g. ['toolbar', 'history']). Names resolve against the registry.
    */
   modules?: string[];
+  /**
+   * Selection bubble (block-toolbar module) configuration. The bubble floats
+   * above the selection, may overhang short editors, and coexists with the
+   * top toolbar.
+   */
+  'block-toolbar'?: BlockToolbarOptions;
   /**
    * Explicit list of format names to load, overriding the default set.
    * Names resolve against the registry.
