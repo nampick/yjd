@@ -156,3 +156,27 @@ test('replaceSelection(html) sanitizes and routes to insertHTML', () => {
   assert.ok(!/script/i.test(call[2]), 'script stripped before insert');
   assert.ok(/<b>hi<\/b>/.test(call[2]));
 });
+
+test('_sameBlock resolves root-level endpoints into their blocks (#71)', () => {
+  const ed = makeEditor({ complete: async () => 'x' });
+  const ai = new Ai(ed, {});
+
+  // Whole-field selection over a SINGLE block → same block (diff eligible).
+  ed.editor.innerHTML = '<p>only paragraph</p>';
+  const r1 = document.createRange();
+  r1.selectNodeContents(ed.editor);
+  assert.equal(ai._sameBlock(r1), true,
+    'selectNodeContents(root) with one block child must qualify for the diff');
+
+  // Whole-field selection over TWO blocks → not the same block (plain replace).
+  ed.editor.innerHTML = '<p>one</p><p>two</p>';
+  const r2 = document.createRange();
+  r2.selectNodeContents(ed.editor);
+  assert.equal(ai._sameBlock(r2), false, 'multi-block selections still fall back');
+
+  // The normal in-block selection keeps working.
+  const p = ed.editor.querySelector('p');
+  const r3 = document.createRange();
+  r3.selectNodeContents(p);
+  assert.equal(ai._sameBlock(r3), true);
+});
