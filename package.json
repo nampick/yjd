@@ -1,6 +1,6 @@
 {
   "name": "@oix1987/yjd",
-  "version": "2.14.0",
+  "version": "2.15.0",
   "description": "Dependency-free, tree-shakeable rich text editor & WYSIWYG for the web — comment threads, outline/versions rail, block drag handles, slash menu, code blocks with language detection, chat/prompt input layout with first-class plain-text mode, bring-your-own-model AI, @mentions, drag-drop uploads, and HTML/Markdown/JSON export. Ship ~17 KB, not the whole library.",
   "keywords": [
     "rich-text-editor",
