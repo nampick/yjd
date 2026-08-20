@@ -895,7 +895,6 @@
   padding: 10px 10px 10px 10px;
   border-radius: var(--rte-radius-sm);
   border: 1px solid var(--rte-border);
-  max-height: 37px;
   align-items: center;
   /* Same dropdown chevron as every other select (UI 2.0 family: 1.75 stroke). */
   background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='16'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%236d7480'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='m6%209%206%206%206-6'/%3E%3C/svg%3E");
@@ -3107,6 +3106,14 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   background: var(--rte-bg);
   color: var(--rte-ink);
   font-size: 14px;
+}
+/* Selects grow with their text instead of clipping it: if the environment
+   inflates the font (browser minimum-font-size, OS accessibility text size,
+   host CSS that our scoping can't shield), a fixed height cut the label off
+   at the bottom. min-height keeps the 30px control rhythm otherwise. (#67) */
+.yjd-rich-editor .yjd-select-input {
+  height: auto;
+  min-height: var(--rte-ctl, 30px);
 }
 .yjd-rich-editor .yjd-input::placeholder,
 .yjd-rich-editor .yjd-select-input::placeholder,
