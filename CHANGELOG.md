@@ -4,6 +4,16 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- **Block-handle gutter no longer blinks when the mouse crosses between
+  blocks.** Inter-block margins belong to no block rect, so a vertical mouse
+  path hid the ⠿/+ handles for the width of every margin and re-showed them in
+  the next block — one blink per boundary. The gutter now snaps to the nearest
+  block while the pointer is between two blocks (above the first / below the
+  last block it still hides). (#65)
+
 ## [2.14.0] — 2026-08-19
 
 ### Added
