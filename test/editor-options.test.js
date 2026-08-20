@@ -586,3 +586,23 @@ test('plainText: inline markup flattens onto one line, blocks split lines (#60)'
   ed.setContent('<ul><li>one</li><li>two</li></ul>');
   assert.equal(ed.getContent(), 'one\ntwo', 'list items become lines');
 });
+
+test('getText() returns a mention chip token, not its visible label (#69)', () => {
+  const chip = '<span class="mention" data-id="product" data-trigger="{" data-token="{{product}}" contenteditable="false">{product</span>';
+
+  // Rich mode
+  const rich = new Editor(mount(), { autoFocus: false });
+  rich.setContent('<p>Hello ' + chip + ' world</p>');
+  assert.equal(rich.getText(), 'Hello {{product}} world');
+
+  // Chips without a token keep the old behaviour (visible text).
+  const plainChip = new Editor(mount(), { autoFocus: false });
+  plainChip.setContent('<p>Hi <span class="mention" data-id="u1">@nam</span></p>');
+  assert.equal(plainChip.getText(), 'Hi @nam');
+
+  // plainText mode: getters and the setContent flatten both honor the token.
+  const pt = new Editor(mount(), { plainText: true, autoFocus: false });
+  pt.setContent('<p>Ship ' + chip + ' today</p>');
+  assert.equal(pt.getContent(), 'Ship {{product}} today',
+    'plainText flatten keeps the serialized token');
+});
