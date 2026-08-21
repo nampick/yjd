@@ -6822,3 +6822,30 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   cursor: pointer;
 }
 .yjd-rich-editor .yjd-slot-preview { margin-top: 8px; border-top: 1px solid var(--rte-border); padding-top: 8px; }
+
+/* === BUTTON BLOCK (#83) === */
+.yjd-rich-editor .yjd-btn-wrap { margin: 0 0 12px; }
+.yjd-rich-editor .yjd-button { cursor: pointer; font-family: var(--rte-ui); font-size: 15px; }
+.yjd-rich-editor .yjd-button-label { outline: none; }
+.yjd-rich-editor .yjd-btn-inspector {
+  z-index: 1002;
+  width: 240px;
+  padding: 12px;
+  background: var(--rte-bg);
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius-md, 10px);
+  box-shadow: var(--rte-shadow, 0 8px 28px rgba(15, 23, 42, 0.14));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.yjd-rich-editor .yjd-btn-field { display: flex; align-items: center; gap: 8px; font: 12px var(--rte-ui); color: var(--rte-muted); }
+.yjd-rich-editor .yjd-btn-field > span:first-child { width: 68px; flex: none; }
+.yjd-rich-editor .yjd-btn-field .yjd-input { flex: 1; min-width: 0; }
+.yjd-rich-editor .yjd-btn-num { width: 64px; flex: none !important; }
+.yjd-rich-editor .yjd-btn-swatches { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; flex: 1; }
+.yjd-rich-editor .yjd-btn-swatch { width: 20px; height: 20px; border-radius: 6px; border: 1px solid var(--rte-border-strong); cursor: pointer; padding: 0; }
+.yjd-rich-editor .yjd-btn-hex { width: 84px; flex: none !important; }
+.yjd-rich-editor .yjd-btn-aligns { display: flex; gap: 4px; }
+.yjd-rich-editor .yjd-btn-align { width: 28px; height: 24px; border: 1px solid var(--rte-border); background: var(--rte-bg); border-radius: 6px; cursor: pointer; }
+.yjd-rich-editor .yjd-btn-align.active { background: var(--rte-accent-weak); border-color: var(--rte-accent); }

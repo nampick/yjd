@@ -16,6 +16,7 @@ import { applyEditorInput } from './lib/core/editor-input.js';
 applySerializeMethods(Editor);
 applyEditorCommands(Editor);
 applyEditorInput(Editor);
+applyEmailMethods(Editor);
 
 // Import formats
 import Bold from './lib/formats/bold.js';
@@ -60,6 +61,8 @@ import Mention from './lib/modules/mention.js';
 import Ai from './lib/modules/ai.js';
 import Variables from './lib/modules/variables.js';
 import Blocks from './lib/modules/blocks.js';
+import ButtonBlock from './lib/modules/button-block.js';
+import { applyEmailMethods } from './lib/email.js';
 
 import ResizeHandles from './lib/modules/resize-handles.js';
 
@@ -124,6 +127,7 @@ registry.register('modules/mention', Mention, true);
 registry.register('modules/ai', Ai, true);
 registry.register('modules/variables', Variables, true);
 registry.register('modules/blocks', Blocks, true);
+registry.register('modules/button', ButtonBlock, true);
 
 registry.register('modules/resize-handles', ResizeHandles, true);
 
@@ -227,6 +231,7 @@ export {
 export {
   Variables,
   Blocks,
+  ButtonBlock,
   Toolbar,
   History,
   BlockToolbar,
