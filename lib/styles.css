@@ -6736,3 +6736,89 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   pointer-events: none;
 }
 .yjd-popup-portal > * { pointer-events: auto; }
+
+/* === TEMPLATE ATOMS (#78/#79): variable chips + slot cards === */
+.yjd-rich-editor .yjd-var {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: var(--rte-accent-weak, #eef0ff);
+  color: var(--rte-accent-ink, var(--rte-accent));
+  font-family: var(--rte-mono, ui-monospace, monospace);
+  font-size: 0.86em;
+  line-height: 1.6;
+  white-space: nowrap;
+  cursor: default;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.yjd-rich-editor .yjd-var.yjd-var-preview {
+  background: var(--rte-success-weak, #e7f6ec);
+  color: var(--rte-success, #17953f);
+  font-family: var(--rte-ui);
+}
+.yjd-var-menu .yjd-var-token {
+  font-family: var(--rte-mono, ui-monospace, monospace);
+  font-size: 12px;
+  color: var(--rte-accent, #6d5efc);
+  margin-right: 8px;
+}
+.yjd-var-menu .yjd-var-label {
+  font-size: 12.5px;
+  color: var(--rte-muted, #6d7480);
+}
+.yjd-rich-editor .yjd-slot {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1.5px dashed var(--rte-border-strong, #c9ced6);
+  border-radius: var(--rte-radius-md, 10px);
+  background: var(--rte-chrome, #f6f7f8);
+  -webkit-user-select: none;
+  user-select: none;
+}
+.yjd-rich-editor .yjd-slot-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.yjd-rich-editor .yjd-slot-icon { font-size: 16px; }
+.yjd-rich-editor .yjd-slot-label { font: 600 13px var(--rte-ui); color: var(--rte-ink); }
+.yjd-rich-editor .yjd-slot-token {
+  margin-left: auto;
+  font-family: var(--rte-mono, ui-monospace, monospace);
+  font-size: 11px;
+  color: var(--rte-muted);
+  background: var(--rte-bg);
+  border: 1px solid var(--rte-border);
+  border-radius: 5px;
+  padding: 1px 6px;
+}
+.yjd-rich-editor .yjd-slot-desc { margin-top: 4px; font: 12px/1.45 var(--rte-ui); color: var(--rte-muted); }
+.yjd-rich-editor .yjd-slot-arg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font: 12px var(--rte-ui);
+  color: var(--rte-muted);
+}
+.yjd-rich-editor .yjd-slot-arg-input {
+  flex: 1;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid var(--rte-border);
+  border-radius: 6px;
+  background: var(--rte-bg);
+  color: var(--rte-ink);
+  font: 12.5px var(--rte-ui);
+}
+.yjd-rich-editor .yjd-slot-preview-toggle {
+  margin-top: 8px;
+  font: 11.5px var(--rte-ui);
+  color: var(--rte-accent);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.yjd-rich-editor .yjd-slot-preview { margin-top: 8px; border-top: 1px solid var(--rte-border); padding-top: 8px; }

@@ -58,6 +58,8 @@ import FindReplace from './lib/modules/find-replace.js';
 import SlashMenu from './lib/modules/slash-menu.js';
 import Mention from './lib/modules/mention.js';
 import Ai from './lib/modules/ai.js';
+import Variables from './lib/modules/variables.js';
+import Blocks from './lib/modules/blocks.js';
 
 import ResizeHandles from './lib/modules/resize-handles.js';
 
@@ -120,6 +122,8 @@ registry.register('modules/find-replace', FindReplace, true);
 registry.register('modules/slash-menu', SlashMenu, true);
 registry.register('modules/mention', Mention, true);
 registry.register('modules/ai', Ai, true);
+registry.register('modules/variables', Variables, true);
+registry.register('modules/blocks', Blocks, true);
 
 registry.register('modules/resize-handles', ResizeHandles, true);
 
@@ -221,6 +225,8 @@ export {
 
 // Export modules
 export {
+  Variables,
+  Blocks,
   Toolbar,
   History,
   BlockToolbar,
