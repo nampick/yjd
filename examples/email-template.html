@@ -76,6 +76,7 @@ async function complete({ action, prompt, text, signal, placeholders }, onToken)
 
 const editor = new yjd('#editor', {
   autoFocus: false,
+  builder: true,               // author-friendly palette + visible layout
   height: 'auto',
   minHeight: 420,
   placeholder: 'Build your template — try /, { and select text…',

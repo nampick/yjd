@@ -64,6 +64,7 @@ import Blocks from './lib/modules/blocks.js';
 import ButtonBlock from './lib/modules/button-block.js';
 import Sections from './lib/modules/sections.js';
 import Schema from './lib/modules/schema.js';
+import Builder from './lib/modules/builder.js';
 import { applyEmailMethods } from './lib/email.js';
 
 import ResizeHandles from './lib/modules/resize-handles.js';
@@ -132,6 +133,7 @@ registry.register('modules/blocks', Blocks, true);
 registry.register('modules/button', ButtonBlock, true);
 registry.register('modules/sections', Sections, true);
 registry.register('modules/schema', Schema, true);
+registry.register('modules/builder', Builder, true);
 
 registry.register('modules/resize-handles', ResizeHandles, true);
 
@@ -238,6 +240,7 @@ export {
   ButtonBlock,
   Sections,
   Schema,
+  Builder,
   Toolbar,
   History,
   BlockToolbar,

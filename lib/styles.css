@@ -6918,3 +6918,94 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   cursor: pointer;
   line-height: 1;
 }
+
+/* === BUILDER MODE === */
+.yjd-rich-editor.yjd-builder-mode {
+  display: grid;
+  grid-template-columns: 136px minmax(0, 1fr);
+  grid-template-areas:
+    "toolbar toolbar"
+    "palette editor"
+    "warn warn"
+    "status status";
+}
+.yjd-builder-mode > .rich-editor-toolbar-container { grid-area: toolbar; }
+.yjd-builder-mode > .yjd-palette { grid-area: palette; }
+.yjd-builder-mode > .rich-editor-area { grid-area: editor; }
+.yjd-builder-mode > .yjd-schema-warn { grid-area: warn; }
+.yjd-builder-mode > .rich-editor-statusbar { grid-area: status; }
+.yjd-rich-editor .yjd-palette {
+  border-right: 1px solid var(--rte-border);
+  background: var(--rte-chrome, #f8f9fa);
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.yjd-rich-editor .yjd-palette-head {
+  font: 600 10px var(--rte-ui);
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--rte-muted);
+  padding: 2px 6px 6px;
+}
+.yjd-rich-editor .yjd-tile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: none;
+  cursor: grab;
+  text-align: left;
+  touch-action: none;
+}
+.yjd-rich-editor .yjd-tile:hover {
+  background: var(--rte-bg);
+  border-color: var(--rte-border);
+}
+.yjd-rich-editor .yjd-tile.dragging { opacity: .5; cursor: grabbing; }
+.yjd-rich-editor .yjd-tile-icon {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: 600 13px var(--rte-ui);
+  color: var(--rte-accent);
+  background: var(--rte-accent-weak, #eef0ff);
+  border-radius: 6px;
+}
+.yjd-rich-editor .yjd-tile-label { font: 500 12px var(--rte-ui); color: var(--rte-ink); }
+
+/* Structure is visible, not hover-only: authors see the layout they're building. */
+.yjd-builder-mode .yjd-section {
+  outline: 1.5px dashed var(--rte-border-strong);
+  outline-offset: 3px;
+  position: relative;
+}
+.yjd-builder-mode .yjd-section:hover { outline-color: var(--rte-accent); }
+.yjd-builder-mode .yjd-col {
+  outline: 1px dashed var(--rte-border);
+  outline-offset: -4px;
+  border-radius: 8px;
+  min-height: 44px;
+  padding: 8px;
+}
+.yjd-builder-mode .yjd-col:empty::before {
+  content: '+ Add content';
+  display: block;
+  padding: 12px 10px;
+  font: 500 12px var(--rte-ui);
+  color: var(--rte-muted);
+  text-align: center;
+  cursor: pointer;
+}
+.yjd-builder-mode .yjd-col:empty { border: none; }
+.yjd-builder-mode .yjd-col:empty:hover::before { color: var(--rte-accent); }
