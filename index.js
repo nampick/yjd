@@ -62,6 +62,8 @@ import Ai from './lib/modules/ai.js';
 import Variables from './lib/modules/variables.js';
 import Blocks from './lib/modules/blocks.js';
 import ButtonBlock from './lib/modules/button-block.js';
+import Sections from './lib/modules/sections.js';
+import Schema from './lib/modules/schema.js';
 import { applyEmailMethods } from './lib/email.js';
 
 import ResizeHandles from './lib/modules/resize-handles.js';
@@ -128,6 +130,8 @@ registry.register('modules/ai', Ai, true);
 registry.register('modules/variables', Variables, true);
 registry.register('modules/blocks', Blocks, true);
 registry.register('modules/button', ButtonBlock, true);
+registry.register('modules/sections', Sections, true);
+registry.register('modules/schema', Schema, true);
 
 registry.register('modules/resize-handles', ResizeHandles, true);
 
@@ -232,6 +236,8 @@ export {
   Variables,
   Blocks,
   ButtonBlock,
+  Sections,
+  Schema,
   Toolbar,
   History,
   BlockToolbar,

@@ -6849,3 +6849,72 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .yjd-btn-aligns { display: flex; gap: 4px; }
 .yjd-rich-editor .yjd-btn-align { width: 28px; height: 24px; border: 1px solid var(--rte-border); background: var(--rte-bg); border-radius: 6px; cursor: pointer; }
 .yjd-rich-editor .yjd-btn-align.active { background: var(--rte-accent-weak); border-color: var(--rte-accent); }
+
+/* === SECTIONS (#84) + SCHEMA (#81) === */
+.yjd-rich-editor .yjd-section { margin: 0 0 14px; }
+.yjd-rich-editor .yjd-section > .yjd-col { min-height: 28px; }
+.yjd-rich-editor .yjd-section:has(> .yjd-col:nth-child(2)) {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.yjd-rich-editor .yjd-section:has(> .yjd-col:nth-child(2)) > .yjd-col { flex: 1 1 0; min-width: 0; }
+.yjd-rich-editor .yjd-col:empty {
+  border: 1.5px dashed var(--rte-border);
+  border-radius: 8px;
+}
+.yjd-rich-editor .yjd-col:empty::before {
+  content: 'Drop blocks here';
+  display: block;
+  padding: 10px;
+  font: 12px var(--rte-ui);
+  color: var(--rte-muted);
+  text-align: center;
+}
+.yjd-rich-editor .yjd-section-pill {
+  position: absolute;
+  z-index: 1001;
+  font: 600 10.5px var(--rte-ui);
+  color: var(--rte-muted);
+  background: var(--rte-bg);
+  border: 1px solid var(--rte-border);
+  border-radius: 999px;
+  padding: 2px 9px;
+  cursor: pointer;
+  box-shadow: var(--rte-shadow-sm, 0 2px 8px rgba(15,23,42,.08));
+}
+.yjd-rich-editor .yjd-section-pill:hover { color: var(--rte-accent); border-color: var(--rte-accent); }
+.yjd-rich-editor .yjd-swatch-none {
+  background:
+    linear-gradient(45deg, transparent 46%, #e0525f 46%, #e0525f 54%, transparent 54%),
+    var(--rte-bg);
+}
+.yjd-rich-editor .yjd-section-delete {
+  margin-top: 4px;
+  font: 12px var(--rte-ui);
+  color: var(--rte-danger, #d33);
+  background: none;
+  border: 1px solid var(--rte-danger-weak, #f3d5d8);
+  border-radius: 7px;
+  padding: 5px 0;
+  cursor: pointer;
+}
+.yjd-rich-editor .yjd-schema-warn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  background: var(--rte-danger-weak, #fdf1f2);
+  border-top: 1px solid var(--rte-border);
+  font: 12.5px var(--rte-ui);
+  color: var(--rte-danger, #b3261e);
+}
+.yjd-rich-editor .yjd-schema-warn-msg { flex: 1; min-width: 0; }
+.yjd-rich-editor .yjd-schema-warn-close {
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: inherit;
+  cursor: pointer;
+  line-height: 1;
+}
