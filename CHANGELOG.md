@@ -4,6 +4,44 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added — template & page building (#78–#85)
+- **Merge-tag variable chips** (`variables`): declared `{token}` placeholders
+  render as atomic chips with a trigger picker; hover shows the sample and
+  `previewVariables(true)` swaps every chip for its sample read-only; content
+  APIs round-trip raw tokens. (#78)
+- **Custom atomic blocks** (`blocks`): registered `{{slot}}` tokens render as
+  non-editable cards (icon · label · description, optional `$arg` input,
+  optional host preview), insert from the slash menu, drag with the gutter,
+  and serialize byte-for-byte. (#79)
+- **AI placeholder safety + `ai.runDocument()`**: atoms encode to opaque
+  sentinels around the model call (`ctx.placeholders` describes them); dropped
+  placeholders follow `ai.placeholders: 'restore' | 'reject' | 'ask'`; whole-
+  document rewrites stream through `streamInto()` with buffered sentinel
+  decode and one-step undo. (#80)
+- **Content schema** (`schema`): `require` (blocks/variables/button),
+  `allowTags` (violating tags flatten gracefully on setContent), `maxLength`;
+  live dismissable warning strip, `schema:violation` event,
+  `editor.validate()`. (#81)
+- **`getEmailHTML()`** — compile to email-client-safe HTML: every style
+  inlined (zero classes / `<style>`), `<ol>` as numbered badge rows,
+  blockquote/hr/pre/img/table hardened, CTAs as bulletproof table+VML,
+  sections as bands with stacking columns; fragment or `{document:true}`;
+  byte-stable. (#82)
+- **Button block**: first-class CTA with inspector popover (label, URL,
+  colors, radius, padding, align, full-width), `editor.insertButton()`,
+  slash entry, lossless `data-props` round-trip. (#83)
+- **Section & Columns**: minimal container model — sections with
+  background/padding/radius and 1–3 equal columns, hover-pill inspector,
+  cross-column block dragging, implicit default section (zero migration),
+  email export stacks columns. (#84)
+- **Content design tokens** (`theme: { colors, strict, mode }`): named
+  swatches in every inspector, `strict` removes free-form color input,
+  token-named values (`bgToken`) re-resolve through the current theme.
+  The classic scheme strings (`theme: 'dark'`) keep working; the object
+  form carries the scheme in `theme.mode`. (#85)
+
 ## [2.15.0] — 2026-08-20
 
 ### Added

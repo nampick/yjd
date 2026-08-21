@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>yjd — email template builder demo (#78–#85)</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; background: #f2f4f6; color: #14181d; }
+  header { padding: 14px 22px; background: #fff; border-bottom: 1px solid #e5e8ec; display: flex; align-items: center; gap: 12px; }
+  header h1 { font-size: 15px; margin: 0; }
+  header .tag { font-size: 11px; color: #6d7480; background: #f2f4f6; border-radius: 999px; padding: 2px 9px; }
+  header .actions { margin-left: auto; display: flex; gap: 8px; }
+  header button { font: 600 12.5px inherit; padding: 7px 13px; border-radius: 8px; border: 1px solid #d6dae0; background: #fff; cursor: pointer; }
+  header button.primary { background: #25d366; border-color: #25d366; color: #fff; }
+  header button.active { background: #eef0ff; border-color: #6d5efc; color: #6d5efc; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding: 18px 22px; max-width: 1400px; margin: 0 auto; }
+  .pane { background: #fff; border: 1px solid #e5e8ec; border-radius: 12px; overflow: hidden; }
+  .pane-head { padding: 9px 14px; font: 600 11px inherit; letter-spacing: .08em; text-transform: uppercase; color: #6d7480; border-bottom: 1px solid #eef0f3; display: flex; gap: 10px; align-items: center; }
+  .pane-head .mode { margin-left: auto; display: flex; gap: 4px; }
+  .pane-head .mode button { font: 600 11px inherit; border: 1px solid #e5e8ec; background: #fff; border-radius: 6px; padding: 3px 9px; cursor: pointer; }
+  .pane-head .mode button.on { background: #14181d; color: #fff; border-color: #14181d; }
+  #editor-host { padding: 14px; }
+  #email-frame { width: 100%; height: 720px; border: 0; }
+  #email-html { display: none; width: 100%; height: 720px; border: 0; padding: 14px; font: 11.5px/1.5 ui-monospace, Menlo, monospace; white-space: pre-wrap; overflow: auto; color: #333; }
+  @media (max-width: 1080px) { .cols { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Lifecycle email builder</h1>
+  <span class="tag">variables · blocks · button · section · schema · AI · getEmailHTML</span>
+  <div class="actions">
+    <button id="btn-preview">👁 Preview variables</button>
+    <button id="btn-ai">✦ AI rewrite</button>
+    <button id="btn-validate">✓ Validate</button>
+    <button id="btn-copy" class="primary">Copy email HTML</button>
+  </div>
+</header>
+
+<div class="cols">
+  <div class="pane">
+    <div class="pane-head">Template editor</div>
+    <div id="editor-host"><div id="editor"></div></div>
+  </div>
+  <div class="pane">
+    <div class="pane-head">Email output — getEmailHTML()
+      <div class="mode">
+        <button id="mode-preview" class="on">Preview</button>
+        <button id="mode-html">HTML</button>
+      </div>
+    </div>
+    <iframe id="email-frame" title="email preview"></iframe>
+    <div id="email-html"></div>
+  </div>
+</div>
+
+<script type="module">
+import yjd from '/index.js';
+
+/* Offline AI mock — streams word by word; echoes ctx.text so the sentinel
+   round-trip is visible (placeholders always survive). */
+async function complete({ action, prompt, text, signal, placeholders }, onToken) {
+  const canned = {
+    improve: 'Your {month} numbers are in — and they are worth a look.',
+    document: 'Hi {shopName} 👋\nHere is the short version of your month.\n' + text.split('\n').slice(2).join('\n'),
+  };
+  const out = canned[action] || canned.improve;
+  for (const w of out.split(/(?= )/)) {
+    if (signal && signal.aborted) return;
+    await new Promise((r) => setTimeout(r, 40));
+    onToken(w);
+  }
+  return out;
+}
+
+const editor = new yjd('#editor', {
+  autoFocus: false,
+  height: 'auto',
+  minHeight: 420,
+  placeholder: 'Build your template — try /, { and select text…',
+
+  /* #85 — brand-locked design tokens */
+  theme: {
+    colors: { brand: '#25d366', ink: '#14181d', surface: '#f6f7f8', night: '#0f172a' },
+    strict: false,
+  },
+
+  /* #78 — merge-tag variables */
+  variables: {
+    trigger: '{',
+    items: {
+      shopName: { label: 'Shop name', sample: 'Acme Outfitters' },
+      month: { label: 'Month', sample: 'August' },
+      chats: { label: 'Chats handled', sample: '412' },
+      unsubscribeUrl: { label: 'Unsubscribe link', sample: 'https://app.example/unsub/123' },
+    },
+  },
+
+  /* #79 — machine-filled slots */
+  blocks: {
+    stats: {
+      label: 'Stats grid', icon: '📊', token: '{{stats}}',
+      description: 'Views · clicks · chats · leads (filled by the send pipeline)',
+      preview: () => '<b>1.2k</b> views · <b>96</b> clicks · <b>412</b> chats · <b>38</b> leads',
+    },
+    revenue: {
+      label: 'Revenue banner', icon: '💰', token: '{{revenue}}',
+      description: 'Total revenue matched to chat leads',
+    },
+  },
+
+  /* #81 — invariants, validated live */
+  schema: {
+    require: ['variable:shopName', 'block:stats', 'button'],
+    allowTags: ['h1','h2','h3','p','ul','ol','li','strong','em','u','s','a','br','blockquote','hr','div','span','img','code','pre'],
+    maxLength: 6000,
+  },
+
+  /* #80 — placeholder-safe BYO-model AI */
+  ai: { complete, placeholders: 'restore' },
+});
+window.__ed = editor;
+
+/* A complete lifecycle email, authored with every new piece. */
+editor.setContent([
+  '<h1>Your {month} digest is ready</h1>',
+  '<p>Hi <strong>{shopName}</strong> — the assistant handled <strong>{chats} chats</strong> this month. Here are the numbers that matter:</p>',
+  '<p>{{stats}}</p>',
+  '<div class="yjd-section" data-style=\'{"background":"#f6f7f8","padding":20,"radius":12}\'>' +
+    '<div class="yjd-col"><h2>Turn chats into checkout</h2><p>Shoppers who chat convert 3× more often. Put the assistant on your busiest pages before the weekend rush.</p></div>' +
+    '<div class="yjd-col"><p>{{revenue}}</p>' +
+      '<div class="yjd-btn-wrap" data-align="center" contenteditable="false"><a class="yjd-button" href="{{ctaUrl}}" data-props=\'{"bgToken":"brand","bg":"#25d366","color":"#ffffff","radius":10,"padding":12,"align":"center"}\'><span class="yjd-button-label" contenteditable="true">Open your dashboard</span></a></div>' +
+    '</div>' +
+  '</div>',
+  '<h3>Three things to do next</h3>',
+  '<ol><li>Reply to the two <strong>open conversations</strong> waiting on you.</li><li>Enable the <em>welcome flow</em> for first-time visitors.</li><li>Share your {month} report with the team.</li></ol>',
+  '<blockquote>“We answered pre-sale questions while we slept.” — a merchant like {shopName}</blockquote>',
+  '<hr>',
+  '<p><a href="{unsubscribeUrl}">Unsubscribe</a> · Sent with ❤️ by Acme Assistant</p>',
+].join(''));
+
+/* Live email compile → right pane */
+const frame = document.getElementById('email-frame');
+const rawPane = document.getElementById('email-html');
+function refresh() {
+  const html = editor.getEmailHTML({ width: 600, document: true });
+  frame.srcdoc = html;
+  rawPane.textContent = html;
+}
+editor.on ? editor.on('change', refresh) : null;
+const _origOnChange = editor.options.onChange;
+editor.options.onChange = (c) => { if (_origOnChange) _origOnChange(c); refresh(); };
+refresh();
+
+/* Header actions */
+let previewOn = false;
+document.getElementById('btn-preview').addEventListener('click', (e) => {
+  previewOn = !previewOn;
+  editor.previewVariables(previewOn);
+  e.currentTarget.classList.toggle('active', previewOn);
+});
+document.getElementById('btn-ai').addEventListener('click', async () => {
+  await editor.ai.runDocument({ prompt: 'Make it half as long, keep the warm tone' });
+  refresh();
+});
+document.getElementById('btn-validate').addEventListener('click', () => {
+  const r = editor.validate();
+  const msg = r.valid ? '✓ Template valid' : '✗ ' + r.violations.map((v) => v.message).join(' · ');
+  if (typeof editor.showToast === 'function') editor.showToast(msg);
+  console.log('[validate]', r);
+});
+document.getElementById('btn-copy').addEventListener('click', () => {
+  navigator.clipboard?.writeText(editor.getEmailHTML({ width: 600, document: true }));
+});
+document.getElementById('mode-preview').addEventListener('click', () => {
+  frame.style.display = 'block'; rawPane.style.display = 'none';
+  document.getElementById('mode-preview').classList.add('on');
+  document.getElementById('mode-html').classList.remove('on');
+});
+document.getElementById('mode-html').addEventListener('click', () => {
+  frame.style.display = 'none'; rawPane.style.display = 'block';
+  document.getElementById('mode-html').classList.add('on');
+  document.getElementById('mode-preview').classList.remove('on');
+});
+</script>
+</body>
+</html>

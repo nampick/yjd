@@ -371,6 +371,99 @@ export interface BlockToolbarOptions {
   sheet?: boolean | string[];
 }
 
+/** A declared merge-tag variable (#78). */
+export interface VariableItem {
+  label?: string;
+  /** Sample value shown on hover and in preview mode. */
+  sample?: string;
+}
+
+/** Merge-tag variable chips (#78). */
+export interface VariablesOptions {
+  /** Picker trigger character (default '{'). */
+  trigger?: string;
+  /** Declared tokens by name: {shopName} etc. Undeclared tokens stay text. */
+  items: Record<string, VariableItem>;
+}
+
+/** A registered atomic block ("slot", #79). */
+export interface BlockDef {
+  label?: string;
+  /** Emoji or short text shown on the card and in the slash menu. */
+  icon?: string;
+  description?: string;
+  /** Serialized token, e.g. '{{stats}}' or '{{cta:$arg}}' ($arg = the input). */
+  token: string;
+  /** One small inline input serialized into the token's $arg. */
+  arg?: { label?: string; default?: string };
+  /** Host-rendered preview HTML for the collapsed Preview toggle. */
+  preview?: (arg: string | null) => string;
+}
+
+/** CTA button props (#83). */
+export interface ButtonProps {
+  label?: string;
+  href?: string;
+  bg?: string;
+  color?: string;
+  /** Theme token names — re-resolve through theme.colors on load (#85). */
+  bgToken?: string;
+  colorToken?: string;
+  radius?: number;
+  padding?: number;
+  align?: 'left' | 'center' | 'right';
+  full?: boolean;
+}
+
+/** Section style (#84). */
+export interface SectionStyle {
+  background?: string;
+  padding?: number;
+  radius?: number;
+}
+
+/** Content design tokens (#85). */
+export interface ThemeOptions {
+  /** Colour scheme when using the object form (default 'inherit'). */
+  mode?: 'inherit' | 'light' | 'dark' | 'auto';
+  /** Named colors rendered as swatches in inspectors and pickers. */
+  colors?: Record<string, string>;
+  /** Hide free-form color inputs — authors pick, they don't invent. */
+  strict?: boolean;
+  radius?: number[];
+  fonts?: string[];
+}
+
+/** Content schema (#81). */
+export interface SchemaOptions {
+  /** Required atoms: 'block:<name>' | 'variable:<name>' | 'button'. */
+  require?: string[];
+  /** Allowed element tags; everything else flattens on setContent/paste. */
+  allowTags?: string[];
+  /** Max characters of text content. */
+  maxLength?: number;
+}
+
+/** validate() result (#81). */
+export interface ValidationResult {
+  valid: boolean;
+  violations: { rule: 'require' | 'allowTags' | 'maxLength'; detail: string; message: string }[];
+}
+
+/** getEmailHTML options (#82). */
+export interface EmailOptions {
+  /** Content width in px (default 600). */
+  width?: number;
+  /** Wrap output in a full centered-card HTML document. */
+  document?: boolean;
+  theme?: {
+    ink?: string; body?: string; accent?: string; link?: string;
+    muted?: string; border?: string; font?: string;
+  };
+  /** Named colors for resolving token-named props (defaults to theme.colors). */
+  colors?: Record<string, string>;
+}
+
 // Editor options interface
 export interface EditorOptions {
   placeholder?: string;
@@ -514,6 +607,14 @@ export interface EditorOptions {
    * top toolbar.
    */
   'block-toolbar'?: BlockToolbarOptions;
+  /** Merge-tag variable chips (#78). */
+  variables?: VariablesOptions;
+  /** Registered atomic blocks — machine-filled slots (#79). */
+  blocks?: Record<string, BlockDef>;
+  /** Content design tokens: named colors, strict mode (#85). */
+  theme?: ThemeOptions | 'inherit' | 'light' | 'dark' | 'auto';
+  /** Content schema validated live (#81). */
+  schema?: SchemaOptions;
   /**
    * Explicit list of format names to load, overriding the default set.
    * Names resolve against the registry.
@@ -555,6 +656,14 @@ export class Editor {
   setContent(content: string): void;
   /** Alias of getContent() / setContent(). */
   getHTML(): string;
+  /** Compile content to email-client-safe HTML (#82): styles inlined, ol as numbered rows, VML CTAs. */
+  getEmailHTML(opts?: EmailOptions): string;
+  /** Insert a CTA button block (#83). */
+  insertButton(props?: ButtonProps): HTMLElement | null;
+  /** Validate against options.schema (#81). */
+  validate(): ValidationResult;
+  /** Toggle variable sample preview — read-only while active (#78). */
+  previewVariables(on: boolean): void;
   setHTML(html: string): void;
   /** Export/import the document as a JSON tree. */
   getJSON(): JsonDoc;

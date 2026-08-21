@@ -574,6 +574,50 @@ Mentions and the AI module keep working — both round-trip plain text. With
 `prompt.serializeAttachments`, attachment tails use the markdown shape
 (`![](src)` / `[name](url)`) instead of HTML tags.
 
+### Template & page building
+
+Turn the editor into a light page/template builder — email templates, banners,
+CMS sections — with five composable pieces:
+
+```js
+new yjd('#tpl', {
+  // {token} merge tags → atomic chips with a picker and sample preview (#78)
+  variables: {
+    trigger: '{',
+    items: { shopName: { label: 'Shop name', sample: 'acme-store' } },
+  },
+  // {{slot}} machine-filled sections → atomic cards in the slash menu (#79)
+  blocks: {
+    stats: { label: 'Stats grid', icon: '📊', token: '{{stats}}' },
+    cta:   { label: 'Button', icon: '🔘', token: '{{cta:$arg}}', arg: { label: 'Label', default: 'Open' } },
+  },
+  // Brand-locked design tokens (#85): swatches everywhere, strict = no free colors
+  theme: { colors: { brand: '#25d366', ink: '#14181d' }, strict: true },
+  // Live-validated invariants (#81)
+  schema: { require: ['block:cta'], allowTags: ['h1','h2','p','ul','ol','li','strong','em','a','br'], maxLength: 5000 },
+});
+
+editor.previewVariables(true);          // read the mail as a recipient would
+editor.insertButton({ label: 'Finish setup', href: '{{ctaUrl}}' });  // CTA block (#83)
+editor.validate();                      // { valid, violations } — gate your Save
+await editor.ai.runDocument({ prompt: 'Half as long, keep the warm tone' });  // placeholder-safe (#80)
+const html = editor.getEmailHTML({ width: 600 });  // email-client-safe compile (#82)
+```
+
+- **Variables & blocks round-trip as raw tokens** — `getContent()` emits
+  `{shopName}` / `{{cta:Label}}` verbatim; nothing proprietary is stored.
+- **AI is placeholder-safe**: atoms become opaque sentinels around the model
+  call; dropped placeholders are restored, rejected, or surfaced in the diff
+  (`ai.placeholders: 'restore' | 'reject' | 'ask'`).
+- **Sections & columns** (#84): `/section` inserts a background band (1–3 equal
+  columns, background/padding/radius inspector); blocks drag between columns;
+  documents without sections behave exactly as before.
+- **`getEmailHTML()`** inlines every style, renders `<ol>` as numbered badge
+  rows, compiles CTAs to the bulletproof table+VML pattern, and stacks section
+  columns on narrow clients — no classes, no `<style>` blocks.
+- Token-named colors (`bgToken: 'brand'`) re-resolve through the current
+  `theme.colors` — re-branding is a theme change, not a document migration.
+
 ### Selection bubble
 
 The bubble (block-toolbar module) floats above the selection, coexists with the
