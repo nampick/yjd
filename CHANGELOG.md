@@ -4,6 +4,37 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [2.15.1] — 2026-11-02
+
+### Fixed
+- **Loose root-level text is no longer reordered.** HTML handed to
+  `setContent()` / the `content` option (and restored drafts) with a bare
+  text/inline run between blocks — e.g. `<p>Hi</p>{{list}}<p>Bye</p>` — kept
+  the run directly under the editable root, where block commands (which walk
+  `root.children`) could not see it: a select-all list conversion moved the
+  following paragraphs before it, and `insertBlock()` with the caret in it
+  appended the block at the end of the document. Every root-level run with
+  content now becomes its own `<p>` in document order (whitespace-only runs
+  dropped, block-only HTML untouched), and list conversion / `insertBlock()`
+  handle runs created later by editing.
+- **Mobile layout no longer overrides host sizing.** The editor writes
+  `--rte-area-min-height` (from `minHeight` / fixed `height`) and
+  `--rte-area-max-height` (from `maxHeight`) on the wrapper; the responsive
+  rule reads `min-height: var(--rte-area-min-height, 150px)` and
+  `font-size: var(--rte-area-font-size, 16px)` (16px avoids iOS zoom-on-focus)
+  under a zero-specificity `:where(.yjd-rich-editor)` selector, so options and
+  host CSS win. Closes #86.
+- **List and alignment button titles honour `options.strings`** —
+  `list.checklist|bullet|ordered|roman|alpha`, `list.head`,
+  `align.left|center|right|justify`, `align.head`; the align title lookup no
+  longer reads `this.editorId` on the class (always undefined). Initial titles
+  are translated before any click. Closes #87.
+- **Popups and the selection bubble stay opaque when a host blanks
+  `--rte-bg`.** Floating surfaces (bubble + arrow, table toolbar + arrow,
+  colour picker, select popups, menus, popups) use the new `--rte-popup-bg`
+  token (falls back to `--rte-chrome`, then `#fff`; dark theme has its own
+  solid default); the frame background gets a real `#fff` fallback.
+
 ## [2.15.0] — 2026-08-20
 
 ### Added
@@ -935,6 +966,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.15.1]: https://github.com/nampick/yjd/releases/tag/v2.15.1
 [2.15.0]: https://github.com/nampick/yjd/releases/tag/v2.15.0
 [2.14.0]: https://github.com/nampick/yjd/releases/tag/v2.14.0
 [2.13.6]: https://github.com/nampick/yjd/releases/tag/v2.13.6

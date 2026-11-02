@@ -14,7 +14,7 @@
   /* Own stacking context: internal z-index (toolbars 1000, handles 997-999,
      dropdowns) never competes with the host page's popovers/modals. */
   isolation: isolate;
-  background: var(--rte-bg, var(--rte-bg));
+  background: var(--rte-bg, #fff);
   border: 1px solid var(--rte-border, var(--rte-table-border));
   border-radius: 8px;
   /* visible (not hidden) so popovers/dropdowns can extend past a short editor
@@ -104,14 +104,17 @@
   }
 }
 
-.yjd-rich-editor .rich-editor-area {
+/* Base editable-area rules use :where() (zero specificity for the frame
+   class) so the responsive defaults below and any host rule can override
+   them — see #86. */
+:where(.yjd-rich-editor) .rich-editor-area {
   flex: 1 1 auto;
   min-height: 40px;
-  font-size: 16px;
+  font-size: var(--rte-area-font-size, 16px);
   line-height: 1.7;
   outline: none;
   padding: 20px 20px 20px 20px;
-  background: var(--rte-bg, var(--rte-bg));
+  background: var(--rte-bg, #fff);
   color: var(--rte-ink, var(--rte-ink));
   font-family: inherit;
   overflow-y: auto;
@@ -151,8 +154,8 @@
   z-index: 1;
 }
 
-.yjd-rich-editor .rich-editor-area {
-  font-size: 16px;
+:where(.yjd-rich-editor) .rich-editor-area {
+  font-size: var(--rte-area-font-size, 16px);
   line-height: 1.7;
   font-family: inherit;
   color: var(--rte-ink, var(--rte-ink));
@@ -446,7 +449,7 @@
   align-items: center;
   gap: 28px;
   padding: 8px;
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   border-radius: var(--rte-radius-sm);
   box-shadow: 0 4px 24px rgba(0,0,0,0.13);
 }
@@ -470,7 +473,7 @@
   align-items: center;
   gap: 12px;
   padding: 8px;
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   border-radius: 6px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.13);
 }
@@ -509,7 +512,7 @@
 /* === COLOR PICKER === */
 .yjd-rich-editor .color-picker-popup {
   position: absolute;
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   display:none;
   border-radius: var(--rte-radius-sm);
   padding: 8px;
@@ -530,7 +533,7 @@
 /* === CUSTOM SELECT === */
 .yjd-rich-editor .custom-select-popup, .yjd-rich-editor .heading-select-popup, .yjd-rich-editor .capitalization-select-popup, .yjd-rich-editor .font-family-select-popup, .yjd-rich-editor .line-height-select-popup, .yjd-rich-editor .text-size-select-popup {
   position: absolute;
-  background: var(--rte-chrome, var(--rte-bg));
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   display: none;
   border: 1px solid var(--rte-border, var(--rte-table-border));
   border-radius: var(--rte-radius-sm);
@@ -750,7 +753,7 @@
   border-radius: var(--rte-radius-sm);
   border: 1px solid var(--rte-border-strong);
   box-sizing: border-box;
-  background: var(--rte-bg, var(--rte-bg));
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   color: var(--rte-ink, var(--rte-ink));
   font-size: 14px;
   /* A value longer than the field shows an ellipsis (…) when the input isn't
@@ -802,7 +805,7 @@
   align-items: center;
   padding: 8px 15px;
   border: 1px solid var(--rte-border);
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   box-shadow: 0px 1px 3.3px 0px rgba(0, 0, 0, 0.04);
   color: var(--rte-ink);
   font-size: 12px;
@@ -822,7 +825,7 @@
 /* === LINK POPUP === */
 .yjd-rich-editor .link-popup {
   position: absolute;
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   font-family: var(--rte-ui);
   display: none;
   border: none;
@@ -861,7 +864,7 @@
   justify-content: center;
   padding: 0;
   border: 1px solid var(--rte-border);
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   width: 34px;
   height: var(--rte-ctl, 30px);
   border-radius: var(--rte-radius-sm);
@@ -914,7 +917,7 @@
 /* === TABLE POPUP === */
 .yjd-rich-editor .table-popup {
   position: absolute;
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   font-family: var(--rte-ui);
   display: none;
   border: 1px solid var(--rte-table-border);
@@ -981,7 +984,7 @@
 .yjd-rich-editor .table-grid-cell {
   width: 20px;
   height: 20px;
-  background: var(--rte-bg, var(--rte-bg));
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   border: 1px solid var(--rte-border-strong, rgb(238, 238, 238));
   cursor: pointer;
   transition: background-color 0.1s ease;
@@ -1040,7 +1043,7 @@
   z-index: 2147483000;
   min-width: 150px;
   padding: 10px 12px;
-  background: var(--rte-bg, #fff);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   color: var(--rte-ink);
   border: 1px solid var(--rte-border);
   border-radius: var(--rte-radius-sm, 8px);
@@ -1140,7 +1143,7 @@
 /* === TEXT ALIGN PICKER === */
 .yjd-rich-editor .text-align-picker-popup {
   position: absolute;
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   display: none;
   border: 1px solid var(--rte-table-border);
   border-radius: var(--rte-radius-sm);
@@ -1184,7 +1187,7 @@
 .yjd-rich-editor .align-button {
   height: 24px;
   border-radius: var(--rte-radius-xs);
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   border: none;
   align-items: center;
   display: flex;
@@ -1219,7 +1222,7 @@
 /* === LIST PICKER === */
 .yjd-rich-editor .list-picker-popup {
   position: absolute;
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   display: none;
   border-radius: var(--rte-radius-sm);
   padding: 12px;
@@ -1377,7 +1380,7 @@
 .yjd-rich-editor .emoji-picker-popup {
   position: absolute;
   z-index: 10000;
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   border-radius: var(--rte-radius-md);
   padding: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
@@ -1432,7 +1435,7 @@
 .yjd-rich-editor .image-popup {
   position: absolute;
   z-index: 10000;
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   font-family: var(--rte-ui);
   border-radius: var(--rte-radius);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
@@ -1477,7 +1480,7 @@
 .yjd-rich-editor .video-popup {
   position: absolute;
   z-index: 10000;
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   font-family: var(--rte-ui);
   border-radius: var(--rte-radius);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
@@ -1555,7 +1558,7 @@
 .yjd-rich-editor .tag-popup {
   position: absolute;
   z-index: 10000;
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   font-family: var(--rte-ui);
   border-radius: var(--rte-radius);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
@@ -1635,7 +1638,7 @@
 .yjd-rich-editor .import-popup {
   position: absolute;
   z-index: 10000;
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   border: 1px solid var(--rte-table-border);
   border-radius: var(--rte-radius);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
@@ -1904,7 +1907,7 @@
   display: flex;
   gap: 2px;
   padding: 4px;
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   border: 1px solid var(--rte-border);
   border-radius: var(--rte-radius-sm);
   box-shadow: var(--rte-shadow-sm);
@@ -2078,11 +2081,15 @@
     .yjd-rich-editor .tag-popup {
       width: unset !important;
     }
-  /* Editor area adjustments */
-  .yjd-rich-editor .rich-editor-area {
+  /* Editor area adjustments (#86). Zero-specificity frame class + variables:
+     the editor's minHeight/height options land on the wrapper as
+     --rte-area-min-height and win here, and any host rule on .rich-editor-area
+     beats this default. Font size defaults to 16px so iOS does not zoom on
+     focus; hosts that want smaller text set --rte-area-font-size. */
+  :where(.yjd-rich-editor) .rich-editor-area {
     padding: 12px;
-    min-height: 150px;
-    font-size: 14px;
+    min-height: var(--rte-area-min-height, 150px);
+    font-size: var(--rte-area-font-size, 16px);
     line-height: 1.4;
   }
 
@@ -2216,46 +2223,46 @@
   }
 
   /* Content formatting adjustments */
-  .yjd-rich-editor .rich-editor-area h1 {
+  :where(.yjd-rich-editor) .rich-editor-area h1 {
     font-size: 1.5em !important;
     margin: 0.5em 0 !important;
   }
 
-  .yjd-rich-editor .rich-editor-area h2 {
+  :where(.yjd-rich-editor) .rich-editor-area h2 {
     font-size: 1.3em !important;
     margin: 0.5em 0 !important;
   }
 
-  .yjd-rich-editor .rich-editor-area h3 {
+  :where(.yjd-rich-editor) .rich-editor-area h3 {
     font-size: 1.1em !important;
     margin: 0.5em 0 !important;
   }
 
-  .yjd-rich-editor .rich-editor-area p {
+  :where(.yjd-rich-editor) .rich-editor-area p {
     margin: 0.8em 0 !important;
   }
 
-  .yjd-rich-editor .rich-editor-area ul,
-  .yjd-rich-editor .rich-editor-area ol {
+  :where(.yjd-rich-editor) .rich-editor-area ul,
+  :where(.yjd-rich-editor) .rich-editor-area ol {
     padding-left: 20px !important;
     margin: 0.8em 0 !important;
   }
 
-  .yjd-rich-editor .rich-editor-area blockquote {
+  :where(.yjd-rich-editor) .rich-editor-area blockquote {
     padding-left: 12px !important;
     margin: 0.8em 0 !important;
     font-size: 14px !important;
   }
 
-  .yjd-rich-editor .rich-editor-area table {
+  :where(.yjd-rich-editor) .rich-editor-area table {
     font-size: 13px !important;
     overflow-x: auto !important;
     display: block !important;
     white-space: nowrap !important;
   }
 
-  .yjd-rich-editor .rich-editor-area th,
-  .yjd-rich-editor .rich-editor-area td {
+  :where(.yjd-rich-editor) .rich-editor-area th,
+  :where(.yjd-rich-editor) .rich-editor-area td {
     padding: 6px 8px !important;
     min-width: 60px !important;
   }
@@ -2400,6 +2407,10 @@
   --rte-bg: #ffffff;
   --rte-bg-2: #fafbfc;
   --rte-chrome: #fcfcfd;
+  /* Floating surfaces (selection bubble, table toolbar, pickers, menus,
+     popups). Independent of --rte-bg so blanking the frame never makes
+     a popup transparent. */
+  --rte-popup-bg: #ffffff;
   --rte-chrome-2: #f3f4f6;
   --rte-chrome-3: #eceef1;
   --rte-border: #e3e5ea;
@@ -2469,7 +2480,7 @@
 .yjd-rich-editor {
   border: 1px solid var(--rte-border) !important;
   border-radius: var(--rte-radius) !important;
-  background: var(--rte-bg);
+  background: var(--rte-bg, #fff);
   color: var(--rte-ink);
   box-shadow: var(--rte-shadow-sm);
   font-family: var(--rte-ui, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
@@ -2667,9 +2678,9 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 }
 
 /* ---------- Editor surface ---------- */
-.yjd-rich-editor .rich-editor-area {
+:where(.yjd-rich-editor) .rich-editor-area {
   color: var(--rte-ink);
-  font-size: 16px;
+  font-size: var(--rte-area-font-size, 16px);
   line-height: 1.72;
   padding: 22px 24px;
 }
@@ -2730,7 +2741,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .text-align-picker-popup,
 .yjd-rich-editor .emoji-picker-popup {
   /* Popover recipe (UI 2.0): 1px strong border, 8px radius, --rte-shadow. */
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   border: 1px solid var(--rte-border-strong);
   border-radius: var(--rte-radius-md);
   box-shadow: var(--rte-shadow);
@@ -2808,7 +2819,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 /* ---------- Floating toolbars (block + table) ---------- */
 .yjd-rich-editor .block-toolbar-container,
 .yjd-rich-editor .table-toolbar-container {
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   border: 1px solid var(--rte-border-strong);
   border-radius: var(--rte-radius-md);
   box-shadow: var(--rte-shadow);
@@ -2868,7 +2879,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   flex-direction: column;
   gap: 8px;
   padding: 10px;
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   border: 1px solid var(--rte-border-strong);
   border-radius: var(--rte-radius-md);
   box-shadow: var(--rte-shadow);
@@ -2891,7 +2902,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   border: 1px solid var(--rte-border-strong);
   border-radius: var(--rte-radius-sm);
   color: var(--rte-ink);
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   transition: border-color var(--rte-t), box-shadow var(--rte-t);
 }
 .yjd-rich-editor .yjd-find-input:focus {
@@ -3103,7 +3114,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   padding: 0 12px;
   border: 1px solid var(--rte-border);
   border-radius: var(--rte-radius-sm);
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   color: var(--rte-ink);
   font-size: 14px;
 }
@@ -3229,17 +3240,17 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg line,
 .yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg polyline,
 .yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg rect {
-  color: var(--rte-bg) !important;
-  stroke: var(--rte-bg) !important;
+  color: var(--rte-popup-bg, var(--rte-chrome, #fff)) !important;
+  stroke: var(--rte-popup-bg, var(--rte-chrome, #fff)) !important;
   fill: none !important;
 }
 .yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg [fill="currentColor"] {
-  fill: var(--rte-bg) !important;
+  fill: var(--rte-popup-bg, var(--rte-chrome, #fff)) !important;
   stroke: none !important;
 }
 .yjd-rich-editor .block-toolbar-btn.active .icon svg,
 .yjd-rich-editor .block-toolbar-btn.active .icon svg path {
-  stroke: var(--rte-bg) !important;
+  stroke: var(--rte-popup-bg, var(--rte-chrome, #fff)) !important;
   fill: none !important;
 }
 
@@ -3247,7 +3258,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
    DESIGN SYSTEM v2.4 — sync the list-picker popover with the others
    ===================================================================== */
 .yjd-rich-editor .list-picker-popup {
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   border: 1px solid var(--rte-border);
   border-radius: var(--rte-radius-md);
   box-shadow: var(--rte-shadow);
@@ -3658,7 +3669,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .rte-add-menu-popup {
   display: none;
   position: absolute;
-  background: var(--rte-bg, #fff);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   border: 1px solid var(--rte-border, var(--rte-table-border));
   border-radius: var(--rte-radius-md, 14px);
   box-shadow: 0 8px 28px rgba(20, 24, 47, 0.14);
@@ -3720,7 +3731,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   max-height: 320px;
   overflow-y: auto;
   padding: 6px;
-  background: var(--rte-bg, var(--rte-bg));
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   border: 1px solid var(--rte-border-strong);
   border-radius: var(--rte-radius-md, 12px);
   box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.20), 0 2px 6px rgba(16, 18, 23, 0.06));
@@ -3754,7 +3765,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   background: var(--rte-chrome-2, var(--rte-chrome-2));
   color: inherit;
 }
-.yjd-slash-item.active .yjd-slash-icon { background: var(--rte-bg, var(--rte-bg)); }
+.yjd-slash-item.active .yjd-slash-icon { background: var(--rte-popup-bg, var(--rte-chrome, #fff)); }
 .yjd-slash-icon svg {
   width: auto;
   height: var(--rte-icon-size);
@@ -3873,7 +3884,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   padding: 10px 36px 10px 12px;
   font: 500 14px/1.4 var(--rte-ui);
   color: var(--rte-ink);
-  background-color: var(--rte-bg);
+  background-color: var(--rte-popup-bg, var(--rte-chrome, #fff));
   background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='16'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%236d7480'%20stroke-width='1.75'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='m6%209%206%206%206-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
@@ -4222,7 +4233,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   max-height: 280px;
   overflow-y: auto;
   padding: 6px;
-  background: var(--rte-bg, var(--rte-bg));
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   border: 1px solid var(--rte-border-strong);
   border-radius: var(--rte-radius-md, 12px);
   box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.20), 0 2px 6px rgba(16, 18, 23, 0.06));
@@ -4268,7 +4279,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   width: 232px;
   max-width: calc(100vw - 16px);
   padding: 5px;
-  background: var(--rte-bg, var(--rte-bg));
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   border: 1px solid var(--rte-border-strong);
   border-radius: var(--rte-radius-md);
   box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.20), 0 2px 6px rgba(16, 18, 23, 0.06));
@@ -4322,13 +4333,13 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   padding: 6px 8px;
   border: 1px solid var(--rte-border, var(--rte-border));
   border-radius: var(--rte-radius-sm);
-  background: var(--rte-chrome, var(--rte-bg));
+  background: var(--rte-chrome, #fff);
   transition: border-color var(--rte-t), box-shadow var(--rte-t);
 }
 .yjd-ai-ask:focus-within {
   border-color: var(--rte-accent, var(--rte-accent));
   box-shadow: 0 0 0 3px var(--rte-accent-ring);
-  background: var(--rte-bg, #fff);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
 }
 .yjd-ai-ask-ic {
   flex: 0 0 auto;
@@ -4378,7 +4389,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   padding: 0 12px;
   border-radius: var(--rte-radius-sm);
   border: 1px solid var(--rte-border-strong);
-  background: var(--rte-bg, var(--rte-bg));
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   color: var(--rte-ink, var(--rte-ink));
   cursor: pointer;
   font: 500 12px/1 var(--rte-ui);
@@ -4420,7 +4431,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   display: none;
   gap: 8px;
   align-items: center;
-  background: var(--rte-bg, #fff);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   color: var(--rte-ink);
   border: 1px solid var(--rte-border-strong);
   border-radius: var(--rte-radius-md);
@@ -4632,7 +4643,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .rich-editor-toolbar-btn.active,
 .yjd-rich-editor .block-toolbar-btn.active {
   background: var(--rte-ink) !important;
-  color: var(--rte-bg) !important;
+  color: var(--rte-popup-bg, var(--rte-chrome, #fff)) !important;
   border-color: transparent;
 }
 /* Pressed glyphs: paper-coloured STROKES — outline icons must keep fill:none
@@ -4642,12 +4653,12 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg path,
 .yjd-rich-editor .block-toolbar-btn.active .icon svg,
 .yjd-rich-editor .block-toolbar-btn.active .icon svg path {
-  color: var(--rte-bg) !important;
+  color: var(--rte-popup-bg, var(--rte-chrome, #fff)) !important;
   fill: none !important;
 }
 .yjd-rich-editor .rich-editor-toolbar-btn.active .icon svg [fill="currentColor"],
 .yjd-rich-editor .block-toolbar-btn.active .icon svg [fill="currentColor"] {
-  fill: var(--rte-bg) !important;
+  fill: var(--rte-popup-bg, var(--rte-chrome, #fff)) !important;
   stroke: none !important;
 }
 
@@ -4664,19 +4675,19 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .rich-editor-toolbar-btn.active:not(.more-btn):hover,
 .yjd-rich-editor .block-toolbar-btn.active:hover {
   background: var(--rte-ink) !important;
-  color: var(--rte-bg) !important;
+  color: var(--rte-popup-bg, var(--rte-chrome, #fff)) !important;
   border-color: transparent !important;
 }
 .yjd-rich-editor .rich-editor-toolbar-btn.active:not(.more-btn):hover .icon svg,
 .yjd-rich-editor .rich-editor-toolbar-btn.active:not(.more-btn):hover .icon svg path,
 .yjd-rich-editor .block-toolbar-btn.active:hover .icon svg,
 .yjd-rich-editor .block-toolbar-btn.active:hover .icon svg path {
-  color: var(--rte-bg) !important;
-  stroke: var(--rte-bg) !important;
+  color: var(--rte-popup-bg, var(--rte-chrome, #fff)) !important;
+  stroke: var(--rte-popup-bg, var(--rte-chrome, #fff)) !important;
   fill: none !important;
 }
 .yjd-rich-editor .rich-editor-toolbar-btn.active:not(.more-btn):hover .icon svg [fill="currentColor"] {
-  fill: var(--rte-bg) !important;
+  fill: var(--rte-popup-bg, var(--rte-chrome, #fff)) !important;
   stroke: none !important;
 }
 /* The open "⋯ N" toggle keeps its own pressed chrome on hover. */
@@ -4732,7 +4743,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   gap: 1px;
   max-height: 212px;
   overflow-y: auto;
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   border: 1px solid var(--rte-border-strong);
   border-radius: var(--rte-radius-md);
   box-shadow: var(--rte-shadow);
@@ -4840,7 +4851,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .yjd-image-align-btn.active,
 .yjd-rich-editor .table-toolbar-btn.active {
   background: var(--rte-ink) !important;
-  color: var(--rte-bg) !important;
+  color: var(--rte-popup-bg, var(--rte-chrome, #fff)) !important;
   border-color: transparent !important;
 }
 /* Labelled picker rows (align/list): active = accent row, not ink tile. */
@@ -4858,21 +4869,21 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .yjd-image-align-btn.active svg path,
 .yjd-rich-editor .table-toolbar-btn.active svg,
 .yjd-rich-editor .table-toolbar-btn.active svg path {
-  color: var(--rte-bg) !important;
-  stroke: var(--rte-bg) !important;
+  color: var(--rte-popup-bg, var(--rte-chrome, #fff)) !important;
+  stroke: var(--rte-popup-bg, var(--rte-chrome, #fff)) !important;
   fill: none !important;
 }
 .yjd-rich-editor .yjd-image-align-btn.active svg [fill="currentColor"],
 .yjd-rich-editor .align-button.active svg [fill="currentColor"],
 .yjd-rich-editor .list-button.active svg [fill="currentColor"] {
-  fill: var(--rte-bg) !important;
+  fill: var(--rte-popup-bg, var(--rte-chrome, #fff)) !important;
   stroke: none !important;
 }
 /* …and pressed popover buttons ignore hover, same as the toolbar. */
 .yjd-rich-editor .yjd-image-align-btn.active:hover,
 .yjd-rich-editor .table-toolbar-btn.active:hover {
   background: var(--rte-ink) !important;
-  color: var(--rte-bg) !important;
+  color: var(--rte-popup-bg, var(--rte-chrome, #fff)) !important;
 }
 /* Labelled picker rows pin their ACCENT active state through hover. */
 .yjd-rich-editor .align-button.active:hover,
@@ -5042,7 +5053,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   padding: 0 9px;
   border: 1px solid var(--rte-border-strong);
   border-radius: var(--rte-radius-sm);
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   color: var(--rte-ink);
   font-size: 12.5px !important;
   cursor: pointer;
@@ -5079,7 +5090,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   flex: 0 0 auto;
   border: 1px solid var(--rte-border);
   border-radius: var(--rte-radius-sm);
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
 }
 .yjd-rich-editor .import-file-info {
   display: flex;
@@ -5099,7 +5110,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   flex: 0 0 auto;
   border: 1px solid var(--rte-border);
   border-radius: var(--rte-radius-sm);
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   color: var(--rte-muted);
 }
 .yjd-rich-editor .import-file-meta {
@@ -5167,7 +5178,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   padding: 0 9px;
   border: 1px solid var(--rte-border);
   border-radius: 20px;
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   color: var(--rte-ink-2);
   font-size: 12px !important;
   cursor: pointer;
@@ -5231,7 +5242,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   padding: 9px 13px;
   border: 1px solid var(--rte-border-strong, #ced2d9);
   border-radius: var(--rte-radius-md, 8px);
-  background: var(--rte-bg, #fff);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   color: var(--rte-ink-2, #3c424d);
   font-size: 12.5px;
   box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.2));
@@ -5372,7 +5383,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   height: 26px;
   border: 1px solid var(--rte-border);
   border-radius: var(--rte-radius-sm);
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   color: var(--rte-muted);
 }
 /* Active row: quiet chrome wash (not the accent), accent-tinted glyph. */
@@ -5384,7 +5395,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-slash-item:hover .yjd-slash-icon,
 .yjd-slash-item.active .yjd-slash-icon {
   color: var(--rte-accent-ink);
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
 }
 .yjd-slash-item.active .yjd-slash-hint { color: var(--rte-muted); }
 .yjd-slash-key {
@@ -5470,7 +5481,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .color-button:hover {
   transform: none;
   border-color: var(--rte-border-strong);
-  box-shadow: 0 0 0 2px var(--rte-bg), 0 0 0 3.5px var(--rte-accent);
+  box-shadow: 0 0 0 2px var(--rte-popup-bg, var(--rte-chrome, #fff)), 0 0 0 3.5px var(--rte-accent);
 }
 /* Bottom utility row: no-colour · white · black · custom · spacer · hex. */
 .yjd-rich-editor .custom-color-container {
@@ -5545,7 +5556,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .resize-handle {
   width: 8px !important;
   height: 8px !important;
-  background: var(--rte-bg) !important;
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff)) !important;
   border: 1.5px solid var(--rte-accent) !important;
   border-radius: 2px !important;
   box-shadow: var(--rte-shadow-sm) !important;
@@ -5607,7 +5618,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor .yjd-find-btn.yjd-find-toggle:not(.yjd-find-icon) {
   appearance: none;
   -webkit-appearance: none;
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
 }
 .yjd-rich-editor .yjd-find-btn.yjd-find-toggle.active:not(.yjd-find-icon) {
   background: var(--rte-accent-weak);
@@ -5889,7 +5900,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   box-sizing: border-box;
   border: 1px solid var(--rte-border-strong);
   border-radius: var(--rte-radius-md);
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   box-shadow: var(--rte-shadow);
   overflow: hidden;
 }
@@ -5965,7 +5976,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   padding: 8px 9px;
   font: 400 12.5px/1.55 var(--rte-ui);
   color: var(--rte-ink);
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   resize: vertical;
   min-height: 52px;
   outline: none;
@@ -6345,7 +6356,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   align-items: center;
   gap: 2px;
   padding: 4px 5px;
-  background: var(--rte-bg, #fff);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   border: 1px solid var(--rte-border-strong);
   border-radius: var(--rte-radius-md);
   box-shadow: var(--rte-shadow, 0 10px 28px -8px rgba(16, 18, 23, 0.20));
@@ -6533,6 +6544,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   --rte-bg: #101216;
   --rte-bg-2: #14171b;
   --rte-chrome: #15181d;
+  --rte-popup-bg: #101216;
   --rte-chrome-2: #1c2027;
   --rte-chrome-3: #232830;
   --rte-border: #262b33;
@@ -6578,6 +6590,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
   --rte-bg: #ffffff;
   --rte-bg-2: #fafbfc;
   --rte-chrome: #fcfcfd;
+  --rte-popup-bg: #ffffff;
   --rte-chrome-2: #f3f4f6;
   --rte-chrome-3: #eceef1;
   --rte-border: #e3e5ea;
@@ -6623,6 +6636,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
     --rte-bg: #101216;
     --rte-bg-2: #14171b;
     --rte-chrome: #15181d;
+    --rte-popup-bg: #101216;
     --rte-chrome-2: #1c2027;
     --rte-chrome-3: #232830;
     --rte-border: #262b33;
@@ -6666,7 +6680,7 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 .yjd-rich-editor[data-theme="dark"] .yjd-slash-menu,
 .yjd-rich-editor.yjd-theme-dark .yjd-slash-menu,
 .yjd-slash-menu[data-theme="dark"] {
-  background: var(--rte-bg);
+  background: var(--rte-popup-bg, var(--rte-chrome, #fff));
   border-color: var(--rte-border);
   color: var(--rte-ink);
 }
