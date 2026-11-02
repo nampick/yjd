@@ -804,7 +804,37 @@ new yjd('#editor', {
 });
 ```
 
-> **Token reference** — surfaces: `--rte-bg` (editor/popups), `--rte-bg-2`
+**Embedding (blend the editor into a card / form).** The tokens that matter:
+
+| Token | Controls |
+| --- | --- |
+| `--rte-bg` | Editable frame + area background only |
+| `--rte-border` | Frame border colour |
+| `--rte-chrome` | Toolbar / statusbar background |
+| `--rte-popup-bg` | Floating surfaces — selection bubble, table toolbar, colour picker, select popups, slash/mention menus, popups (default `#fff`, dark `#101216`; falls back to `--rte-chrome`) |
+| `--rte-area-min-height` | Editable area min-height on narrow (<850px) screens; set for you from the `minHeight` / fixed `height` options (default `150px`) |
+| `--rte-area-font-size` | Editable area font size (default `16px` — keeps iOS from zooming on focus; set e.g. `14px` for denser text) |
+| `--rte-accent` | Accent (focus ring, active states, links in chrome) |
+
+```css
+.my-card .yjd-rich-editor {
+  --rte-bg: transparent;       /* blend the frame into the card */
+  --rte-border: transparent;   /* remove the frame border */
+  --rte-area-font-size: 15px;
+}
+```
+
+> **Warning — blanking `--rte-bg` only affects the editable frame.** Popups and the
+> selection bubble keep their own solid background (`--rte-popup-bg`) — set that
+> token if you want to retheme them.
+>
+> **Warning — remove the frame border with `--rte-border: transparent`**, not with a
+> host `border: none !important` rule: the editor's styles live in
+> `@layer yjd`, and an `!important` declaration inside a layer beats an
+> unlayered `!important` one, so host `!important` rules do not reach it.
+
+> **Token reference** — surfaces: `--rte-bg` (editable frame), `--rte-popup-bg`
+> (floating popups/bubble), `--rte-bg-2`
 > (canvas), `--rte-chrome`(`-2`/`-3`) (toolbar / hovers+statusbar / pressed).
 > Text: `--rte-ink`(`-2`), `--rte-muted`, `--rte-faint`. Lines: `--rte-border`,
 > `--rte-border-strong` (popover frames), `--rte-hairline`. Accent:

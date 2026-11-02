@@ -28,7 +28,8 @@ overriding tokens, without touching component CSS.
 
 | Token | Light | Dark | Use for |
 |-------|-------|------|---------|
-| `--rte-bg` | `#ffffff` | `#101216` | Editor / popup / input surfaces |
+| `--rte-bg` | `#ffffff` | `#101216` | Editable frame / area surface (blanking it does not affect popups) |
+| `--rte-popup-bg` | `#ffffff` | `#101216` | Floating surfaces: selection bubble, table toolbar, pickers, select popups, menus, popups (falls back to `--rte-chrome`, then `#fff`) |
 | `--rte-bg-2` | `#fafbfc` | `#14171b` | Page-level canvas behind the editor |
 | `--rte-chrome` | `#fcfcfd` | `#15181d` | Toolbar |
 | `--rte-chrome-2` | `#f3f4f6` | `#1c2027` | Hover surfaces, status bar |
