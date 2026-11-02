@@ -104,10 +104,13 @@
   }
 }
 
-.yjd-rich-editor .rich-editor-area {
+/* Base editable-area rules use :where() (zero specificity for the frame
+   class) so the responsive defaults below and any host rule can override
+   them — see #86. */
+:where(.yjd-rich-editor) .rich-editor-area {
   flex: 1 1 auto;
   min-height: 40px;
-  font-size: 16px;
+  font-size: var(--rte-area-font-size, 16px);
   line-height: 1.7;
   outline: none;
   padding: 20px 20px 20px 20px;
@@ -151,8 +154,8 @@
   z-index: 1;
 }
 
-.yjd-rich-editor .rich-editor-area {
-  font-size: 16px;
+:where(.yjd-rich-editor) .rich-editor-area {
+  font-size: var(--rte-area-font-size, 16px);
   line-height: 1.7;
   font-family: inherit;
   color: var(--rte-ink, var(--rte-ink));
@@ -2078,11 +2081,15 @@
     .yjd-rich-editor .tag-popup {
       width: unset !important;
     }
-  /* Editor area adjustments */
-  .yjd-rich-editor .rich-editor-area {
+  /* Editor area adjustments (#86). Zero-specificity frame class + variables:
+     the editor's minHeight/height options land on the wrapper as
+     --rte-area-min-height and win here, and any host rule on .rich-editor-area
+     beats this default. Font size defaults to 16px so iOS does not zoom on
+     focus; hosts that want smaller text set --rte-area-font-size. */
+  :where(.yjd-rich-editor) .rich-editor-area {
     padding: 12px;
-    min-height: 150px;
-    font-size: 14px;
+    min-height: var(--rte-area-min-height, 150px);
+    font-size: var(--rte-area-font-size, 16px);
     line-height: 1.4;
   }
 
@@ -2216,46 +2223,46 @@
   }
 
   /* Content formatting adjustments */
-  .yjd-rich-editor .rich-editor-area h1 {
+  :where(.yjd-rich-editor) .rich-editor-area h1 {
     font-size: 1.5em !important;
     margin: 0.5em 0 !important;
   }
 
-  .yjd-rich-editor .rich-editor-area h2 {
+  :where(.yjd-rich-editor) .rich-editor-area h2 {
     font-size: 1.3em !important;
     margin: 0.5em 0 !important;
   }
 
-  .yjd-rich-editor .rich-editor-area h3 {
+  :where(.yjd-rich-editor) .rich-editor-area h3 {
     font-size: 1.1em !important;
     margin: 0.5em 0 !important;
   }
 
-  .yjd-rich-editor .rich-editor-area p {
+  :where(.yjd-rich-editor) .rich-editor-area p {
     margin: 0.8em 0 !important;
   }
 
-  .yjd-rich-editor .rich-editor-area ul,
-  .yjd-rich-editor .rich-editor-area ol {
+  :where(.yjd-rich-editor) .rich-editor-area ul,
+  :where(.yjd-rich-editor) .rich-editor-area ol {
     padding-left: 20px !important;
     margin: 0.8em 0 !important;
   }
 
-  .yjd-rich-editor .rich-editor-area blockquote {
+  :where(.yjd-rich-editor) .rich-editor-area blockquote {
     padding-left: 12px !important;
     margin: 0.8em 0 !important;
     font-size: 14px !important;
   }
 
-  .yjd-rich-editor .rich-editor-area table {
+  :where(.yjd-rich-editor) .rich-editor-area table {
     font-size: 13px !important;
     overflow-x: auto !important;
     display: block !important;
     white-space: nowrap !important;
   }
 
-  .yjd-rich-editor .rich-editor-area th,
-  .yjd-rich-editor .rich-editor-area td {
+  :where(.yjd-rich-editor) .rich-editor-area th,
+  :where(.yjd-rich-editor) .rich-editor-area td {
     padding: 6px 8px !important;
     min-width: 60px !important;
   }
@@ -2667,9 +2674,9 @@ body.yjd-fullscreen-lock { overflow: hidden; }
 }
 
 /* ---------- Editor surface ---------- */
-.yjd-rich-editor .rich-editor-area {
+:where(.yjd-rich-editor) .rich-editor-area {
   color: var(--rte-ink);
-  font-size: 16px;
+  font-size: var(--rte-area-font-size, 16px);
   line-height: 1.72;
   padding: 22px 24px;
 }
