@@ -966,6 +966,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.15.1]: https://github.com/nampick/yjd/releases/tag/v2.15.1
 [2.15.0]: https://github.com/nampick/yjd/releases/tag/v2.15.0
 [2.14.0]: https://github.com/nampick/yjd/releases/tag/v2.14.0
 [2.13.6]: https://github.com/nampick/yjd/releases/tag/v2.13.6
