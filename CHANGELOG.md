@@ -4,6 +4,15 @@ All notable changes to `@oix1987/yjd` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [2.15.2] — 2026-11-05
+
+### Changed
+- **Releases publish through npm Trusted Publishing.** `release.yml` no longer
+  uses an `NPM_TOKEN` secret; it publishes with the workflow's OIDC identity
+  (Node 22, npm ≥ 11.5.1). 2.15.1 had to be published by hand after npm revoked
+  classic tokens, so it shipped without a provenance attestation or `gitHead`;
+  2.15.2 restores both. No library code changes.
+
 ## [2.15.1] — 2026-11-02
 
 ### Fixed
@@ -966,6 +975,7 @@ Fixes from integrating yjd into a real app (the 2.4 upgrade suggestions).
 Earlier releases (v2.4.0 and prior) predate this changelog; see the Git tag
 history for details.
 
+[2.15.2]: https://github.com/nampick/yjd/releases/tag/v2.15.2
 [2.15.1]: https://github.com/nampick/yjd/releases/tag/v2.15.1
 [2.15.0]: https://github.com/nampick/yjd/releases/tag/v2.15.0
 [2.14.0]: https://github.com/nampick/yjd/releases/tag/v2.14.0

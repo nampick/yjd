@@ -91,7 +91,7 @@ function printNext() {
   console.log(`   git branch -d release/v${v} && git push origin --delete release/v${v}`);
   console.log(`\n${B}4) Create the GitHub Release — this is what triggers the CI publish:${X}`);
   console.log(`   npm run release:gh -- ${v}   ${Y}# ← creates the Release (user PAT) → fires release.yml${X}`);
-  console.log(`   release.yml then runs: npm publish --provenance --access public   (needs the NPM_TOKEN secret)`);
+  console.log(`   release.yml then runs: npm publish --provenance --access public   (npm Trusted Publishing, no token)`);
   console.log(`   (release.yml keys off the Release "published" event, not tag-push — that trigger is flaky.)`);
   console.log(`   Manual fallback if CI is unavailable: npm publish --access public   (the Release already exists)`);
   console.log(`   Retry a failed CI publish: gh workflow_dispatch "Release" with input tag=v${v}`);

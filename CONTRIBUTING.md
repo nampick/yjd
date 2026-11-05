@@ -42,7 +42,8 @@ npm run release -- 2.7.7
 ```
 
 Pushing the tag runs `.github/workflows/release.yml`: `npm publish --provenance`
-(needs the `NPM_TOKEN` secret — a classic **Automation** token that bypasses 2FA)
+via npm **Trusted Publishing** (OIDC — no token; the trusted publisher is set on
+npmjs.com for `nampick/yjd` / `release.yml`)
 + a GitHub Release from the CHANGELOG.
 
 To refresh the live site after a release, bump `@oix1987/yjd` in the
