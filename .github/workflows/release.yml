@@ -37,16 +37,19 @@ jobs:
           ref: ${{ github.event.release.tag_name || inputs.tag }}
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # Trusted Publishing (OIDC) needs Node >= 22.14 and npm >= 11.5.1.
+          node-version: 22
           cache: npm
           registry-url: https://registry.npmjs.org
+      - run: npm install -g npm@^11.5.1
       - run: npm ci
       - run: npm test
       - run: npm run build
-      - name: Publish to npm (provenance)
-        # NPM_TOKEN MUST be a classic "Automation" token (it bypasses 2FA).
-        # A "Publish" or granular token without 2FA-bypass fails with:
-        #   403 - Two-factor authentication ... is required to publish packages.
+      - name: Publish to npm (Trusted Publishing + provenance)
+        # No token: npm exchanges this job's OIDC identity (id-token: write)
+        # for a short-lived publish credential. Requires a Trusted Publisher
+        # on npmjs.com → @oix1987/yjd → Settings → GitHub Actions,
+        # repo nampick/yjd, workflow release.yml. Classic tokens were revoked
+        # by npm, which is why 2.15.1 had to be published by hand (no
+        # provenance, no gitHead).
         run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
